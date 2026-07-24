@@ -1185,7 +1185,11 @@ function watchdogCheck() {
     const path = require("path");
     const fs = require("fs");
     const cutoff = new Date(Date.now() - STALE_THRESHOLD_MS).toISOString();
-    // Find active sessions whose last event is older than threshold
+    // Find active sessions whose last event is older than threshold.
+    // Remote-source sessions (source != 'local') are excluded: their transcript
+    // is a delayed rsync mirror on this host and their activity clock is the
+    // remote machine's, so the transcript-tail error/interrupt heuristics below
+    // would misfire. Their lifecycle is owned by server/lib/remote-sync.js.
     const staleSessions = db
       .prepare(
         `SELECT s.id, s.status, s.cwd,
@@ -1194,7 +1198,8 @@ function watchdogCheck() {
                  AND e.event_type IN ('SessionStart','UserPromptSubmit','PreToolUse','Stop','Notification')
                  ORDER BY e.created_at DESC LIMIT 1) as last_data
          FROM sessions s
-         WHERE s.status IN ('active', 'error') AND s.updated_at < ?`
+         WHERE s.status IN ('active', 'error') AND s.updated_at < ?
+           AND (s.source = 'local' OR s.source IS NULL)`
       )
       .all(cutoff);
 
@@ -1410,10 +1415,18 @@ function livenessReap({ ignoreIdleGate = false } = {}) {
   const fs = require("fs");
   const path = require("path");
 
+  // `source = 'local'` guard: sessions pulled from a remote machine over SSH
+  // (Remote Data Sources — sessions.source = a remote source id) can NEVER be
+  // probed by this host's `ps`/`lsof`, and their cwd is legitimately POSIX-
+  // absolute (e.g. /home/ubuntu/matroid), so the posix-cwd guard below does not
+  // catch them. Their liveness is owned entirely by the sync/import path
+  // (server/lib/remote-sync.js reconciles their status from the mirrored
+  // transcript), so the local process probe must leave them alone.
   const activeSessions = db
     .prepare(
       `SELECT id, name, cwd, transcript_path, updated_at FROM sessions
-       WHERE status = 'active' AND cwd IS NOT NULL AND cwd <> ''`
+       WHERE status = 'active' AND cwd IS NOT NULL AND cwd <> ''
+         AND (source = 'local' OR source IS NULL)`
     )
     .all();
   if (activeSessions.length === 0) return; // nothing to check — skip the ps/lsof cost

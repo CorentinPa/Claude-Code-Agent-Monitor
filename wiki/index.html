@@ -3904,6 +3904,20 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <b>source badge</b> so their origin is always visible.
           </p>
 
+          <h3>Live Status</h3>
+          <p>
+            Because a remote session is pulled over SSH, it never emits live hooks to this
+            dashboard, so remote sessions (<code>source</code> ≠ <code>local</code>) are excluded
+            from every local liveness and stale sweep — the process liveness reap, the watchdog
+            transcript scan, the startup cleanup, and the periodic abandon sweep all skip them.
+            Instead, a remote session's live status is reconciled from the rsync'd mirror on every
+            sync: if its mirrored transcript was modified within
+            <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) the session stays
+            <code>active</code>; once the mirror stops advancing for longer than that window, the
+            session is reconciled to <code>completed</code>. This keeps a still-running remote
+            session from being wrongly shown as Completed.
+          </p>
+
           <h3>Security Model</h3>
           <p>
             Authentication defers entirely to the host's own SSH stack —
@@ -3940,6 +3954,11 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                   <td><code>DASHBOARD_REMOTE_TEST_TIMEOUT_MS</code></td>
                   <td><code>15000</code></td>
                   <td>Timeout for the <b>Test connection</b> probe</td>
+                </tr>
+                <tr>
+                  <td><code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code></td>
+                  <td><code>600000</code></td>
+                  <td>Freshness window (10 min) for a Remote Data Source session's live status — a remote session whose mirrored transcript changed within this window stays <code>active</code>, otherwise it is reconciled to <code>completed</code> on the next sync; remote sessions receive no live hooks, so this replaces the local liveness and stale sweeps (which skip them)</td>
                 </tr>
               </tbody>
             </table>
@@ -6460,7 +6479,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations (zh/vi) — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=36" defer></script>
+    <script src="i18n-content.js?v=37" defer></script>
     <script src="script.js?v=31" defer></script>
     <script>
       (function () {

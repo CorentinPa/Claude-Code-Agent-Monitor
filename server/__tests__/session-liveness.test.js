@@ -334,6 +334,23 @@ describe("watchdog liveness reap", () => {
     assert.equal(stmts.getSession.get(sid).status, "active");
   });
 
+  it("spares a remote-source session with a POSIX cwd and no live local process", async () => {
+    // A Remote Data Source session (source = a remote id) legitimately reports a
+    // POSIX-absolute cwd on another machine (e.g. /home/ubuntu/matroid) that no
+    // local claude process owns. The posix-cwd guard can't catch it, so the
+    // source guard must: local process liveness says nothing about a remote box.
+    const sid = "rmt00000-0000-0000-0000-00000000000e";
+    const cwd = "/home/ubuntu/matroid";
+    const tpath = await seedSession(sid, cwd);
+    db.prepare("UPDATE sessions SET source = ? WHERE id = ?").run("src_remotebox", sid);
+    backdate(sid, tpath);
+
+    liveness.probeLiveCwds = () => ({ available: true, cwds: new Set() });
+    hooksRouter.livenessReap();
+
+    assert.equal(stmts.getSession.get(sid).status, "active", "remote session must not be reaped");
+  });
+
   it("does not touch error sessions", async () => {
     const sid = "errr0000-0000-0000-0000-000000000006";
     const cwd = "/tmp/liveness-error";

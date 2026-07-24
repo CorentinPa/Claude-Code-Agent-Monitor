@@ -871,8 +871,14 @@ export const api = {
      *
      * @returns {@link CostResult} — the aggregate cost breakdown across sessions.
      */
-    totalCost: () =>
-      request<CostResult>(`/pricing/cost?tz_offset=${new Date().getTimezoneOffset()}`),
+    totalCost: () => {
+      // Scope the aggregate to the active data-scope, exactly like the sessions /
+      // stats / analytics endpoints — otherwise switching the Data scope selector
+      // left the Dashboard "total cost" showing the un-narrowed global total.
+      const qs = new URLSearchParams({ tz_offset: String(new Date().getTimezoneOffset()) });
+      applyScope(qs);
+      return request<CostResult>(`/pricing/cost?${qs.toString()}`);
+    },
     /**
      * GET /api/pricing/cost/:sessionId - cost for one session, priced as of
      * the session's start date.

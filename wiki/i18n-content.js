@@ -23,6 +23,10 @@ window.__WIKI_CONTENT_I18N = {
     "Ceiling on a single rsync-and-import run before it is aborted":
       "单次 rsync 与导入运行在被中止前的上限",
     "Timeout for the <b>Test connection</b> probe": "<b>Test connection</b> 探测的超时时间",
+    "Freshness window (10 min) for a Remote Data Source session's live status — a remote session whose mirrored transcript changed within this window stays <code>active</code>, otherwise it is reconciled to <code>completed</code> on the next sync; remote sessions receive no live hooks, so this replaces the local liveness and stale sweeps (which skip them)":
+      "远程数据源会话实时状态的新鲜度窗口(10 分钟)——镜像的 transcript 在此窗口内发生变化的远程会话保持 <code>active</code>,否则会在下次同步时被调和为 <code>completed</code>;远程会话不接收实时 hook,因此这会取代本地的存活与陈旧扫描(它们会跳过远程会话)",
+    "Because a remote session is pulled over SSH, it never emits live hooks to this dashboard, so remote sessions (<code>source</code> ≠ <code>local</code>) are excluded from every local liveness and stale sweep — the process liveness reap, the watchdog transcript scan, the startup cleanup, and the periodic abandon sweep all skip them. Instead, a remote session's live status is reconciled from the rsync'd mirror on every sync: if its mirrored transcript was modified within <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) the session stays <code>active</code>; once the mirror stops advancing for longer than that window, the session is reconciled to <code>completed</code>. This keeps a still-running remote session from being wrongly shown as Completed.":
+      "由于远程会话是通过 SSH 拉取的,它从不向本仪表盘发送实时 hook,因此远程会话(<code>source</code> ≠ <code>local</code>)会被排除在每一次本地存活与陈旧扫描之外——进程存活回收、看门狗 transcript 扫描、启动清理以及周期性放弃扫描都会跳过它们。取而代之的是,远程会话的实时状态会在每次同步时从 rsync 的镜像进行调和:如果其镜像的 transcript 在 <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code>(默认 10 分钟)内被修改,会话保持 <code>active</code>;一旦镜像在超过该窗口的时间内不再推进,会话就会被调和为 <code>completed</code>。这可以避免仍在运行的远程会话被错误地显示为 Completed。",
     "List configured sources with their status": "列出已配置的来源及其状态",
     "Add a source — SSH destination plus optional port, identity file, and remote home":
       "添加来源——SSH 目标外加可选的端口、身份文件和远程主目录",
@@ -1301,6 +1305,10 @@ window.__WIKI_CONTENT_I18N = {
       "Giới hạn trên cho một lần chạy rsync-và-nhập trước khi bị hủy",
     "Timeout for the <b>Test connection</b> probe":
       "Thời gian chờ cho phép thăm dò <b>Test connection</b>",
+    "Freshness window (10 min) for a Remote Data Source session's live status — a remote session whose mirrored transcript changed within this window stays <code>active</code>, otherwise it is reconciled to <code>completed</code> on the next sync; remote sessions receive no live hooks, so this replaces the local liveness and stale sweeps (which skip them)":
+      "Cửa sổ mới (10 phút) cho trạng thái trực tiếp của một phiên Remote Data Source — một phiên từ xa có transcript được sao chép thay đổi trong cửa sổ này vẫn ở trạng thái <code>active</code>, ngược lại nó được điều hòa thành <code>completed</code> ở lần đồng bộ kế tiếp; các phiên từ xa không nhận hook trực tiếp, nên điều này thay thế các quét liveness và stale cục bộ (vốn bỏ qua chúng)",
+    "Because a remote session is pulled over SSH, it never emits live hooks to this dashboard, so remote sessions (<code>source</code> ≠ <code>local</code>) are excluded from every local liveness and stale sweep — the process liveness reap, the watchdog transcript scan, the startup cleanup, and the periodic abandon sweep all skip them. Instead, a remote session's live status is reconciled from the rsync'd mirror on every sync: if its mirrored transcript was modified within <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) the session stays <code>active</code>; once the mirror stops advancing for longer than that window, the session is reconciled to <code>completed</code>. This keeps a still-running remote session from being wrongly shown as Completed.":
+      "Vì một phiên từ xa được kéo qua SSH, nó không bao giờ phát hook trực tiếp đến bảng điều khiển này, nên các phiên từ xa (<code>source</code> ≠ <code>local</code>) bị loại khỏi mọi quét liveness và stale cục bộ — quá trình thu hồi liveness của tiến trình, quét transcript của watchdog, dọn dẹp khi khởi động, và quét bỏ rơi định kỳ đều bỏ qua chúng. Thay vào đó, trạng thái trực tiếp của một phiên từ xa được điều hòa từ bản sao rsync ở mỗi lần đồng bộ: nếu transcript được sao chép của nó được sửa đổi trong <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (mặc định 10 phút) thì phiên vẫn ở trạng thái <code>active</code>; một khi bản sao ngừng tiến triển lâu hơn cửa sổ đó, phiên được điều hòa thành <code>completed</code>. Điều này giúp một phiên từ xa vẫn đang chạy không bị hiển thị sai là Completed.",
     "List configured sources with their status":
       "Liệt kê các nguồn đã cấu hình cùng trạng thái của chúng",
     "Add a source — SSH destination plus optional port, identity file, and remote home":
@@ -2612,6 +2620,10 @@ window.__WIKI_CONTENT_I18N = {
     "Ceiling on a single rsync-and-import run before it is aborted":
       "단일 rsync 및 가져오기 실행이 중단되기 전의 상한",
     "Timeout for the <b>Test connection</b> probe": "<b>Test connection</b> 프로브의 타임아웃",
+    "Freshness window (10 min) for a Remote Data Source session's live status — a remote session whose mirrored transcript changed within this window stays <code>active</code>, otherwise it is reconciled to <code>completed</code> on the next sync; remote sessions receive no live hooks, so this replaces the local liveness and stale sweeps (which skip them)":
+      "Remote Data Source 세션의 실시간 상태에 대한 신선도 창(10분) — 미러링된 transcript가 이 창 이내에 변경된 원격 세션은 <code>active</code>로 유지되고, 그렇지 않으면 다음 동기화에서 <code>completed</code>로 조정됩니다; 원격 세션은 실시간 hook을 받지 않으므로 이는 로컬 liveness 및 stale 스윕(이들은 원격 세션을 건너뜀)을 대체합니다",
+    "Because a remote session is pulled over SSH, it never emits live hooks to this dashboard, so remote sessions (<code>source</code> ≠ <code>local</code>) are excluded from every local liveness and stale sweep — the process liveness reap, the watchdog transcript scan, the startup cleanup, and the periodic abandon sweep all skip them. Instead, a remote session's live status is reconciled from the rsync'd mirror on every sync: if its mirrored transcript was modified within <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) the session stays <code>active</code>; once the mirror stops advancing for longer than that window, the session is reconciled to <code>completed</code>. This keeps a still-running remote session from being wrongly shown as Completed.":
+      "원격 세션은 SSH를 통해 가져오기 때문에 이 대시보드에 실시간 hook을 전혀 보내지 않으므로, 원격 세션(<code>source</code> ≠ <code>local</code>)은 모든 로컬 liveness 및 stale 스윕에서 제외됩니다 — 프로세스 liveness 회수, 워치독 transcript 스캔, 시작 시 정리, 주기적 abandon 스윕이 모두 이들을 건너뜁니다. 대신 원격 세션의 실시간 상태는 매 동기화마다 rsync된 미러로부터 조정됩니다: 미러링된 transcript가 <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code>(기본 10분) 이내에 수정되었으면 세션은 <code>active</code>로 유지되고, 미러가 그 창보다 오래 진행되지 않으면 세션은 <code>completed</code>로 조정됩니다. 이는 아직 실행 중인 원격 세션이 잘못 Completed로 표시되는 것을 방지합니다.",
     "List configured sources with their status": "구성된 소스와 상태를 나열합니다",
     "Add a source — SSH destination plus optional port, identity file, and remote home":
       "소스 추가 — SSH 대상과 선택적 포트, 신원 파일, 원격 홈",
@@ -3892,6 +3904,7 @@ window.__WIKI_CONTENT_I18N = {
       "How It Works": "工作原理",
       Setup: "设置",
       "Data Scope": "数据范围",
+      "Live Status": "实时状态",
       "Security Model": "安全模型",
       "API Endpoints": "API 端点",
       "WebSocket Events": "WebSocket 事件",
@@ -4078,6 +4091,7 @@ window.__WIKI_CONTENT_I18N = {
       "How It Works": "Cách hoạt động",
       Setup: "Thiết lập",
       "Data Scope": "Phạm vi dữ liệu",
+      "Live Status": "Trạng thái trực tiếp",
       "Security Model": "Mô hình an toàn",
       "API Endpoints": "Điểm cuối API",
       "WebSocket Events": "Sự kiện WebSocket",
@@ -4267,6 +4281,7 @@ window.__WIKI_CONTENT_I18N = {
       "How It Works": "작동 방식",
       Setup: "설정",
       "Data Scope": "데이터 범위",
+      "Live Status": "실시간 상태",
       "Security Model": "보안 모델",
       "API Endpoints": "API 엔드포인트",
       "WebSocket Events": "WebSocket 이벤트",
