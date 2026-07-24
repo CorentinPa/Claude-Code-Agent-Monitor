@@ -79,6 +79,7 @@ function createOpenApiSpec() {
     ],
     tags: [
       { name: "Health", description: "Service liveness checks" },
+      { name: "Metrics", description: "Prometheus / OpenMetrics scrape endpoint" },
       { name: "Sessions", description: "Claude Code session lifecycle" },
       { name: "Agents", description: "Main/subagent records and status" },
       { name: "Events", description: "Event stream persistence" },
@@ -1829,6 +1830,38 @@ function createOpenApiSpec() {
               content: {
                 "application/json": {
                   schema: { $ref: "#/components/schemas/StatsResponse" },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/api/metrics": {
+        get: {
+          tags: ["Metrics"],
+          summary: "Prometheus metrics exposition",
+          operationId: "getMetrics",
+          description:
+            "Exposes the dashboard's live counters (sessions/agents by status, " +
+            "event and token totals, connected realtime clients, configured " +
+            "remote sources, process uptime/memory, build version) in the " +
+            "Prometheus text-exposition format (v0.0.4) for scraping into " +
+            "Prometheus / Grafana. Read-only. Mounted under `/api`, so it honors " +
+            "the optional `DASHBOARD_TOKEN` guard — point the scrape job's bearer " +
+            "token at it when the server is bound to a LAN.",
+          responses: {
+            200: {
+              description: "Prometheus text exposition (v0.0.4).",
+              content: {
+                "text/plain": {
+                  schema: { type: "string" },
+                  example:
+                    "# HELP ccam_up 1 when the dashboard API is serving this scrape.\n" +
+                    "# TYPE ccam_up gauge\n" +
+                    "ccam_up 1\n" +
+                    "# HELP ccam_sessions Number of sessions by lifecycle status.\n" +
+                    "# TYPE ccam_sessions gauge\n" +
+                    'ccam_sessions{status="active"} 3\n',
                 },
               },
             },

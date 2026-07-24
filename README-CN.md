@@ -952,7 +952,18 @@ OpenAPI 文档由 `server/openapi.js` 生成，Swagger UI 由后端直接提供�
 
 仓库根目录还提交了一份 `openapi.yaml`，它镜像实时规范，并通过 `npm run openapi:yaml` 重新生成（唯一可信来源为 `server/openapi.js`，切勿手动编辑）。
 
-API 文档现已**全面覆盖**：每个后端路由都有文档说明（共 75 个路径条目），包含参数、Schema、字段描述与示例；新增文档的路由组包括 `/api/push`、`/api/cc-config`、`/api/run`、`/api/workflows/runs`、`/api/sessions/facets` 与 `/api/settings/claude-home`。
+API 文档现已**全面覆盖**：每个后端路由都有文档说明（共 82 个路径条目），包含参数、Schema、字段描述与示例；新增文档的路由组包括 `/api/push`、`/api/cc-config`、`/api/run`、`/api/workflows/runs`、`/api/sessions/facets` 与 `/api/settings/claude-home`。
+
+### Prometheus 指标与 Grafana
+
+`GET /api/metrics` 以 Prometheus 文本暴露格式（text-exposition format）导出 Dashboard 的实时计数器——按状态划分的会话/Agent、事件与 Token 总数、已连接的实时客户端、已配置的远程数据源、进程运行时长/内存，以及构建版本——因此 CCAM 可被抓取（scrape）到你自己的可观测性栈中。一套开箱即用的 Prometheus + Grafana 组合，内置预构建的 **CCAM — Overview** 仪表盘，位于 [`monitoring/`](./monitoring/README.md)：
+
+```bash
+DASHBOARD_ALLOWED_HOSTS=host.docker.internal npm start   # let the scraper's Host through the guard
+cd monitoring && docker compose up -d                    # Grafana on :3000 (admin/admin), auto-provisioned
+```
+
+完整指标列表以及抓取/认证细节，请参见 [docs/API.md → Metrics](./docs/API.md#metrics)。
 
 <p align="center">
   <img src="images/swagger.png" alt="Swagger UI" width="100%">

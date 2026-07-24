@@ -938,13 +938,24 @@ There are three ways to explore the HTTP API, all driven by a single OpenAPI 3.0
 
 The OpenAPI document is generated from `server/openapi.js` (`createOpenApiSpec()`), merged with supplementary fragments under `server/openapi-extra/`. Swagger UI and ReDoc are both served directly by the backend; the ReDoc bundle is served locally (`GET /api/redoc/redoc.standalone.js`) so the reference works fully offline / air-gapped, consistent with the project's no-external-assets policy.
 
-Coverage is comprehensive: every backend route is documented (75 path entries) across these tags — Health, Sessions, Agents, Events, Stats, Analytics, Hooks, Pricing, Workflows, Settings, Updates, Alerts, Webhooks, Push, CcConfig (Claude Code config explorer), Run (dashboard-spawned runs), and Documentation — each with parameters, request/response schemas, field-level descriptions, and realistic examples.
+Coverage is comprehensive: every backend route is documented (82 path entries) across these tags — Health, Sessions, Agents, Events, Stats, Metrics, Analytics, Hooks, Pricing, Workflows, Settings, Updates, Alerts, Webhooks, Push, CcConfig (Claude Code config explorer), Run (dashboard-spawned runs), and Documentation — each with parameters, request/response schemas, field-level descriptions, and realistic examples.
 
 A committed **`openapi.yaml`** at the repo root mirrors the live spec. It is generated from `server/openapi.js` (never hand-edited) — regenerate it after API changes with:
 
 ```bash
 npm run openapi:yaml
 ```
+
+### Prometheus metrics & Grafana
+
+`GET /api/metrics` exposes the dashboard's live counters — sessions/agents by status, event and token totals, connected realtime clients, configured remote sources, process uptime/memory, and build version — in the Prometheus text-exposition format, so CCAM can be scraped into your own observability stack. A turnkey Prometheus + Grafana stack with a pre-built **CCAM — Overview** dashboard lives in [`monitoring/`](./monitoring/README.md):
+
+```bash
+DASHBOARD_ALLOWED_HOSTS=host.docker.internal npm start   # let the scraper's Host through the guard
+cd monitoring && docker compose up -d                    # Grafana on :3000 (admin/admin), auto-provisioned
+```
+
+See [docs/API.md → Metrics](./docs/API.md#metrics) for the full metric list and scrape/auth details.
 
 <p align="center">
   <img src="images/swagger.png" alt="Swagger UI" width="100%">

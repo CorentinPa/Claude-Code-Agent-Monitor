@@ -13,6 +13,7 @@ Complete REST API and WebSocket documentation for Agent Dashboard.
   - [Sessions](#sessions)
   - [Agents](#agents)
   - [Tools](#tools)
+  - [Metrics](#metrics)
   - [Pricing](#pricing)
   - [Notifications](#notifications)
   - [Remote Data Sources](#remote-data-sources)
@@ -498,6 +499,49 @@ curl http://localhost:4820/api/tools?limit=50&tool_name=bash
   "total": 156
 }
 ```
+
+---
+
+### Metrics
+
+#### Prometheus exposition
+
+```
+GET /api/metrics
+```
+
+Exposes the dashboard's live counters in the [Prometheus text-exposition format](https://prometheus.io/docs/instrumenting/exposition_formats/) (v0.0.4) so this monitoring dashboard can itself be scraped into Prometheus / Grafana. Read-only. Values are read from the same prepared statements the REST API uses, so they match the UI.
+
+Response `Content-Type: text/plain; version=0.0.4; charset=utf-8`.
+
+| Metric | Type | Labels | Meaning |
+| --- | --- | --- | --- |
+| `ccam_up` | gauge | — | `1` when the API served the scrape |
+| `ccam_build_info` | gauge | `version` | Always `1`; dashboard version rides on the label |
+| `ccam_process_uptime_seconds` | gauge | — | Server process uptime |
+| `ccam_process_resident_memory_bytes` | gauge | — | Server process RSS |
+| `ccam_sessions` | gauge | `status` (`active`/`completed`/`error`/`abandoned`) | Sessions by status |
+| `ccam_agents` | gauge | `status` (`working`/`waiting`/`completed`/`error`) | Agents by status |
+| `ccam_events_total` | counter | — | Total events recorded |
+| `ccam_websocket_clients` | gauge | — | Connected realtime clients |
+| `ccam_remote_sources` | gauge | `enabled` (`true`/`false`) | Configured Remote Data Sources |
+| `ccam_tokens_total` | counter | `kind` (`input`/`output`/`cache_read`/`cache_write`) | Cumulative token usage |
+
+Status series are always emitted (even at `0`) so a series never disappears from the exposition. The endpoint is mounted under `/api`, so it sits behind the same two guards as every other route: the **Host-header (DNS-rebinding) guard** and the optional **`DASHBOARD_TOKEN`** guard. A scraper that reaches the server as anything other than loopback (e.g. Prometheus in Docker hitting `host.docker.internal`) must be allowlisted with `DASHBOARD_ALLOWED_HOSTS`, or the scrape returns `403 EBADHOST`; if a token is set, the scrape must also send it.
+
+Example scrape config (start the server with `DASHBOARD_ALLOWED_HOSTS=host.docker.internal`):
+
+```yaml
+scrape_configs:
+  - job_name: ccam
+    metrics_path: /api/metrics
+    static_configs:
+      - targets: ["host.docker.internal:4820"]
+    # authorization:              # only if DASHBOARD_TOKEN is set
+    #   credentials: "<DASHBOARD_TOKEN>"
+```
+
+A ready-to-run Prometheus + Grafana stack (with a pre-built dashboard) lives in [`monitoring/`](../monitoring/README.md) — `cd monitoring && docker compose up -d`.
 
 ---
 

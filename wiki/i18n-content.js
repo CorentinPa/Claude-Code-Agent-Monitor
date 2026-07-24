@@ -1278,6 +1278,10 @@ window.__WIKI_CONTENT_I18N = {
       '<span class="caption-icon">🧬</span> <span><strong>工作流运行 · 会话内</strong> — 同样的群组关联到其启动会话，因此会话的动态工作流子 Agent 及其已计入的 token 成本可在会话内直接查看</span>',
     '<span class="caption-icon">🧬</span> <span><strong>Workflow Runs · expanded</strong> — a run opened up: clickable color-coded phase filters, the per-agent metrics table, and a full list of clickable result items that expand to each agent\'s complete prompt and result</span>':
       '<span class="caption-icon">🧬</span> <span><strong>工作流运行 · 展开</strong> — 展开的一次运行：可点击的彩色阶段筛选、按 Agent 的指标表，以及完整的可点击结果项列表，点击即可展开每个 Agent 的完整提示词与结果</span>',
+    'Live counters in Prometheus text-exposition format (v0.0.4): sessions and agents by status, total events, cumulative tokens by kind, connected WebSocket clients, configured remote sources, process uptime and RSS, and build version — so CCAM can be scraped into Prometheus / Grafana. Read-only, and — being under <code>/api</code> — behind the DNS-rebinding Host-header guard and the optional <code>DASHBOARD_TOKEN</code>: a non-loopback scraper (e.g. Prometheus in Docker via <code>host.docker.internal</code>) must be allowlisted with <code>DASHBOARD_ALLOWED_HOSTS</code> or the scrape returns <code>403 EBADHOST</code>, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with a pre-provisioned "CCAM — Overview" dashboard lives in <code>monitoring/</code> (<code>cd monitoring &amp;&amp; docker compose up -d</code>; Grafana on port 3000).':
+      'Prometheus 文本展示格式（v0.0.4）的实时计数器：按状态划分的 sessions 与 agents、事件总数、按种类累计的 token、已连接的 WebSocket 客户端、已配置的远程数据源、进程运行时长与 RSS，以及构建版本——以便将 CCAM 抓取到 Prometheus / Grafana。只读，且——由于位于 <code>/api</code> 之下——处于 DNS 重绑定 Host 头防护和可选的 <code>DASHBOARD_TOKEN</code> 之后：非回环抓取器（例如 Docker 中通过 <code>host.docker.internal</code> 访问的 Prometheus）必须用 <code>DASHBOARD_ALLOWED_HOSTS</code> 加入白名单，否则抓取会返回 <code>403 EBADHOST</code>，并且在设置了令牌时必须发送该令牌。一个开箱即用、预置了 "CCAM — Overview" 仪表盘的 Prometheus + Grafana 组合位于 <code>monitoring/</code>（<code>cd monitoring &amp;&amp; docker compose up -d</code>；Grafana 在 3000 端口）。',
+    "Comma-separated extra <code>Host</code>-header names allowed past the DNS-rebinding guard — needed for a non-loopback client or scraper, such as Prometheus in Docker reaching <code>/api/metrics</code> via <code>host.docker.internal</code>; an unlisted host is rejected with <code>403 EBADHOST</code>":
+      "逗号分隔的额外 <code>Host</code> 头名称，允许其通过 DNS 重绑定防护——非回环客户端或抓取器需要它，例如 Docker 中通过 <code>host.docker.internal</code> 访问 <code>/api/metrics</code> 的 Prometheus；未列入的主机会被拒绝并返回 <code>403 EBADHOST</code>",
   },
   vi: {
     "Pull Claude Code history from other machines over SSH. Each remote's <code>~/.claude/projects</code> tree is rsynced into a sandboxed staging directory, fed through the same importer as local history, and every session is tagged with its source. A background poller keeps remote data near-real-time, a global data-scope selector (Local only / All / a specific source) narrows the whole app, and sessions from a remote show a source badge. Auth defers entirely to the host's SSH stack — no passwords or secrets are stored. Managed in <b>Settings → Remote Data Sources</b>.":
@@ -2590,6 +2594,10 @@ window.__WIKI_CONTENT_I18N = {
       '<span class="caption-icon">🧬</span> <span><strong>Lần chạy quy trình · trong phiên</strong> — cùng các nhóm đó được liên kết tới phiên khởi chạy, nên các sub-agent của quy trình động và chi phí token đã được gộp vào của phiên đều hiển thị ngay trong phiên</span>',
     '<span class="caption-icon">🧬</span> <span><strong>Workflow Runs · expanded</strong> — a run opened up: clickable color-coded phase filters, the per-agent metrics table, and a full list of clickable result items that expand to each agent\'s complete prompt and result</span>':
       '<span class="caption-icon">🧬</span> <span><strong>Lần chạy quy trình · mở rộng</strong> — một lần chạy được mở ra: bộ lọc giai đoạn có màu và bấm được, bảng số liệu theo từng agent, và danh sách đầy đủ các mục kết quả bấm được để mở ra lời nhắc và kết quả đầy đủ của từng agent</span>',
+    'Live counters in Prometheus text-exposition format (v0.0.4): sessions and agents by status, total events, cumulative tokens by kind, connected WebSocket clients, configured remote sources, process uptime and RSS, and build version — so CCAM can be scraped into Prometheus / Grafana. Read-only, and — being under <code>/api</code> — behind the DNS-rebinding Host-header guard and the optional <code>DASHBOARD_TOKEN</code>: a non-loopback scraper (e.g. Prometheus in Docker via <code>host.docker.internal</code>) must be allowlisted with <code>DASHBOARD_ALLOWED_HOSTS</code> or the scrape returns <code>403 EBADHOST</code>, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with a pre-provisioned "CCAM — Overview" dashboard lives in <code>monitoring/</code> (<code>cd monitoring &amp;&amp; docker compose up -d</code>; Grafana on port 3000).':
+      'Các bộ đếm trực tiếp ở định dạng Prometheus text-exposition (v0.0.4): sessions và agents theo trạng thái, tổng số sự kiện, token tích lũy theo loại, số client WebSocket đang kết nối, các nguồn dữ liệu từ xa đã cấu hình, thời gian chạy tiến trình và RSS, cùng phiên bản build — để CCAM có thể được scrape vào Prometheus / Grafana. Chỉ-đọc, và — vì nằm dưới <code>/api</code> — nằm sau lớp bảo vệ Host-header chống DNS-rebinding và <code>DASHBOARD_TOKEN</code> tùy chọn: một scraper không phải loopback (ví dụ Prometheus trong Docker qua <code>host.docker.internal</code>) phải được đưa vào danh sách cho phép bằng <code>DASHBOARD_ALLOWED_HOSTS</code> nếu không lần scrape sẽ trả về <code>403 EBADHOST</code>, và phải gửi token khi có đặt token. Một bộ Prometheus + Grafana chạy-ngay với bảng điều khiển "CCAM — Overview" dựng sẵn nằm trong <code>monitoring/</code> (<code>cd monitoring &amp;&amp; docker compose up -d</code>; Grafana ở cổng 3000).',
+    "Comma-separated extra <code>Host</code>-header names allowed past the DNS-rebinding guard — needed for a non-loopback client or scraper, such as Prometheus in Docker reaching <code>/api/metrics</code> via <code>host.docker.internal</code>; an unlisted host is rejected with <code>403 EBADHOST</code>":
+      "Các tên <code>Host</code>-header bổ sung, phân tách bằng dấu phẩy, được cho phép vượt qua lớp bảo vệ chống DNS-rebinding — cần cho một client hoặc scraper không phải loopback, chẳng hạn Prometheus trong Docker truy cập <code>/api/metrics</code> qua <code>host.docker.internal</code>; một host không có trong danh sách sẽ bị từ chối với <code>403 EBADHOST</code>",
   },
   ko: {
     "Pull Claude Code history from other machines over SSH. Each remote's <code>~/.claude/projects</code> tree is rsynced into a sandboxed staging directory, fed through the same importer as local history, and every session is tagged with its source. A background poller keeps remote data near-real-time, a global data-scope selector (Local only / All / a specific source) narrows the whole app, and sessions from a remote show a source badge. Auth defers entirely to the host's SSH stack — no passwords or secrets are stored. Managed in <b>Settings → Remote Data Sources</b>.":
@@ -3885,6 +3893,10 @@ window.__WIKI_CONTENT_I18N = {
       '<span class="caption-icon">🧬</span> <span><strong>Workflow Runs · in a session</strong> — 동일한 플릿을 이를 실행한 세션에 연결하여, 세션의 동적 워크플로 서브에이전트와 그에 포함된 토큰 비용을 인라인으로 확인할 수 있습니다</span>',
     '<span class="caption-icon">🧬</span> <span><strong>Workflow Runs · expanded</strong> — a run opened up: clickable color-coded phase filters, the per-agent metrics table, and a full list of clickable result items that expand to each agent\'s complete prompt and result</span>':
       '<span class="caption-icon">🧬</span> <span><strong>Workflow Runs · expanded</strong> — 펼쳐본 실행 화면: 클릭 가능한 색상별 단계 필터, 에이전트별 지표 테이블, 그리고 클릭하면 각 에이전트의 전체 프롬프트와 결과로 펼쳐지는 결과 항목 전체 목록을 제공합니다</span>',
+    'Live counters in Prometheus text-exposition format (v0.0.4): sessions and agents by status, total events, cumulative tokens by kind, connected WebSocket clients, configured remote sources, process uptime and RSS, and build version — so CCAM can be scraped into Prometheus / Grafana. Read-only, and — being under <code>/api</code> — behind the DNS-rebinding Host-header guard and the optional <code>DASHBOARD_TOKEN</code>: a non-loopback scraper (e.g. Prometheus in Docker via <code>host.docker.internal</code>) must be allowlisted with <code>DASHBOARD_ALLOWED_HOSTS</code> or the scrape returns <code>403 EBADHOST</code>, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with a pre-provisioned "CCAM — Overview" dashboard lives in <code>monitoring/</code> (<code>cd monitoring &amp;&amp; docker compose up -d</code>; Grafana on port 3000).':
+      'Prometheus 텍스트 노출 형식(v0.0.4)의 실시간 카운터: 상태별 sessions 및 agents, 총 이벤트 수, 종류별 누적 token, 연결된 WebSocket 클라이언트, 구성된 원격 데이터 소스, 프로세스 가동 시간 및 RSS, 그리고 빌드 버전 — CCAM을 Prometheus / Grafana로 스크레이핑할 수 있도록 합니다. 읽기 전용이며 — <code>/api</code> 아래에 있으므로 — DNS 리바인딩 Host 헤더 가드와 선택적 <code>DASHBOARD_TOKEN</code> 뒤에 위치합니다: 루프백이 아닌 스크레이퍼(예: <code>host.docker.internal</code>을 통해 접근하는 Docker 내 Prometheus)는 <code>DASHBOARD_ALLOWED_HOSTS</code>로 허용 목록에 추가해야 하며, 그렇지 않으면 스크레이프가 <code>403 EBADHOST</code>를 반환하고, 토큰이 설정된 경우 해당 토큰을 함께 보내야 합니다. "CCAM — Overview" 대시보드가 미리 프로비저닝된 즉시 실행 가능한 Prometheus + Grafana 스택이 <code>monitoring/</code>에 있습니다(<code>cd monitoring &amp;&amp; docker compose up -d</code>; Grafana는 3000 포트).',
+    "Comma-separated extra <code>Host</code>-header names allowed past the DNS-rebinding guard — needed for a non-loopback client or scraper, such as Prometheus in Docker reaching <code>/api/metrics</code> via <code>host.docker.internal</code>; an unlisted host is rejected with <code>403 EBADHOST</code>":
+      "쉼표로 구분된 추가 <code>Host</code> 헤더 이름으로, DNS 리바인딩 가드를 통과하도록 허용합니다 — 루프백이 아닌 클라이언트나 스크레이퍼에 필요하며, 예를 들어 <code>host.docker.internal</code>을 통해 <code>/api/metrics</code>에 접근하는 Docker 내 Prometheus가 있습니다; 목록에 없는 host는 <code>403 EBADHOST</code>로 거부됩니다",
   },
   plain: {
     zh: {
@@ -3894,6 +3906,7 @@ window.__WIKI_CONTENT_I18N = {
       "Data Scope": "数据范围",
       "Security Model": "安全模型",
       "API Endpoints": "API 端点",
+      Metrics: "指标",
       "WebSocket Events": "WebSocket 事件",
       CLI: "CLI",
       "System Overview": "系统概览",
@@ -4080,6 +4093,7 @@ window.__WIKI_CONTENT_I18N = {
       "Data Scope": "Phạm vi dữ liệu",
       "Security Model": "Mô hình an toàn",
       "API Endpoints": "Điểm cuối API",
+      Metrics: "Số liệu",
       "WebSocket Events": "Sự kiện WebSocket",
       CLI: "CLI",
       "System Overview": "Tổng quan hệ thống",
@@ -4269,6 +4283,7 @@ window.__WIKI_CONTENT_I18N = {
       "Data Scope": "데이터 범위",
       "Security Model": "보안 모델",
       "API Endpoints": "API 엔드포인트",
+      Metrics: "메트릭",
       "WebSocket Events": "WebSocket 이벤트",
       CLI: "CLI",
       "System Overview": "시스템 개요",

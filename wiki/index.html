@@ -1921,6 +1921,13 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                   <td>Path to the SQLite database file</td>
                 </tr>
                 <tr>
+                  <td><code>DASHBOARD_ALLOWED_HOSTS</code></td>
+                  <td><code>(empty)</code></td>
+                  <td>
+                    Comma-separated extra <code>Host</code>-header names allowed past the DNS-rebinding guard — needed for a non-loopback client or scraper, such as Prometheus in Docker reaching <code>/api/metrics</code> via <code>host.docker.internal</code>; an unlisted host is rejected with <code>403 EBADHOST</code>
+                  </td>
+                </tr>
+                <tr>
                   <td><code>DASHBOARD_WORKING_IDLE_SECONDS</code></td>
                   <td><code>120</code></td>
                   <td>
@@ -3241,6 +3248,17 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
               <span class="route-path">/api/analytics</span>
               <span class="route-desc"
                 >Token totals, tool usage, daily trends, agent types, event types, averages</span
+              >
+            </div>
+          </div>
+
+          <h3>Metrics</h3>
+          <div class="route-list">
+            <div class="route-item">
+              <span class="method method-get">GET</span>
+              <span class="route-path">/api/metrics</span>
+              <span class="route-desc"
+                >Live counters in Prometheus text-exposition format (v0.0.4): sessions and agents by status, total events, cumulative tokens by kind, connected WebSocket clients, configured remote sources, process uptime and RSS, and build version — so CCAM can be scraped into Prometheus / Grafana. Read-only, and — being under <code>/api</code> — behind the DNS-rebinding Host-header guard and the optional <code>DASHBOARD_TOKEN</code>: a non-loopback scraper (e.g. Prometheus in Docker via <code>host.docker.internal</code>) must be allowlisted with <code>DASHBOARD_ALLOWED_HOSTS</code> or the scrape returns <code>403 EBADHOST</code>, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with a pre-provisioned "CCAM — Overview" dashboard lives in <code>monitoring/</code> (<code>cd monitoring && docker compose up -d</code>; Grafana on port 3000).</span
               >
             </div>
           </div>
@@ -6460,7 +6478,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations (zh/vi) — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=36" defer></script>
+    <script src="i18n-content.js?v=37" defer></script>
     <script src="script.js?v=31" defer></script>
     <script>
       (function () {

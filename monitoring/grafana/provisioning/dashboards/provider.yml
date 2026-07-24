@@ -1,0 +1,14 @@
+# Loads every dashboard JSON under /var/lib/grafana/dashboards on startup, so the
+# bundled "CCAM — Overview" board appears with no manual import.
+apiVersion: 1
+
+providers:
+  - name: CCAM
+    orgId: 1
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

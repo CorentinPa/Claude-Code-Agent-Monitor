@@ -938,13 +938,24 @@ HTTP API를 탐색하는 방법은 세 가지가 있으며, 모두 하나의 Ope
 
 OpenAPI 문서는 `server/openapi.js`(`createOpenApiSpec()`)에서 생성되며, `server/openapi-extra/` 아래의 보조 프래그먼트와 병합됩니다. Swagger UI와 ReDoc은 모두 백엔드가 직접 제공합니다. ReDoc 번들은 로컬로 제공되므로(`GET /api/redoc/redoc.standalone.js`) 이 참조 문서는 완전한 오프라인 / 에어갭 환경에서도 동작하며, 이는 프로젝트의 외부 자산 미사용 정책과 일치합니다.
 
-커버리지는 포괄적입니다. 모든 백엔드 라우트가 문서화되어 있으며(75개의 경로 항목), 다음 태그들 — Health, Sessions, Agents, Events, Stats, Analytics, Hooks, Pricing, Workflows, Settings, Updates, Alerts, Webhooks, Push, CcConfig(Claude Code 설정 탐색기), Run(대시보드에서 생성된 실행), Documentation — 에 걸쳐 각각 매개변수, 요청/응답 스키마, 필드 수준 설명, 현실적인 예제를 포함합니다.
+커버리지는 포괄적입니다. 모든 백엔드 라우트가 문서화되어 있으며(82개의 경로 항목), 다음 태그들 — Health, Sessions, Agents, Events, Stats, Metrics, Analytics, Hooks, Pricing, Workflows, Settings, Updates, Alerts, Webhooks, Push, CcConfig(Claude Code 설정 탐색기), Run(대시보드에서 생성된 실행), Documentation — 에 걸쳐 각각 매개변수, 요청/응답 스키마, 필드 수준 설명, 현실적인 예제를 포함합니다.
 
 저장소 루트에 커밋되어 있는 **`openapi.yaml`**은 라이브 사양을 그대로 반영합니다. 이 파일은 `server/openapi.js`에서 생성되며(직접 손으로 편집하지 않음) — API 변경 후 다음 명령으로 다시 생성합니다:
 
 ```bash
 npm run openapi:yaml
 ```
+
+### Prometheus 메트릭 & Grafana
+
+`GET /api/metrics`는 대시보드의 실시간 카운터 — 상태별 세션/에이전트, 이벤트 및 토큰 총계, 연결된 실시간 클라이언트, 구성된 원격 소스, 프로세스 가동 시간/메모리, 빌드 버전 — 를 Prometheus 텍스트 노출 형식으로 공개하므로, CCAM를 자체 관측성 스택으로 스크레이핑할 수 있습니다. 미리 구축된 **CCAM — Overview** 대시보드를 갖춘 턴키 방식의 Prometheus + Grafana 스택은 [`monitoring/`](./monitoring/README.md)에 있습니다:
+
+```bash
+DASHBOARD_ALLOWED_HOSTS=host.docker.internal npm start   # let the scraper's Host through the guard
+cd monitoring && docker compose up -d                    # Grafana on :3000 (admin/admin), auto-provisioned
+```
+
+전체 메트릭 목록과 스크레이프/인증 세부 정보는 [docs/API.md → Metrics](./docs/API.md#metrics)를 참고하세요.
 
 <p align="center">
   <img src="images/swagger.png" alt="Swagger UI" width="100%">

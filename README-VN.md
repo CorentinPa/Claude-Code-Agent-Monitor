@@ -950,7 +950,7 @@ Tài liệu OpenAPI được tạo từ `server/openapi.js` và giao diện ngư
 
 Tệp `openapi.yaml` cũng được commit ở thư mục gốc của kho lưu trữ, phản chiếu thông số trực tiếp và được tạo lại qua `npm run openapi:yaml` (nguồn chính thức là `server/openapi.js`; không bao giờ chỉnh sửa thủ công).
 
-Tài liệu API hiện đã **đầy đủ**: mọi route phụ trợ đều được ghi tài liệu (75 mục đường dẫn) kèm tham số, schema, mô tả trường và ví dụ; các nhóm mới được ghi tài liệu gồm `/api/push`, `/api/cc-config`, `/api/run`, `/api/workflows/runs`, `/api/sessions/facets` và `/api/settings/claude-home`.
+Tài liệu API hiện đã **đầy đủ**: mọi route phụ trợ đều được ghi tài liệu (82 mục đường dẫn) kèm tham số, schema, mô tả trường và ví dụ; các nhóm mới được ghi tài liệu gồm `/api/push`, `/api/cc-config`, `/api/run`, `/api/workflows/runs`, `/api/sessions/facets` và `/api/settings/claude-home`.
 
 <p align="center">
   <img src="images/swagger.png" alt="Swagger UI" width="100%">
@@ -959,6 +959,17 @@ Tài liệu API hiện đã **đầy đủ**: mọi route phụ trợ đều đ�
 <p align="center">
   <img src="images/redoc.png" alt="ReDoc UI" width="100%">
 </p>
+
+### Số liệu Prometheus & Grafana
+
+`GET /api/metrics` cung cấp các bộ đếm trực tiếp của dashboard — phiên/agent theo trạng thái, tổng số sự kiện và token, số client thời gian thực đang kết nối, các nguồn từ xa đã cấu hình, thời gian hoạt động/bộ nhớ của tiến trình, và phiên bản build — theo định dạng text-exposition của Prometheus, nên CCAM có thể được scrape vào observability stack của riêng bạn. Một stack Prometheus + Grafana sẵn dùng với dashboard **CCAM — Overview** dựng sẵn nằm trong [`monitoring/`](./monitoring/README.md):
+
+```bash
+DASHBOARD_ALLOWED_HOSTS=host.docker.internal npm start   # let the scraper's Host through the guard
+cd monitoring && docker compose up -d                    # Grafana on :3000 (admin/admin), auto-provisioned
+```
+
+Xem [docs/API.md → Metrics](./docs/API.md#metrics) để biết danh sách chỉ số đầy đủ cùng chi tiết scrape/xác thực.
 
 ### Sức khỏe
 
