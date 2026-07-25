@@ -104,7 +104,16 @@
     "context": "컨텍스트",
     "key": "키",
     "action": "동작",
-    "docsLink": "키바인딩 문서 보기"
+    "docsLink": "키바인딩 문서 보기",
+    "contextPlaceholder": "컨텍스트 (예: Global, Chat)",
+    "addContext": "컨텍스트 추가",
+    "removeContext": "컨텍스트 삭제",
+    "addBinding": "키바인딩 추가",
+    "removeBinding": "키바인딩 삭제",
+    "errContext": "모든 컨텍스트에는 이름이 필요합니다.",
+    "errDupContext": "중복된 컨텍스트: {{context}}",
+    "errEmpty": "\"{{context}}\"의 모든 키바인딩에는 키와 동작이 모두 필요합니다.",
+    "errDupKey": "컨텍스트 \"{{context}}\"에 중복된 키 \"{{key}}\"이(가) 있습니다."
   },
   "statusline": {
     "title": "상태 표시줄",

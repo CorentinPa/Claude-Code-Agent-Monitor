@@ -238,7 +238,7 @@ flowchart LR
 <p align="center">
   <img src="images/config.png" alt="Trình khám phá cấu hình Claude" width="100%">
   <br>
-  <em>🧰 <strong>Trình khám phá cấu hình Claude</strong> — Trình kiểm tra 12-tab cho mọi thứ Claude Code biết: skills, subagents, lệnh slash, output styles, plugin (kèm số đóng góp của từng plugin), marketplaces, máy chủ MCP, hooks, settings (ẩn key bí mật), memory (các tệp `CLAUDE.md` của user + project cùng kho memory dựa-trên-tệp theo từng dự án — mọi `*.md` dưới `~/.claude/projects/<slug>/memory/`, nhóm theo dự án và tìm kiếm được), keybindings và statusline. Hỗ trợ tạo / sửa / xoá trên các bề mặt tệp văn bản rủi ro thấp — kể cả các tệp auto-memory theo từng dự án — với sao lưu dấu thời gian bắt buộc</em>
+  <em>🧰 <strong>Trình khám phá cấu hình Claude</strong> — Trình kiểm tra 12-tab cho mọi thứ Claude Code biết: skills, subagents, lệnh slash, output styles, plugin (kèm số đóng góp của từng plugin), marketplaces, máy chủ MCP, hooks, settings (ẩn key bí mật), memory (các tệp `CLAUDE.md` của user + project cùng kho memory dựa-trên-tệp theo từng dự án — mọi `*.md` dưới `~/.claude/projects/<slug>/memory/`, nhóm theo dự án và tìm kiếm được), keybindings (kèm trình chỉnh sửa có cấu trúc ngay trong giao diện) và statusline. Hỗ trợ tạo / sửa / xoá trên các bề mặt rủi ro thấp — các tệp văn bản, các tệp auto-memory theo từng dự án, và `keybindings.json` — với sao lưu dấu thời gian bắt buộc</em>
 </p>
 
 <p align="center">

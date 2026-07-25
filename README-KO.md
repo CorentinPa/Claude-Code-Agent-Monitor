@@ -238,7 +238,7 @@ flowchart LR
 <p align="center">
   <img src="images/config.png" alt="Claude Config Explorer" width="100%">
   <br>
-  <em>🧰 <strong>Claude 설정 탐색기</strong> — Claude Code가 알고 있는 모든 것을 위한 12탭 인스펙터: 스킬, 서브에이전트, 슬래시 명령, 출력 스타일, 플러그인(플러그인별 기여 항목 포함), 마켓플레이스, MCP 서버, Hook, 설정(비밀 키 마스킹 포함), 메모리(사용자 + 프로젝트 `CLAUDE.md` 파일과 프로젝트별 파일 기반 메모리 저장소 — `~/.claude/projects/<slug>/memory/` 아래의 모든 `*.md` 파일을 프로젝트별로 그룹화하고 검색 가능), 키바인딩, Statusline. 저위험 텍스트 파일 표면 — 프로젝트별 자동 메모리 파일 포함 — 에서 필수 타임스탬프 백업과 함께 생성 / 편집 / 삭제 가능</em>
+  <em>🧰 <strong>Claude 설정 탐색기</strong> — Claude Code가 알고 있는 모든 것을 위한 12탭 인스펙터: 스킬, 서브에이전트, 슬래시 명령, 출력 스타일, 플러그인(플러그인별 기여 항목 포함), 마켓플레이스, MCP 서버, Hook, 설정(비밀 키 마스킹 포함), 메모리(사용자 + 프로젝트 `CLAUDE.md` 파일과 프로젝트별 파일 기반 메모리 저장소 — `~/.claude/projects/<slug>/memory/` 아래의 모든 `*.md` 파일을 프로젝트별로 그룹화하고 검색 가능), 키바인딩(인라인 구조화 편집기 포함), Statusline. 저위험 표면 — 텍스트 파일 아티팩트, 프로젝트별 자동 메모리 파일, `keybindings.json` — 에서 필수 타임스탬프 백업과 함께 생성 / 편집 / 삭제 가능</em>
 </p>
 
 <p align="center">
@@ -1102,6 +1102,7 @@ Claude Code의 모든 설정 표면을 읽기 전용으로 검사할 수 있으�
 | `GET`    | `/api/cc-config/hooks`              | 사용자 / 프로젝트 / 프로젝트 로컬 `settings.json` 파일 전반에 걸쳐 집계된 Hook |
 | `GET`    | `/api/cc-config/hook-scripts`       | `~/.claude/hooks/`의 파일(`hooks.<event>.command`가 참조하는 헬퍼 스크립트) |
 | `GET`    | `/api/cc-config/keybindings`        | `~/.claude/keybindings.json`을 컨텍스트별로 그룹화된 키/액션 쌍으로 파싱한 결과 |
+| `PUT`    | `/api/cc-config/keybindings`        | `{ groups: [{ context, bindings: [{ key, action }] }] }`로 `keybindings.json` 덮어쓰기. 먼저 백업하고, 최상위 메타데이터(`$schema`/`$docs`)를 보존하며, 중복 컨텍스트/키를 거부. (`settings.json`과 달리 CLI가 세션 중에 다시 쓰지 않으므로 안전) |
 | `GET`    | `/api/cc-config/statusline`         | `settings.json.statusLine` 설정 + 존재하는 경우 실제 `statusline.py` / `statusline-command.sh` 내용 |
 | `GET`    | `/api/cc-config/settings`           | 사용자 / 프로젝트 / 프로젝트 로컬 설정 JSON. 시크릿으로 보이는 키(`/token\|secret\|password\|api[_-]?key\|auth/i`에 일치)는 `"<redacted>"`로 대체됩니다 |
 | `GET`    | `/api/cc-config/memory`             | 사용자 + 프로젝트 범위의 `CLAUDE.md` 파일과 프로젝트별 파일 기반 메모리: `~/.claude/projects/<slug>/memory/` 아래의 모든 `*.md`에 대한 `scope:"auto-memory"` 항목(각각 `project`, `name`, `isIndex` 및 파싱된 `frontmatter`를 포함). `{ scope: "auto-memory", type: "auto-memory", project, name }`와 함께 `PUT`/`DELETE /api/cc-config/file`로 변경합니다(백업은 `<memory-dir>/.cc-config-backups/auto-memory/`에 저장됨) |

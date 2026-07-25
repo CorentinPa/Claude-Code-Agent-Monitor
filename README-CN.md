@@ -240,7 +240,7 @@ flowchart LR
 <p align="center">
   <img src="images/config.png" alt="Claude 配置浏览器" width="100%">
   <br>
-  <em>🧰 <strong>Claude 配置浏览器</strong> — 12 标签页检查器，涵盖 Claude Code 知道的一切：技能、子代理、斜杠命令、输出样式、插件（含每个插件的贡献计数）、市场、MCP 服务器、Hook、设置（密钥脱敏）、记忆（用户与项目 `CLAUDE.md` 文件，外加按项目分组、可搜索的文件型记忆存储 —— `~/.claude/projects/<slug>/memory/` 下的每个 `*.md`）、快捷键与状态行。低风险文本文件表面支持创建/编辑/删除（含按项目的 auto-memory 文件），带强制时间戳备份</em>
+  <em>🧰 <strong>Claude 配置浏览器</strong> — 12 标签页检查器，涵盖 Claude Code 知道的一切：技能、子代理、斜杠命令、输出样式、插件（含每个插件的贡献计数）、市场、MCP 服务器、Hook、设置（密钥脱敏）、记忆（用户与项目 `CLAUDE.md` 文件，外加按项目分组、可搜索的文件型记忆存储 —— `~/.claude/projects/<slug>/memory/` 下的每个 `*.md`）、快捷键（含内联结构化编辑器）与状态行。在低风险表面支持创建/编辑/删除 —— 文本文件工件、按项目的 auto-memory 文件，以及 `keybindings.json` —— 带强制时间戳备份</em>
 </p>
 
 <p align="center">

@@ -1680,6 +1680,93 @@ const paths = {
         },
       },
     },
+    put: {
+      tags: ["CcConfig"],
+      summary: "Overwrite keybindings",
+      description:
+        "Mutating. Overwrites ~/.claude/keybindings.json from a structured list of context groups (`{ context, bindings: [{ key, action }] }`); on disk the bindings become an object keyed by `key`. The existing file is backed up first (under cc-config-backups/keybindings/) and any top-level metadata (`$schema`, `$docs`, unknown keys) is preserved — only the `bindings` array is replaced. Rejects duplicate contexts and duplicate keys within a context. Writes are atomic. Unlike settings.json, keybindings.json is not rewritten mid-session by the live CLI, so this edit is safe. Emits a `cc_config_changed` websocket event on success.",
+      operationId: "ccConfigPutKeybindings",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["groups"],
+              properties: {
+                groups: {
+                  type: "array",
+                  description: "Full set of context-scoped keybinding groups to persist.",
+                  items: {
+                    type: "object",
+                    required: ["context", "bindings"],
+                    properties: {
+                      context: { type: "string", example: "Global" },
+                      bindings: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          required: ["key", "action"],
+                          properties: {
+                            key: { type: "string", example: "ctrl+t" },
+                            action: { type: "string", example: "toggleTodos" },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            example: {
+              groups: [
+                { context: "Global", bindings: [{ key: "ctrl+t", action: "toggleTodos" }] },
+                { context: "Chat", bindings: [{ key: "escape", action: "cancel" }] },
+              ],
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: "keybindings.json written (backup taken when it already existed).",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CcConfigFileWriteResponse" },
+              example: {
+                ok: true,
+                file: "/Users/son/.claude/keybindings.json",
+                target: "/Users/son/.claude/keybindings.json",
+                backupPath:
+                  "/Users/son/.claude/cc-config-backups/keybindings/keybindings.json.2026-06-25T12-00-00.000Z.bak",
+                created: false,
+              },
+            },
+          },
+        },
+        400: {
+          description:
+            "Bad request. `EBADREQ` — `groups` is missing or not an array. `EBADCONTENT` — a group/binding is malformed, a context is empty, or there is a duplicate context or duplicate key within a context.",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              example: {
+                error: { code: "EBADCONTENT", message: 'duplicate key "ctrl+t" in context Global' },
+              },
+            },
+          },
+        },
+        413: {
+          description: "`ETOOLARGE` — the serialized keybindings exceed the 256 KiB limit.",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              example: { error: { code: "ETOOLARGE", message: "content exceeds 262144 bytes" } },
+            },
+          },
+        },
+      },
+    },
   },
 
   "/api/cc-config/statusline": {

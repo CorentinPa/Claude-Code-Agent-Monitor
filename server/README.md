@@ -571,6 +571,7 @@ Reads — and carefully gated mutations for low-risk text-file artifacts — for
 | `GET`    | `/api/cc-config/hooks`                | Hooks aggregated across user / project / project-local `settings.json` |
 | `GET`    | `/api/cc-config/hook-scripts`         | Files in `~/.claude/hooks/` (helper scripts referenced by hook commands) |
 | `GET`    | `/api/cc-config/keybindings`          | `~/.claude/keybindings.json` parsed into context-grouped key/action pairs |
+| `PUT`    | `/api/cc-config/keybindings`          | Overwrite `~/.claude/keybindings.json` from `{ groups: [{ context, bindings: [{ key, action }] }] }`. Backs the file up first, preserves top-level metadata (`$schema`/`$docs`), rejects duplicate contexts/keys (`EBADCONTENT`). Safe because — unlike `settings.json` — the CLI does not rewrite it mid-session |
 | `GET`    | `/api/cc-config/statusline`           | `settings.json.statusLine` config + script content if present |
 | `GET`    | `/api/cc-config/settings`             | User / project / project-local settings JSON, secret keys redacted |
 | `GET`    | `/api/cc-config/memory`               | `CLAUDE.md` files at user + project scope. Also returns the per-project file-based memory store as `scope:"auto-memory"` items (each carrying `project`, `name`, `isIndex`, and parsed `frontmatter`) — every `*.md` under `~/.claude/projects/<slug>/memory/` |

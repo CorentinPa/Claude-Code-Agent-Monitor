@@ -238,7 +238,7 @@ Comes with a sleek dark theme, responsive design, and intuitive navigation to ex
 <p align="center">
   <img src="images/config.png" alt="Claude Config Explorer" width="100%">
   <br>
-  <em>🧰 <strong>Claude Config Explorer</strong> — 12-tab inspector for everything Claude Code knows about: skills, subagents, slash commands, output styles, plugins (with per-plugin contributions), marketplaces, MCP servers, hooks, settings (with secret-key redaction), memory (the user + project `CLAUDE.md` files plus the per-project file-based memory store — every `*.md` under `~/.claude/projects/<slug>/memory/`, grouped by project and searchable, with clickable `MEMORY.md` index links that jump to the matching fact file), keybindings, and statusline. Create / edit / delete on low-risk text-file surfaces — including the per-project auto-memory files — with mandatory timestamped backups</em>
+  <em>🧰 <strong>Claude Config Explorer</strong> — 12-tab inspector for everything Claude Code knows about: skills, subagents, slash commands, output styles, plugins (with per-plugin contributions), marketplaces, MCP servers, hooks, settings (with secret-key redaction), memory (the user + project `CLAUDE.md` files plus the per-project file-based memory store — every `*.md` under `~/.claude/projects/<slug>/memory/`, grouped by project and searchable, with clickable `MEMORY.md` index links that jump to the matching fact file), keybindings (with an inline structured editor), and statusline. Create / edit / delete on low-risk surfaces — the text-file artifacts, the per-project auto-memory files, and `keybindings.json` — with mandatory timestamped backups</em>
 </p>
 
 <p align="center">
@@ -1115,6 +1115,7 @@ Read-only inspection of every Claude Code configuration surface, plus carefully-
 | `GET`    | `/api/cc-config/hooks`              | Hooks aggregated across user / project / project-local `settings.json` files |
 | `GET`    | `/api/cc-config/hook-scripts`       | Files in `~/.claude/hooks/` (the helper scripts referenced by `hooks.<event>.command`) |
 | `GET`    | `/api/cc-config/keybindings`        | `~/.claude/keybindings.json` parsed into context-grouped key/action pairs |
+| `PUT`    | `/api/cc-config/keybindings`        | Overwrite `keybindings.json` from `{ groups: [{ context, bindings: [{ key, action }] }] }`. Backs up first, preserves top-level metadata (`$schema`/`$docs`), rejects duplicate contexts/keys. Safe to edit (unlike `settings.json`, the CLI never rewrites it mid-session) |
 | `GET`    | `/api/cc-config/statusline`         | `settings.json.statusLine` config + the actual `statusline.py` / `statusline-command.sh` content if present |
 | `GET`    | `/api/cc-config/settings`           | User / project / project-local settings JSON, with secret-like keys (matching `/token\|secret\|password\|api[_-]?key\|auth/i`) replaced by `"<redacted>"` |
 | `GET`    | `/api/cc-config/memory`             | `CLAUDE.md` files at user + project scope, plus per-project file-based memory: `scope:"auto-memory"` items (each carrying `project`, `name`, `isIndex`, and parsed `frontmatter`) for every `*.md` under `~/.claude/projects/<slug>/memory/`. Mutate via `PUT`/`DELETE /api/cc-config/file` with `{ scope: "auto-memory", type: "auto-memory", project, name }` (backups land in `<memory-dir>/.cc-config-backups/auto-memory/`) |
