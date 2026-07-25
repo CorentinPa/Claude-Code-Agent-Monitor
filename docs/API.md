@@ -68,6 +68,8 @@ Authentication is **off by default** (the loopback bind is the trust boundary). 
 
 These paths stay exempt even when a token is configured: `/api/health`, `/api/openapi.json`, `/api/docs`, and `/api/hooks` (local Claude Code hook ingestion). Requests that fail the check get `401` with error code `EUNAUTHORIZED`.
 
+`GET /api/settings/info` includes `server.version` (the running dashboard release). Pair with `ccam version` or the Settings About panel to confirm client and server builds match after deploy.
+
 ```mermaid
 sequenceDiagram
     participant Client
