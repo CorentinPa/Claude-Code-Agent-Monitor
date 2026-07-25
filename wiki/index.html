@@ -590,6 +590,7 @@
           <a href="#vscode-ext" class="nav-link"><span class="nav-icon">◈</span>VS Code Extension</a>
           <a href="#desktop-app" class="nav-link"><span class="nav-icon">◈</span>Desktop App (macOS &amp; Windows)</a>
           <a href="#settings-page" class="nav-link"><span class="nav-icon">◈</span>Settings Page</a>
+          <a href="#config-explorer" class="nav-link"><span class="nav-icon">◈</span>Claude Config Explorer</a>
           <a href="#alerts-webhooks" class="nav-link"><span class="nav-icon">◈</span>Alerts &amp; Webhooks</a>
           <a href="#update-notifier" class="nav-link"><span class="nav-icon">◈</span>Update Notifier</a>
           <a href="#connection-status" class="nav-link"><span class="nav-icon">◈</span>Connection Status</a>
@@ -1332,11 +1333,14 @@
                     <code>MEMORY.md</code> index plus one file per remembered fact, often 100+),
                     grouped by project, searchable, and editable — the <code>MEMORY.md</code>
                     index links are clickable and jump to (scroll to + highlight) the matching
-                    fact file. Create, edit, and
-                    delete the low-risk text-file surfaces
+                    fact file.                     Create, edit, and
+                    delete the low-risk surfaces — text-file artifacts, per-project auto-memory
+                    files, and <code>keybindings.json</code> (structured inline editor) —
                     with mandatory timestamped backups before every write. Plugins, MCP, hooks,
                     and live settings stay read-only with explainer banners and copy-able CLI
-                    commands. Per-plugin contribution breakdowns show author and license.
+                    commands. See the dedicated
+                    <a href="#config-explorer">Config Explorer</a> section for the full tour.
+                    Per-plugin contribution breakdowns show author and license.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -5249,6 +5253,245 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
                 Each Claude model variant (e.g., Opus 4.6 vs Opus 4.1) has its own explicit pricing
                 pattern because different model versions have different rates. The cost engine uses
                 specificity sorting — longer patterns match before shorter ones.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── Claude Config Explorer ─────────────────────────────────────── -->
+        <section id="config-explorer">
+          <div class="section-label">◈ Integrations</div>
+          <h2>Claude Config Explorer</h2>
+
+          <div class="screenshot-gallery">
+            <div class="screenshot-card">
+              <img src="../images/config.png" alt="Claude Config Explorer — 12-tab inspector with overview counts, scope filter, and tab bar" width="3024" height="1722" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Claude Config Explorer</strong> — the <code>/cc-config</code> page: 12 tabs (skills, subagents, slash commands, output styles, plugins, marketplaces, MCP servers, hooks, keybindings, settings, memory), a scope filter (user / project / all), search, and safe edit affordances on the low-risk surfaces</span></div>
+            </div>
+            <div class="screenshot-card">
+              <img src="../images/config-skills.png" alt="Claude Config Explorer — Skills tab with searchable skill list and edit actions" width="3024" height="1722" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🧩</span> <span><strong>Claude Config Explorer · Skills</strong> — the Skills tab lists every discovered skill (user, project, and plugin) with description and source, is searchable, and opens any <code>SKILL.md</code> for a timestamp-backed edit via the shared editor modal</span></div>
+            </div>
+          </div>
+
+          <p>
+            A first-class <strong>configuration inspector</strong> at <code>/cc-config</code> that
+            reads every surface Claude Code knows about — skills, subagents, slash commands, output
+            styles, plugins, marketplaces, MCP servers, hooks, settings, memory, keybindings, and
+            statusline scripts — from the same on-disk layout the CLI uses. The Overview tab
+            summarizes counts and filesystem roots; every other tab drills into one surface with
+            search, scope filtering (<b>user</b> / <b>project</b> / <b>all</b>), and — where safe —
+            create / edit / delete with <strong>mandatory timestamped backups</strong> before every
+            mutation. A <code>cc-watcher</code> on <code>CLAUDE_HOME</code> plus
+            <code>cc_config_changed</code> WebSocket messages keep the page live when files change
+            outside the dashboard.
+          </p>
+
+          <div class="feature-grid">
+            <div class="feature-card">
+              <div class="feature-icon ic-amber">🗂️</div>
+              <h3>12 discovery tabs</h3>
+              <p>
+                <strong>Skills</strong>, <strong>Subagents</strong>, <strong>Slash commands</strong>,
+                <strong>Output styles</strong>, <strong>Plugins</strong> (with per-plugin
+                <code>contributes</code> counts and <code>plugin.json</code> metadata),
+                <strong>Marketplaces</strong>, <strong>MCP servers</strong>, <strong>Hooks</strong>
+                (plus <code>~/.claude/hooks/</code> script listing), <strong>Keybindings</strong>,
+                <strong>Settings</strong> (Current configuration summary + per-file JSON),
+                and <strong>Memory</strong> (user/project <code>CLAUDE.md</code> + per-project
+                auto-memory). Statusline config and script previews live under Settings.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon ic-emerald">✏️</div>
+              <h3>Safe mutations</h3>
+              <p>
+                <code>PUT</code> / <code>DELETE /api/cc-config/file</code> handles skills, agents,
+                commands, output-styles, <code>CLAUDE.md</code>, and per-project auto-memory
+                (<code>scope: "auto-memory"</code>). Writes are <strong>atomic</strong> (temp file +
+                rename), names are validated against a strict regex, resolved paths are
+                containment-checked, and content is capped at 256&nbsp;KiB. Every overwrite or delete
+                creates a backup under <code>cc-config-backups/</code> — outside the directories
+                Claude Code scans — so deleted artifacts cannot reappear as ghost entries.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon ic-indigo">⌨️</div>
+              <h3>Keybindings editor</h3>
+              <p>
+                The Keybindings tab includes a structured inline editor for
+                <code>~/.claude/keybindings.json</code>. Add or remove contexts and bindings, edit
+                keys and actions in place, and save via <code>PUT /api/cc-config/keybindings</code>.
+                The server read-modify-writes the file: top-level metadata (<code>$schema</code>,
+                <code>$docs</code>) is preserved, duplicate contexts/keys are rejected, and the
+                file is backed up first. Unlike <code>settings.json</code>, the live CLI does not
+                rewrite keybindings mid-session, so dashboard edits are safe.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon ic-cyan">🧠</div>
+              <h3>Memory store</h3>
+              <p>
+                The Memory tab surfaces user + project <code>CLAUDE.md</code> and the per-project
+                file-based memory store — every <code>*.md</code> under
+                <code>~/.claude/projects/&lt;slug&gt;/memory/</code> (a <code>MEMORY.md</code> index
+                plus one file per remembered fact, often 100+). Files are grouped by project in
+                collapsible sections, searchable, and editable. Clickable index links in
+                <code>MEMORY.md</code> jump to (scroll + highlight) the matching fact file.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon ic-rose">🔒</div>
+              <h3>Read-only by design</h3>
+              <p>
+                <strong>Plugins</strong>, <strong>MCP servers</strong>, <strong>hooks-in-settings</strong>,
+                and live <strong>settings.json</strong> files are intentionally not writable from the
+                dashboard — they race with the running <code>claude</code> CLI. Those tabs show
+                explainer banners with copy-able <code>claude plugin …</code>,
+                <code>claude mcp …</code>, and <code>claude config …</code> commands instead of
+                edit buttons. Secret-like settings keys are redacted server-side.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon ic-violet">🔄</div>
+              <h3>Live refresh</h3>
+              <p>
+                Successful mutations broadcast <code>cc_config_changed</code> over the WebSocket so
+                every open <code>/cc-config</code> tab refetches without polling. A filesystem watcher
+                on <code>CLAUDE_HOME</code> (<code>cc-watcher.js</code>) detects external edits
+                (e.g. you changed a skill in your editor) and triggers the same refresh path. The
+                Backups modal lists every timestamped copy and builds <code>mv</code> restore
+                commands.
+              </p>
+            </div>
+          </div>
+
+          <h3>Editable vs read-only</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Surface</th>
+                  <th>Dashboard</th>
+                  <th>How to change (if read-only)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Skills · Subagents · Commands · Output styles</td>
+                  <td>Create / edit / delete (<code>PUT</code>/<code>DELETE /file</code>)</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td><code>CLAUDE.md</code> · auto-memory <code>*.md</code></td>
+                  <td>Create / edit / delete (<code>PUT</code>/<code>DELETE /file</code>)</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td><code>keybindings.json</code></td>
+                  <td>Structured inline editor (<code>PUT /keybindings</code>)</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>Plugins · marketplaces</td>
+                  <td>Read-only inventory</td>
+                  <td><code>claude plugin install|uninstall …</code></td>
+                </tr>
+                <tr>
+                  <td>MCP servers</td>
+                  <td>Read-only inventory</td>
+                  <td><code>claude mcp add|remove …</code></td>
+                </tr>
+                <tr>
+                  <td>Hooks · settings.json</td>
+                  <td>Read-only (redacted secrets)</td>
+                  <td><code>claude config</code> · <code>/config</code> · <code>$EDITOR</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>API endpoints</h3>
+          <div class="route-list">
+            <div class="route-item">
+              <span class="method method-get">GET</span>
+              <span class="route-path">/api/cc-config/overview</span>
+              <span class="route-desc">Filesystem roots + aggregate counts across every surface</span>
+            </div>
+            <div class="route-item">
+              <span class="method method-get">GET</span>
+              <span class="route-path">/api/cc-config/{skills,agents,commands,…}</span>
+              <span class="route-desc">Per-tab discovery lists; most accept <code>?scope=user|project|all</code></span>
+            </div>
+            <div class="route-item">
+              <span class="method method-get">GET</span>
+              <span class="route-path">/api/cc-config/file?path=…</span>
+              <span class="route-desc">Single-file viewer (path-contained to allowed roots)</span>
+            </div>
+            <div class="route-item">
+              <span class="method method-put">PUT</span>
+              <span class="route-path">/api/cc-config/file</span>
+              <span class="route-desc">Create/overwrite a text artifact — backs up first, atomic write</span>
+            </div>
+            <div class="route-item">
+              <span class="method method-delete">DELETE</span>
+              <span class="route-path">/api/cc-config/file</span>
+              <span class="route-desc">Backup-then-delete (skill dirs backed up whole)</span>
+            </div>
+            <div class="route-item">
+              <span class="method method-put">PUT</span>
+              <span class="route-path">/api/cc-config/keybindings</span>
+              <span class="route-desc">Structured overwrite of <code>keybindings.json</code> — preserves metadata, backs up first</span>
+            </div>
+            <div class="route-item">
+              <span class="method method-get">GET</span>
+              <span class="route-path">/api/cc-config/backups</span>
+              <span class="route-desc">Timestamped backup listing for the recovery modal</span>
+            </div>
+          </div>
+
+          <div class="code-header"><span class="code-lang">json — PUT /api/cc-config/keybindings body</span></div>
+          <pre><code>{
+  "groups": [
+    {
+      "context": "Global",
+      "bindings": [
+        { "key": "ctrl+t", "action": "toggleTodos" },
+        { "key": "ctrl+n", "action": "newThing" }
+      ]
+    },
+    {
+      "context": "Chat",
+      "bindings": [{ "key": "escape", "action": "cancel" }]
+    }
+  ]
+}</code></pre>
+
+          <div class="callout callout-info">
+            <div class="callout-icon">ℹ</div>
+            <div class="callout-body">
+              <strong>Backups live outside Claude Code's scan paths</strong>
+              <p>
+                Every mutation writes a timestamped copy under
+                <code>&lt;root&gt;/cc-config-backups/&lt;type&gt;/</code> (or
+                <code>&lt;memory-dir&gt;/.cc-config-backups/auto-memory/</code> for per-project
+                memory files) <em>before</em> touching the original. Skill folders are copied
+                whole so bundled assets survive in the backup. The UI's Backups modal shows every
+                copy and prints a one-line <code>mv</code> restore command.
+              </p>
+            </div>
+          </div>
+
+          <div class="callout callout-warning">
+            <div class="callout-icon">⚠</div>
+            <div class="callout-body">
+              <strong>Do not edit settings.json from here</strong>
+              <p>
+                The live <code>claude</code> process rewrites <code>settings.json</code> and
+                <code>~/.claude.json</code> constantly (model changes, plugin toggles, MCP
+                registration). A dashboard write would race and lose state — or worse, break hook
+                ingestion. Use <code>claude config set …</code>, <code>/config</code>, or hand-edit
+                only when no <code>claude</code> process is running.
               </p>
             </div>
           </div>
