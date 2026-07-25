@@ -66,6 +66,14 @@ const webhooksRouter = require("./routes/webhooks");
 const remoteSourcesRouter = require("./routes/remote-sources");
 const metricsRouter = require("./routes/metrics");
 
+const APP_VERSION = (() => {
+  try {
+    return require("../package.json").version || "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+})();
+
 function createApp() {
   const app = express();
   const openApiSpec = createOpenApiSpec();
@@ -127,7 +135,7 @@ function createApp() {
   });
 
   app.get("/api/health", (_req, res) => {
-    res.json({ status: "ok", timestamp: new Date().toISOString() });
+    res.json({ status: "ok", version: APP_VERSION, timestamp: new Date().toISOString() });
   });
 
   return app;
