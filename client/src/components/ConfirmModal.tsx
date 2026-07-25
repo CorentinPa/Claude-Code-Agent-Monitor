@@ -1,15 +1,46 @@
 /**
  * @file ConfirmModal.tsx
- * @description Reusable centered confirmation dialog used for destructive
- * actions (e.g. deleting an alert rule or a webhook target) in place of inline
- * confirms or the native window.confirm. Click-outside and Escape cancel; the
- * confirm button is styled destructive by default.
+ * @description Centered confirmation dialog for destructive or irreversible
+ * actions (delete webhook, remove alert rule, etc.). Replaces `window.confirm`
+ * with themed UI that matches the dashboard and supports a loading (`busy`)
+ * state on the confirm button.
+ *
+ * ## Dismissal
+ * Clicking the backdrop, pressing Escape, or clicking the X cancels. The confirm
+ * button can be styled non-destructive for neutral confirmations.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
 import { useEffect } from "react";
 import { AlertTriangle, X } from "lucide-react";
 
+/** Props for {@link ConfirmModal}. */
+export interface ConfirmModalProps {
+  /** When false, nothing is rendered. */
+  open: boolean;
+  /** Dialog heading. */
+  title: string;
+  /** Optional supporting message below the title. */
+  message?: string;
+  /** Primary action label (e.g. "Delete"). */
+  confirmLabel: string;
+  /** Secondary cancel label. */
+  cancelLabel: string;
+  /** When true (default), confirm button uses red destructive styling. */
+  destructive?: boolean;
+  /** Disables confirm while an async delete is in flight. */
+  busy?: boolean;
+  /** Called when the user confirms. */
+  onConfirm: () => void;
+  /** Called on cancel, backdrop click, Escape, or X. */
+  onCancel: () => void;
+}
+
+/**
+ * Modal confirmation overlay.
+ * @param props See {@link ConfirmModalProps}.
+ */
 export function ConfirmModal({
   open,
   title,
@@ -20,17 +51,7 @@ export function ConfirmModal({
   busy = false,
   onConfirm,
   onCancel,
-}: {
-  open: boolean;
-  title: string;
-  message?: string;
-  confirmLabel: string;
-  cancelLabel: string;
-  destructive?: boolean;
-  busy?: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
+}: ConfirmModalProps) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {

@@ -1,22 +1,40 @@
 /**
  * @file Tip.tsx
- * @description A reusable React component that displays a tooltip with custom content when the user hovers over the wrapped children.
- * Tooltip follows the cursor position and uses a portal to avoid clipping by parent overflow or screen edges.
+ * @description Cursor-following tooltip for revealing extra detail on hover — used
+ * by {@link StatCard} for raw metric values and anywhere a compact display needs
+ * a full-precision expansion without cluttering the layout.
+ *
+ * ## Portal rendering
+ * Tooltip content is portaled to `document.body` with `position: fixed` so
+ * parent `overflow: hidden` cannot clip it. Placement flips left/up when the
+ * cursor is near viewport edges.
+ *
+ * ## No-op mode
+ * When `raw` is omitted the component returns `children` unchanged — callers
+ * do not need conditional wrappers.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
 import { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 
+/** Props for {@link Tip}. */
 interface TipProps {
+  /** Tooltip body; when absent, only `children` are rendered. */
   raw?: string;
+  /** Element that triggers the tooltip on hover. */
   children: React.ReactNode;
-  /** Override max width of tooltip (px). Default 320 */
+  /** Max tooltip width in pixels. Default `320`. */
   maxWidth?: number;
-  /** Render wrapper as block-level div instead of inline span. Use when wrapping full-width elements. */
+  /** Use a block-level wrapper instead of inline `span` for full-width targets. */
   block?: boolean;
 }
 
+/**
+ * Hover tooltip anchored to the mouse cursor.
+ * @param props See {@link TipProps}.
+ */
 export function Tip({ raw, children, maxWidth = 320, block = false }: TipProps) {
   const [show, setShow] = useState(false);
   const [pos, setPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });

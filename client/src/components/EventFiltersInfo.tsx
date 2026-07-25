@@ -1,11 +1,14 @@
 /**
  * @file EventFiltersInfo.tsx
- * @description Accordion-style help panel that explains the Event Timeline's
- * status badges, the Pre/Post lifecycle, how filters compose, and what each
- * filter dropdown accepts. Rendered above the EventFilters toolbar on both
- * ActivityFeed and SessionDetail so users can discover the model without
- * leaving the page. Native <details> / <summary> - no popover primitive
- * required and keyboard-accessible out of the box.
+ * @description Collapsible help panel for the Event Timeline filter toolbar.
+ * Explains agent status badges, Pre/Post hook lifecycle, how filters compose,
+ * and what each dropdown accepts. Mounted above {@link EventFilters} on both
+ * Activity Feed and Session Detail so users can self-serve without leaving the
+ * page.
+ *
+ * Built with native `<details>` / `<summary>` for keyboard accessibility without
+ * a custom popover primitive.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -13,6 +16,10 @@ import { useTranslation } from "react-i18next";
 import { Info } from "lucide-react";
 import { AgentStatusBadge } from "./StatusBadge";
 
+/**
+ * Top-level accordion rendered once per timeline view.
+ * @returns Expandable help card with nested sections.
+ */
 export function EventFiltersInfo() {
   const { t } = useTranslation("common");
   return (
@@ -99,6 +106,7 @@ export function EventFiltersInfo() {
   );
 }
 
+/** Nested collapsible section inside the help panel. */
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <details className="group" open>
@@ -111,6 +119,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+/** Label + description row in the filter-values glossary. */
 function Field({ label, desc }: { label: string; desc: string }) {
   return (
     <>

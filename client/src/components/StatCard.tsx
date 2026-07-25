@@ -1,6 +1,14 @@
 /**
  * @file StatCard.tsx
- * @description A reusable React component that displays a statistic with a label, value, icon, and optional trend information. It is designed to be used in dashboards or analytics pages to present key metrics in a visually appealing way. The component also supports showing raw values as tooltips on hover for more detailed information.
+ * @description Compact metric tile for dashboard and analytics grids. Shows a
+ * label, large formatted value, Lucide icon, and optional trend suffix. When
+ * the displayed value is abbreviated (e.g. "1.2k"), pass the full precision
+ * string via `raw` so {@link Tip} can reveal it on hover.
+ *
+ * ## Loading state
+ * Set `loading` while fetching so the card renders {@link StatValueSkeleton}
+ * instead of flashing placeholder dashes or zeros before real data arrives.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -8,19 +16,28 @@ import type { LucideIcon } from "lucide-react";
 import { Tip } from "./Tip";
 import { StatValueSkeleton } from "./Skeleton";
 
+/** Props for {@link StatCard}. */
 interface StatCardProps {
+  /** Uppercase label above the value (usually a translated metric name). */
   label: string;
+  /** Primary metric — pre-formatted by the caller. */
   value: string | number;
+  /** Decorative icon in the card header. */
   icon: LucideIcon;
+  /** Optional secondary line (e.g. "+12% vs last week"). */
   trend?: string;
+  /** Tailwind text-color class for the icon. Defaults to `text-accent`. */
   accentColor?: string;
-  /** Raw value shown as custom tooltip on hover */
+  /** Full-precision value shown in the hover tooltip when `value` is abbreviated. */
   raw?: string;
-  /** When true, render skeletons in place of value/trend so the UI never
-   *  flashes "-" or "0" before real data arrives. */
+  /** When true, render skeletons in place of value/trend. */
   loading?: boolean;
 }
 
+/**
+ * Renders a single statistic inside the shared `card` chrome.
+ * @param props See {@link StatCardProps}.
+ */
 export function StatCard({
   label,
   value,
