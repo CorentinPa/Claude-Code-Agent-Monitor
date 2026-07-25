@@ -114,7 +114,12 @@ The repo has two packages:
 ```bash
 npm test           # all server and client tests must pass
 npm run format     # run Prettier
+bash .claude/skills/file-headers/scripts/check-headers-pr.sh origin/master HEAD
 ```
+
+Applicable source files (`.js`, `.ts`, `.tsx`, `.py`, `.sh`, `.css`, etc.) must
+include the `@author Son Nguyen <hoangson091104@gmail.com>` header — CI enforces
+this on every PR via the **File Headers** workflow.
 
 ---
 
