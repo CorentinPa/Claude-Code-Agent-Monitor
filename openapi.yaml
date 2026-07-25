@@ -1457,11 +1457,15 @@ components:
         server:
           type: object
           required:
+            - version
             - uptime
             - node_version
             - platform
             - ws_connections
           properties:
+            version:
+              type: string
+              description: Dashboard release version from package.json
             uptime:
               type: number
             node_version:
