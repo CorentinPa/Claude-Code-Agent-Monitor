@@ -594,6 +594,7 @@
           <a href="#alerts-webhooks" class="nav-link"><span class="nav-icon">◈</span>Alerts &amp; Webhooks</a>
           <a href="#update-notifier" class="nav-link"><span class="nav-icon">◈</span>Update Notifier</a>
           <a href="#connection-status" class="nav-link"><span class="nav-icon">◈</span>Connection Status</a>
+          <a href="#prometheus-grafana" class="nav-link"><span class="nav-icon">◈</span>Prometheus &amp; Grafana</a>
           <a href="#i18n" class="nav-link"><span class="nav-icon">◈</span>Internationalization</a>
           <a href="#tabby" class="nav-link"><span class="nav-icon">🐾</span>Tabby</a>
 
@@ -1532,6 +1533,18 @@
             <div class="screenshot-card" id="ss-redoc">
               <img src="../images/redoc.png" alt="ReDoc API reference" width="100%" loading="lazy" decoding="async" />
               <div class="screenshot-caption"><span class="caption-icon">📗</span> <span><strong>API Docs · ReDoc</strong> — a self-hosted, read-optimized rendering of the full OpenAPI 3.0 spec at <code>/api/redoc</code>, served entirely offline with no CDN. Complements the interactive Swagger UI at <code>/api/docs</code>; every backend route is documented with parameters, schemas, and examples</span></div>
+            </div>
+            <div class="screenshot-card" id="ss-grafana">
+              <img src="../images/grafana.png" alt="Grafana CCAM — Overview dashboard" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. Login <code>admin</code> / <code>admin</code> on port 3000</span></div>
+            </div>
+            <div class="screenshot-card" id="ss-prometheus-console">
+              <img src="../images/prometheus-console.png" alt="Prometheus CCAM console" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🔥</span> <span><strong>Observability · Prometheus console</strong> — pre-built landing page at <code>/consoles/index.html</code> with live metric cards, session/token tables, and drill-down links into the Graph UI (Prometheus 3.x compatible — queries the HTTP API directly)</span></div>
+            </div>
+            <div class="screenshot-card" id="ss-prometheus-query">
+              <img src="../images/prometheus-query.png" alt="Prometheus Graph with CCAM PromQL" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">📈</span> <span><strong>Observability · Prometheus Graph</strong> — run PromQL against scraped CCAM series (e.g. <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>, <code>rate(ccam_tokens_total[5m])</code>) with starter expressions from the CCAM console and recording rules in <code>monitoring/prometheus/ccam-rules.yml</code></span></div>
             </div>
           </div>
 
@@ -5878,6 +5891,111 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
           </p>
         </section>
 
+        <!-- ─── Prometheus & Grafana ───────────────────────────────────────── -->
+        <section id="prometheus-grafana">
+          <div class="section-label">◈ Integrations</div>
+          <h2>Prometheus &amp; Grafana</h2>
+
+          <div class="screenshot-gallery">
+            <div class="screenshot-card">
+              <img src="../images/grafana.png" alt="Grafana CCAM — Overview dashboard with live fleet metrics" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login (<code>admin</code> / <code>admin</code> on port 3000): fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data</span></div>
+            </div>
+            <div class="screenshot-card">
+              <img src="../images/prometheus-console.png" alt="Prometheus CCAM console landing page" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🔥</span> <span><strong>Prometheus · CCAM console</strong> — static HTML at <code>/consoles/index.html</code> (Prometheus 3.x compatible): live metric cards, session/token tables, and one-click Graph drill-down links that query the Prometheus HTTP API directly</span></div>
+            </div>
+            <div class="screenshot-card">
+              <img src="../images/prometheus-query.png" alt="Prometheus Graph UI running CCAM PromQL" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">📈</span> <span><strong>Prometheus · Graph</strong> — ad-hoc PromQL against scraped CCAM series; starter expressions ship in the CCAM console and <code>monitoring/README.md</code>, with derived rates in <code>monitoring/prometheus/ccam-rules.yml</code></span></div>
+            </div>
+          </div>
+
+          <p>
+            CCAM exposes a read-only <strong>Prometheus text-exposition</strong> endpoint at
+            <code>GET /api/metrics</code> — sessions and agents by status, cumulative events and
+            tokens, connected WebSocket clients, configured remote sources, process uptime/RSS, and
+            build version — so the same dashboard you use for Claude Code monitoring can be scraped
+            into your own observability stack. A turnkey stack lives in
+            <code>monitoring/</code>: npm-managed binaries (no Homebrew/apt) or optional Docker
+            Compose, with Grafana datasource and four dashboards auto-provisioned on first start.
+          </p>
+
+          <p>
+            <strong>Quick start (npm):</strong> run the dashboard on loopback, then
+            <code>npm run monitoring:install</code> once and <code>npm run monitoring:up</code>.
+            Open Grafana at <code>http://localhost:3000</code> and Prometheus at
+            <code>http://localhost:9090</code>. The pre-built CCAM console is at
+            <code>http://localhost:9090/consoles/index.html</code> (also reachable from the
+            Prometheus UI under <strong>Consoles</strong>). For an all-Docker path use
+            <code>npm run monitoring:docker:up</code> or <code>npm run docker:full:up</code> for
+            dashboard + Prometheus + Grafana together. Verify with
+            <code>npm run monitoring:verify</code> — the <code>ccam</code> scrape target should read
+            <strong>UP</strong>.
+          </p>
+
+          <div class="feature-grid">
+            <div class="feature-card">
+              <div class="feature-icon ic-amber">📊</div>
+              <h3>Four Grafana boards</h3>
+              <p>
+                <strong>CCAM — Overview</strong> (default home),
+                <strong>CCAM — Sessions &amp; Agents</strong>,
+                <strong>CCAM — Tokens &amp; Events</strong>, and
+                <strong>CCAM — Platform</strong> — all provisioned from
+                <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape.
+                Credentials default to <code>admin</code> / <code>admin</code> via
+                <code>monitoring/grafana.defaults.env</code>.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon ic-rose">🔥</div>
+              <h3>Prometheus console</h3>
+              <p>
+                Prometheus 3.x dropped the legacy console template libraries, so CCAM ships a
+                <strong>static HTML console</strong> at
+                <code>monitoring/prometheus/consoles/index.html</code> that fetches
+                <code>/api/v1/query</code> directly — live cards, session tables, and Graph links
+                without Go-template errors on <code>/consoles/index.html</code>.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon ic-cyan">📈</div>
+              <h3>Recording rules</h3>
+              <p>
+                <code>monitoring/prometheus/ccam-rules.yml</code> derives convenient rates and
+                aggregates from raw <code>ccam_*</code> series (e.g.
+                <code>rate(ccam_tokens_total[5m])</code>) so Grafana panels and ad-hoc Graph queries
+                stay fast without hand-rolling every expression.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon ic-violet">🛡</div>
+              <h3>Scrape &amp; auth guard</h3>
+              <p>
+                Loopback scrapes (<code>127.0.0.1:4820</code>) work out of the box. When Prometheus
+                runs in Docker and reaches the host via <code>host.docker.internal</code>, add that
+                host to <code>DASHBOARD_ALLOWED_HOSTS</code> or the scrape returns
+                <code>403 EBADHOST</code>. If <code>DASHBOARD_TOKEN</code> is set, scrapers must send
+                the same bearer token.
+              </p>
+            </div>
+          </div>
+
+          <div class="callout callout-info">
+            <div class="callout-icon">ℹ</div>
+            <div class="callout-body">
+              <strong>Full reference</strong>
+              <p>
+                Commands, Docker vs npm paths, dashboard UIDs, starter PromQL, and troubleshooting
+                (Grafana login reset, target DOWN) are documented in
+                <a href="../monitoring/README.md"><code>monitoring/README.md</code></a> and the
+                <a href="#api-reference">API reference</a> entry for <code>GET /api/metrics</code>.
+              </p>
+            </div>
+          </div>
+        </section>
+
         <!-- ─── Internationalization ──────────────────────────────────────── -->
         <section id="i18n">
           <div class="section-label">◈ Integrations</div>
@@ -6755,8 +6873,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations (zh/vi) — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=37" defer></script>
-    <script src="script.js?v=31" defer></script>
+    <script src="i18n-content.js?v=38" defer></script>
+    <script src="script.js?v=32" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

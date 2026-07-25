@@ -36,7 +36,8 @@ const swaggerUi = require("swagger-ui-express");
 const { initWebSocket } = require("./websocket");
 const { createOpenApiSpec } = require("./openapi");
 const { redocBundlePath, renderRedocHtml } = require("./lib/redoc");
-const { writeServerInfo, removeServerInfo } = require("./lib/server-info");
+const { writeServerInfo, removeServerInfo, peersSharingDataDir } = require("./lib/server-info");
+const { getDataDir } = require("./lib/claude-home");
 const {
   resolveHost,
   isLoopbackHostname,
@@ -186,6 +187,16 @@ function startServer(app, port) {
       // server even when it bound a non-default port (the desktop app falls
       // back off 4820 when that port is already taken).
       writeServerInfo(port);
+      const sharedDbPeers = peersSharingDataDir();
+      if (sharedDbPeers.length > 0) {
+        const peerPorts = sharedDbPeers.map((p) => p.port).join(", ");
+        const ingestPort = Math.min(port, ...sharedDbPeers.map((p) => p.port));
+        console.warn(
+          `⚠️  Another dashboard is running on port(s) ${peerPorts} using the same database ` +
+            `(${getDataDir()}). Hooks ingest through port ${ingestPort} only to avoid duplicate events. ` +
+            `Stop extra instances if you do not need them.`
+        );
+      }
       const mode = isProduction ? "production" : "development";
       const shown = boundLoopback ? "localhost" : host;
       console.log(`Agent Dashboard server running on http://${shown}:${port} (${mode})`);

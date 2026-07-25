@@ -50,6 +50,8 @@ A professional dashboard to track and visualize your Claude Code agent sessions,
 ![Prettier](https://img.shields.io/badge/Prettier-3.8-F7B93E?style=flat-square&logo=prettier&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-20.10-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![Podman](https://img.shields.io/badge/Podman-4.0-CC342D?style=flat-square&logo=podman&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-2.x-E6522C?style=flat-square&logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-10.x-F46800?style=flat-square&logo=grafana&logoColor=white)
 ![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.5-844FBA?style=flat-square&logo=terraform&logoColor=white)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-%3E%3D1.24-326CE5?style=flat-square&logo=kubernetes&logoColor=white)
 ![Helm](https://img.shields.io/badge/Helm-3-0F1689?style=flat-square&logo=helm&logoColor=white)
@@ -441,7 +443,7 @@ docker build -t agent-monitor .
 docker run -d --name agent-monitor \
   -p 127.0.0.1:4820:4820 \
   -v "$HOME/.claude:/root/.claude:ro" \
-  -v agent-monitor-data:/app/data \
+  -v "$HOME/.claude/agent-dashboard:/app/data" \
   agent-monitor
 
 # Podman
@@ -449,18 +451,21 @@ podman build -t agent-monitor .
 podman run -d --name agent-monitor \
   -p 127.0.0.1:4820:4820 \
   -v "$HOME/.claude:/root/.claude:ro" \
-  -v agent-monitor-data:/app/data \
+  -v "$HOME/.claude/agent-dashboard:/app/data" \
   agent-monitor
 ```
 
-The dashboard is then available at `http://localhost:4820`. The image binds `0.0.0.0` **inside the container** (`DASHBOARD_HOST`) and writes SQLite to the `/app/data` volume (`DASHBOARD_DATA_DIR`) — both baked into the `Dockerfile` so Compose and plain `docker run` work as-is. The trust boundary is the **host** port publish: the examples publish on `127.0.0.1` only, so the dashboard is not LAN-reachable out of the box. To expose it on a LAN, publish on `0.0.0.0` (drop the `127.0.0.1:` prefix, e.g. `-p 4820:4820`) **and** set `DASHBOARD_TOKEN` (see [Configuration](#configuration) and [`.github/SECURITY.md`](./.github/SECURITY.md)).
+The dashboard is then available at `http://localhost:4820`. The image binds `0.0.0.0` **inside the container** (`DASHBOARD_HOST`) and writes SQLite to `/app/data` (`DASHBOARD_DATA_DIR`) — both baked into the `Dockerfile` so Compose and plain `docker run` work as-is. Compose and the examples below bind-mount the **same** host directory as `npm start` / `npm run dev` (`~/.claude/agent-dashboard`), so Docker, native, and dev all share one database. The trust boundary is the **host** port publish: the examples publish on `127.0.0.1` only, so the dashboard is not LAN-reachable out of the box. To expose it on a LAN, publish on `0.0.0.0` (drop the `127.0.0.1:` prefix, e.g. `-p 4820:4820`) **and** set `DASHBOARD_TOKEN` (see [Configuration](#configuration) and [`.github/SECURITY.md`](./.github/SECURITY.md)).
 
 **Volume mounts:**
 
 | Mount | Purpose |
 |---|---|
 | `~/.claude:/root/.claude:ro` | Read legacy session history for import |
-| `agent-monitor-data:/app/data` | Persist the SQLite database across restarts |
+| `~/.claude/agent-dashboard:/app/data` | **Canonical SQLite database** (shared with native installs) |
+
+> [!NOTE]
+> If you previously used the old Compose named volume (`dashboard-data`), copy any data you need into `~/.claude/agent-dashboard/` once, then remove the unused volume: `docker volume rm claude-code-agent-monitor_dashboard-data` (name may vary).
 
 > [!IMPORTANT]
 > **Note:** Claude Code hooks must still point to a running hook-handler process on the host. The container itself does not receive hooks — run `npm run install-hooks` **on the host** to configure hooks that POST to `http://localhost:4820`. Running the installer inside a container is **refused** (issue #193) so it can't write a container-internal handler path into a bind-mounted host `~/.claude`; override with `CCAM_ALLOW_CONTAINER_HOOKS=1` only if you actually run Claude Code inside the same container.
@@ -498,7 +503,7 @@ sequenceDiagram
 ### Hook Lifecycle
 
 1. **Claude Code** fires a hook on session start, tool use, turn end, subagent completion, and session exit
-2. **Hook Handler** (`scripts/hook-handler.js`) reads the JSON event from stdin, resolves every live dashboard via `~/.claude/.agent-dashboard.json` (or `CLAUDE_DASHBOARD_PORT` if set), and POSTs the same payload to each one in parallel. Fails silently with a 5 s safety-net timeout so it never blocks Claude Code, and per-target promises never reject so a single dead listener can't starve the others. Multiple dashboards running together (e.g. `npm run dev` + the macOS desktop app) all receive every event.
+2. **Hook Handler** (`scripts/hook-handler.js`) reads the JSON event from stdin, resolves live dashboards via `~/.claude/.agent-dashboard.json` (or `CLAUDE_DASHBOARD_PORT` if set), and POSTs the same payload to **one ingest target per unique SQLite data directory** (lowest port wins when Docker and `npm run dev` share `~/.claude/agent-dashboard`, so events are never double-ingested). Servers with **different** databases (e.g. the desktop app using its own Application Support dir alongside `npm run dev`) still each receive hooks. Fails silently with a 5 s safety-net timeout so it never blocks Claude Code, and per-target promises never reject so a single dead listener can't starve the others.
 3. **Server** processes the event inside a SQLite transaction:
    - Auto-creates sessions and main agents on first contact
    - Detects `Agent` tool calls to track subagent creation
@@ -735,6 +740,18 @@ API-backed commands need the server running — when it isn't, **read-only comma
 | `npm run desktop:dmg:universal` | Build one merged **universal** DMG (arm64 + x86_64) — optional, **slowest**, not what the release ships |
 | `npm run desktop:win`   | Build a Windows **NSIS installer** `.exe` (x64) — run on Windows |
 | `npm run desktop:win:portable` | Build a Windows **portable** (no-install) `.exe` (x64) — run on Windows |
+| `npm run monitoring:install` | Run `npm install` in `monitoring/` — downloads Prometheus + Grafana via `postinstall` |
+| `npm run monitoring:setup` | Alias for `monitoring:install` |
+| `npm run monitoring:up` | Start Prometheus (:9090) + Grafana (:3000) in the background (no Docker) |
+| `npm run monitoring:down` | Stop the npm-managed monitoring stack |
+| `npm run monitoring:start` | Foreground monitoring stack (Ctrl+C stops both) |
+| `npm run monitoring:docker:up` | Start Prometheus + Grafana via Docker Compose |
+| `npm run monitoring:docker:down` | Tear down the Docker monitoring stack |
+| `npm run monitoring:verify` | Health-check dashboard, Prometheus, Grafana, and scrape target |
+| `npm run docker:up` | Start the dashboard in Docker (`docker compose up -d --build`) |
+| `npm run docker:down` | Stop the dashboard container |
+| `npm run docker:full:up` | Dashboard + Prometheus + Grafana — all in Docker |
+| `npm run docker:full:down` | Tear down the full Docker stack |
 
 ---
 
@@ -961,12 +978,48 @@ npm run openapi:yaml
 
 ### Prometheus metrics & Grafana
 
-`GET /api/metrics` exposes the dashboard's live counters — sessions/agents by status, event and token totals, connected realtime clients, configured remote sources, process uptime/memory, and build version — in the Prometheus text-exposition format, so CCAM can be scraped into your own observability stack. A turnkey Prometheus + Grafana stack with a pre-built **CCAM — Overview** dashboard lives in [`monitoring/`](./monitoring/README.md):
+`GET /api/metrics` exposes the dashboard's live counters — sessions/agents by status, event and token totals, connected realtime clients, configured remote sources, process uptime/memory, and build version — in the Prometheus text-exposition format, so CCAM can be scraped into your own observability stack. A turnkey Prometheus + Grafana stack with **four auto-provisioned dashboards** (default home: **CCAM — Overview**) lives in [`monitoring/`](./monitoring/README.md).
+
+**npm (no Docker — macOS, Linux, or Windows):**
 
 ```bash
-DASHBOARD_ALLOWED_HOSTS=host.docker.internal npm start   # let the scraper's Host through the guard
-cd monitoring && docker compose up -d                    # Grafana on :3000 (admin/admin), auto-provisioned
+npm start                          # dashboard on :4820
+npm run monitoring:install         # one-time: npm postinstall pulls binaries
+npm run monitoring:up              # Grafana on :3000 (login: admin / admin), auto-provisioned
 ```
+
+**Docker / Podman** (when the dashboard runs in a container or you prefer Compose):
+
+```bash
+# Dashboard only
+npm run docker:up
+
+# Dashboard + Prometheus + Grafana (one command)
+npm run docker:full:up
+
+# Or mix: native/docker dashboard + docker monitoring
+DASHBOARD_ALLOWED_HOSTS=host.docker.internal npm start   # or docker:up with same env
+npm run monitoring:docker:up
+npm run monitoring:verify
+```
+
+<p align="center">
+  <img src="images/grafana.png" alt="Grafana CCAM — Overview dashboard with live session, event, and token metrics" width="100%">
+  <br>
+  <em>📊 <strong>Grafana · CCAM — Overview</strong> — default home dashboard (four boards auto-provisioned): fleet snapshot, database totals, breakdown charts, and rates — all from live <code>/api/metrics</code> scrapes</em>
+</p>
+
+<p align="center">
+  <img src="images/prometheus-console.png" alt="Prometheus CCAM console with metric cards and session tables" width="100%">
+  <br>
+  <em>🔥 <strong>Prometheus · CCAM console</strong> — pre-built landing page at <code>/consoles/index.html</code> that queries Prometheus directly for scrape health, session totals, events, tokens, and drill-down Graph links</em>
+</p>
+
+<p align="center">
+  <img src="images/prometheus-query.png" alt="Prometheus Graph UI with CCAM PromQL query" width="100%">
+  <br>
+  <em>📈 <strong>Prometheus · Graph</strong> — run PromQL against scraped CCAM metrics (e.g. <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>, <code>rate(ccam_tokens_total[5m])</code>) with starter links from the CCAM console and <a href="./monitoring/README.md">monitoring/README.md</a></em>
+</p>
 
 See [docs/API.md → Metrics](./docs/API.md#metrics) for the full metric list and scrape/auth details.
 

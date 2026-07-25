@@ -15,6 +15,8 @@ Enterprise-grade Node.js backend for Claude Code agent monitoring with real-time
 ![ESLint](https://img.shields.io/badge/ESLint-8.44-4B32C3?style=flat-square&logo=eslint&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-20.10-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![Podman](https://img.shields.io/badge/Podman-4.0-CC342D?style=flat-square&logo=podman&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-2.x-E6522C?style=flat-square&logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-10.x-F46800?style=flat-square&logo=grafana&logoColor=white)
 ![SSE](https://img.shields.io/badge/SSE-Server_Sent_Events-FF6600?style=flat-square&logo=googlechrome&logoColor=white)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
@@ -466,7 +468,7 @@ The OpenAPI spec is generated from `server/openapi.js` (`createOpenApiSpec()`), 
 | `GET`   | `/api/analytics`    | Analytics aggregates for charts/trends           |
 | `GET`   | `/api/metrics`      | Prometheus / OpenMetrics exposition (text; v0.0.4) |
 
-**Prometheus metrics (`GET /api/metrics`).** Exposes the dashboard's live counters — `ccam_sessions`/`ccam_agents` by status, `ccam_events_total`, `ccam_tokens_total` by kind, `ccam_websocket_clients`, `ccam_remote_sources` by enabled state, `ccam_process_uptime_seconds`/`ccam_process_resident_memory_bytes`, and `ccam_build_info{version}` — in the Prometheus v0.0.4 text-exposition format for scraping into Prometheus / Grafana (`server/routes/metrics.js`). Values come from the same `server/db.js` prepared statements the REST API uses, so they match the UI; status series are enumerated so a gauge never drops out of the exposition at zero. The route is read-only and, being under `/api`, sits behind both the Host-header (DNS-rebinding) guard and the optional `DASHBOARD_TOKEN` guard: a non-loopback scraper (e.g. Prometheus in Docker via `host.docker.internal`) must be allowlisted with `DASHBOARD_ALLOWED_HOSTS` or it gets `403 EBADHOST`, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with a pre-built dashboard lives in [`monitoring/`](../monitoring/README.md).
+**Prometheus metrics (`GET /api/metrics`).** Exposes the dashboard's live counters — `ccam_sessions`/`ccam_agents` by status, `ccam_events_total`, `ccam_tokens_total` by kind, `ccam_websocket_clients`, `ccam_remote_sources` by enabled state, `ccam_process_uptime_seconds`/`ccam_process_resident_memory_bytes`, and `ccam_build_info{version}` — in the Prometheus v0.0.4 text-exposition format for scraping into Prometheus / Grafana (`server/routes/metrics.js`). Values come from the same `server/db.js` prepared statements the REST API uses, so they match the UI; status series are enumerated so a gauge never drops out of the exposition at zero. The route is read-only and, being under `/api`, sits behind both the Host-header (DNS-rebinding) guard and the optional `DASHBOARD_TOKEN` guard: a non-loopback scraper (e.g. Prometheus in Docker via `host.docker.internal`) must be allowlisted with `DASHBOARD_ALLOWED_HOSTS` or it gets `403 EBADHOST`, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with four auto-provisioned dashboards (default home **CCAM — Overview**) lives in [`monitoring/`](../monitoring/README.md).
 
 **Data scope (`?sources=`).** `GET /api/sessions`, `/api/events`, `/api/agents`, `/api/stats`, and `/api/analytics` all accept an optional `sources` query param — a comma-separated list of source ids (`local` plus any remote source id, see [Remote Data Sources](#remote-data-sources)) — that narrows the result to sessions with a matching `sessions.source`. It is parsed by `server/lib/source-filter.js` into SQL predicates; `/api/stats` and `/api/analytics` route to the source-scoped aggregates in `server/lib/scoped-stats.js` only when a scope is present, leaving the unscoped fast paths unchanged. `GET /api/sessions/facets` additionally returns a `sources` facet enumerating the known source ids.
 
@@ -1453,7 +1455,7 @@ CMD ["node", "server/index.js"]
 ```bash
 # Build and run
 docker build -t agent-dashboard .
-docker run -p 4820:4820 -v $(pwd)/data:/app/data agent-dashboard
+docker run -p 127.0.0.1:4820:4820 -v "$HOME/.claude/agent-dashboard:/app/data" agent-dashboard
 ```
 
 ---

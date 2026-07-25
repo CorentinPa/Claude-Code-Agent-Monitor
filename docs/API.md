@@ -541,7 +541,7 @@ scrape_configs:
     #   credentials: "<DASHBOARD_TOKEN>"
 ```
 
-A ready-to-run Prometheus + Grafana stack (with a pre-built dashboard) lives in [`monitoring/`](../monitoring/README.md) — `cd monitoring && docker compose up -d`.
+A ready-to-run Prometheus + Grafana stack (four auto-provisioned dashboards; default home **CCAM — Overview**) lives in [`monitoring/`](../monitoring/README.md). **npm path (no Docker):** `npm run monitoring:install` then `npm run monitoring:up` (binaries are pulled via the monitoring package's `postinstall` — there is no official `grafana`/`prometheus` server package on npm). **Docker path:** `npm run monitoring:docker:up` or `npm run docker:full:up` (set `DASHBOARD_ALLOWED_HOSTS=host.docker.internal` on the dashboard when Prometheus runs in a container). Pre-built Prometheus console: `http://localhost:9090/consoles/index.html`.
 
 ---
 

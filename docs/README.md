@@ -53,6 +53,7 @@ graph TB
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Production deployment strategies | DevOps engineers |
 | [I18N.md](./I18N.md) | Language architecture, locale strategy, and rollout checklist | Frontend and product teams |
 | [CLI.md](./CLI.md) | `ccam` command reference — monitoring, browsing, insights, alerts, pricing, import, administration | Terminal users and CI scripting |
+| [monitoring/README.md](../monitoring/README.md) | Prometheus + Grafana stack (`npm run monitoring:up` or Docker) | DevOps / observability |
 
 ---
 

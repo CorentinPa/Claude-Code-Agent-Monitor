@@ -50,6 +50,8 @@ Claude Code 에이전트 세션, 도구 사용, 서브에이전트 오케스트�
 ![Prettier](https://img.shields.io/badge/Prettier-3.8-F7B93E?style=flat-square&logo=prettier&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-20.10-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![Podman](https://img.shields.io/badge/Podman-4.0-CC342D?style=flat-square&logo=podman&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-2.x-E6522C?style=flat-square&logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-10.x-F46800?style=flat-square&logo=grafana&logoColor=white)
 ![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.5-844FBA?style=flat-square&logo=terraform&logoColor=white)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-%3E%3D1.24-326CE5?style=flat-square&logo=kubernetes&logoColor=white)
 ![Helm](https://img.shields.io/badge/Helm-3-0F1689?style=flat-square&logo=helm&logoColor=white)
@@ -441,7 +443,7 @@ docker build -t agent-monitor .
 docker run -d --name agent-monitor \
   -p 127.0.0.1:4820:4820 \
   -v "$HOME/.claude:/root/.claude:ro" \
-  -v agent-monitor-data:/app/data \
+  -v "$HOME/.claude/agent-dashboard:/app/data" \
   agent-monitor
 
 # Podman
@@ -449,7 +451,7 @@ podman build -t agent-monitor .
 podman run -d --name agent-monitor \
   -p 127.0.0.1:4820:4820 \
   -v "$HOME/.claude:/root/.claude:ro" \
-  -v agent-monitor-data:/app/data \
+  -v "$HOME/.claude/agent-dashboard:/app/data" \
   agent-monitor
 ```
 
@@ -460,7 +462,7 @@ podman run -d --name agent-monitor \
 | 마운트 | 용도 |
 |---|---|
 | `~/.claude:/root/.claude:ro` | 가져오기를 위한 레거시 세션 기록 읽기 |
-| `agent-monitor-data:/app/data` | 재시작 간 SQLite 데이터베이스 유지 |
+| `~/.claude/agent-dashboard:/app/data` | **표준 SQLite 데이터베이스**(네이티브 설치와 공유) |
 
 > [!IMPORTANT]
 > **참고:** Claude Code Hook은 여전히 호스트에서 실행 중인 hook-handler 프로세스를 가리켜야 합니다. 컨테이너 자체는 Hook을 받지 않습니다 — `http://localhost:4820`으로 POST하는 Hook을 구성하려면 **호스트에서** `npm run install-hooks`를 실행하세요. 컨테이너 내부에서 설치 프로그램을 실행하는 것은 **거부됩니다**(issue #193). 바인드 마운트된 호스트 `~/.claude`에 컨테이너 내부 핸들러 경로가 기록되지 않게 하기 위함입니다; 실제로 같은 컨테이너 안에서 Claude Code를 실행하는 경우에만 `CCAM_ALLOW_CONTAINER_HOOKS=1`로 재정의하세요.
@@ -498,7 +500,7 @@ sequenceDiagram
 ### Hook 라이프사이클
 
 1. **Claude Code**는 세션 시작, 도구 사용, 턴 종료, 서브에이전트 완료, 세션 종료 시 Hook을 발생시킵니다
-2. **Hook 핸들러**(`scripts/hook-handler.js`)는 stdin에서 JSON 이벤트를 읽고, `~/.claude/.agent-dashboard.json`(또는 설정된 경우 `CLAUDE_DASHBOARD_PORT`)을 통해 실행 중인 모든 대시보드를 확인한 뒤, 동일한 페이로드를 각 대시보드에 병렬로 POST합니다. 5초의 안전망 타임아웃과 함께 조용히 실패하므로 Claude Code를 절대 차단하지 않으며, 대상별 프로미스는 절대 reject되지 않으므로 하나의 죽은 리스너가 다른 리스너들을 굶기는 일이 없습니다. 여러 대시보드가 함께 실행 중일 때(예: `npm run dev` + macOS 데스크톱 앱) 모두가 모든 이벤트를 수신합니다.
+2. **Hook 핸들러**(`scripts/hook-handler.js`)는 stdin에서 JSON 이벤트를 읽고, `~/.claude/.agent-dashboard.json`(또는 설정된 경우 `CLAUDE_DASHBOARD_PORT`)을 통해 실행 중인 대시보드를 확인한 뒤, **고유한 SQLite 데이터 디렉터리당 하나의 수집 대상**으로 동일한 페이로드를 POST합니다(Docker와 `npm run dev`가 `~/.claude/agent-dashboard`를 공유하면 가장 낮은 포트가 우선되어 이벤트가 중복 수집되지 않음). **서로 다른** 데이터베이스를 쓰는 서버(예: 데스크톱 앱의 Application Support와 `npm run dev`)는 각각 훅을 계속 받습니다. 5초의 안전망 타임아웃과 함께 조용히 실패하므로 Claude Code를 절대 차단하지 않으며, 대상별 프로미스는 절대 reject되지 않으므로 하나의 죽은 리스너가 다른 리스너들을 굶기는 일이 없습니다.
 3. **서버**는 SQLite 트랜잭션 내에서 이벤트를 처리합니다:
    - 첫 접촉 시 세션과 메인 에이전트를 자동 생성합니다
    - `Agent` 도구 호출을 감지하여 서브에이전트 생성을 추적합니다
@@ -735,6 +737,13 @@ API 기반 명령어는 서버가 실행 중이어야 합니다 — 서버가 �
 | `npm run desktop:dmg:universal` | **하나의** 병합된 유니버설 DMG(arm64 + x86_64, 단일 파일) 빌드 — 선택 사항, **가장 느림**, 릴리스에 포함되는 것은 아님. |
 | `npm run desktop:win`   | Windows **NSIS 설치 프로그램** `.exe`(x64)를 빌드합니다 — Windows에서 실행 |
 | `npm run desktop:win:portable` | Windows **포터블**(무설치) `.exe`(x64)를 빌드합니다 — Windows에서 실행 |
+| `npm run monitoring:install` | `monitoring/`에서 `npm install` 실행 — `postinstall`로 Prometheus + Grafana 다운로드 |
+| `npm run monitoring:setup` | `monitoring:install` 별칭 |
+| `npm run monitoring:up` | Prometheus(:9090) + Grafana(:3000)를 백그라운드로 시작합니다(Docker 불필요) |
+| `npm run monitoring:down` | npm으로 관리되는 모니터링 스택을 중지합니다 |
+| `npm run monitoring:start` | 포그라운드로 시작합니다(Ctrl+C로 둘 다 중지) |
+| `npm run monitoring:docker:up` | Docker Compose로 Prometheus + Grafana를 시작합니다 |
+| `npm run monitoring:docker:down` | Docker 모니터링 스택을 종료합니다 |
 
 ---
 
@@ -961,12 +970,40 @@ npm run openapi:yaml
 
 ### Prometheus 메트릭 & Grafana
 
-`GET /api/metrics`는 대시보드의 실시간 카운터 — 상태별 세션/에이전트, 이벤트 및 토큰 총계, 연결된 실시간 클라이언트, 구성된 원격 소스, 프로세스 가동 시간/메모리, 빌드 버전 — 를 Prometheus 텍스트 노출 형식으로 공개하므로, CCAM를 자체 관측성 스택으로 스크레이핑할 수 있습니다. 미리 구축된 **CCAM — Overview** 대시보드를 갖춘 턴키 방식의 Prometheus + Grafana 스택은 [`monitoring/`](./monitoring/README.md)에 있습니다:
+`GET /api/metrics`는 대시보드의 실시간 카운터 — 상태별 세션/에이전트, 이벤트 및 토큰 총계, 연결된 실시간 클라이언트, 구성된 원격 소스, 프로세스 가동 시간/메모리, 빌드 버전 — 를 Prometheus 텍스트 노출 형식으로 공개하므로, CCAM를 자체 관측성 스택으로 스크레이핑할 수 있습니다. **네 개의 자동 프로비저닝 대시보드**(기본 홈: **CCAM — Overview**)를 갖춘 턴키 방식의 Prometheus + Grafana 스택은 [`monitoring/`](./monitoring/README.md)에 있습니다.
+
+**npm(Docker/Homebrew 불필요):**
 
 ```bash
-DASHBOARD_ALLOWED_HOSTS=host.docker.internal npm start   # let the scraper's Host through the guard
-cd monitoring && docker compose up -d                    # Grafana on :3000 (admin/admin), auto-provisioned
+npm start                      # dashboard on :4820
+npm run monitoring:install       # 1회: npm postinstall이 바이너리 다운로드
+npm run monitoring:up          # Grafana on :3000 (admin/admin), auto-provisioned
 ```
+
+**Docker / Podman**(대시보드가 컨테이너에서 실행되거나 Compose를 선호할 때):
+
+```bash
+DASHBOARD_ALLOWED_HOSTS=host.docker.internal npm start   # 또는 agent-monitor 서비스에 설정
+npm run monitoring:docker:up
+```
+
+<p align="center">
+  <img src="images/grafana.png" alt="Grafana CCAM — Overview 대시보드의 실시간 세션·이벤트·토큰 메트릭" width="100%">
+  <br>
+  <em>📊 <strong>Grafana · CCAM — Overview</strong> — 기본 홈 대시보드(네 개 보드 자동 프로비저닝): 플릿 스냅샷, DB 누적 합계, 분해 차트, 속도 — 모두 실시간 <code>/api/metrics</code> 스크레이프</em>
+</p>
+
+<p align="center">
+  <img src="images/prometheus-console.png" alt="메트릭 카드와 세션 표가 있는 Prometheus CCAM 콘솔" width="100%">
+  <br>
+  <em>🔥 <strong>Prometheus · CCAM 콘솔</strong> — <code>/consoles/index.html</code> 사전 구성 랜딩 페이지가 스크레이프 상태, 세션/이벤트/토큰 합계 및 Graph 드릴다운 링크를 Prometheus에 직접 조회</em>
+</p>
+
+<p align="center">
+  <img src="images/prometheus-query.png" alt="CCAM PromQL 쿼리가 있는 Prometheus Graph UI" width="100%">
+  <br>
+  <em>📈 <strong>Prometheus · Graph</strong> — 스크레이프된 CCAM 메트릭에 PromQL 실행(예: <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>) — CCAM 콘솔과 <a href="./monitoring/README.md">monitoring/README.md</a>의 시작 링크 제공</em>
+</p>
 
 전체 메트릭 목록과 스크레이프/인증 세부 정보는 [docs/API.md → Metrics](./docs/API.md#metrics)를 참고하세요.
 

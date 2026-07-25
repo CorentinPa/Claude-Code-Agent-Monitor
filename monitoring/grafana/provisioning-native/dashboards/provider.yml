@@ -1,5 +1,6 @@
-# Loads every dashboard JSON under /var/lib/grafana/dashboards on startup — four
-# bundled CCAM boards (Overview, Sessions & Agents, Tokens & Events, Platform Health).
+# Dashboard provider for the native stack. start-native.sh writes the absolute
+# dashboards path into .data/grafana-provisioning/dashboards/provider.runtime.yml
+# because Grafana requires an absolute path in file providers.
 apiVersion: 1
 
 providers:

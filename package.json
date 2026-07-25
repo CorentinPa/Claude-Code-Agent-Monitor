@@ -95,7 +95,19 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "openapi:yaml": "node scripts/generate-openapi-yaml.js",
-    "link-cli": "npm link || node -e \"console.warn('ccam CLI not linked globally (no permission?). Link manually with: npm link')\""
+    "link-cli": "npm link || node -e \"console.warn('ccam CLI not linked globally (no permission?). Link manually with: npm link')\"",
+    "monitoring:install": "npm install --prefix monitoring",
+    "monitoring:setup": "npm run monitoring:install",
+    "monitoring:up": "npm --prefix monitoring run start",
+    "monitoring:down": "npm --prefix monitoring run stop",
+    "monitoring:start": "npm --prefix monitoring run start:foreground",
+    "monitoring:docker:up": "docker compose -f monitoring/docker-compose.yml up -d",
+    "monitoring:docker:down": "docker compose -f monitoring/docker-compose.yml down",
+    "monitoring:verify": "node monitoring/scripts/verify.js",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:full:up": "docker compose -f docker-compose.full.yml up -d --build",
+    "docker:full:down": "docker compose -f docker-compose.full.yml down"
   },
   "dependencies": {
     "adm-zip": "^0.5.16",

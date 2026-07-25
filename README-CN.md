@@ -50,6 +50,8 @@
 ![Prettier](https://img.shields.io/badge/Prettier-3.8-F7B93E?style=flat-square&logo=prettier&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-20.10-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![Podman](https://img.shields.io/badge/Podman-4.0-CC342D?style=flat-square&logo=podman&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-2.x-E6522C?style=flat-square&logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-10.x-F46800?style=flat-square&logo=grafana&logoColor=white)
 ![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.5-844FBA?style=flat-square&logo=terraform&logoColor=white)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-%3E%3D1.24-326CE5?style=flat-square&logo=kubernetes&logoColor=white)
 ![Helm](https://img.shields.io/badge/Helm-3-0F1689?style=flat-square&logo=helm&logoColor=white)
@@ -449,7 +451,7 @@ docker build -t agent-monitor .
 docker run -d --name agent-monitor \
   -p 127.0.0.1:4820:4820 \
   -v "$HOME/.claude:/root/.claude:ro" \
-  -v agent-monitor-data:/app/data \
+  -v "$HOME/.claude/agent-dashboard:/app/data" \
   agent-monitor
 
 # Podman
@@ -457,7 +459,7 @@ podman build -t agent-monitor .
 podman run -d --name agent-monitor \
   -p 127.0.0.1:4820:4820 \
   -v "$HOME/.claude:/root/.claude:ro" \
-  -v agent-monitor-data:/app/data \
+  -v "$HOME/.claude/agent-dashboard:/app/data" \
   agent-monitor
 ```
 
@@ -468,7 +470,7 @@ podman run -d --name agent-monitor \
 | 挂载 | 用途 |
 |---|---|
 | `~/.claude:/root/.claude:ro` | 读取历史会话用于导入 |
-| `agent-monitor-data:/app/data` | 跨重启持久化 SQLite 数据库 |
+| `~/.claude/agent-dashboard:/app/data` | **规范 SQLite 数据库**（与原生安装共享） |
 
 > [!IMPORTANT]
 > **注意：** Claude Code Hook 仍需指向宿主机上运行的 hook-handler 进程。容器本身不接收 Hook — 在宿主机上运行 `npm run install-hooks` 以配置 Hook 将数据 POST 到 `http://localhost:4820`。
@@ -724,6 +726,13 @@ ccam version                      # 打印 CLI 版本（也可用 --version / -v
 | `npm run desktop:dmg:universal` | **macOS：** 构建**一个**合并的通用（universal）DMG（arm64 + x86_64，单个文件）——可选，**最慢**，不是发布版本附带的内容。 |
 | `npm run desktop:win` | **Windows：** 构建 NSIS **安装包** `.exe`（x64）— 在 Windows 上运行 |
 | `npm run desktop:win:portable` | **Windows：** 构建**免安装便携版** `.exe`（x64）— 在 Windows 上运行 |
+| `npm run monitoring:install` | 在 `monitoring/` 中运行 `npm install` — 通过 `postinstall` 下载 Prometheus + Grafana |
+| `npm run monitoring:setup` | `monitoring:install` 的别名 |
+| `npm run monitoring:up` | 在后台启动 Prometheus（:9090）+ Grafana（:3000）（无需 Docker） |
+| `npm run monitoring:down` | 停止 npm 管理的监控栈 |
+| `npm run monitoring:start` | 前台启动监控栈（Ctrl+C 停止两者） |
+| `npm run monitoring:docker:up` | 通过 Docker Compose 启动 Prometheus + Grafana |
+| `npm run monitoring:docker:down` | 关闭 Docker 监控栈 |
 
 ---
 
@@ -969,12 +978,40 @@ API 文档现已**全面覆盖**：每个后端路由都有文档说明（共 82
 
 ### Prometheus 指标与 Grafana
 
-`GET /api/metrics` 以 Prometheus 文本暴露格式（text-exposition format）导出 Dashboard 的实时计数器——按状态划分的会话/Agent、事件与 Token 总数、已连接的实时客户端、已配置的远程数据源、进程运行时长/内存，以及构建版本——因此 CCAM 可被抓取（scrape）到你自己的可观测性栈中。一套开箱即用的 Prometheus + Grafana 组合，内置预构建的 **CCAM — Overview** 仪表盘，位于 [`monitoring/`](./monitoring/README.md)：
+`GET /api/metrics` 以 Prometheus 文本暴露格式（text-exposition format）导出 Dashboard 的实时计数器——按状态划分的会话/Agent、事件与 Token 总数、已连接的实时客户端、已配置的远程数据源、进程运行时长/内存，以及构建版本——因此 CCAM 可被抓取（scrape）到你自己的可观测性栈中。一套开箱即用的 Prometheus + Grafana 组合，**自动配置四个仪表盘**（默认首页：**CCAM — Overview**），位于 [`monitoring/`](./monitoring/README.md)。
+
+**npm（无需 Docker / Homebrew）：**
 
 ```bash
-DASHBOARD_ALLOWED_HOSTS=host.docker.internal npm start   # let the scraper's Host through the guard
-cd monitoring && docker compose up -d                    # Grafana on :3000 (admin/admin), auto-provisioned
+npm start                      # dashboard on :4820
+npm run monitoring:install       # 一次性：npm postinstall 拉取二进制
+npm run monitoring:up          # Grafana on :3000 (admin/admin)，自动配置
 ```
+
+**Docker / Podman**（当 Dashboard 在容器中运行，或你偏好 Compose 时）：
+
+```bash
+DASHBOARD_ALLOWED_HOSTS=host.docker.internal npm start   # 或在 agent-monitor 服务上设置
+npm run monitoring:docker:up
+```
+
+<p align="center">
+  <img src="images/grafana.png" alt="Grafana CCAM — Overview 仪表盘，展示实时会话、事件与 Token 指标" width="100%">
+  <br>
+  <em>📊 <strong>Grafana · CCAM — Overview</strong> — 默认首页仪表盘（自动配置四个看板）：舰队快照、数据库累计总量、分解图与速率 — 全部来自实时 <code>/api/metrics</code> 抓取</em>
+</p>
+
+<p align="center">
+  <img src="images/prometheus-console.png" alt="Prometheus CCAM 控制台，展示指标卡片与会话表" width="100%">
+  <br>
+  <em>🔥 <strong>Prometheus · CCAM 控制台</strong> — <code>/consoles/index.html</code> 预置落地页，直接查询 Prometheus 显示抓取状态、会话/事件/Token 总量及 Graph 钻取链接</em>
+</p>
+
+<p align="center">
+  <img src="images/prometheus-query.png" alt="Prometheus Graph 界面中的 CCAM PromQL 查询" width="100%">
+  <br>
+  <em>📈 <strong>Prometheus · Graph</strong> — 对已抓取的 CCAM 指标运行 PromQL（如 <code>sum(ccam_sessions)</code>、<code>ccam_events_total</code>），可从 CCAM 控制台与 <a href="./monitoring/README.md">monitoring/README.md</a> 的快捷链接打开</em>
+</p>
 
 完整指标列表以及抓取/认证细节，请参见 [docs/API.md → Metrics](./docs/API.md#metrics)。
 
