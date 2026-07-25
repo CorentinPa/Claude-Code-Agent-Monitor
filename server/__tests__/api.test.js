@@ -170,6 +170,7 @@ describe("GET /api/health", () => {
     const res = await fetch("/api/health");
     assert.equal(res.status, 200);
     assert.equal(res.body.status, "ok");
+    assert.equal(res.body.version, pkg.version);
     assert.ok(res.body.timestamp);
   });
 });
