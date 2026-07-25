@@ -244,6 +244,12 @@ flowchart LR
 </p>
 
 <p align="center">
+  <img src="images/config-skills.png" alt="Claude 配置浏览器 — 技能标签页" width="100%">
+  <br>
+  <em>🧩 <strong>Claude 配置浏览器 · 技能</strong> — 技能标签页列出所有已发现的技能（用户、项目与插件），显示其描述与来源，可在整个集合中搜索，并可打开任意技能文件进行带时间戳备份的安全编辑</em>
+</p>
+
+<p align="center">
   <img src="images/run.png" alt="运行 Claude — 启动前配置" width="100%">
   <br>
   <em>▶️ <strong>运行 Claude</strong> — 直接在仪表盘内启动 <code>claude</code> 子进程。选择模式（对话 / 单次）、来源（新会话 vs 从完整历史中恢复）、工作目录（带最近 cwd 自动补全）、模型、权限模式与思考强度。路由上的同源守卫防止浏览器 drive-by spawn</em>

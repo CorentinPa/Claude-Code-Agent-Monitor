@@ -242,6 +242,12 @@ flowchart LR
 </p>
 
 <p align="center">
+  <img src="images/config-skills.png" alt="Claude 설정 탐색기 — 스킬 탭" width="100%">
+  <br>
+  <em>🧩 <strong>Claude 설정 탐색기 · 스킬</strong> — 스킬 탭은 발견된 모든 스킬(사용자, 프로젝트, 플러그인)을 설명과 출처와 함께 나열하고, 전체 목록에서 검색할 수 있으며, 안전한 타임스탬프 백업과 함께 스킬 파일을 열어 편집할 수 있습니다</em>
+</p>
+
+<p align="center">
   <img src="images/run.png" alt="Run Claude — pre-run config" width="100%">
   <br>
   <em>▶️ <strong>Run Claude</strong> — 대시보드 안에서 바로 <code>claude</code> 서브프로세스를 생성합니다. 모드(대화 / 원샷), 소스(새 세션 vs 전체 기록에서 재개), 작업 디렉터리(최근 cwd 자동완성), 모델, 권한 모드, thinking effort를 선택하세요. 동일 출처 가드가 브라우저 드라이브바이 생성을 방지합니다</em>

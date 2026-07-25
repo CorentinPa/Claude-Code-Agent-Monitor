@@ -242,6 +242,12 @@ flowchart LR
 </p>
 
 <p align="center">
+  <img src="images/config-skills.png" alt="Trình khám phá cấu hình Claude — tab Skills" width="100%">
+  <br>
+  <em>🧩 <strong>Trình khám phá cấu hình Claude · Skills</strong> — tab Skills liệt kê mọi skill được phát hiện (user, project và plugin) kèm mô tả và nguồn, có thể tìm kiếm trên toàn bộ danh sách, và mở bất kỳ tệp skill nào để chỉnh sửa an toàn với sao lưu dấu thời gian</em>
+</p>
+
+<p align="center">
   <img src="images/run.png" alt="Chạy Claude — cấu hình trước khi chạy" width="100%">
   <br>
   <em>▶️ <strong>Chạy Claude</strong> — Khởi chạy tiến trình con <code>claude</code> ngay trong dashboard. Chọn chế độ (Hội thoại / Một lần), nguồn (phiên mới vs tiếp tục từ lịch sử đầy đủ), thư mục làm việc (autocomplete với cwd gần đây), model, permission mode và mức suy nghĩ. Same-origin guard trên route ngăn drive-by spawn từ trình duyệt</em>

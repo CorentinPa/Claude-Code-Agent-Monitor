@@ -242,6 +242,12 @@ Comes with a sleek dark theme, responsive design, and intuitive navigation to ex
 </p>
 
 <p align="center">
+  <img src="images/config-skills.png" alt="Claude Config Explorer — Skills tab" width="100%">
+  <br>
+  <em>🧩 <strong>Claude Config Explorer · Skills</strong> — the Skills tab lists every discovered skill (user, project, and plugin) with its description and source, is searchable across the whole set, and opens any skill file for a safe, timestamp-backed edit</em>
+</p>
+
+<p align="center">
   <img src="images/run.png" alt="Run Claude — pre-run config" width="100%">
   <br>
   <em>▶️ <strong>Run Claude</strong> — spawn <code>claude</code> subprocesses right inside the dashboard. Pick mode (Conversation / One-shot), source (new session vs resume from your full history), working directory (autocomplete with recent cwds), model, permission mode, and thinking effort. Same-origin guard prevents browser drive-by spawning</em>
