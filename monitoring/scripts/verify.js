@@ -156,6 +156,10 @@ async function main() {
     process.exit(1);
   }
   console.log("\nMonitoring stack OK.");
+  console.log(`  Grafana:    ${GRAFANA_URL}  (${grafanaLoginDetail()})`);
+  console.log(`  Console:    ${PROMETHEUS_URL}/consoles/index.html`);
+  console.log(`  Graph:      ${PROMETHEUS_URL}/graph`);
+  console.log(`  Metrics:    ${DASHBOARD_URL}/api/metrics`);
 }
 
 main();
