@@ -265,6 +265,12 @@ flowchart LR
   <em>🔔 <strong>설정 · 알림</strong> — 규칙 기반 알림 엔진과 아웃바운드 웹훅을 한곳에서: 규칙별 쿨다운이 있는 알림 규칙(이벤트 패턴 / 비활성 / 멈춘 에이전트 / 토큰 임계값), 실시간 발동 알림 피드, 14개의 퍼스트클래스 웹훅 제공자(Slack, Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream)와 선택적 HMAC 서명을 지원하는 범용 JSON 엔드포인트</em>
 </p>
 
+<p align="center">
+  <img src="images/remote.png" alt="설정 — 원격 데이터 소스" width="100%">
+  <br>
+  <em>🛰️ <strong>설정 · 원격 데이터 소스</strong> — SSH로 다른 머신의 Claude Code 활동을 가져옵니다: 대상별로 소스 추가, 연결 테스트, 수동 또는 백그라운드 폴러로 동기화, 그리고 전역 데이터 범위를 로컬 · 전체 소스 · 특정 머신 사이에서 전환하며 세션별 소스 배지 표시</em>
+</p>
+
 사이드바에서 대시보드, Kanban 보드, 세션 목록, 활동 피드, 분석, 워크플로, 설정에 빠르게 접근할 수 있습니다. 각 페이지는 실시간 업데이트와 풍부한 시각화로 Claude Code 에이전트 활동에 대한 깊이 있는 인사이트를 제공하도록 설계되었습니다.
 
 ---

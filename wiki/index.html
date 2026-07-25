@@ -1521,6 +1521,10 @@
               <img src="../images/redoc.png" alt="ReDoc API reference" width="100%" loading="lazy" decoding="async" />
               <div class="screenshot-caption"><span class="caption-icon">📗</span> <span><strong>API Docs · ReDoc</strong> — a self-hosted, read-optimized rendering of the full OpenAPI 3.0 spec at <code>/api/redoc</code>, served entirely offline with no CDN. Complements the interactive Swagger UI at <code>/api/docs</code>; every backend route is documented with parameters, schemas, and examples</span></div>
             </div>
+            <div class="screenshot-card" id="ss-remote">
+              <img src="../images/remote.png" alt="Settings — Remote Data Sources" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🛰️</span> <span><strong>Settings · Remote Data Sources</strong> — pull Claude Code activity from other machines over SSH: add sources by destination, test connectivity, sync manually or on a background poller, and switch the global data scope between local, all sources, or a specific machine with per-session source badges</span></div>
+            </div>
           </div>
 
           <h3>GitHub Star History</h3>
@@ -3855,6 +3859,13 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
         <section id="remote-sources">
           <div class="section-label">◈ Integrations</div>
           <h2>Remote Data Sources</h2>
+
+          <div class="screenshot-gallery gallery-single">
+            <div class="screenshot-card">
+              <img src="../images/remote.png" alt="Settings page Remote Data Sources section showing configured SSH sources with live status, the data-scope selector, and per-source sync controls" width="3024" height="1722" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🛰️</span> <span>Settings → Remote Data Sources — add machines by SSH destination, test connectivity, sync on demand or on a background schedule, and narrow the whole app with the global data-scope selector</span></div>
+            </div>
+          </div>
 
           <p>
             Beyond local history, the dashboard can pull Claude Code activity from

@@ -265,6 +265,12 @@ flowchart LR
   <em>🔔 <strong>Cài đặt · Cảnh báo</strong> — công cụ cảnh báo theo quy tắc và webhook gửi đi trong cùng một nơi: quy tắc cảnh báo (mẫu sự kiện / không hoạt động / agent bị treo / ngưỡng token) với cooldown theo từng quy tắc, nguồn cấp cảnh báo đã kích hoạt theo thời gian thực, và 14 nhà cung cấp webhook hạng nhất (Slack, Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream) cùng một endpoint JSON tổng quát có tùy chọn ký HMAC</em>
 </p>
 
+<p align="center">
+  <img src="images/remote.png" alt="Cài đặt — Nguồn dữ liệu từ xa" width="100%">
+  <br>
+  <em>🛰️ <strong>Cài đặt · Nguồn dữ liệu từ xa</strong> — kéo hoạt động Claude Code từ các máy khác qua SSH: thêm nguồn theo đích đến, kiểm tra kết nối, đồng bộ thủ công hoặc theo bộ hẹn giờ nền, và chuyển phạm vi dữ liệu toàn cục giữa cục bộ, tất cả nguồn, hoặc một máy cụ thể, với huy hiệu nguồn cho từng phiên</em>
+</p>
+
 Thanh bên cung cấp quyền truy cập nhanh vào Trang tổng quan, Bảng Kanban, danh sách Phiên, Nguồn cấp dữ liệu hoạt động, Phân tích, Quy trình công việc và Cài đặt. Mỗi trang được thiết kế để cung cấp cho bạn những hiểu biết sâu sắc về hoạt động Agent Claude Code của bạn với các cập nhật theo thời gian thực và hình ảnh trực quan phong phú.
 
 ---

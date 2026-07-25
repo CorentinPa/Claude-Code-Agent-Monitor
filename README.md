@@ -265,6 +265,12 @@ Comes with a sleek dark theme, responsive design, and intuitive navigation to ex
   <em>🔔 <strong>Settings · Alerts</strong> — rules-based alerting engine and outbound webhooks in one place: alert rules (event pattern / inactivity / stuck agent / token threshold) with per-rule cooldown, a live fired-alert feed, and 14 first-class webhook providers (Slack, Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream) plus a generic JSON endpoint with optional HMAC signing</em>
 </p>
 
+<p align="center">
+  <img src="images/remote.png" alt="Settings — Remote Data Sources" width="100%">
+  <br>
+  <em>🛰️ <strong>Settings · Remote Data Sources</strong> — pull Claude Code activity from other machines over SSH: add sources by destination, test connectivity, sync manually or on a background poller, and switch the global data scope between local, all sources, or a specific machine, with per-session source badges</em>
+</p>
+
 The sidebar provides quick access to the Dashboard, Kanban Board, Sessions list, Activity Feed, Analytics, Workflows, and Settings. Each page is designed to give you deep insights into your Claude Code agent activity with real-time updates and rich visualizations.
 
 ---
