@@ -871,8 +871,14 @@ export const api = {
      *
      * @returns {@link CostResult} — the aggregate cost breakdown across sessions.
      */
-    totalCost: () =>
-      request<CostResult>(`/pricing/cost?tz_offset=${new Date().getTimezoneOffset()}`),
+    totalCost: () => {
+      // Scope the aggregate to the active data-scope, exactly like the sessions /
+      // stats / analytics endpoints — otherwise switching the Data scope selector
+      // left the Dashboard "total cost" showing the un-narrowed global total.
+      const qs = new URLSearchParams({ tz_offset: String(new Date().getTimezoneOffset()) });
+      applyScope(qs);
+      return request<CostResult>(`/pricing/cost?${qs.toString()}`);
+    },
     /**
      * GET /api/pricing/cost/:sessionId - cost for one session, priced as of
      * the session's start date.
@@ -1103,6 +1109,21 @@ export const api = {
      * @returns {@link CcKeybindings} — grouped key/action bindings + file metadata.
      */
     keybindings: () => request<CcKeybindings>("/cc-config/keybindings"),
+    /**
+     * PUT /api/cc-config/keybindings - overwrite the user's `keybindings.json`
+     * from a structured list of groups. The server backs the file up first and
+     * preserves any top-level metadata (`$schema`/`$docs`), replacing only the
+     * `bindings` array.
+     *
+     * @param groups Full set of {@link CcKeybindingGroup}s to persist.
+     * @returns {@link CcMutationResult} — the written path, backup path, and
+     *   whether the file was newly `created`.
+     */
+    writeKeybindings: (groups: CcKeybindingGroup[]) =>
+      request<CcMutationResult>("/cc-config/keybindings", {
+        method: "PUT",
+        body: JSON.stringify({ groups }),
+      }),
     /**
      * GET /api/cc-config/statusline - active statusline config + scripts.
      * @returns {@link CcStatusline} — the active config plus discovered scripts.

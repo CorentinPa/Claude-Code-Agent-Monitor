@@ -99,7 +99,16 @@
     "context": "Ngữ cảnh",
     "key": "Phím",
     "action": "Hành động",
-    "docsLink": "Xem tài liệu phím tắt"
+    "docsLink": "Xem tài liệu phím tắt",
+    "contextPlaceholder": "Ngữ cảnh (vd: Global, Chat)",
+    "addContext": "Thêm ngữ cảnh",
+    "removeContext": "Xoá ngữ cảnh",
+    "addBinding": "Thêm phím tắt",
+    "removeBinding": "Xoá phím tắt",
+    "errContext": "Mỗi ngữ cảnh cần có tên.",
+    "errDupContext": "Ngữ cảnh trùng lặp: {{context}}",
+    "errEmpty": "Mỗi phím tắt trong \"{{context}}\" cần cả phím và hành động.",
+    "errDupKey": "Phím trùng lặp \"{{key}}\" trong ngữ cảnh \"{{context}}\"."
   },
   "statusline": {
     "title": "Statusline",

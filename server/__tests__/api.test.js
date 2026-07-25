@@ -2199,6 +2199,50 @@ describe("Watchdog API-error detection", () => {
       }
     }
   });
+
+  it("must NOT flip a remote-source session to error from its mirrored transcript", async () => {
+    // Remote Data Source sessions are monitored via a delayed rsync mirror on
+    // this host, so the transcript-tail error heuristic must never act on them —
+    // their lifecycle is owned by remote-sync's reconciliation, not the watchdog.
+    const tmpTranscript = path.join(os.tmpdir(), `watchdog-remote-${Date.now()}.jsonl`);
+    fs.writeFileSync(tmpTranscript, "");
+    const sessionId = `watchdog-remote-${Date.now()}`;
+    const hooks = require("../routes/hooks");
+
+    try {
+      await post("/api/hooks/event", {
+        hook_type: "PreToolUse",
+        data: {
+          session_id: sessionId,
+          transcript_path: tmpTranscript,
+          tool_name: "Read",
+          cwd: "/tmp",
+        },
+      });
+      // Tag it as remote AFTER creation (mirrors what remote-sync does).
+      db.prepare("UPDATE sessions SET source = ? WHERE id = ?").run("src_remotebox", sessionId);
+
+      writeTranscriptWithError(tmpTranscript);
+      db.prepare("UPDATE sessions SET updated_at = ? WHERE id = ?").run(
+        new Date(Date.now() - 60_000).toISOString(),
+        sessionId
+      );
+      hooks.transcriptCache.invalidate(tmpTranscript);
+      hooks.watchdogCheck();
+
+      assert.strictEqual(
+        stmts.getSession.get(sessionId).status,
+        "active",
+        "watchdog must leave remote-source sessions untouched"
+      );
+    } finally {
+      try {
+        fs.unlinkSync(tmpTranscript);
+      } catch {
+        // ignore
+      }
+    }
+  });
 });
 
 // ============================================================

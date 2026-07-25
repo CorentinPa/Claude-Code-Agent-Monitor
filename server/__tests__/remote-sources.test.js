@@ -341,6 +341,31 @@ describe("source scoping across data endpoints", () => {
     const res = await get("/api/agents?sources=local");
     assert.ok(res.body.agents.every((a) => a.session_id !== "scope-remote"));
   });
+
+  it("pricing cost respects the source scope (regression: total cost was global)", async () => {
+    // Equal usage on the local + the remote session; the default claude-opus-4-8
+    // pricing rule prices it. Before the fix, /pricing/cost ignored `sources`, so
+    // every scope returned the same global total and the Dashboard cost never
+    // moved when the scope changed.
+    stmts.upsertTokenUsage.run("scope-local", "claude-opus-4-8", 1_000_000, 0, 0, 0);
+    stmts.upsertTokenUsage.run("scope-remote", "claude-opus-4-8", 1_000_000, 0, 0, 0);
+
+    const all = await get("/api/pricing/cost");
+    const local = await get("/api/pricing/cost?sources=local");
+    const remote = await get("/api/pricing/cost?sources=src_scope");
+
+    assert.ok(all.body.total_cost > 0, "some cost recorded across all sources");
+    assert.ok(local.body.total_cost > 0, "local scope has cost");
+    assert.ok(remote.body.total_cost > 0, "remote scope has cost");
+    // The fix: each scope is strictly less than the combined total.
+    assert.ok(local.body.total_cost < all.body.total_cost, "local scope excludes remote cost");
+    assert.ok(remote.body.total_cost < all.body.total_cost, "remote scope excludes local cost");
+    // The two disjoint scopes partition the whole (no other opus-4-8 usage here).
+    assert.ok(
+      Math.abs(local.body.total_cost + remote.body.total_cost - all.body.total_cost) < 1e-6,
+      "local + remote cost sums to the unscoped total"
+    );
+  });
 });
 
 describe("/api/remote-sources session_count", () => {
@@ -357,6 +382,115 @@ describe("/api/remote-sources session_count", () => {
     const list = await get("/api/remote-sources");
     const row = list.body.sources.find((s) => s.id === id);
     assert.equal(row.session_count, 2);
+  });
+});
+
+// ── Remote session status reconciliation ─────────────────────────────────────
+// A remote session gets NO live hooks and is excluded from every local liveness/
+// staleness sweep, so its active/completed state is driven solely by whether its
+// mirrored transcript is still advancing. These exercise that reconciliation
+// directly against a staged tree with controlled mtimes.
+describe("reconcileRemoteSessionStatus", () => {
+  const dbModule = require("../db");
+  const SRC = { id: "src_recon" };
+  let stageRoot;
+
+  before(() => {
+    stageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ccam-recon-"));
+  });
+  after(() => {
+    try {
+      fs.rmSync(stageRoot, { recursive: true, force: true });
+    } catch {
+      /* ignore */
+    }
+  });
+
+  function stageSession(id, ageMs) {
+    const proj = path.join(stageRoot, "-Users-x-proj");
+    fs.mkdirSync(proj, { recursive: true });
+    const f = path.join(proj, `${id}.jsonl`);
+    fs.writeFileSync(f, "{}\n");
+    const t = new Date(Date.now() - ageMs);
+    fs.utimesSync(f, t, t);
+    return f;
+  }
+
+  it("heals a wrongly-completed remote session whose mirror is still fresh", () => {
+    stmts.insertSession.run(
+      "recon-fresh",
+      "s",
+      "completed",
+      "/home/ubuntu/matroid",
+      "claude-opus-4-8",
+      null
+    );
+    stmts.setSessionSource.run(SRC.id, "recon-fresh");
+    stmts.insertAgent.run(
+      "recon-fresh-main",
+      "recon-fresh",
+      "Main",
+      "main",
+      null,
+      "completed",
+      null,
+      null,
+      null
+    );
+    stageSession("recon-fresh", 1_000); // 1s old → still running
+
+    remoteSync.reconcileRemoteSessionStatus(dbModule, SRC, stageRoot);
+
+    assert.equal(stmts.getSession.get("recon-fresh").status, "active");
+    assert.equal(stmts.getSession.get("recon-fresh").ended_at, null, "ended_at cleared on heal");
+    assert.equal(stmts.getAgent.get("recon-fresh-main").status, "waiting");
+  });
+
+  it("completes an active remote session whose mirror has gone stale", () => {
+    stmts.insertSession.run(
+      "recon-stale",
+      "s",
+      "active",
+      "/home/ubuntu/other",
+      "claude-opus-4-8",
+      null
+    );
+    stmts.setSessionSource.run(SRC.id, "recon-stale");
+    stmts.insertAgent.run(
+      "recon-stale-main",
+      "recon-stale",
+      "Main",
+      "main",
+      null,
+      "waiting",
+      null,
+      null,
+      null
+    );
+    stageSession("recon-stale", 20 * 60 * 1000); // 20 min idle → ended
+
+    remoteSync.reconcileRemoteSessionStatus(dbModule, SRC, stageRoot);
+
+    assert.equal(stmts.getSession.get("recon-stale").status, "completed");
+    assert.ok(stmts.getSession.get("recon-stale").ended_at, "ended_at stamped");
+    assert.equal(stmts.getAgent.get("recon-stale-main").status, "completed");
+  });
+
+  it("never touches a session owned by a different source", () => {
+    stmts.insertSession.run(
+      "recon-other",
+      "s",
+      "active",
+      "/home/ubuntu/z",
+      "claude-opus-4-8",
+      null
+    );
+    stmts.setSessionSource.run("src_different", "recon-other");
+    stageSession("recon-other", 20 * 60 * 1000); // stale, but not this source's
+
+    remoteSync.reconcileRemoteSessionStatus(dbModule, SRC, stageRoot);
+
+    assert.equal(stmts.getSession.get("recon-other").status, "active");
   });
 });
 

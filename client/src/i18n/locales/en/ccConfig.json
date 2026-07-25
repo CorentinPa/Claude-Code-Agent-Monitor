@@ -104,7 +104,16 @@
     "context": "Context",
     "key": "Key",
     "action": "Action",
-    "docsLink": "View keybindings docs"
+    "docsLink": "View keybindings docs",
+    "contextPlaceholder": "Context (e.g. Global, Chat)",
+    "addContext": "Add context",
+    "removeContext": "Remove context",
+    "addBinding": "Add binding",
+    "removeBinding": "Remove binding",
+    "errContext": "Every context needs a name.",
+    "errDupContext": "Duplicate context: {{context}}",
+    "errEmpty": "Every binding in \"{{context}}\" needs both a key and an action.",
+    "errDupKey": "Duplicate key \"{{key}}\" in context \"{{context}}\"."
   },
   "statusline": {
     "title": "Statusline",

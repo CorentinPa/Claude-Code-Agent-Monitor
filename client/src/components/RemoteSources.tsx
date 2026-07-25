@@ -29,6 +29,9 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  Globe,
+  Monitor,
+  ListChecks,
 } from "lucide-react";
 import { api } from "../lib/api";
 import type { RemoteSource, RemoteSourceInput } from "../lib/api";
@@ -287,36 +290,91 @@ export function RemoteSources() {
         <p className="text-xs text-gray-500 mb-3">
           {t(
             "remoteSources.scopeDesc",
-            "Choose which machines' data the whole dashboard shows. Changes apply immediately."
+            "Choose which machines' data the whole dashboard shows. Changes apply immediately across every page — sessions, analytics, and cost."
           )}
         </p>
-        <div className="flex flex-col gap-2">
+        {/* Card selector — one card per scope mode, each with a short explanation
+            so the choice is self-describing rather than a bare radio label. */}
+        <div className="grid gap-2.5 sm:grid-cols-3" role="radiogroup" aria-label="Data scope">
           {(
             [
-              ["all", t("remoteSources.scopeAll", "All sources (local + remote)")],
-              ["local", t("remoteSources.scopeLocal", "This machine only")],
-              ["selected", t("remoteSources.scopeSelected", "Selected sources…")],
-            ] as [ScopeMode, string][]
-          ).map(([mode, label]) => (
-            <label key={mode} className="flex items-center gap-2.5 cursor-pointer">
-              <input
-                type="radio"
-                name="data-scope"
-                checked={scope.mode === mode}
-                onChange={() => setMode(mode)}
-                className="accent-accent"
-              />
-              <span className="text-sm text-gray-300">{label}</span>
-            </label>
-          ))}
-          {scope.mode === "selected" && (
-            <div className="mt-1 ml-6 flex flex-wrap gap-2">
+              {
+                mode: "all",
+                Icon: Globe,
+                title: t("remoteSources.scopeAll", "All sources"),
+                desc: t(
+                  "remoteSources.scopeAllDesc",
+                  "This machine plus every configured remote source, combined."
+                ),
+              },
+              {
+                mode: "local",
+                Icon: Monitor,
+                title: t("remoteSources.scopeLocal", "This machine only"),
+                desc: t(
+                  "remoteSources.scopeLocalDesc",
+                  "Only sessions collected locally — hides all remote-source data."
+                ),
+              },
+              {
+                mode: "selected",
+                Icon: ListChecks,
+                title: t("remoteSources.scopeSelected", "Selected sources"),
+                desc: t(
+                  "remoteSources.scopeSelectedDesc",
+                  "Pick exactly which machines to include, below."
+                ),
+              },
+            ] as { mode: ScopeMode; Icon: typeof Globe; title: string; desc: string }[]
+          ).map(({ mode, Icon, title, desc }) => {
+            const active = scope.mode === mode;
+            return (
+              <button
+                key={mode}
+                role="radio"
+                aria-checked={active}
+                onClick={() => setMode(mode)}
+                className={`relative text-left rounded-xl border p-3 transition-colors ${
+                  active
+                    ? "border-accent bg-accent/10 ring-1 ring-accent/40"
+                    : "border-border bg-surface-2 hover:border-accent/40 hover:bg-surface-2/70"
+                }`}
+              >
+                {active && (
+                  <CheckCircle className="w-4 h-4 text-accent absolute top-2.5 right-2.5" />
+                )}
+                <Icon className={`w-5 h-5 mb-2 ${active ? "text-accent" : "text-gray-400"}`} />
+                <div
+                  className={`text-sm font-medium ${active ? "text-gray-100" : "text-gray-300"}`}
+                >
+                  {title}
+                </div>
+                <div className="text-[11px] text-gray-500 mt-0.5 leading-snug">{desc}</div>
+                {mode === "selected" && scope.mode === "selected" && (
+                  <div className="text-[11px] text-accent mt-1">
+                    {t("remoteSources.scopeSelectedCount", "{{n}} of {{total}} selected", {
+                      n: scope.selected.filter((id) => scopeOptionIds.includes(id)).length,
+                      total: scopeOptionIds.length,
+                    })}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {scope.mode === "selected" && (
+          <div className="mt-3 pt-3 border-t border-border">
+            <div className="text-[11px] uppercase tracking-wider text-gray-500 mb-2">
+              {t("remoteSources.scopePickMachines", "Machines to include")}
+            </div>
+            <div className="flex flex-wrap gap-2">
               {scopeOptionIds.map((id) => {
                 const on = scope.selected.includes(id);
                 return (
                   <button
                     key={id}
                     onClick={() => toggleSelected(id)}
+                    aria-pressed={on}
                     className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors ${
                       on
                         ? "bg-accent/15 border-accent/40 text-accent"
@@ -329,8 +387,8 @@ export function RemoteSources() {
                 );
               })}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Sources list header + add button */}

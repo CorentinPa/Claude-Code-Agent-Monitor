@@ -5169,7 +5169,7 @@ paths:
         - Pricing
       summary: Get total token cost across all sessions
       operationId: getTotalCost
-      description: Computes the aggregate token cost across EVERY session by matching each (model, speed, inference_geo, service_tier) usage bucket against the most specific pricing rule. Returns `total_cost`, a per-bucket `breakdown`, `feature_costs` (web-search surcharge, code-execution container time with the org free-hours allowance applied), `unpriced_models` (usage with no matching rule, contributing $0 so the total stays honest), and `daily_costs` bucketed by local calendar day. Pass `tz_offset` (minutes; the JS `Date.getTimezoneOffset()` value, e.g. 300 for US Eastern, -120 for CEST) so day boundaries align with the viewer's timezone; omitted/invalid offsets fall back to UTC.
+      description: Computes the aggregate token cost across EVERY session by matching each (model, speed, inference_geo, service_tier) usage bucket against the most specific pricing rule. Returns `total_cost`, a per-bucket `breakdown`, `feature_costs` (web-search surcharge, code-execution container time with the org free-hours allowance applied), `unpriced_models` (usage with no matching rule, contributing $0 so the total stays honest), and `daily_costs` bucketed by local calendar day. Pass `tz_offset` (minutes; the JS `Date.getTimezoneOffset()` value, e.g. 300 for US Eastern, -120 for CEST) so day boundaries align with the viewer's timezone; omitted/invalid offsets fall back to UTC. Honors the `sources` data-scope filter, like the sessions / stats / analytics endpoints, so the reported cost matches the active scope.
       parameters:
         - name: tz_offset
           in: query
@@ -5178,6 +5178,13 @@ paths:
             type: integer
           description: Viewer timezone offset in minutes, as returned by `Date.getTimezoneOffset()` (positive for zones behind UTC, e.g. 300 = US Eastern, -120 = CEST). Shifts the `daily_costs` day boundaries; invalid or omitted values default to UTC.
           example: 300
+        - name: sources
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Comma-separated data-source ids to include (local history is `local`; remote SSH machines use their `remote_sources.id`). Omit for all sources. Narrows the aggregate cost to the given origins.
+          example: local
       responses:
         '200':
           description: Cost result
@@ -7610,6 +7617,90 @@ paths:
                     bindings:
                       - key: ctrl+s
                         action: submit
+    put:
+      tags:
+        - CcConfig
+      summary: Overwrite keybindings
+      description: 'Mutating. Overwrites ~/.claude/keybindings.json from a structured list of context groups (`{ context, bindings: [{ key, action }] }`); on disk the bindings become an object keyed by `key`. The existing file is backed up first (under cc-config-backups/keybindings/) and any top-level metadata (`$schema`, `$docs`, unknown keys) is preserved — only the `bindings` array is replaced. Rejects duplicate contexts and duplicate keys within a context. Writes are atomic. Unlike settings.json, keybindings.json is not rewritten mid-session by the live CLI, so this edit is safe. Emits a `cc_config_changed` websocket event on success.'
+      operationId: ccConfigPutKeybindings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - groups
+              properties:
+                groups:
+                  type: array
+                  description: Full set of context-scoped keybinding groups to persist.
+                  items:
+                    type: object
+                    required:
+                      - context
+                      - bindings
+                    properties:
+                      context:
+                        type: string
+                        example: Global
+                      bindings:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - key
+                            - action
+                          properties:
+                            key:
+                              type: string
+                              example: ctrl+t
+                            action:
+                              type: string
+                              example: toggleTodos
+            example:
+              groups:
+                - context: Global
+                  bindings:
+                    - key: ctrl+t
+                      action: toggleTodos
+                - context: Chat
+                  bindings:
+                    - key: escape
+                      action: cancel
+      responses:
+        '200':
+          description: keybindings.json written (backup taken when it already existed).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CcConfigFileWriteResponse'
+              example:
+                ok: true
+                file: /Users/son/.claude/keybindings.json
+                target: /Users/son/.claude/keybindings.json
+                backupPath: /Users/son/.claude/cc-config-backups/keybindings/keybindings.json.2026-06-25T12-00-00.000Z.bak
+                created: false
+        '400':
+          description: Bad request. `EBADREQ` — `groups` is missing or not an array. `EBADCONTENT` — a group/binding is malformed, a context is empty, or there is a duplicate context or duplicate key within a context.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: EBADCONTENT
+                  message: duplicate key "ctrl+t" in context Global
+        '413':
+          description: '`ETOOLARGE` — the serialized keybindings exceed the 256 KiB limit.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: ETOOLARGE
+                  message: content exceeds 262144 bytes
   /api/cc-config/statusline:
     get:
       tags:
