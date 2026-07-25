@@ -322,9 +322,14 @@ function createOpenApiSpec() {
         },
         HealthResponse: {
           type: "object",
-          required: ["status", "timestamp"],
+          required: ["status", "timestamp", "version"],
           properties: {
             status: { type: "string", enum: ["ok"] },
+            version: {
+              type: "string",
+              description: "Dashboard release version from package.json",
+              example: "1.4.1",
+            },
             timestamp: { type: "string", format: "date-time" },
           },
         },
