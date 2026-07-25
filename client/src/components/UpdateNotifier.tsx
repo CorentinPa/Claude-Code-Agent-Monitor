@@ -1,7 +1,19 @@
 /**
- * @file Modal that tells the user when the dashboard's git checkout is behind
- * its remote and shows the exact command to run in a terminal. The dashboard
- * never pulls or restarts itself - the user copies and runs the command.
+ * @file UpdateNotifier.tsx
+ * @description Modal surfaced when the dashboard's git checkout is behind its
+ * remote tracking branch. Shows how many commits behind, the exact terminal
+ * command to update, and copy-to-clipboard — the dashboard never pulls or
+ * restarts itself.
+ *
+ * ## State sources
+ * - Initial fetch via `api.updates.status()` on mount.
+ * - Live refresh from WebSocket `update_status` events on {@link eventBus}.
+ *
+ * ## Dismissal persistence
+ * Dismissals are keyed by `remote_sha` in `localStorage` so a new upstream
+ * commit re-opens the prompt. Settings can reset dismissal via the
+ * `dashboard:reset-update-dismissal` window event.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -12,12 +24,15 @@ import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
 import type { UpdateStatusPayload, WSMessage } from "../lib/types";
 
+/** `localStorage` key storing the dismissed upstream SHA. */
 const DISMISS_KEY = "agent-monitor-update-dismissed-sha";
 
+/** Narrow unknown WebSocket payloads to {@link UpdateStatusPayload}. */
 function isUpdatePayload(x: unknown): x is UpdateStatusPayload {
   return typeof x === "object" && x !== null && "git_repo" in x && "update_available" in x;
 }
 
+/** Read the last dismissed upstream SHA from `localStorage`, or null. */
 function loadDismissedSha(): string | null {
   try {
     return localStorage.getItem(DISMISS_KEY);
@@ -26,6 +41,10 @@ function loadDismissedSha(): string | null {
   }
 }
 
+/**
+ * Git update availability modal — mounted once in {@link Layout}.
+ * @returns `null` when no update is available or the current SHA was dismissed.
+ */
 export function UpdateNotifier() {
   const { t } = useTranslation("updates");
   const [status, setStatus] = useState<UpdateStatusPayload | null>(null);

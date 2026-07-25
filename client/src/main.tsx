@@ -1,6 +1,19 @@
 /**
  * @file main.tsx
- * @description The entry point of the React application that renders the main App component into the root DOM element. It uses React's StrictMode for highlighting potential problems in the application and ensures that the app is rendered in a way that adheres to best practices.
+ * @description Vite client entry point. Bootstraps React 18, loads global styles
+ * and i18n, registers the service worker for offline asset caching, and mounts
+ * {@link App} into `#root`.
+ *
+ * ## Fonts
+ * Only Latin subsets of Inter and JetBrains Mono are imported so Vite bundles
+ * lean WOFF2 files instead of every glyph subset Google Fonts would serve.
+ *
+ * ## Service worker reload policy
+ * On first visit there is no controlling SW yet — we must not reload when the
+ * initial SW activates (the page is already fresh). On subsequent deploys the
+ * page is controlled; when a new SW takes over we reload once so hashed bundle
+ * URLs update without a manual hard refresh.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 

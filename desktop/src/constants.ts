@@ -1,8 +1,14 @@
 /**
- * @file Shared constants for the desktop shell.
+ * @file constants.ts
+ * @description Shared compile-time constants for the Electron desktop shell.
+ * Values here must stay aligned with `electron-builder.yml` (app ID), the
+ * documented default dashboard port, and the embedded server health probe in
+ * `server-host.ts`.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
+/** Human-readable product name shown in window title and About menu. */
 export const APP_NAME = "Claude Code Monitor";
 
 /**

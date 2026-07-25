@@ -1,18 +1,42 @@
 /**
  * @file EmptyState.tsx
- * @description A reusable React component that displays an empty state with an icon, title, description, and an optional action. It is designed to be used across the application whenever there is no data to show or when a user needs guidance on what to do next.
+ * @description Centered empty-state panel used whenever a page or section has
+ * nothing to render yet — no sessions, no events, no search hits, or a feature
+ * that has not been configured. Keeps the UI from looking broken by giving the
+ * user a clear icon, title, explanation, and an optional call-to-action slot.
+ *
+ * ## When to use
+ * Prefer this over ad-hoc "No data" paragraphs so every list/table page shares
+ * the same vertical rhythm, typography, and card chrome. The optional `action`
+ * slot accepts any React node (usually a `<Link>` or `<button>`) without this
+ * component needing to know about routing.
+ *
+ * ## Accessibility
+ * The icon is decorative (no separate `aria-label`); meaning comes from the
+ * visible `title` (`<h3>`) and `description` (`<p>`). Callers should pass
+ * translated strings via `useTranslation`.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
 import type { LucideIcon } from "lucide-react";
 
-interface EmptyStateProps {
+/** Props for {@link EmptyState}. */
+export interface EmptyStateProps {
+  /** Lucide icon shown inside the rounded square above the title. */
   icon: LucideIcon;
+  /** Primary heading — keep short (one line). */
   title: string;
+  /** Supporting copy; wrapped at `max-w-md` for comfortable line length. */
   description: string;
+  /** Optional CTA rendered below the description (button, link, or form). */
   action?: React.ReactNode;
 }
 
+/**
+ * Renders a vertically centered empty state inside the main content column.
+ * @param props See {@link EmptyStateProps}.
+ */
 export function EmptyState({ icon: Icon, title, description, action }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">

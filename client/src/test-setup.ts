@@ -1,6 +1,12 @@
 /**
  * @file test-setup.ts
- * @description Test setup file for the client-side unit tests using Vitest and React Testing Library. This file configures the testing environment, including importing necessary libraries and performing cleanup after each test to ensure isolation between tests. The cleanup function from React Testing Library is called after each test to unmount components and clean up the DOM, preventing side effects from affecting other tests.
+ * @description Vitest global setup for the React client test suite. Pulls in
+ * jest-dom matchers, initializes the real i18n bundle (same as production),
+ * forces English before each test for deterministic assertions, and runs
+ * Testing Library cleanup after every test to prevent DOM leakage between cases.
+ *
+ * Imported from `vitest.config.ts` via `setupFiles`.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -10,12 +16,12 @@ import { afterEach, beforeEach } from "vitest";
 import "./i18n/index";
 import i18n from "i18next";
 
-// Force English locale for deterministic test assertions
-// (LanguageDetector may pick up zh from the system environment)
+/** Pin locale to English — LanguageDetector may otherwise pick up zh/vi from the host OS. */
 beforeEach(() => {
   i18n.changeLanguage("en");
 });
 
+/** Unmount rendered trees and reset the document between tests. */
 afterEach(() => {
   cleanup();
 });

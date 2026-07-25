@@ -1,6 +1,21 @@
 /**
  * @file Layout.tsx
- * @description Defines the Layout component that serves as the main structure for the application, including a collapsible sidebar and a main content area. The sidebar's collapsed state is stored in localStorage to persist user preferences across sessions. The component uses React Router's Outlet to render nested routes within the main content area and adjusts its layout based on the sidebar's state.
+ * @description Application shell that frames every authenticated route: persistent
+ * sidebar, main content column, update notifier, and the Tabby assistant overlay.
+ * The layout is the single parent route in {@link App} — child pages render inside
+ * React Router's `<Outlet />` so navigation never remounts chrome.
+ *
+ * ## Sidebar persistence
+ * Collapsed state is read once from `localStorage` via {@link loadCollapsed} and
+ * written back on every toggle. Failures to access storage are swallowed so a
+ * private-browsing quota error never breaks the UI.
+ *
+ * ## Sticky descendants
+ * The inner content wrapper uses `overflow-x-clip` (not `hidden`) so horizontal
+ * overflow is clipped without creating a scroll container. That keeps `position:
+ * sticky` elements — e.g. the Settings page table-of-contents — pinned to the
+ * viewport rather than a nested scroll box.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -10,10 +25,16 @@ import { Sidebar, SIDEBAR_STORAGE_KEY, loadCollapsed } from "./Sidebar";
 import { UpdateNotifier } from "./UpdateNotifier";
 import { Tabby } from "./Tabby/Tabby";
 
+/** Props for {@link Layout}. */
 interface LayoutProps {
+  /** Live WebSocket status forwarded to the sidebar connection indicator. */
   wsConnected: boolean;
 }
 
+/**
+ * Root layout wrapping all dashboard routes.
+ * @param props See {@link LayoutProps}.
+ */
 export function Layout({ wsConnected }: LayoutProps) {
   const [collapsed, setCollapsed] = useState(loadCollapsed);
 

@@ -1,34 +1,48 @@
 /**
  * @file Select.tsx
- * @description Custom styled dropdown that replaces the native <select> for
- * consistent rendering across the app. Native macOS / Chromium selects reserve
- * checkmark space inconsistently, making rows look ragged; this generic dropdown
- * (Tailwind + lucide) aligns labels, supports keyboard navigation, flips above
- * the trigger when there's no room below, and marks the selected option with an
- * accent + check. Used by the Run Claude page and the webhook settings form.
+ * @description Generic styled dropdown that replaces native `<select>` elements
+ * for consistent cross-platform rendering. Native macOS/Chromium selects reserve
+ * checkmark space inconsistently; this control aligns labels, supports arrow-key
+ * navigation, flips above the trigger when viewport space is tight, and marks
+ * the active option with accent color plus a Lucide check.
+ *
+ * ## Consumers
+ * Used on the Run Claude page and webhook settings form wherever a compact
+ * enum picker is needed.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Check } from "lucide-react";
 
+/** Single option in a {@link Select} list. */
 export interface SelectOption<T extends string> {
+  /** Stored value emitted via `onChange`. */
   value: T;
+  /** Primary label shown in the trigger and list. */
   label: string;
+  /** Optional secondary line (smaller gray text). */
   hint?: string;
 }
 
-export function Select<T extends string>({
-  value,
-  onChange,
-  options,
-  disabled,
-}: {
+/** Props for {@link Select}. */
+export interface SelectProps<T extends string> {
+  /** Currently selected value. */
   value: T;
+  /** Called when the user picks a new option. */
   onChange: (v: T) => void;
+  /** All choices; must be non-empty for sensible rendering. */
   options: SelectOption<T>[];
+  /** Disables opening the list. */
   disabled?: boolean;
-}) {
+}
+
+/**
+ * Accessible custom select control.
+ * @typeParam T - string union of allowed option values.
+ */
+export function Select<T extends string>({ value, onChange, options, disabled }: SelectProps<T>) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(() =>
     Math.max(

@@ -1,9 +1,15 @@
 /**
  * @file FieldHelp.tsx
- * @description A small "(?)" info trigger that reveals a rich popover explaining
- * how to fill in a form field - description, optional copy-able examples, and an
- * optional note. Hover/focus/click to open; the popover is portal'd to <body>
- * and clamped to the viewport so it never clips inside scrolling cards.
+ * @description Contextual "(?)" help trigger for dense settings forms. Opens a
+ * rich popover with title, description, optional example chips, and an optional
+ * footnote — all portaled to `<body>` and repositioned on scroll/resize so the
+ * panel never clips inside scrolling cards.
+ *
+ * ## Interaction model
+ * Opens on hover, focus, or click (toggle). Escape dismisses. The popover uses
+ * `pointer-events-none` so moving the pointer toward it does not accidentally
+ * close the trigger's hover state mid-read.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -12,17 +18,23 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { HelpCircle } from "lucide-react";
 
-export function FieldHelp({
-  title,
-  description,
-  examples,
-  note,
-}: {
+/** Props for {@link FieldHelp}. */
+export interface FieldHelpProps {
+  /** Optional bold heading inside the popover. */
   title?: string;
+  /** Main explanatory copy. */
   description: string;
+  /** Short example values rendered as monospace chips. */
   examples?: string[];
+  /** Secondary note shown below examples. */
   note?: string;
-}) {
+}
+
+/**
+ * Inline help control for form fields.
+ * @param props See {@link FieldHelpProps}.
+ */
+export function FieldHelp({ title, description, examples, note }: FieldHelpProps) {
   const { t } = useTranslation("common");
   const [open, setOpen] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);

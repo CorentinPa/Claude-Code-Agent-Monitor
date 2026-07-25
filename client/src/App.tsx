@@ -1,6 +1,21 @@
 /**
  * @file App.tsx
- * @description Defines the main application component that sets up routing for different pages, manages WebSocket connections for real-time updates, and initializes notifications. It uses React Router for navigation and custom hooks for WebSocket and notification handling.
+ * @description Top-level React tree for the Claude Code Agent Monitor dashboard.
+ * Wires together routing, real-time WebSocket ingestion, browser notifications,
+ * and the splash screen shown on cold load.
+ *
+ * ## Data flow
+ * 1. {@link useWebSocket} connects to the server's `/ws` endpoint.
+ * 2. Each inbound {@link WSMessage} is published on the in-memory
+ *    {@link eventBus} so any page can subscribe without prop drilling.
+ * 3. {@link useNotifications} listens for alert-worthy events and surfaces OS
+ *    notifications when permitted.
+ *
+ * ## Routing
+ * All feature pages nest under {@link Layout}, which owns the sidebar and
+ * passes `wsConnected` for the connection badge. Unknown paths fall through to
+ * {@link NotFound}.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -24,6 +39,10 @@ import { useNotifications } from "./hooks/useNotifications";
 import { eventBus } from "./lib/eventBus";
 import type { WSMessage } from "./lib/types";
 
+/**
+ * Application root component mounted by {@link main.tsx}.
+ * @returns Routed dashboard UI inside `BrowserRouter`.
+ */
 export default function App() {
   const onMessage = useCallback((msg: WSMessage) => {
     eventBus.publish(msg);

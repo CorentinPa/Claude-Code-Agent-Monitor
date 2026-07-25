@@ -1,6 +1,12 @@
 /**
  * @file NotFound.tsx
- * @description Displays a user-friendly 404 Not Found page with navigation options to return to the dashboard or go back to the previous page.
+ * @description Catch-all route for unknown paths (`path="*"` in {@link App}).
+ * Presents a friendly 404 card with translated copy and two recovery actions:
+ * navigate home (dashboard) or go back one history entry.
+ *
+ * Uses the `errors` i18n namespace (`notFound.*` keys) so the page stays
+ * localized without hard-coded English strings.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -8,6 +14,10 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle, ArrowLeft, Home } from "lucide-react";
 
+/**
+ * 404 page rendered for unmatched routes.
+ * @returns Centered error card with navigation actions.
+ */
 export function NotFound() {
   const navigate = useNavigate();
   const { t } = useTranslation("errors");

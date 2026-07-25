@@ -1,6 +1,22 @@
 /**
  * @file index.ts
- * @description Initializes the i18n internationalization framework for the agent dashboard application, setting up language resources for English, Chinese, Vietnamese, and Korean locales. It configures language detection, fallback options, and namespaces for organized translation keys. This module allows the application to support multiple languages and provides a seamless experience for users across different regions.
+ * @description i18next bootstrap for the dashboard client. Registers bundled JSON
+ * locale files for English (`en`), Chinese (`zh`), Vietnamese (`vi`), and
+ * Korean (`ko`), wires browser language detection, and exports the configured
+ * singleton consumed by `react-i18next`.
+ *
+ * ## Namespaces
+ * Translations are split by feature area (`dashboard`, `sessions`, `settings`,
+ * etc.) so pages import only the keys they need via `useTranslation("ns")`.
+ * `common` is the default namespace for shared labels and buttons.
+ *
+ * ## Detection order
+ * 1. `localStorage` key `i18nextLng` (user override from Settings)
+ * 2. `navigator.language` fallback
+ *
+ * Unknown regional variants (e.g. `en-US`) map to supported base languages via
+ * `nonExplicitSupportedLngs`.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -173,4 +189,5 @@ i18n
     },
   });
 
+/** Configured i18next instance — import side effects run {@link init}. */
 export default i18n;

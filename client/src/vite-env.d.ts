@@ -1,10 +1,16 @@
 /**
  * @file vite-env.d.ts
- * @description Ambient type declarations for the client build — Vite client types plus the build-time-injected `__APP_VERSION__` global (the repo-root project version; see vite.config.ts).
+ * @description Ambient type declarations for the Vite client build. Pulls in
+ * Vite's client types (`import.meta.env`, static asset modules) and declares
+ * compile-time globals injected by `define` in `vite.config.ts`.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
 /// <reference types="vite/client" />
 
-/** Repo-root project version, injected by Vite `define` at build time. */
+/**
+ * Repository version string baked in at build time from the root `package.json`.
+ * Surfaced in Settings and the update notifier without a runtime fetch.
+ */
 declare const __APP_VERSION__: string;
