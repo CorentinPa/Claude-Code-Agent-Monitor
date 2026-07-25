@@ -238,7 +238,13 @@ flowchart LR
 <p align="center">
   <img src="images/config.png" alt="Claude Config Explorer" width="100%">
   <br>
-  <em>🧰 <strong>Claude 설정 탐색기</strong> — Claude Code가 알고 있는 모든 것을 위한 12탭 인스펙터: 스킬, 서브에이전트, 슬래시 명령, 출력 스타일, 플러그인(플러그인별 기여 항목 포함), 마켓플레이스, MCP 서버, Hook, 설정(비밀 키 마스킹 포함), 메모리(사용자 + 프로젝트 `CLAUDE.md` 파일과 프로젝트별 파일 기반 메모리 저장소 — `~/.claude/projects/<slug>/memory/` 아래의 모든 `*.md` 파일을 프로젝트별로 그룹화하고 검색 가능), 키바인딩, Statusline. 저위험 텍스트 파일 표면 — 프로젝트별 자동 메모리 파일 포함 — 에서 필수 타임스탬프 백업과 함께 생성 / 편집 / 삭제 가능</em>
+  <em>🧰 <strong>Claude 설정 탐색기</strong> — Claude Code가 알고 있는 모든 것을 위한 12탭 인스펙터: 스킬, 서브에이전트, 슬래시 명령, 출력 스타일, 플러그인(플러그인별 기여 항목 포함), 마켓플레이스, MCP 서버, Hook, 설정(비밀 키 마스킹 포함), 메모리(사용자 + 프로젝트 `CLAUDE.md` 파일과 프로젝트별 파일 기반 메모리 저장소 — `~/.claude/projects/<slug>/memory/` 아래의 모든 `*.md` 파일을 프로젝트별로 그룹화하고 검색 가능), 키바인딩(인라인 구조화 편집기 포함), Statusline. 저위험 표면 — 텍스트 파일 아티팩트, 프로젝트별 자동 메모리 파일, `keybindings.json` — 에서 필수 타임스탬프 백업과 함께 생성 / 편집 / 삭제 가능</em>
+</p>
+
+<p align="center">
+  <img src="images/config-skills.png" alt="Claude 설정 탐색기 — 스킬 탭" width="100%">
+  <br>
+  <em>🧩 <strong>Claude 설정 탐색기 · 스킬</strong> — 스킬 탭은 발견된 모든 스킬(사용자, 프로젝트, 플러그인)을 설명과 출처와 함께 나열하고, 전체 목록에서 검색할 수 있으며, 안전한 타임스탬프 백업과 함께 스킬 파일을 열어 편집할 수 있습니다</em>
 </p>
 
 <p align="center">
@@ -263,6 +269,12 @@ flowchart LR
   <img src="images/alerts.png" alt="Settings — Alerts & Webhooks" width="100%">
   <br>
   <em>🔔 <strong>설정 · 알림</strong> — 규칙 기반 알림 엔진과 아웃바운드 웹훅을 한곳에서: 규칙별 쿨다운이 있는 알림 규칙(이벤트 패턴 / 비활성 / 멈춘 에이전트 / 토큰 임계값), 실시간 발동 알림 피드, 14개의 퍼스트클래스 웹훅 제공자(Slack, Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream)와 선택적 HMAC 서명을 지원하는 범용 JSON 엔드포인트</em>
+</p>
+
+<p align="center">
+  <img src="images/remote.png" alt="설정 — 원격 데이터 소스" width="100%">
+  <br>
+  <em>🛰️ <strong>설정 · 원격 데이터 소스</strong> — SSH로 다른 머신의 Claude Code 활동을 가져옵니다: 대상별로 소스 추가, 연결 테스트, 수동 또는 백그라운드 폴러로 동기화, 그리고 전역 데이터 범위를 로컬 · 전체 소스 · 특정 머신 사이에서 전환하며 세션별 소스 배지 표시</em>
 </p>
 
 사이드바에서 대시보드, Kanban 보드, 세션 목록, 활동 피드, 분석, 워크플로, 설정에 빠르게 접근할 수 있습니다. 각 페이지는 실시간 업데이트와 풍부한 시각화로 Claude Code 에이전트 활동에 대한 깊이 있는 인사이트를 제공하도록 설계되었습니다.
@@ -505,8 +517,8 @@ sequenceDiagram
    - JSONL 트랜스크립트에서 API 오류(`isApiErrorMessage` 항목: 할당량 제한, 속도 제한, invalid_request)와 원시 `type: "error"` 응답을 추출하여 `APIError` 이벤트로 저장합니다. 턴 지속 시간(`system` 하위 유형 `turn_duration`)은 `TurnDuration` 이벤트로 저장됩니다. 도구 결과 오류(`toolUseResult.is_error`)는 `ToolError` 이벤트로 추적됩니다
    - **오류 감지 워치독** — 백그라운드 타이머가 15초마다 실행되어 최근 Hook 이벤트가 없는(10초 이상 오래된) 활성 세션을 스캔합니다. 해당 세션의 트랜스크립트 파일을 다시 읽어 API 오류(인증 실패, 속도 제한, 할당량 소진)를 찾고, 이벤트 데이터에 `transcript_path`가 없는 가져온 세션에 대해서는 세션 `cwd`로부터 트랜스크립트 경로를 유도하며, API 오류가 발견되면 세션/에이전트를 `error`로 표시합니다. 이는 API 오류 후 Claude CLI가 Hook을 발생시키지 않는 경우(예: CLI가 오류를 표시하고 대기하는 401 인증 실패)를 포착합니다
    - **사용자 중단(Esc) 복구** — `Esc`로 턴을 취소하면 **Hook이 전혀 발생하지 않으므로**(문서화된 Claude Code의 제한 사항), 개입이 없다면 메인 에이전트는 영원히 `working` 상태에 갇혀 있게 됩니다. 동일한 15초 워치독이 두 가지 방식으로 이를 복구합니다: (1) 취소가 트랜스크립트에 `[Request interrupted by user]` 마커를 남기는 경우(일부 출력 *이후의* Esc), 트랜스크립트 캐시가 `pendingInterrupt`를 통해 이를 플래그하고 — 순수하게 트랜스크립트 순서(최신 중단 vs 최신 실제 턴 활동, 동일한 시계이므로 1초 미만의 취소에도 동작)로부터 유도됩니다 — 세션은 약 15초 이내에 **Waiting**으로 이동합니다; (2) *어떤 출력도 나오기 전에* Esc를 누르면 Claude Code는 마커를 전혀 기록하지 않으므로 유휴 타임아웃 폴백이 적용됩니다 — 메인 에이전트가 **진행 중인 도구 없이** `working` 상태이고 **Hook 이벤트도 트랜스크립트도** `DASHBOARD_WORKING_IDLE_SECONDS`(기본값 `120`) 동안 진전이 없었다면, 해당 턴은 죽은 것으로 간주되고 세션은 **Waiting**으로 이동합니다. 두 경로 모두 `Interrupted` 이벤트를 기록하고, 일반적인 `Stop`이 만들어내는 것과 동일한 Waiting 상태에 세션을 안착시킵니다. 스트리밍 출력(트랜스크립트가 계속 증가 중)과 진행 중인 도구 호출(`current_tool` 설정됨)은 예외이며, 드물게 발생하는 잘못된 전환은 다음 실제 Hook에서 자가 복구됩니다
-   - **죽은 세션 활성 상태 회수** — Claude Code를 종료하면(Ctrl+C, 터미널 닫기) `SessionEnd` Hook이 발생하지만, 그 순간 대시보드가 실행 중이 아니면 이벤트는 영원히 유실되고 세션은 오래됨 정리(기본 3시간)까지 **Waiting** 상태로 남아 있게 됩니다. 동일한 15초 워치독이 **프로세스 활성 상태 프로브**로 이 공백을 메웁니다: 실행 중인 `claude` CLI 프로세스를 나열하고(macOS에서는 `ps` + `lsof`, Linux에서는 `/proc`), `cwd`에 살아 있는 claude 프로세스가 없는 모든 `active` 세션을 완료 처리합니다 — 실제 `SessionEnd`가 만들어내는 것과 동일한 `completed` 상태에 안착시키고, 타임라인에 합성 `SessionEnd` 이벤트를 남깁니다. 보호 장치: 워치독 틱에서는 세션의 트랜스크립트가 최소 `DASHBOARD_LIVENESS_IDLE_SECONDS`(기본값 `60`; 디스크에 트랜스크립트가 없을 때는 마지막 Hook 기록이 폴백 시계) 동안 기록되지 않았어야 하며 — **부팅 패스는 이 게이트를 완전히 건너뛰므로**, 실행 1초 전에 종료된 세션도 즉시 정리됩니다 — 프로브는 Windows에서, 컨테이너 내부에서(호스트 프로세스가 그곳에서는 보이지 않음), `ps`/`lsof`가 실패할 때, 또는 `DASHBOARD_LIVENESS_PROBE=0`으로 명시적으로 비활성화된 경우 "응답 없음"을 보고합니다(아무것도 변경하지 않음). **혼합** 배포에서는 회수가 `cwd`가 POSIX 절대 경로가 아닌 모든 세션도 자동으로 건너뜁니다 — household Hook을 통해 다른 머신에서 전달된 세션은 원본 머신 자체의 경로(예: Windows의 `D:\Git\ai-deck`)를 보고하며, 이는 로컬 `ps`/`lsof`/`/proc` 스캔이 결코 일치시킬 수 없으므로, 진짜 로컬 세션에 대해 프로브를 비활성화하지 않고도 원격 세션이 보호됩니다. 잘못된 완료 처리는 자가 복구됩니다: 다음 Hook 이벤트가 세션을 재활성화합니다. 15초 워치독 주기 외에도, 회수는 **시작 시 즉시** 실행되고(이전 실행에서 DB에 이미 남아 있던 죽은 세션을 렌더링되기 전에 정리) **약 5초 후 다시** 실행되므로(시작 동기화가 방금 가져온 세션까지 커버), 대시보드가 꺼져 있는 동안 죽은 세션이 Waiting으로 표시되는 일이 결코 없습니다
-   - 주기적인 서버 스윕이 이벤트 기반 감지를 빠져나간 abandoned 세션과 새 압축을 포착합니다(예: `/compact`는 Hook을 발생시키지 않고, `/resume`이 세션 생성 후 몇 초 이내에 발생하는 경우). 주기는 `DASHBOARD_STALE_MINUTES`로부터 유도됩니다(임계값의 ¼, 60초 – 5분으로 제한). 스윕은 `transcript_path`를 찾기 위해 이벤트 테이블을 스캔하는 대신 각 활성 세션 행에서 직접 읽습니다(작은 인덱스 조회). 이 컬럼은 Hook 핸들러가 트랜스크립트 경로를 처음 볼 때 채워지고 `db.js` 마이그레이션이 기존 이벤트로부터 일회성 백필하며, 부분 인덱스 `idx_sessions_active_tp`가 스윕이 읽는 행을 정확히 커버합니다. 스윕은 Hook 핸들러와 트랜스크립트 캐시를 공유하여 중복 I/O를 피합니다. abandoned 세션 정리는 메모리를 제한하기 위해 트랜스크립트 캐시 항목도 제거합니다
+   - **죽은 세션 활성 상태 회수** — Claude Code를 종료하면(Ctrl+C, 터미널 닫기) `SessionEnd` Hook이 발생하지만, 그 순간 대시보드가 실행 중이 아니면 이벤트는 영원히 유실되고 세션은 오래됨 정리(기본 3시간)까지 **Waiting** 상태로 남아 있게 됩니다. 동일한 15초 워치독이 **프로세스 활성 상태 프로브**로 이 공백을 메웁니다: 실행 중인 `claude` CLI 프로세스를 나열하고(macOS에서는 `ps` + `lsof`, Linux에서는 `/proc`), `cwd`에 살아 있는 claude 프로세스가 없는 모든 `active` 세션을 완료 처리합니다 — 실제 `SessionEnd`가 만들어내는 것과 동일한 `completed` 상태에 안착시키고, 타임라인에 합성 `SessionEnd` 이벤트를 남깁니다. 보호 장치: 워치독 틱에서는 세션의 트랜스크립트가 최소 `DASHBOARD_LIVENESS_IDLE_SECONDS`(기본값 `60`; 디스크에 트랜스크립트가 없을 때는 마지막 Hook 기록이 폴백 시계) 동안 기록되지 않았어야 하며 — **부팅 패스는 이 게이트를 완전히 건너뛰므로**, 실행 1초 전에 종료된 세션도 즉시 정리됩니다 — 프로브는 Windows에서, 컨테이너 내부에서(호스트 프로세스가 그곳에서는 보이지 않음), `ps`/`lsof`가 실패할 때, 또는 `DASHBOARD_LIVENESS_PROBE=0`으로 명시적으로 비활성화된 경우 "응답 없음"을 보고합니다(아무것도 변경하지 않음). **혼합** 배포에서는 회수가 `cwd`가 POSIX 절대 경로가 아닌 모든 세션도 자동으로 건너뜁니다 — household Hook을 통해 다른 머신에서 전달된 세션은 원본 머신 자체의 경로(예: Windows의 `D:\Git\ai-deck`)를 보고하며, 이는 로컬 `ps`/`lsof`/`/proc` 스캔이 결코 일치시킬 수 없으므로, 진짜 로컬 세션에 대해 프로브를 비활성화하지 않고도 원격 세션이 보호됩니다. **원격 데이터 소스** 세션(`sessions.source` ≠ `local`)도 항상 건너뜁니다 — 이들의 `cwd`는 다른 머신에서 정당하게 POSIX 절대 경로이므로 로컬 프로세스 프로브는 이들에 대해 아무것도 말해주지 않으며, 이들의 수명 주기는 위에서 설명한 원격 동기화 조정이 전적으로 소유합니다. 잘못된 완료 처리는 자가 복구됩니다: 다음 Hook 이벤트가 세션을 재활성화합니다. 15초 워치독 주기 외에도, 회수는 **시작 시 즉시** 실행되고(이전 실행에서 DB에 이미 남아 있던 죽은 세션을 렌더링되기 전에 정리) **약 5초 후 다시** 실행되므로(시작 동기화가 방금 가져온 세션까지 커버), 대시보드가 꺼져 있는 동안 죽은 세션이 Waiting으로 표시되는 일이 결코 없습니다
+   - 주기적인 서버 스윕이 이벤트 기반 감지를 빠져나간 abandoned 세션과 새 압축을 포착합니다(예: `/compact`는 Hook을 발생시키지 않고, `/resume`이 세션 생성 후 몇 초 이내에 발생하는 경우). 주기는 `DASHBOARD_STALE_MINUTES`로부터 유도됩니다(임계값의 ¼, 60초 – 5분으로 제한). 스윕은 `transcript_path`를 찾기 위해 이벤트 테이블을 스캔하는 대신 각 활성 세션 행에서 직접 읽습니다(작은 인덱스 조회). 이 컬럼은 Hook 핸들러가 트랜스크립트 경로를 처음 볼 때 채워지고 `db.js` 마이그레이션이 기존 이벤트로부터 일회성 백필하며, 부분 인덱스 `idx_sessions_active_tp`가 스윕이 읽는 행을 정확히 커버합니다. 스윕은 Hook 핸들러와 트랜스크립트 캐시를 공유하여 중복 I/O를 피합니다. abandoned 세션 정리는 메모리를 제한하기 위해 트랜스크립트 캐시 항목도 제거합니다. 이 스윕과 시작 시 1시간 정리 모두 **원격 데이터 소스** 세션(`source` ≠ `local`)을 건너뜁니다: 이들의 `updated_at`은 원격 CLI의 실제 활동이 아니라 rsync 주기를 추적하므로, 대신 동기화가 미러로부터 상태를 조정합니다
    - **지속적 프로젝트 동기화**(`startSessionSync`)는 일회성의 마커로 게이트된 시작 백필을 넘어 `~/.claude/projects`를 계속 발견 가능하게 유지합니다: 나중에 추가되고 세션이 Hook을 통해 흐르지 않는 프로젝트는 그렇지 않으면 수동 재스캔 전까지 보이지 않은 채로 남게 됩니다. 즉각적인 시작 스윕, 디바운스된 `fs.watch`(macOS/Windows에서는 재귀적, Linux에서는 루트 + 직계 자식), 그리고 `DASHBOARD_SESSION_SYNC_MS` 폴링(기본값 30초; `0`은 폴링을 비활성화하고 워처는 유지)이 하나의 mtime 캐시와 병합된 스윕을 공유하여 mtime이 진행된 파일만 다시 파싱하며 — 이미 가져와졌고 변경되지 않은 세션은 다시 파싱하지 않고 건너뛰므로, 재시작 비용은 O(새/변경된 파일)로 유지됩니다. 새로 발견되거나 커진 각 세션은 Hook이 발생시키는 것과 동일한 프레임인 `session_created`/`session_updated`와 해당 메인 에이전트를 브로드캐스트합니다
 4. **WebSocket**은 변경 사항을 연결된 모든 클라이언트에 브로드캐스트합니다
 5. **UI**는 업데이트를 수신하고 영향을 받는 컴포넌트를 폴링 없이 실시간으로 다시 렌더링합니다.
@@ -606,6 +618,7 @@ flowchart LR
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | **워치독 틱** 활성 상태 회수를 위한 유휴 게이트: 세션의 트랜스크립트가 최소 이 시간 동안 기록되지 않았을 때에만 완료 처리되므로(디스크에 트랜스크립트가 없을 때는 마지막 Hook 기록이 폴백 시계), 턴 진행 중이거나 방금 재개된 세션이 일시적인 프로브 실패로 깜빡이며 사라지는 일이 없습니다. 시작 패스는 이 게이트를 무시합니다 — 부팅 시에는 프로브 단독으로 결정하므로, 실행 직전에 종료된 세션은 즉시 정리됩니다 |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | 시작 후 추가되어 세션이 Hook을 통해 흐르지 않는 프로젝트를 표면화하는 지속적 `~/.claude/projects` 백그라운드 동기화의 폴링 간격(ms). `fs.watch` 워처는 이와 무관하게 거의 즉시 발동합니다; 이 폴링은 안전망입니다(워처는 이벤트를 놓치거나 네트워크 파일시스템에서 발동하지 않을 수 있음). 워처는 계속 실행하면서 폴링만 비활성화하려면 `0`으로 설정하십시오 |
 | `DASHBOARD_REMOTE_SYNC_MS` | `60000` | 원격 소스를 `rsync`로 가져오는 간격(ms). `0`으로 설정하면 원격 소스 폴링이 비활성화됩니다 |
+| `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000` (10분) | **원격 데이터 소스** 세션의 실시간 상태에 대한 신선도 윈도우. 각 동기화 시, 미러링된 트랜스크립트가 이 윈도우 내에 수정된 원격 세션은 여전히 실행 중(`active`)으로 취급되고, 미러가 이보다 오래 진행을 멈추면 세션은 `completed`로 조정됩니다. 원격 세션은 실시간 Hook을 받지 않으므로 이것이 로컬 활성 상태/오래됨 스윕(이들을 건너뜀)을 대체합니다. 느린 링크나 매우 긴 유휴 턴에는 값을 높이십시오 |
 | `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` | `600000` | 원격 소스별 `rsync` 타임아웃 |
 | `DASHBOARD_REMOTE_TEST_TIMEOUT_MS` | `15000` | 소스로의 SSH 연결 프로브 타임아웃 |
 | `DASHBOARD_HOST`        | `127.0.0.1`   | 서버가 바인딩하는 인터페이스. 기본값은 루프백(네트워크에서 접근 불가). LAN에 노출하려면 `0.0.0.0`으로 설정(시작 시 경고를 로깅) |
@@ -1089,6 +1102,7 @@ Claude Code의 모든 설정 표면을 읽기 전용으로 검사할 수 있으�
 | `GET`    | `/api/cc-config/hooks`              | 사용자 / 프로젝트 / 프로젝트 로컬 `settings.json` 파일 전반에 걸쳐 집계된 Hook |
 | `GET`    | `/api/cc-config/hook-scripts`       | `~/.claude/hooks/`의 파일(`hooks.<event>.command`가 참조하는 헬퍼 스크립트) |
 | `GET`    | `/api/cc-config/keybindings`        | `~/.claude/keybindings.json`을 컨텍스트별로 그룹화된 키/액션 쌍으로 파싱한 결과 |
+| `PUT`    | `/api/cc-config/keybindings`        | `{ groups: [{ context, bindings: [{ key, action }] }] }`로 `keybindings.json` 덮어쓰기. 먼저 백업하고, 최상위 메타데이터(`$schema`/`$docs`)를 보존하며, 중복 컨텍스트/키를 거부. (`settings.json`과 달리 CLI가 세션 중에 다시 쓰지 않으므로 안전) |
 | `GET`    | `/api/cc-config/statusline`         | `settings.json.statusLine` 설정 + 존재하는 경우 실제 `statusline.py` / `statusline-command.sh` 내용 |
 | `GET`    | `/api/cc-config/settings`           | 사용자 / 프로젝트 / 프로젝트 로컬 설정 JSON. 시크릿으로 보이는 키(`/token\|secret\|password\|api[_-]?key\|auth/i`에 일치)는 `"<redacted>"`로 대체됩니다 |
 | `GET`    | `/api/cc-config/memory`             | 사용자 + 프로젝트 범위의 `CLAUDE.md` 파일과 프로젝트별 파일 기반 메모리: `~/.claude/projects/<slug>/memory/` 아래의 모든 `*.md`에 대한 `scope:"auto-memory"` 항목(각각 `project`, `name`, `isIndex` 및 파싱된 `frontmatter`를 포함). `{ scope: "auto-memory", type: "auto-memory", project, name }`와 함께 `PUT`/`DELETE /api/cc-config/file`로 변경합니다(백업은 `<memory-dir>/.cc-config-backups/auto-memory/`에 저장됨) |

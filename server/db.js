@@ -902,12 +902,16 @@ try {
 // Legacy sessions (created before SessionEnd hook) will never receive a SessionEnd event,
 // so they stay "active" forever. Complete any active session whose last event is older than
 // 1 hour — the CLI process is certainly gone by then.
+// Remote-source sessions (source != 'local') are exempt: their "last event" is bounded by
+// the rsync cadence, not the remote CLI's actual activity, so a busy remote session could be
+// wrongly completed here. server/lib/remote-sync.js owns their status via mirror reconciliation.
 db.prepare(
   `
   UPDATE sessions SET
     status = 'completed',
     ended_at = COALESCE(ended_at, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
   WHERE status = 'active'
+    AND (source = 'local' OR source IS NULL)
     AND started_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 hour')
     AND NOT EXISTS (
       SELECT 1 FROM events e
@@ -1097,9 +1101,14 @@ const stmts = {
   touchSession: db.prepare(
     "UPDATE sessions SET updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?"
   ),
+  // Remote-source sessions (source != 'local') are excluded: their updated_at is
+  // driven by the rsync/import cadence rather than the remote CLI's real activity,
+  // so the periodic abandon sweep must not touch them. remote-sync.js reconciles
+  // their status from the mirrored transcript instead.
   findStaleSessions: db.prepare(
     `SELECT id FROM sessions
      WHERE status = 'active' AND id != ?
+       AND (source = 'local' OR source IS NULL)
        AND updated_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-' || ? || ' minutes')`
   ),
 

@@ -99,7 +99,16 @@
     "context": "上下文",
     "key": "按键",
     "action": "动作",
-    "docsLink": "查看快捷键文档"
+    "docsLink": "查看快捷键文档",
+    "contextPlaceholder": "上下文（如 Global、Chat）",
+    "addContext": "添加上下文",
+    "removeContext": "删除上下文",
+    "addBinding": "添加快捷键",
+    "removeBinding": "删除快捷键",
+    "errContext": "每个上下文都需要名称。",
+    "errDupContext": "上下文重复：{{context}}",
+    "errEmpty": "“{{context}}”中的每个快捷键都需要按键和动作。",
+    "errDupKey": "上下文“{{context}}”中的按键“{{key}}”重复。"
   },
   "statusline": {
     "title": "状态行",

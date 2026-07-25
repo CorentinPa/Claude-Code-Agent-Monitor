@@ -5,6 +5,7 @@
 
 const { Router } = require("express");
 const { stmts, db } = require("../db");
+const { parseSources, sourceColumnClause } = require("../lib/source-filter");
 const {
   WEB_SEARCH_PER_1K_SEARCHES,
   CODE_EXEC_PER_HOUR,
@@ -372,10 +373,15 @@ router.delete("/:pattern", (req, res) => {
   res.json({ ok: true });
 });
 
-// GET /api/pricing/cost - Get total cost across all sessions
+// GET /api/pricing/cost - Get total cost across all sessions.
+// Honors the global data-scope: `?sources=<csv>` narrows the aggregate to those
+// origin machines (see server/lib/source-filter.js), matching the sessions /
+// stats / analytics endpoints so the Dashboard "total cost" tracks the selector.
 router.get("/cost", (req, res) => {
   const rawOffset = parseInt(req.query.tz_offset, 10);
   const tzModifier = Number.isFinite(rawOffset) ? `${-rawOffset} minutes` : "+0 minutes";
+  const { clause, params } = sourceColumnClause(parseSources(req), "s.source");
+  const whereClause = clause ? `WHERE ${clause}` : "";
 
   const dailyTokens = db
     .prepare(
@@ -395,9 +401,10 @@ router.get("/cost", (req, res) => {
         SUM(tu.code_execution_requests + tu.baseline_code_execution) as code_execution_requests
       FROM token_usage tu
       JOIN sessions s ON s.id = tu.session_id
+      ${whereClause}
       GROUP BY 1, tu.model, tu.speed, tu.inference_geo, tu.service_tier`
     )
-    .all(tzModifier);
+    .all(tzModifier, ...params);
   const rules = stmts.listPricing.all();
   // Price the date-split rows so each day's usage bills at the rate effective on
   // that date (e.g. Sonnet 5's intro discount before 2026-08-31, standard after).
