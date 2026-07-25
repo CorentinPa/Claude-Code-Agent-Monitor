@@ -113,6 +113,7 @@ describe("ccam CLI — monitoring", () => {
     assert.equal(code, 0);
     assert.match(out, /Dashboard/);
     assert.match(out, /up/);
+    assert.match(out, /v\d+\.\d+\.\d+/);
     assert.match(out, new RegExp(String(PORT)));
   });
 

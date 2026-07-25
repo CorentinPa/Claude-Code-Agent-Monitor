@@ -551,7 +551,8 @@ const offlineData = {
 
 async function cmdHealth() {
   const h = await get("/api/health");
-  console.log(`${c.green("●")} Dashboard ${c.bold("up")} at ${baseUrl()} (${h.timestamp})`);
+  const ver = h.version ? ` v${h.version}` : "";
+  console.log(`${c.green("●")} Dashboard ${c.bold("up")}${ver} at ${baseUrl()} (${h.timestamp})`);
 }
 
 function renderStats(s, source) {
