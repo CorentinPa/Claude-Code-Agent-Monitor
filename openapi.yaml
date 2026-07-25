@@ -3,7 +3,7 @@
 openapi: 3.0.3
 info:
   title: Agent Dashboard for Claude Code API
-  version: 1.4.1
+  version: 1.4.2
   description: HTTP API for real-time Claude Code session monitoring, agent lifecycle tracking, analytics, pricing, hooks ingestion, and workflow intelligence.
   contact:
     name: Son Nguyen
@@ -1462,11 +1462,15 @@ components:
         server:
           type: object
           required:
+            - version
             - uptime
             - node_version
             - platform
             - ws_connections
           properties:
+            version:
+              type: string
+              description: Dashboard release version from package.json
             uptime:
               type: number
             node_version:

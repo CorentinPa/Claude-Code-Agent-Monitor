@@ -13,6 +13,14 @@ const { transcriptCache } = require("./hooks");
 
 const router = Router();
 
+const APP_VERSION = (() => {
+  try {
+    return require("../../package.json").version || "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+})();
+
 const { getSettingsPath, getClaudeHome, setClaudeHome } = require("../lib/claude-home");
 const CLAUDE_SETTINGS_PATH = getSettingsPath();
 
@@ -108,6 +116,7 @@ router.get("/info", (req, res) => {
     },
     hooks: hookStatus,
     server: {
+      version: APP_VERSION,
       uptime: process.uptime(),
       node_version: process.version,
       platform: process.platform,

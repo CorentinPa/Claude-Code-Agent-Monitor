@@ -179,6 +179,8 @@
   "about": {
     "title": "Giới thiệu",
     "description": "Thông tin runtime của máy chủ.",
+    "release": "Phiên bản",
+    "uiBuild": "UI build v{{version}} (hãy build lại client để khớp)",
     "uptime": "Thời gian chạy",
     "nodejs": "Node.js",
     "platform": "Nền tảng",

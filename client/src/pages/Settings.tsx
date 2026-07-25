@@ -224,7 +224,13 @@ const emptyRow: EditRow = {
 interface SystemInfo {
   db: { path: string; size: number; counts: Record<string, number> };
   hooks: { installed: boolean; path: string; hooks: Record<string, boolean> };
-  server: { uptime: number; node_version: string; platform: string; ws_connections: number };
+  server: {
+    version: string;
+    uptime: number;
+    node_version: string;
+    platform: string;
+    ws_connections: number;
+  };
 }
 
 function formatTimestamp(iso: string): string {
@@ -1780,7 +1786,23 @@ export function Settings() {
 
         {sysInfo ? (
           <div className="card p-5">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              <div className="bg-surface-2 rounded-lg px-4 py-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Server className="w-4 h-4 text-indigo-400" />
+                  <p className="text-[11px] text-gray-500 uppercase tracking-wider">
+                    {t("about.release")}
+                  </p>
+                </div>
+                <p className="text-sm font-semibold text-gray-200 font-mono">
+                  v{sysInfo.server.version}
+                </p>
+                {sysInfo.server.version !== __APP_VERSION__ && (
+                  <p className="text-[10px] text-amber-400/90 mt-1">
+                    {t("about.uiBuild", { version: __APP_VERSION__ })}
+                  </p>
+                )}
+              </div>
               <div className="bg-surface-2 rounded-lg px-4 py-3">
                 <div className="flex items-center gap-2 mb-1.5">
                   <Clock className="w-4 h-4 text-blue-400" />

@@ -883,9 +883,9 @@ export const api = {
      *     `load_stats` (5-/15-/60-minute rates).
      *   - `hooks`: whether the dashboard's Claude Code hooks are installed, the
      *     settings.json path, and a per-hook installed map.
-     *   - `server`: process uptime, Node version, platform/arch, live WebSocket
-     *     connection count, process memory, CPU load averages, and host memory/
-     *     cpu counts.
+     *   - `server`: dashboard release `version`, process uptime, Node version,
+     *     platform/arch, live WebSocket connection count, process memory, CPU
+     *     load averages, and host memory/cpu counts.
      *   - `transcript_cache`: LRU cache occupancy, capacity, hit/miss counts,
      *     and the currently-cached keys.
      *
@@ -909,6 +909,7 @@ export const api = {
         };
         hooks: { installed: boolean; path: string; hooks: Record<string, boolean> };
         server: {
+          version: string;
           uptime: number;
           node_version: string;
           platform: string;

@@ -1857,6 +1857,12 @@ describe("Transcript cache integration", () => {
     assert.ok(Array.isArray(res.body.transcript_cache.keys), "should have keys array");
   });
 
+  it("should include server version in settings info", async () => {
+    const res = await fetch("/api/settings/info");
+    assert.strictEqual(res.status, 200);
+    assert.equal(res.body.server.version, pkg.version);
+  });
+
   it("should evict cache entry on SessionEnd", async () => {
     const tmpTranscript = path.join(os.tmpdir(), `test-evict-${Date.now()}.jsonl`);
     fs.writeFileSync(

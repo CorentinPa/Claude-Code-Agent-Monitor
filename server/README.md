@@ -452,7 +452,7 @@ The OpenAPI spec is generated from `server/openapi.js` (`createOpenApiSpec()`), 
 
 | Method  | Path                | Description                                      |
 | ------- | ------------------- | ------------------------------------------------ |
-| `GET`   | `/api/health`       | Server health check                              |
+| `GET`   | `/api/health`       | Server health check (`status`, `version`, `timestamp`) |
 | `GET`   | `/api/sessions`     | List sessions (`status`, `limit`, `offset`)     |
 | `GET`   | `/api/sessions/:id` | Session detail (includes `agents` + `events`)   |
 | `POST`  | `/api/sessions`     | Create session (idempotent by `id`)             |

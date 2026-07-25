@@ -179,6 +179,8 @@
   "about": {
     "title": "About",
     "description": "Server runtime information.",
+    "release": "Release",
+    "uiBuild": "UI build v{{version}} (rebuild client to match)",
     "uptime": "Uptime",
     "nodejs": "Node.js",
     "platform": "Platform",

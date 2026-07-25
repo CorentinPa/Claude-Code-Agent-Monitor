@@ -1140,8 +1140,12 @@ function createOpenApiSpec() {
             },
             server: {
               type: "object",
-              required: ["uptime", "node_version", "platform", "ws_connections"],
+              required: ["version", "uptime", "node_version", "platform", "ws_connections"],
               properties: {
+                version: {
+                  type: "string",
+                  description: "Dashboard release version from package.json",
+                },
                 uptime: { type: "number" },
                 node_version: { type: "string" },
                 platform: { type: "string" },
