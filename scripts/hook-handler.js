@@ -4,9 +4,10 @@
  * Claude Code hook handler.
  * Receives hook event JSON on stdin and forwards it to every live Agent
  * Dashboard server. Designed to fail silently so it never blocks Claude
- * Code, and to fan out across multiple dashboards (e.g. the macOS desktop
- * app running alongside `npm run dev`) so each one keeps its real-time
- * stream.
+ * Code, and to fan out across multiple dashboards that use **different**
+ * SQLite data directories (e.g. the macOS desktop app alongside `npm run dev`
+ * when each has its own DB). Servers sharing one database receive hooks through
+ * a single ingest port so events are never duplicated.
  *
  * Delivery is fire-and-forget: we exit as soon as the request body is on the
  * wire, WITHOUT waiting for the dashboard's HTTP response. The hook only needs
@@ -29,7 +30,7 @@ const hookType = process.argv[2] || "unknown";
  */
 function resolvePorts() {
   try {
-    return require("../server/lib/server-info").resolveAllDashboardPorts();
+    return require("../server/lib/server-info").resolveHookIngestPorts();
   } catch {
     const envPort = parseInt(process.env.CLAUDE_DASHBOARD_PORT || "", 10);
     return [Number.isInteger(envPort) && envPort > 0 ? envPort : 4820];

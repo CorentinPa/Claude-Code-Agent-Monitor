@@ -1,0 +1,92 @@
+# CCAM dashboard + Prometheus + Grafana on one Docker network.
+#
+#   npm run docker:full:up
+#   open http://localhost:4820   (dashboard)
+#   open http://localhost:3000   (Grafana — admin / admin)
+#
+# Hooks still run on the HOST — run `npm run install-hooks` on the host and point
+# them at http://localhost:4820 (same as docker-compose.yml alone).
+services:
+  agent-monitor:
+    build: .
+    container_name: agent-monitor
+    ports:
+      - "127.0.0.1:${DASHBOARD_PORT:-4820}:4820"
+    volumes:
+      - ${CLAUDE_HOME:-~/.claude}/agent-dashboard:/app/data
+      - ${CLAUDE_HOME:-~/.claude}:/root/.claude:ro
+    environment:
+      NODE_ENV: production
+      DASHBOARD_PORT: 4820
+      # Lets in-network Prometheus scrape /api/metrics (Host: agent-monitor:4820).
+      DASHBOARD_ALLOWED_HOSTS: agent-monitor
+    restart: unless-stopped
+    networks:
+      - ccam
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4820/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ccam-prometheus
+    restart: unless-stopped
+    depends_on:
+      agent-monitor:
+        condition: service_healthy
+    command:
+      - --config.file=/etc/prometheus/prometheus-docker.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+      - --web.console.templates=/etc/prometheus/consoles
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    networks:
+      - ccam
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9090/-/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ccam-grafana
+    restart: unless-stopped
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    env_file:
+      - ./monitoring/grafana.defaults.env
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks:
+      - ccam
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+networks:
+  ccam:
+
+volumes:
+  prometheus-data:
+  grafana-data:

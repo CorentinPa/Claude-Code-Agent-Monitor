@@ -9,14 +9,15 @@ services:
       # "${DASHBOARD_PORT:-4820}:4820" and set DASHBOARD_TOKEN below.
       - "127.0.0.1:${DASHBOARD_PORT:-4820}:4820"
     volumes:
-      - dashboard-data:/app/data
+      # Same SQLite file as `npm start` / `npm run dev` on the host.
+      - ${CLAUDE_HOME:-~/.claude}/agent-dashboard:/app/data
       - ${CLAUDE_HOME:-~/.claude}:/root/.claude:ro
     environment:
       - NODE_ENV=production
       - DASHBOARD_PORT=4820
+      # Optional — required when Prometheus-in-Docker scrapes this container
+      # (host.docker.internal) or the full stack (agent-monitor). See monitoring/README.md.
+      - DASHBOARD_ALLOWED_HOSTS=${DASHBOARD_ALLOWED_HOSTS:-}
       # DASHBOARD_HOST=0.0.0.0 and DASHBOARD_DATA_DIR=/app/data are baked into
       # the image (see Dockerfile) so both `docker run` and Compose work as-is.
     restart: unless-stopped
-
-volumes:
-  dashboard-data:

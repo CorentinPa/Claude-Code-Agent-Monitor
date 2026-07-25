@@ -50,6 +50,8 @@ Bảng điều khiển chuyên nghiệp để theo dõi và trực quan hóa cá
 ![Prettier](https://img.shields.io/badge/Prettier-3.8-F7B93E?style=flat-square&logo=prettier&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-20.10-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![Podman](https://img.shields.io/badge/Podman-4.0-CC342D?style=flat-square&logo=podman&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-2.x-E6522C?style=flat-square&logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-10.x-F46800?style=flat-square&logo=grafana&logoColor=white)
 ![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.5-844FBA?style=flat-square&logo=terraform&logoColor=white)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-%3E%3D1.24-326CE5?style=flat-square&logo=kubernetes&logoColor=white)
 ![Helm](https://img.shields.io/badge/Helm-3-0F1689?style=flat-square&logo=helm&logoColor=white)
@@ -422,7 +424,7 @@ docker build -t agent-monitor .
 docker run -d --name agent-monitor \
   -p 127.0.0.1:4820:4820 \
   -v "$HOME/.claude:/root/.claude:ro" \
-  -v agent-monitor-data:/app/data \
+  -v "$HOME/.claude/agent-dashboard:/app/data" \
   agent-monitor
 
 # Podman
@@ -430,7 +432,7 @@ podman build -t agent-monitor .
 podman run -d --name agent-monitor \
   -p 127.0.0.1:4820:4820 \
   -v "$HOME/.claude:/root/.claude:ro" \
-  -v agent-monitor-data:/app/data \
+  -v "$HOME/.claude/agent-dashboard:/app/data" \
   agent-monitor
 ```
 
@@ -441,7 +443,7 @@ Bảng điều khiển sau đó có sẵn tại `http://localhost:4820`. Image b
 | Gắn kết | Mục đích |
 |---|---|
 | `~/.claude:/root/.claude:ro` | Đọc lịch sử phiên kế thừa để nhập |
-| `agent-monitor-data:/app/data` | Duy trì cơ sở dữ liệu SQLite trong suốt quá trình khởi động lại |
+| `~/.claude/agent-dashboard:/app/data` | **Cơ sở dữ liệu SQLite chuẩn** (dùng chung với cài đặt native) |
 
 > [!QUAN TRỌNG]
 > **Lưu ý:** Các hook của Claude Code vẫn phải trỏ đến một tiến trình xử lý hook đang chạy trên máy chủ. Bản thân vùng chứa không nhận được hook - chạy `npm run install-hooks` trên máy chủ để định cấu hình các hook POST tới `http://localhost:4820`.
@@ -722,6 +724,13 @@ Các lệnh dựa trên API cần server đang chạy — khi chưa chạy, **c�
 | `npm run desktop:dmg:universal` | **macOS:** Tạo **một** DMG universal hợp nhất (arm64 + x86_64 trong một tệp) — tùy chọn, **chậm nhất**, không phải thứ bản phát hành đi kèm. |
 | `npm run desktop:win`   | **Windows:** Tạo trình cài **NSIS** `.exe` (x64) — chạy trên Windows |
 | `npm run desktop:win:portable` | **Windows:** Tạo bản **portable** (không cần cài) `.exe` (x64) — chạy trên Windows |
+| `npm run monitoring:install` | Chạy `npm install` trong `monitoring/` — tải Prometheus + Grafana qua `postinstall` |
+| `npm run monitoring:setup` | Alias của `monitoring:install` |
+| `npm run monitoring:up` | Khởi động Prometheus (:9090) + Grafana (:3000) nền (không cần Docker) |
+| `npm run monitoring:down` | Dừng stack giám sát do npm quản lý |
+| `npm run monitoring:start` | Khởi động foreground (Ctrl+C dừng cả hai) |
+| `npm run monitoring:docker:up` | Khởi động Prometheus + Grafana qua Docker Compose |
+| `npm run monitoring:docker:down` | Gỡ stack giám sát Docker |
 
 ---
 
@@ -963,7 +972,7 @@ Tài liệu OpenAPI được tạo từ `server/openapi.js` và giao diện ngư
 
 Tệp `openapi.yaml` cũng được commit ở thư mục gốc của kho lưu trữ, phản chiếu thông số trực tiếp và được tạo lại qua `npm run openapi:yaml` (nguồn chính thức là `server/openapi.js`; không bao giờ chỉnh sửa thủ công).
 
-Tài liệu API hiện đã **đầy đủ**: mọi route phụ trợ đều được ghi tài liệu (75 mục đường dẫn) kèm tham số, schema, mô tả trường và ví dụ; các nhóm mới được ghi tài liệu gồm `/api/push`, `/api/cc-config`, `/api/run`, `/api/workflows/runs`, `/api/sessions/facets` và `/api/settings/claude-home`.
+Tài liệu API hiện đã **đầy đủ**: mọi route phụ trợ đều được ghi tài liệu (82 mục đường dẫn) kèm tham số, schema, mô tả trường và ví dụ; các nhóm mới được ghi tài liệu gồm `/api/push`, `/api/cc-config`, `/api/run`, `/api/workflows/runs`, `/api/sessions/facets` và `/api/settings/claude-home`.
 
 <p align="center">
   <img src="images/swagger.png" alt="Swagger UI" width="100%">
@@ -972,6 +981,45 @@ Tài liệu API hiện đã **đầy đủ**: mọi route phụ trợ đều đ�
 <p align="center">
   <img src="images/redoc.png" alt="ReDoc UI" width="100%">
 </p>
+
+### Số liệu Prometheus & Grafana
+
+`GET /api/metrics` cung cấp các bộ đếm trực tiếp của dashboard — phiên/agent theo trạng thái, tổng số sự kiện và token, số client thời gian thực đang kết nối, các nguồn từ xa đã cấu hình, thời gian hoạt động/bộ nhớ của tiến trình, và phiên bản build — theo định dạng text-exposition của Prometheus, nên CCAM có thể được scrape vào observability stack của riêng bạn. Một stack Prometheus + Grafana sẵn dùng với **bốn dashboard tự cấp hình** (mặc định: **CCAM — Overview**) nằm trong [`monitoring/`](./monitoring/README.md).
+
+**npm (không Docker, không Homebrew):**
+
+```bash
+npm start                      # dashboard on :4820
+npm run monitoring:install       # một lần: npm postinstall tải binary
+npm run monitoring:up          # Grafana on :3000 (admin/admin), auto-provisioned
+```
+
+**Docker / Podman** (khi dashboard chạy trong container hoặc bạn dùng Compose):
+
+```bash
+DASHBOARD_ALLOWED_HOSTS=host.docker.internal npm start   # hoặc trên service agent-monitor
+npm run monitoring:docker:up
+```
+
+<p align="center">
+  <img src="images/grafana.png" alt="Grafana CCAM — Overview dashboard with live session, event, and token metrics" width="100%">
+  <br>
+  <em>📊 <strong>Grafana · CCAM — Overview</strong> — bảng điều khiển mặc định (bốn board tự cấp hình): ảnh chụp fleet, tổng tích lũy từ DB, biểu đồ phân tích và tốc độ — tất cả từ scrape <code>/api/metrics</code> trực tiếp</em>
+</p>
+
+<p align="center">
+  <img src="images/prometheus-console.png" alt="Prometheus CCAM console with metric cards and session tables" width="100%">
+  <br>
+  <em>🔥 <strong>Prometheus · CCAM console</strong> — trang landing dựng sẵn tại <code>/consoles/index.html</code> truy vấn Prometheus trực tiếp cho trạng thái scrape, tổng phiên, sự kiện, token và liên kết Graph</em>
+</p>
+
+<p align="center">
+  <img src="images/prometheus-query.png" alt="Prometheus Graph UI with CCAM PromQL query" width="100%">
+  <br>
+  <em>📈 <strong>Prometheus · Graph</strong> — chạy PromQL trên metric CCAM đã scrape (ví dụ <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>) với liên kết khởi đầu từ console CCAM và <a href="./monitoring/README.md">monitoring/README.md</a></em>
+</p>
+
+Xem [docs/API.md → Metrics](./docs/API.md#metrics) để biết danh sách chỉ số đầy đủ cùng chi tiết scrape/xác thực.
 
 ### Sức khỏe
 
