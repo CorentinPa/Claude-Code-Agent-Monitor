@@ -179,6 +179,8 @@
   "about": {
     "title": "정보",
     "description": "서버 런타임 정보입니다.",
+    "release": "릴리스",
+    "uiBuild": "UI 빌드 v{{version}} (일치하려면 클라이언트를 다시 빌드하세요)",
     "uptime": "가동 시간",
     "nodejs": "Node.js",
     "platform": "플랫폼",

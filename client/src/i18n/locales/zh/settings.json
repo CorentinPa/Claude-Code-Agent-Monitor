@@ -179,6 +179,8 @@
   "about": {
     "title": "关于",
     "description": "服务器运行时信息。",
+    "release": "版本",
+    "uiBuild": "UI 构建 v{{version}}（请重新构建客户端以匹配）",
     "uptime": "运行时间",
     "nodejs": "Node.js",
     "platform": "平台",

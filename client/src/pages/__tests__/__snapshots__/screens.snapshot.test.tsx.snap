@@ -10062,8 +10062,72 @@ exports[`screen snapshots > Settings 1`] = `
         class="card p-5"
       >
         <div
-          class="grid grid-cols-2 sm:grid-cols-4 gap-3"
+          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
         >
+          <div
+            class="bg-surface-2 rounded-lg px-4 py-3"
+          >
+            <div
+              class="flex items-center gap-2 mb-1.5"
+            >
+              <svg
+                class="lucide lucide-server w-4 h-4 text-indigo-400"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  height="8"
+                  rx="2"
+                  ry="2"
+                  width="20"
+                  x="2"
+                  y="2"
+                />
+                <rect
+                  height="8"
+                  rx="2"
+                  ry="2"
+                  width="20"
+                  x="2"
+                  y="14"
+                />
+                <line
+                  x1="6"
+                  x2="6.01"
+                  y1="6"
+                  y2="6"
+                />
+                <line
+                  x1="6"
+                  x2="6.01"
+                  y1="18"
+                  y2="18"
+                />
+              </svg>
+              <p
+                class="text-[11px] text-gray-500 uppercase tracking-wider"
+              >
+                Release
+              </p>
+            </div>
+            <p
+              class="text-sm font-semibold text-gray-200 font-mono"
+            >
+              v
+            </p>
+            <p
+              class="text-[10px] text-amber-400/90 mt-1"
+            >
+              UI build v1.4.1 (rebuild client to match)
+            </p>
+          </div>
           <div
             class="bg-surface-2 rounded-lg px-4 py-3"
           >
