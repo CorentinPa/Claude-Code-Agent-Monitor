@@ -9,6 +9,21 @@ const { GRAFANA_ADMIN_USER, GRAFANA_ADMIN_PASSWORD } = require("./paths");
 const DASHBOARD_URL = process.env.CCAM_DASHBOARD_URL || "http://127.0.0.1:4820";
 const PROMETHEUS_URL = process.env.CCAM_PROMETHEUS_URL || "http://127.0.0.1:9090";
 const GRAFANA_URL = process.env.CCAM_GRAFANA_URL || "http://127.0.0.1:3000";
+const JSON_MODE = process.argv.includes("--json");
+
+async function checkDashboardHealth() {
+  try {
+    const res = await fetch(`${DASHBOARD_URL}/api/health`);
+    if (!res.ok) {
+      return { name: "Dashboard /api/health", ok: false, detail: `HTTP ${res.status}` };
+    }
+    const body = await res.json();
+    const detail = body.version ? `v${body.version}` : undefined;
+    return { name: "Dashboard /api/health", ok: true, detail, version: body.version };
+  } catch (err) {
+    return { name: "Dashboard /api/health", ok: false, detail: err.message };
+  }
+}
 
 async function check(name, url, ok = (res) => res.ok) {
   try {
@@ -127,7 +142,7 @@ async function checkPrometheusConsole() {
 
 async function main() {
   const checks = [
-    await check("Dashboard /api/health", `${DASHBOARD_URL}/api/health`),
+    await checkDashboardHealth(),
     await check(
       "Dashboard /api/metrics",
       `${DASHBOARD_URL}/api/metrics`,
@@ -144,11 +159,30 @@ async function main() {
   let failed = 0;
   for (const c of checks) {
     if (c.ok) {
-      console.log(`✔ ${c.name}${c.detail ? ` (${c.detail})` : ""}`);
+      if (!JSON_MODE) {
+        console.log(`✔ ${c.name}${c.detail ? ` (${c.detail})` : ""}`);
+      }
     } else {
       failed += 1;
-      console.error(`✖ ${c.name}: ${c.detail || "failed"}`);
+      if (!JSON_MODE) {
+        console.error(`✖ ${c.name}: ${c.detail || "failed"}`);
+      }
     }
+  }
+
+  if (JSON_MODE) {
+    const payload = {
+      ok: failed === 0,
+      checks,
+      urls: {
+        dashboard: DASHBOARD_URL,
+        prometheus: PROMETHEUS_URL,
+        grafana: GRAFANA_URL,
+        metrics: `${DASHBOARD_URL}/api/metrics`,
+      },
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    process.exit(failed > 0 ? 1 : 0);
   }
 
   if (failed > 0) {
