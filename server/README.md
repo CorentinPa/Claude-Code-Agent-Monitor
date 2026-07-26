@@ -535,8 +535,12 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
 
 1. **Reach the host once, manually:** `ssh user@host` (or an alias from `~/.ssh/config`). This adds the host to `~/.ssh/known_hosts` — required, since `StrictHostKeyChecking` is left at its secure default (an unknown host key fails the sync rather than being trusted blindly).
 2. **Make auth passwordless:** load your key into `ssh-agent` (`ssh-add`), or set an `IdentityFile` in `~/.ssh/config`, or point the source's optional `identity_file` at the key. Passphrase prompts and password auth will not work under `BatchMode`.
-3. **OpenSSH on both sides** — the dashboard machine needs the OpenSSH **client** (`ssh` + `scp`). The remote needs a running OpenSSH **server** (default on most Linux/macOS hosts; enable the OpenSSH Server optional feature on Windows). **Nothing else is installed on the remote** — no rsync, no agents, no dashboard packages.
-4. **Windows dashboard** — if `ssh`/`scp` are not on PATH, CCAM resolves `C:\Windows\System32\OpenSSH\ssh.exe` and `scp.exe` automatically.
+3. **OpenSSH on both sides** — the dashboard machine needs the OpenSSH **client** (`ssh` + `scp`). The remote needs a running OpenSSH **server** (default on most Linux/macOS hosts; enable the OpenSSH Server optional feature on Windows). **Nothing else is installed on the remote.**
+4. **Cross-platform notes:**
+   - **macOS + Secretive / 1Password / ssh-agent:** leave **Identity file** blank — CCAM runs `ssh -G` and forwards your `IdentityAgent`, and wires the Secretive socket when the dashboard is launched from the GUI.
+   - **Windows dashboard:** OpenSSH Client optional feature; CCAM prefers `ssh`/`scp` on `PATH`, then falls back to `System32\OpenSSH\`.
+   - **Windows remote:** default `~/.claude` works; for a custom path use forward slashes (`C:/Users/you/.claude`).
+   - **Linux/macOS remote:** default `~/.claude/projects`; custom POSIX paths (`/home/ubuntu/.claude`) also work.
 4. **Add the source** (Settings → Remote Data Sources, or `ccam remote-sources add`), click **Test**, then **Sync**.
 
 | Symptom (surfaced in `last_error` / the Test result) | Cause & fix |

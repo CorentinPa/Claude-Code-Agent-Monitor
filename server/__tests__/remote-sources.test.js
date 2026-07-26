@@ -110,7 +110,7 @@ describe("remote-sync validateSourceInput", () => {
     ],
     ["host with space", { label: "x", host: "a b" }, "INVALID_HOST"],
     ["host with ;", { label: "x", host: "a;rm -rf /" }, "INVALID_HOST"],
-    ["host with : (breaks rsync spec)", { label: "x", host: "a:b" }, "INVALID_HOST"],
+    ["host with : (breaks scp spec)", { label: "x", host: "a:b" }, "INVALID_HOST"],
     ["missing label", { host: "a" }, "INVALID_LABEL"],
     ["port out of range", { label: "x", host: "a", ssh_port: 99999 }, "INVALID_PORT"],
     [
@@ -185,13 +185,56 @@ describe("remote-sync command builders", () => {
   it("adds a PowerShell probe for ~-rooted remote homes (Windows remotes)", () => {
     const probes = remoteSync.connectionProbeCommands({ remote_home: "~/.claude" });
     assert.equal(probes.length, 2);
-    assert.match(probes[0], /test -d ~\/\.claude\/projects/);
+    assert.match(probes[0], /sh -c/);
+    assert.match(probes[0], /~\/\.claude\/projects/);
     assert.match(probes[1], /powershell\.exe/);
     assert.match(probes[1], /\.claude\\projects/);
   });
-  it("uses only POSIX probes for absolute remote homes", () => {
+  it("adds cmd.exe probe for Windows drive-letter remote homes", () => {
+    const probes = remoteSync.connectionProbeCommands({
+      remote_home: "C:/Users/hoang/.claude",
+    });
+    assert.equal(probes.length, 2);
+    assert.match(probes[0], /sh -c/);
+    assert.match(probes[1], /cmd \/c/);
+    assert.match(probes[1], /C:\\Users\\hoang\\.claude\\projects/);
+  });
+  it("uses sh probe for POSIX absolute remote homes", () => {
     const probes = remoteSync.connectionProbeCommands({ remote_home: "/opt/cc" });
-    assert.deepEqual(probes, ["test -d /opt/cc/projects && echo CCAM_OK || echo CCAM_NO_DIR"]);
+    assert.deepEqual(probes, [
+      "sh -c 'test -d /opt/cc/projects && echo CCAM_OK || echo CCAM_NO_DIR'",
+    ]);
+  });
+  it("accepts Windows-style remote_home with forward slashes", () => {
+    const v = remoteSync.validateSourceInput({
+      label: "Win",
+      host: "u@win",
+      remote_home: "C:/Users/hoang/.claude",
+    });
+    assert.equal(v.remoteHome, "C:/Users/hoang/.claude");
+    assert.equal(
+      remoteSync.remoteProjectsPath({ remote_home: v.remoteHome }),
+      "C:/Users/hoang/.claude/projects"
+    );
+    assert.equal(
+      remoteSync.scpRemoteSpec({ host: "u@win", remote_home: v.remoteHome }),
+      "u@win:C:/Users/hoang/.claude/projects/."
+    );
+  });
+  it("expands tilde in ssh -G IdentityAgent paths", () => {
+    const home = os.homedir();
+    assert.equal(
+      remoteSync.expandSshConfigPath("~/Library/agent.sock"),
+      path.join(home, "Library/agent.sock")
+    );
+    assert.equal(remoteSync.expandSshConfigPath("/tmp/a"), "/tmp/a");
+  });
+  it("detects legacy scp protocol errors for -O retry", () => {
+    assert.equal(
+      remoteSync.isLegacyScpProtocolError("subsystem request failed on channel 0"),
+      true
+    );
+    assert.equal(remoteSync.isLegacyScpProtocolError("Permission denied"), false);
   });
   it("strips ANSI escapes from command output", () => {
     assert.equal(remoteSync.stripAnsi("\u001b[31;1mscp: not found\u001b[0m"), "scp: not found");
