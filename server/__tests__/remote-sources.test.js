@@ -164,6 +164,49 @@ describe("remote-sync command builders", () => {
       "IdentitiesOnly=yes",
     ]);
   });
+  it("builds scp option args with capital -P for port", () => {
+    const args = remoteSync.scpOptionArgs({ ssh_port: 2222, identity_file: "/k" });
+    assert.deepEqual(args, [
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=10",
+      "-P",
+      "2222",
+      "-i",
+      "/k",
+      "-o",
+      "IdentitiesOnly=yes",
+    ]);
+  });
+  it("adds a PowerShell probe for ~-rooted remote homes (Windows remotes)", () => {
+    const probes = remoteSync.connectionProbeCommands({ remote_home: "~/.claude" });
+    assert.equal(probes.length, 2);
+    assert.match(probes[0], /test -d ~\/\.claude\/projects/);
+    assert.match(probes[1], /powershell\.exe/);
+    assert.match(probes[1], /\.claude\\projects/);
+  });
+  it("uses only POSIX probes for absolute remote homes", () => {
+    const probes = remoteSync.connectionProbeCommands({ remote_home: "/opt/cc" });
+    assert.deepEqual(probes, ["test -d /opt/cc/projects && echo CCAM_OK || echo CCAM_NO_DIR"]);
+  });
+  it("strips ANSI escapes from command output", () => {
+    assert.equal(remoteSync.stripAnsi("\u001b[31;1mscp: not found\u001b[0m"), "scp: not found");
+  });
+  it("resolves ssh/scp binaries on Windows when OpenSSH is in System32", () => {
+    const prev = process.platform;
+    const prevWin = process.env.WINDIR;
+    try {
+      Object.defineProperty(process, "platform", { value: "win32" });
+      process.env.WINDIR = process.env.WINDIR || "C:\\Windows";
+      const ssh = remoteSync.resolveSshBinary("ssh");
+      assert.match(ssh, /ssh\.exe$/i);
+    } finally {
+      Object.defineProperty(process, "platform", { value: prev });
+      if (prevWin === undefined) delete process.env.WINDIR;
+      else process.env.WINDIR = prevWin;
+    }
+  });
   it("defaults the remote projects path to ~/.claude/projects", () => {
     assert.equal(remoteSync.remoteProjectsPath({}), "~/.claude/projects");
     assert.equal(remoteSync.remoteProjectsPath({ remote_home: "/opt/cc" }), "/opt/cc/projects");

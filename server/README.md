@@ -515,7 +515,7 @@ Request body shape:
 
 ### Remote Data Sources
 
-Live remote/multi-machine data collection over SSH. The dashboard pulls Claude Code history from other machines: `server/lib/remote-sync.js` rsyncs each remote's `~/.claude/projects` into a sandboxed per-source staging dir under the data dir, feeds it through the **same** importer used for local history (`scripts/import-history.js` `importFromDirectory`), and tags every imported session with the source id (`sessions.source`). Authentication defers entirely to the host SSH stack (ssh-agent / `~/.ssh/config` / identity file) — **no secrets are stored**; every command runs via `execFile`/`spawn` argument arrays (never a shell string) and `StrictHostKeyChecking` is left at its SSH default.
+Live remote/multi-machine data collection over SSH. The dashboard pulls Claude Code history from other machines: `server/lib/remote-sync.js` uses recursive **`scp` over SSH** (built into OpenSSH — no `rsync` or extra packages on the remote) to mirror each remote's `~/.claude/projects` into a sandboxed per-source staging dir under the data dir, feeds it through the **same** importer used for local history (`scripts/import-history.js` `importFromDirectory`), and tags every imported session with the source id (`sessions.source`). Authentication defers entirely to the host SSH stack (ssh-agent / `~/.ssh/config` / identity file) — **no secrets are stored**; every command runs via `execFile`/`spawn` argument arrays (never a shell string) and `StrictHostKeyChecking` is left at its SSH default.
 
 | Method   | Path                          | Description |
 | -------- | ----------------------------- | ----------- |
@@ -535,7 +535,8 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
 
 1. **Reach the host once, manually:** `ssh user@host` (or an alias from `~/.ssh/config`). This adds the host to `~/.ssh/known_hosts` — required, since `StrictHostKeyChecking` is left at its secure default (an unknown host key fails the sync rather than being trusted blindly).
 2. **Make auth passwordless:** load your key into `ssh-agent` (`ssh-add`), or set an `IdentityFile` in `~/.ssh/config`, or point the source's optional `identity_file` at the key. Passphrase prompts and password auth will not work under `BatchMode`.
-3. **Ensure `rsync` exists on _both_ machines** (it is the transport). Most systems have it; install it on the remote if missing.
+3. **OpenSSH on both sides** — the dashboard machine needs the OpenSSH **client** (`ssh` + `scp`). The remote needs a running OpenSSH **server** (default on most Linux/macOS hosts; enable the OpenSSH Server optional feature on Windows). **Nothing else is installed on the remote** — no rsync, no agents, no dashboard packages.
+4. **Windows dashboard** — if `ssh`/`scp` are not on PATH, CCAM resolves `C:\Windows\System32\OpenSSH\ssh.exe` and `scp.exe` automatically.
 4. **Add the source** (Settings → Remote Data Sources, or `ccam remote-sources add`), click **Test**, then **Sync**.
 
 | Symptom (surfaced in `last_error` / the Test result) | Cause & fix |
@@ -543,7 +544,9 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
 | `Host key verification failed` | The host isn't in `known_hosts`. `ssh user@host` once to accept its key. |
 | `Permission denied (publickey)` | No usable key for non-interactive auth. `ssh-add` your key, set `IdentityFile` in `~/.ssh/config`, or set the source's `identity_file`. |
 | `… does not exist on the remote` | Claude Code's home is elsewhere on that machine. Set the source's **remote home** (default `~/.claude`). |
-| `rsync: command not found` / `rsync error` | `rsync` isn't installed on the remote (or local). Install it. |
+| `scp` / `ssh` not recognized (Windows) | Install the **OpenSSH Client** optional feature, restart the dashboard, or confirm `C:\Windows\System32\OpenSSH\scp.exe` exists. |
+| `Permission denied (publickey,password)` | SSH auth failed — run `ssh user@host` from the same shell that starts the dashboard. Add your key to the remote, start `ssh-agent`, or set **Identity file** in Settings → Remote Data Sources. |
+| Connected but directory missing | Claude Code may not be installed on the remote, or `remote_home` points at the wrong path. Default is `~/.claude/projects`. |
 | Sync hangs then errors after ~10 min | Bounded by `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS`; usually a network/host issue — verify with **Test** (bounded by `DASHBOARD_REMOTE_TEST_TIMEOUT_MS`). |
 
 ### Settings / Ops
@@ -1125,7 +1128,7 @@ Each sweep parses **only** files whose mtime is new or has advanced. A cold-cach
 
 ### Remote Data Source Sync
 
-`startRemoteSourceSync` (in `server/index.js`, wired into `startBackgroundServices`) pulls history from every **enabled** [Remote Data Source](#remote-data-sources) on an interval. A cheap guard first checks whether any enabled source exists, so the poller does no SSH work at all until the user configures one. Each tick delegates to `server/lib/remote-sync.js`, which rsyncs the remote's `~/.claude/projects` into a sandboxed per-source staging dir and runs it through `importFromDirectory`, tagging imported sessions with the source id. The interval is `DASHBOARD_REMOTE_SYNC_MS` (default `60000` ms; `0` disables the poller); a per-source pull is bounded by `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` (default `600000` ms) and the connectivity test by `DASHBOARD_REMOTE_TEST_TIMEOUT_MS` (default `15000` ms). Status transitions broadcast `remote_source.status` for live UI updates. The timer is `unref`'d and fail-safe — a hung or unreachable remote never wedges the dashboard.
+`startRemoteSourceSync` (in `server/index.js`, wired into `startBackgroundServices`) pulls history from every **enabled** [Remote Data Source](#remote-data-sources) on an interval. A cheap guard first checks whether any enabled source exists, so the poller does no SSH work at all until the user configures one. Each tick delegates to `server/lib/remote-sync.js`, which pulls the remote's `~/.claude/projects` via `scp` into a sandboxed per-source staging dir and runs it through `importFromDirectory`, tagging imported sessions with the source id. The interval is `DASHBOARD_REMOTE_SYNC_MS` (default `60000` ms; `0` disables the poller); a per-source pull is bounded by `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` (default `600000` ms) and the connectivity test by `DASHBOARD_REMOTE_TEST_TIMEOUT_MS` (default `15000` ms). Status transitions broadcast `remote_source.status` for live UI updates. The timer is `unref`'d and fail-safe — a hung or unreachable remote never wedges the dashboard.
 
 After each pull imports and tags a source's sessions, `remote-sync.js` **reconciles their live status from the fresh mirror** (`reconcileRemoteSessionStatus`). Remote sessions receive no live hooks and are excluded from every local liveness/stale heuristic (see below), so the mirror is their single source of truth: a transcript touched within `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` (default `600000` ms = 10 min) means the remote CLI is still writing to it (→ `active`, main agent back to `waiting`); once it stops advancing, the session lands in `completed` with its agents completed and `ended_at` stamped — the same terminal state a real `SessionEnd` produces. This is what keeps an already-imported remote session's status correct on every subsequent sync (the shared importer only sets status on first insert), and it self-heals any remote session a pre-fix build wrongly completed.
 
@@ -1405,7 +1408,7 @@ DASHBOARD_LIVENESS_IDLE_SECONDS=60 # Idle gate before the liveness reap may comp
 
 # Remote Data Sources (SSH pull; see the Remote Data Sources section)
 DASHBOARD_REMOTE_SYNC_MS=60000         # Remote-source sync poll interval (ms); 0 disables the poller
-DASHBOARD_REMOTE_SYNC_TIMEOUT_MS=600000# Per-source rsync/pull timeout (ms)
+DASHBOARD_REMOTE_SYNC_TIMEOUT_MS=600000# Per-source scp/pull timeout (ms)
 DASHBOARD_REMOTE_TEST_TIMEOUT_MS=15000 # SSH connectivity-test timeout (ms)
 DASHBOARD_REMOTE_ACTIVE_WINDOW_MS=600000 # Freshness window (ms) for a remote session's live status (active↔completed)
 
