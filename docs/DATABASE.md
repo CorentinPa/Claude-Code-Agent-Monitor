@@ -478,7 +478,7 @@ CREATE TABLE remote_sources (
 | `created_at` | TEXT | YES | ISO 8601 creation timestamp |
 | `updated_at` | TEXT | YES | ISO 8601 timestamp of the last edit |
 
-Managed through the `/api/remote-sources/*` routes; sync/status changes are broadcast over the WebSocket as `remote_source.status`. See [docs/API.md → Remote Data Sources](./API.md#remote-data-sources).
+Managed through the `/api/remote-sources/*` routes; sync/status changes are broadcast over the WebSocket as `remote_source.status` and, on success, `remote_data.updated` plus per-session `session_created` / `session_updated`. See [docs/API.md → Remote Data Sources](./API.md#remote-data-sources).
 
 ---
 

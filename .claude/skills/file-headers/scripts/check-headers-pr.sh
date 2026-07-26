@@ -66,7 +66,7 @@ is_applicable_file() {
   esac
 
   case "$f" in
-    *.min.js|*/wiki/i18n-content.js)
+    wiki/i18n-content.js|*/wiki/i18n-content.js)
       return 1
       ;;
   esac

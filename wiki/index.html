@@ -1100,7 +1100,7 @@
                   <h3>Remote Data Sources</h3>
                   <p>
                     Pull Claude Code history from other machines over SSH. Each remote's
-                    <code>~/.claude/projects</code> tree is rsynced into a sandboxed staging
+                    <code>~/.claude/projects</code> tree is mirrored via <code>scp</code> into a sandboxed staging
                     directory, fed through the same importer as local history, and every session
                     is tagged with its source. A background poller keeps remote data
                     near-real-time, a global data-scope selector (Local only / All / a specific
@@ -3929,13 +3929,17 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
           <p>
             Beyond local history, the dashboard can pull Claude Code activity from
             <b>other machines over SSH</b> and fold it into the same views as your local
-            sessions. Each remote's <code>~/.claude/projects</code> tree is rsynced into a
-            sandboxed staging directory, fed through the exact same importer used for local
-            history, and every imported session is tagged with the source it came from. A
-            background poller keeps remote data near-real-time, and a global <b>data scope</b>
-            selector lets you narrow the entire app to local sessions only, all sources, or a
-            specific machine. Sources are managed in
-            <b>Settings → Remote Data Sources</b>.
+            sessions. Each remote's <code>~/.claude/projects</code> tree is mirrored via
+            <code>scp</code> (or <code>wsl.exe</code> + <code>tar</code> when Claude runs in WSL
+            on a Windows SSH host) into a sandboxed staging directory, fed through the exact same
+            importer used for local history, and every imported session is tagged with the source it
+            came from. A background poller (<code>DASHBOARD_REMOTE_SYNC_MS</code>, default
+            <code>15000</code> ms) keeps remote data near-real-time — adding or re-enabling a source
+            also triggers an immediate pull — and successful syncs broadcast
+            <code>remote_data.updated</code> plus per-session <code>session_created</code> /
+            <code>session_updated</code> frames. A global <b>data scope</b> selector lets you narrow
+            the entire app to local sessions only, all sources, or a specific machine. Sources are
+            managed in <b>Settings → Remote Data Sources</b>.
           </p>
 
           <h3>How It Works</h3>
@@ -3943,15 +3947,15 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <!-- prettier-ignore -->
             <div class="mermaid">
               flowchart LR
-                RH["Remote host\n~/.claude/projects"] -->|rsync over SSH| ST["Sandboxed\nstaging dir"]
+                RH["Remote host\n~/.claude/projects"] -->|scp over SSH| ST["Sandboxed\nstaging dir"]
                 ST -->|same pipeline\nas local history| P["parseSessionFile +\nimportSession"]
                 P -->|tagged with source| D[("SQLite\nsessions / agents / events")]
                 POLL["Background poller\nDASHBOARD_REMOTE_SYNC_MS"] -.->|periodic sync| RH
-                D -.->|remote_source.status| W["WebSocket /ws"]
+                D -.->|remote_source.status\nremote_data.updated\nsession_created/updated| W["WebSocket /ws"]
             </div>
             <p class="diagram-label">
-              Each remote is rsynced, imported through the local pipeline, and tagged by
-              source — the poller keeps it near-real-time
+              Each remote is mirrored over SSH, imported through the local pipeline, and tagged by
+              source — the poller (default 15 s) keeps it near-real-time
             </p>
           </div>
 
@@ -3980,8 +3984,9 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             dashboard, so remote sessions (<code>source</code> ≠ <code>local</code>) are excluded
             from every local liveness and stale sweep — the process liveness reap, the watchdog
             transcript scan, the startup cleanup, and the periodic abandon sweep all skip them.
-            Instead, a remote session's live status is reconciled from the rsync'd mirror on every
-            sync: if its mirrored transcript was modified within
+            Instead, a remote session's live status is reconciled from the mirrored transcript on
+            every sync: activity is judged from the <b>newest event timestamp inside the
+            JSONL</b> (falling back to mirror mtime). If the last event is within
             <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) the session stays
             <code>active</code>; once the mirror stops advancing for longer than that window, the
             session is reconciled to <code>completed</code>. This keeps a still-running remote
@@ -4012,13 +4017,13 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
               <tbody>
                 <tr>
                   <td><code>DASHBOARD_REMOTE_SYNC_MS</code></td>
-                  <td><code>60000</code></td>
-                  <td>Interval for the background remote poller; <code>0</code> disables the poller while leaving manual sync available</td>
+                  <td><code>15000</code></td>
+                  <td>Interval for the background remote poller (add/re-enable also syncs immediately); <code>0</code> disables the poller while leaving manual sync available</td>
                 </tr>
                 <tr>
                   <td><code>DASHBOARD_REMOTE_SYNC_TIMEOUT_MS</code></td>
                   <td><code>600000</code></td>
-                  <td>Ceiling on a single rsync-and-import run before it is aborted</td>
+                  <td>Ceiling on a single scp-and-import run before it is aborted</td>
                 </tr>
                 <tr>
                   <td><code>DASHBOARD_REMOTE_TEST_TIMEOUT_MS</code></td>
@@ -4028,7 +4033,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                 <tr>
                   <td><code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code></td>
                   <td><code>600000</code></td>
-                  <td>Freshness window (10 min) for a Remote Data Source session's live status — a remote session whose mirrored transcript changed within this window stays <code>active</code>, otherwise it is reconciled to <code>completed</code> on the next sync; remote sessions receive no live hooks, so this replaces the local liveness and stale sweeps (which skip them)</td>
+                  <td>Freshness window (10 min) for a Remote Data Source session's live status — judged from the newest JSONL event timestamp in the mirror (mtime fallback); remote sessions receive no live hooks, so this replaces the local liveness and stale sweeps (which skip them)</td>
                 </tr>
               </tbody>
             </table>
@@ -4064,7 +4069,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <div class="route-item">
               <span class="method method-post">POST</span>
               <span class="route-path">/api/remote-sources/:id/sync</span>
-              <span class="route-desc">Trigger an immediate rsync-and-import for that source</span>
+              <span class="route-desc">Trigger an immediate scp-and-import for that source</span>
             </div>
           </div>
           <p>
@@ -6893,7 +6898,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations (zh/vi) — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=38" defer></script>
+    <script src="i18n-content.js?v=40" defer></script>
     <script src="script.js?v=32" defer></script>
     <script>
       (function () {

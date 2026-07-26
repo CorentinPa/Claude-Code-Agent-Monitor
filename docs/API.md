@@ -1172,6 +1172,23 @@ Broadcast whenever Claude Code configuration changes — either by dashboard mut
 { "type": "cc_config_changed", "data": { "source": "fs", "paths": ["/Users/foo/.claude/settings.json"] } }
 ```
 
+#### remote_data.updated
+
+Broadcast once per successful remote sync (background poller, manual **Sync now**, or immediate pull after add/re-enable). Clients use this — and the per-session `session_created` / `session_updated` frames emitted in the same pass — to refetch sessions, costs, and analytics without polling.
+
+```json
+{
+  "type": "remote_data.updated",
+  "data": {
+    "sourceId": "src_a1b2c3",
+    "source": "src_a1b2c3",
+    "label": "dev-box",
+    "counters": { "imported": 1, "skipped": 0, "sessions_tagged": 3 },
+    "last_sync_at": "2026-07-26T21:15:00.000Z"
+  }
+}
+```
+
 #### remote_source.status
 
 Broadcast when a remote data source changes sync state (during/after `POST /api/remote-sources/:id/sync`) or is deleted. `status` is one of `idle`, `syncing`, `ok`, `error`, or `deleted`. `error` and `last_sync_at` are optional and present when relevant. See [Remote Data Sources](#remote-data-sources).

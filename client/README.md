@@ -399,7 +399,7 @@ Server broadcasts these event types over WebSocket:
 | `tool.executed` | Tool execution record | PostToolUse hook |
 | `notification.received` | Notification object | Notification hook |
 | `remote_source.status` | `{ id, status, error?, last_sync_at? }` (`status`: `idle`/`syncing`/`ok`/`error`/`deleted`) | Remote Data Source sync poller + `/api/remote-sources` routes |
-| `remote_data.updated` | `{ sourceId, source, label?, counters?, last_sync_at? }` | Emitted once per successful remote sync; triggers stats/cost/session refetches across Dashboard, Sessions, Analytics, Settings, Kanban, Session detail, etc. |
+| `remote_data.updated` | `{ sourceId, source, label?, counters?, last_sync_at? }` | Emitted once per successful remote sync; triggers stats/cost/session refetches. The server also broadcasts `session_created` / `session_updated` (and main-agent frames) for each mirrored session so Kanban/Sessions update immediately |
 
 ### EventBus Pattern
 
