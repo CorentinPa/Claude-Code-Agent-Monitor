@@ -169,18 +169,25 @@ describe("remote-sync command builders", () => {
     assert.equal(cfg.identityagent, "/tmp/agent.sock");
     assert.equal(cfg.port, "22");
   });
-  it("buildSshChildEnv sets HOME and wires Secretive socket on macOS", () => {
+  it("buildSshChildEnv sets HOME and does not override SSH_AUTH_SOCK", () => {
     const env = remoteSync.buildSshChildEnv();
     assert.ok(env.HOME);
-    if (process.platform === "darwin") {
-      const secretiveSock = path.join(
-        os.homedir(),
-        "Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
-      );
-      if (fs.existsSync(secretiveSock)) {
-        assert.equal(env.SSH_AUTH_SOCK, secretiveSock);
-      }
+    if (process.env.SSH_AUTH_SOCK) {
+      assert.equal(env.SSH_AUTH_SOCK, process.env.SSH_AUTH_SOCK);
     }
+  });
+  it("identityAgentArgsFromConfig follows ssh -G only for concrete agent paths", () => {
+    assert.deepEqual(remoteSync.identityAgentArgsFromConfig("none"), []);
+    assert.deepEqual(remoteSync.identityAgentArgsFromConfig("SSH_AUTH_SOCK"), []);
+    assert.deepEqual(remoteSync.identityAgentArgsFromConfig("/tmp/custom-agent.sock"), [
+      "-o",
+      "IdentityAgent=/tmp/custom-agent.sock",
+    ]);
+    const home = os.homedir();
+    assert.deepEqual(remoteSync.identityAgentArgsFromConfig("~/Library/agent.sock"), [
+      "-o",
+      `IdentityAgent=${path.join(home, "Library/agent.sock")}`,
+    ]);
   });
   it("adds a PowerShell probe for ~-rooted remote homes (Windows remotes)", () => {
     const probes = remoteSync.connectionProbeCommands({ remote_home: "~/.claude" });

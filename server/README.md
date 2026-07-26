@@ -537,7 +537,7 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
 2. **Make auth passwordless:** load your key into `ssh-agent` (`ssh-add`), or set an `IdentityFile` in `~/.ssh/config`, or point the source's optional `identity_file` at the key. Passphrase prompts and password auth will not work under `BatchMode`.
 3. **OpenSSH on both sides** — the dashboard machine needs the OpenSSH **client** (`ssh` + `scp`). The remote needs a running OpenSSH **server** (default on most Linux/macOS hosts; enable the OpenSSH Server optional feature on Windows). **Nothing else is installed on the remote.**
 4. **Cross-platform notes:**
-   - **macOS + Secretive / 1Password / ssh-agent:** leave **Identity file** blank — CCAM runs `ssh -G` and forwards your `IdentityAgent`, and wires the Secretive socket when the dashboard is launched from the GUI.
+   - **macOS auth (Secretive, 1Password, ssh-agent, or file keys):** leave **Identity file** blank unless you need a specific key path. CCAM mirrors your shell: `ssh -G` supplies `IdentityAgent` when your `~/.ssh/config` does; otherwise it uses `SSH_AUTH_SOCK` (including `launchctl getenv` when the dashboard is GUI-launched) or plain `~/.ssh` keys. Secretive is used only when your SSH config points at it — never forced.
    - **Windows dashboard:** OpenSSH Client optional feature; CCAM prefers `ssh`/`scp` on `PATH`, then falls back to `System32\OpenSSH\`.
    - **Windows remote:** default `~/.claude` works; for a custom path use forward slashes (`C:/Users/you/.claude`).
    - **Linux/macOS remote:** default `~/.claude/projects`; custom POSIX paths (`/home/ubuntu/.claude`) also work.
@@ -549,7 +549,7 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
 | `Permission denied (publickey)` | No usable key for non-interactive auth. `ssh-add` your key, set `IdentityFile` in `~/.ssh/config`, or set the source's `identity_file`. |
 | `… does not exist on the remote` | Claude Code's home is elsewhere on that machine. Set the source's **remote home** (default `~/.claude`). |
 | `scp` / `ssh` not recognized (Windows) | Install the **OpenSSH Client** optional feature, restart the dashboard, or confirm `C:\Windows\System32\OpenSSH\scp.exe` exists. |
-| `Permission denied (publickey,password)` | SSH auth failed in the **dashboard process** (not necessarily your Terminal). On macOS with **Secretive** or ssh-agent, start the dashboard from a shell that has agent access, or ensure Secretive is running — CCAM resolves the agent via `ssh -G` and the Secretive socket automatically. Leave **Identity file** blank to use your normal `~/.ssh/config`. Confirm with `ssh user@host` from the same environment that starts the server. |
+| `Permission denied (publickey,password)` | SSH auth failed in the **dashboard process** (not necessarily your Terminal). Leave **Identity file** blank for Secretive, ssh-agent, or default `~/.ssh` keys — CCAM follows `ssh -G` / your config and does not force Secretive. Start the dashboard from the same shell as `ssh user@host`, or ensure your agent is running. Set **Identity file** only for an explicit on-disk key. |
 | Connected but directory missing | Claude Code may not be installed on the remote, or `remote_home` points at the wrong path. Default is `~/.claude/projects`. |
 | Sync hangs then errors after ~10 min | Bounded by `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS`; usually a network/host issue — verify with **Test** (bounded by `DASHBOARD_REMOTE_TEST_TIMEOUT_MS`). |
 
