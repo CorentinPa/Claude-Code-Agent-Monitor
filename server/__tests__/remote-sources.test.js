@@ -149,35 +149,38 @@ describe("remote-sync validateSourceInput", () => {
 });
 
 describe("remote-sync command builders", () => {
-  it("builds ssh option args with port + identity", () => {
-    const args = remoteSync.sshOptionArgs({ ssh_port: 2222, identity_file: "/k" });
-    assert.deepEqual(args, [
-      "-o",
-      "BatchMode=yes",
-      "-o",
-      "ConnectTimeout=10",
-      "-p",
-      "2222",
-      "-i",
-      "/k",
-      "-o",
-      "IdentitiesOnly=yes",
-    ]);
+  it("builds ssh option args with port + identity", async () => {
+    const args = await remoteSync.sshOptionArgs({ ssh_port: 2222, identity_file: "/k" });
+    assert.ok(args.includes("-p"));
+    assert.equal(args[args.indexOf("-p") + 1], "2222");
+    assert.ok(args.includes("-i"));
+    assert.equal(args[args.indexOf("-i") + 1], "/k");
+    assert.ok(args.includes("IdentitiesOnly=yes"));
   });
-  it("builds scp option args with capital -P for port", () => {
-    const args = remoteSync.scpOptionArgs({ ssh_port: 2222, identity_file: "/k" });
-    assert.deepEqual(args, [
-      "-o",
-      "BatchMode=yes",
-      "-o",
-      "ConnectTimeout=10",
-      "-P",
-      "2222",
-      "-i",
-      "/k",
-      "-o",
-      "IdentitiesOnly=yes",
-    ]);
+  it("builds scp option args with capital -P for port", async () => {
+    const args = await remoteSync.scpOptionArgs({ ssh_port: 2222, identity_file: "/k" });
+    assert.ok(args.includes("-P"));
+    assert.equal(args[args.indexOf("-P") + 1], "2222");
+  });
+  it("parses ssh -G output for identity agent discovery", () => {
+    const cfg = remoteSync.parseSshGOutput(
+      "hostname example.com\nidentityagent /tmp/agent.sock\nport 22\n"
+    );
+    assert.equal(cfg.identityagent, "/tmp/agent.sock");
+    assert.equal(cfg.port, "22");
+  });
+  it("buildSshChildEnv sets HOME and wires Secretive socket on macOS", () => {
+    const env = remoteSync.buildSshChildEnv();
+    assert.ok(env.HOME);
+    if (process.platform === "darwin") {
+      const secretiveSock = path.join(
+        os.homedir(),
+        "Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
+      );
+      if (fs.existsSync(secretiveSock)) {
+        assert.equal(env.SSH_AUTH_SOCK, secretiveSock);
+      }
+    }
   });
   it("adds a PowerShell probe for ~-rooted remote homes (Windows remotes)", () => {
     const probes = remoteSync.connectionProbeCommands({ remote_home: "~/.claude" });

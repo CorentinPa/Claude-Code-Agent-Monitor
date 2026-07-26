@@ -545,7 +545,7 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
 | `Permission denied (publickey)` | No usable key for non-interactive auth. `ssh-add` your key, set `IdentityFile` in `~/.ssh/config`, or set the source's `identity_file`. |
 | `… does not exist on the remote` | Claude Code's home is elsewhere on that machine. Set the source's **remote home** (default `~/.claude`). |
 | `scp` / `ssh` not recognized (Windows) | Install the **OpenSSH Client** optional feature, restart the dashboard, or confirm `C:\Windows\System32\OpenSSH\scp.exe` exists. |
-| `Permission denied (publickey,password)` | SSH auth failed — run `ssh user@host` from the same shell that starts the dashboard. Add your key to the remote, start `ssh-agent`, or set **Identity file** in Settings → Remote Data Sources. |
+| `Permission denied (publickey,password)` | SSH auth failed in the **dashboard process** (not necessarily your Terminal). On macOS with **Secretive** or ssh-agent, start the dashboard from a shell that has agent access, or ensure Secretive is running — CCAM resolves the agent via `ssh -G` and the Secretive socket automatically. Leave **Identity file** blank to use your normal `~/.ssh/config`. Confirm with `ssh user@host` from the same environment that starts the server. |
 | Connected but directory missing | Claude Code may not be installed on the remote, or `remote_home` points at the wrong path. Default is `~/.claude/projects`. |
 | Sync hangs then errors after ~10 min | Bounded by `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS`; usually a network/host issue — verify with **Test** (bounded by `DASHBOARD_REMOTE_TEST_TIMEOUT_MS`). |
 
