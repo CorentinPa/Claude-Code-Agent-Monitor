@@ -197,14 +197,13 @@ describe("remote-sync command builders", () => {
     assert.match(probes[1], /powershell\.exe/);
     assert.match(probes[1], /\.claude\\projects/);
   });
-  it("adds cmd.exe probe for Windows drive-letter remote homes", () => {
+  it("adds cmd.exe probe only for Windows drive-letter remote homes", () => {
     const probes = remoteSync.connectionProbeCommands({
       remote_home: "C:/Users/hoang/.claude",
     });
-    assert.equal(probes.length, 2);
-    assert.match(probes[0], /sh -c/);
-    assert.match(probes[1], /cmd \/c/);
-    assert.match(probes[1], /C:\\Users\\hoang\\.claude\\projects/);
+    assert.equal(probes.length, 1);
+    assert.match(probes[0], /cmd \/c/);
+    assert.match(probes[0], /C:\\Users\\hoang\\.claude\\projects/);
   });
   it("uses sh probe for POSIX absolute remote homes", () => {
     const probes = remoteSync.connectionProbeCommands({ remote_home: "/opt/cc" });
@@ -228,13 +227,31 @@ describe("remote-sync command builders", () => {
       "u@win:C:/Users/hoang/.claude/projects/."
     );
   });
-  it("expands tilde in ssh -G IdentityAgent paths", () => {
+  it("expands tilde in ssh -G IdentityAgent paths and strips quotes", () => {
     const home = os.homedir();
     assert.equal(
       remoteSync.expandSshConfigPath("~/Library/agent.sock"),
       path.join(home, "Library/agent.sock")
     );
+    assert.equal(remoteSync.expandSshConfigPath('"/tmp/quoted.sock"'), "/tmp/quoted.sock");
     assert.equal(remoteSync.expandSshConfigPath("/tmp/a"), "/tmp/a");
+  });
+  it("sshConfigFileArgs points at user config when present", () => {
+    const args = remoteSync.sshConfigFileArgs();
+    const cfg = path.join(os.homedir(), ".ssh", "config");
+    if (fs.existsSync(cfg)) {
+      assert.deepEqual(args, ["-F", cfg]);
+    } else {
+      assert.deepEqual(args, []);
+    }
+  });
+  it("treats blank identity_file as null", () => {
+    const v = remoteSync.validateSourceInput({
+      label: "x",
+      host: "a",
+      identity_file: "   ",
+    });
+    assert.equal(v.identityFile, null);
   });
   it("detects legacy scp protocol errors for -O retry", () => {
     assert.equal(

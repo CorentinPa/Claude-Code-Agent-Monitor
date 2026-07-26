@@ -541,7 +541,7 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
    - **Windows dashboard:** OpenSSH Client optional feature; CCAM prefers `ssh`/`scp` on `PATH`, then falls back to `System32\OpenSSH\`.
    - **Windows remote:** default `~/.claude` works; for a custom path use forward slashes (`C:/Users/you/.claude`).
    - **Linux/macOS remote:** default `~/.claude/projects`; custom POSIX paths (`/home/ubuntu/.claude`) also work.
-4. **Add the source** (Settings → Remote Data Sources, or `ccam remote-sources add`), click **Test**, then **Sync**.
+5. **Add the source** (Settings → Remote Data Sources, or `ccam remote-sources add`), click **Test**, then **Sync**.
 
 | Symptom (surfaced in `last_error` / the Test result) | Cause & fix |
 | --- | --- |
