@@ -65,6 +65,9 @@ coverage/
 .tmp/
 .temp/
 
+# Local-only remote data source test playbook (not shipped)
+scripts/remote-test-commands.txt
+
 # Playwright MCP
 .playwright_mcp/
 .playwright-mcp/

@@ -170,6 +170,8 @@ graph LR
 
 Tracks Claude Code sessions (one per CLI invocation or background task). Schema mirrors `server/db.js`.
 
+> **Cursor (informational):** Rows imported from `~/.claude` JSONL transcripts may also represent **Cursor** agent sessions — Cursor happens to use the same on-disk layout as Claude Code. The schema does not record which app created a session.
+
 ```sql
 CREATE TABLE sessions (
     id TEXT PRIMARY KEY,                                              -- UUID from Claude Code

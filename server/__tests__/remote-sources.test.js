@@ -189,13 +189,68 @@ describe("remote-sync command builders", () => {
       `IdentityAgent=${path.join(home, "Library/agent.sock")}`,
     ]);
   });
-  it("adds a PowerShell probe for ~-rooted remote homes (Windows remotes)", () => {
+  it("adds PowerShell and WSL probes for ~-rooted remote homes (Windows remotes)", () => {
     const probes = remoteSync.connectionProbeCommands({ remote_home: "~/.claude" });
-    assert.equal(probes.length, 2);
+    assert.equal(probes.length, 3);
     assert.match(probes[0], /sh -c/);
     assert.match(probes[0], /~\/\.claude\/projects/);
     assert.match(probes[1], /powershell\.exe/);
     assert.match(probes[1], /\.claude\\projects/);
+    assert.match(probes[2], /wsl\.exe/);
+    assert.match(probes[2], /~\/\.claude\/projects/);
+  });
+  it("uses only wsl.exe for wsl: remote homes", () => {
+    const probes = remoteSync.connectionProbeCommands({ remote_home: "wsl:~/.claude" });
+    assert.equal(probes.length, 1);
+    assert.match(probes[0], /wsl\.exe/);
+  });
+
+  it("connectionSuccessMessage reflects explicit vs auto-detected WSL", () => {
+    const wslProbe = "wsl.exe -e sh -c 'test -d ~/.claude/projects && echo CCAM_OK'";
+    assert.match(
+      remoteSync.connectionSuccessMessage({ remote_home: "wsl:~/.claude" }, wslProbe),
+      /wsl:~\/\.claude/
+    );
+    assert.doesNotMatch(
+      remoteSync.connectionSuccessMessage({ remote_home: "wsl:~/.claude" }, wslProbe),
+      /auto-detected/i
+    );
+    assert.match(
+      remoteSync.connectionSuccessMessage({ remote_home: null }, wslProbe),
+      /auto-detected/i
+    );
+    assert.match(
+      remoteSync.connectionSuccessMessage({ remote_home: null }, "sh -c 'echo CCAM_OK'"),
+      /Remote Claude Code history found/
+    );
+  });
+  it("accepts wsl: and UNC remote_home values", () => {
+    const wsl = remoteSync.validateSourceInput({
+      label: "WSL",
+      host: "u@win",
+      remote_home: "wsl:/home/hoang/.claude",
+    });
+    assert.equal(wsl.remoteHome, "wsl:/home/hoang/.claude");
+    assert.equal(
+      remoteSync.remoteProjectsPath({ remote_home: wsl.remoteHome }),
+      "wsl:/home/hoang/.claude/projects"
+    );
+    const unc = remoteSync.validateSourceInput({
+      label: "UNC",
+      host: "u@win",
+      remote_home: "//wsl.localhost/Ubuntu/home/hoang/.claude",
+    });
+    assert.equal(unc.remoteHome, "//wsl.localhost/Ubuntu/home/hoang/.claude");
+    assert.equal(
+      remoteSync.remoteProjectsPath({ remote_home: unc.remoteHome }),
+      "//wsl.localhost/Ubuntu/home/hoang/.claude/projects"
+    );
+  });
+  it("builds a wsl tar command for WSL-hosted Claude homes", () => {
+    assert.equal(
+      remoteSync.wslTarRemoteCmd("~/.claude"),
+      "wsl.exe -e sh -c 'tar -cC ~/.claude/projects .'"
+    );
   });
   it("adds cmd.exe probe only for Windows drive-letter remote homes", () => {
     const probes = remoteSync.connectionProbeCommands({
@@ -519,11 +574,11 @@ describe("reconcileRemoteSessionStatus", () => {
     }
   });
 
-  function stageSession(id, ageMs) {
+  function stageSession(id, ageMs, contentLine = "{}") {
     const proj = path.join(stageRoot, "-Users-x-proj");
     fs.mkdirSync(proj, { recursive: true });
     const f = path.join(proj, `${id}.jsonl`);
-    fs.writeFileSync(f, "{}\n");
+    fs.writeFileSync(f, `${contentLine}\n`);
     const t = new Date(Date.now() - ageMs);
     fs.utimesSync(f, t, t);
     return f;
@@ -587,6 +642,36 @@ describe("reconcileRemoteSessionStatus", () => {
     assert.equal(stmts.getSession.get("recon-stale").status, "completed");
     assert.ok(stmts.getSession.get("recon-stale").ended_at, "ended_at stamped");
     assert.equal(stmts.getAgent.get("recon-stale-main").status, "completed");
+  });
+
+  it("completes an active session when mtime is fresh but transcript content is stale", () => {
+    stmts.insertSession.run(
+      "recon-touch",
+      "s",
+      "active",
+      "/home/ubuntu/touched",
+      "claude-opus-4-8",
+      null
+    );
+    stmts.setSessionSource.run(SRC.id, "recon-touch");
+    stmts.insertAgent.run(
+      "recon-touch-main",
+      "recon-touch",
+      "Main",
+      "main",
+      null,
+      "waiting",
+      null,
+      null,
+      null
+    );
+    const stale = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    stageSession("recon-touch", 1_000, `{"timestamp":"${stale}"}`);
+
+    remoteSync.reconcileRemoteSessionStatus(dbModule, SRC, stageRoot);
+
+    assert.equal(stmts.getSession.get("recon-touch").status, "completed");
+    assert.equal(stmts.getAgent.get("recon-touch-main").status, "completed");
   });
 
   it("never touches a session owned by a different source", () => {

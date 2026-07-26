@@ -287,6 +287,8 @@ flowchart LR
 
 Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Agent：
 
+> **Cursor 会话（仅供参考）：** CCAM 会导入落在 `~/.claude` 下的所有 Agent 转录——本机以及已同步的远程机器。**Cursor** 的用量同样计入：Cursor 恰好与 Claude Code 使用相同的路径存放 Agent 会话。CCAM 不会区分是哪个应用写入了文件。
+
 | 功能 | 描述 |
 |------|------|
 | **Dashboard** | 两个标签页（存储于 `localStorage`）：**Monitor** — 概览统计（6 张统计卡片）、可折叠子 Agent 层级的活跃 Agent 卡片、近期活动流，项目数量通过 `ResizeObserver` 动态填满视口高度。**Health** — 综合系统健康评分环（加权：0.4 × 成功率 + 0.25 × 缓存命中率 + 0.25 × (100 − 错误率) + 0.1 × (100 − 堆内存 %)）、存储引擎甜甜圈图（记录分布）、缓存性能 / 错误率 / 成功率仪表、Top 8 工具调用水平条形图、子 Agent 效能条、模型 Token 分布、压缩影响统计。所有健康指标每 5 秒从 `/api/settings/info` 和 `/api/workflows` 自动刷新。所有图表均有跟随光标的工具提示并自动避免视口边缘溢出 |
@@ -617,7 +619,7 @@ flowchart LR
 | `DASHBOARD_LIVENESS_PROBE` | `1`（开启） | 设为 `0` 可禁用看门狗的**死亡会话存活性回收**（基于 `ps`/`lsof` 的探测，将 `claude` 进程已不存在的 `active` 会话标记为完成——恢复仪表盘停机期间丢失的 `SessionEnd`）。从**另一台机器**（家庭 Hook）转发来的会话会报告非 POSIX 的 `cwd`，会被回收自动跳过，因此混合的本地 + 转发部署不再需要关闭此项；仅在纯远程部署（本地进程无法证明任何事情）时才禁用它。在 Windows 和容器内自动禁用 |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | **看门狗节拍**存活性回收的空闲门槛：只有当会话的 Transcript 至少有这么长时间未被写入时（磁盘上没有 Transcript 时以最后一次 Hook 写入为后备时钟），才会将其标记为完成，因此回合中或刚 resume 的会话绝不会因一次瞬时的探测偏差而消失。启动时的回收跳过该门槛——boot 时由探测单独决定，因此启动前一刻退出的会话会立即清除 |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | 持续 `~/.claude/projects` 后台同步的轮询间隔（毫秒），用于显示启动后才加入、其会话从不经过 Hook 流入的项目。无论如何 `fs.watch` 监听器都会近乎即时触发；该轮询是安全兜底（监听器可能错过事件 / 在网络文件系统上不触发）。设为 `0` 可禁用轮询，同时让监听器保持运行 |
-| `DASHBOARD_REMOTE_SYNC_MS` | `60000` | 通过 `rsync` 拉取远程数据源的间隔（毫秒）。设为 `0` 可禁用远程源轮询 |
+| `DASHBOARD_REMOTE_SYNC_MS` | `15000` | 通过 `rsync` 拉取远程数据源的间隔（毫秒）。新增或重新启用数据源时会立即同步一次。设为 `0` 可禁用远程源轮询 |
 | `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000`（10 分钟） | 一个**远程数据源**会话实时状态的新鲜度窗口。每次同步时，镜像 Transcript 在此窗口内被修改过的远程会话会被视为仍在运行（`active`）；一旦镜像停止推进的时间超过此窗口，会话就被核对为 `completed`。远程会话不接收实时 Hook，因此本项取代了对它们跳过的本地存活性/过期扫描。链路较慢或空闲回合很长时可调大 |
 | `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` | `600000` | 每个远程源 `rsync` 的超时时间 |
 | `DASHBOARD_REMOTE_TEST_TIMEOUT_MS` | `15000` | 到源的 SSH 连接探测超时时间 |

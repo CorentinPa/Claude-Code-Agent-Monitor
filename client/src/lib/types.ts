@@ -1206,6 +1206,21 @@ export interface RemoteSourceStatusPayload {
   last_sync_at?: string;
 }
 
+/** Payload for `remote_data.updated`: a remote source finished importing and
+ *  sessions/costs/stats may have changed. Emitted once per successful sync. */
+export interface RemoteDataUpdatedPayload {
+  /** Remote source id (`src_…`). */
+  sourceId: string;
+  /** Same as `sourceId` — included for backward-compatible consumers. */
+  source: string;
+  /** Human label from the remote_sources row. */
+  label?: string;
+  /** Per-run import counters from the sync. */
+  counters?: Record<string, number>;
+  /** ISO timestamp of this successful sync. */
+  last_sync_at?: string;
+}
+
 // ───── Self-update status ─────
 
 /** Payload for `update_status` WebSocket messages and GET /api/updates/status.
@@ -1636,7 +1651,9 @@ export interface WSMessage {
    *  new_event → DashboardEvent; import.progress → ImportProgressMessage;
    *  update_status → UpdateStatusPayload; run_stream/run_status/run_input_ack
    *  → their matching Run*Payload; cc_config_changed → CcConfigChangedPayload;
-   *  alert_triggered/alert_updated → AlertEvent; workflow_upserted → WorkflowRun. */
+   *  alert_triggered/alert_updated → AlertEvent; workflow_upserted → WorkflowRun;
+   *  remote_source.status → RemoteSourceStatusPayload;
+   *  remote_data.updated → RemoteDataUpdatedPayload. */
   type:
     | "session_created"
     | "session_updated"
@@ -1652,7 +1669,8 @@ export interface WSMessage {
     | "alert_triggered"
     | "alert_updated"
     | "workflow_upserted"
-    | "remote_source.status";
+    | "remote_source.status"
+    | "remote_data.updated";
   /** The message body, whose concrete shape is selected by `type` above. */
   data:
     | Session
@@ -1666,7 +1684,8 @@ export interface WSMessage {
     | CcConfigChangedPayload
     | AlertEvent
     | WorkflowRun
-    | RemoteSourceStatusPayload;
+    | RemoteSourceStatusPayload
+    | RemoteDataUpdatedPayload;
   /** ISO timestamp the server broadcast this message (not necessarily the
    *  same instant the underlying event occurred). */
   timestamp: string;

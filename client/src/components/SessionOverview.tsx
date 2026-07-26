@@ -73,6 +73,7 @@ import {
 } from "lucide-react";
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
+import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { fmt, formatDuration } from "../lib/format";
 import { styleForTool } from "./conversation/toolStyle";
 import type { Agent, Session, SessionStats } from "../lib/types";
@@ -198,6 +199,14 @@ export function SessionOverview({ session, agents }: SessionOverviewProps) {
   // Live refresh on websocket events (debounced).
   useEffect(() => {
     const unsubscribe = eventBus.subscribe((msg) => {
+      if (isRemoteDataRefreshMessage(msg)) {
+        if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = setTimeout(() => {
+          refreshTimerRef.current = null;
+          fetchStats();
+        }, REFRESH_DEBOUNCE_MS);
+        return;
+      }
       const isRelevant =
         msg.type === "new_event" ||
         msg.type === "agent_created" ||

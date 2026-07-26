@@ -102,6 +102,8 @@ Architectural overview and technical reference for the Agent Dashboard system, c
 
 Agent Dashboard is a local-first monitoring platform for Claude Code sessions. It captures agent lifecycle events via Claude Code's native hook system, persists them in SQLite, and presents them through a React dashboard with real-time WebSocket updates.
 
+> **Cursor sessions (informational):** The same `~/.claude` transcript paths also pick up **Cursor** agent sessions — Cursor happens to use that layout locally alongside Claude Code. CCAM does not distinguish which editor created a session.
+
 ```mermaid
 C4Context
     title System Context Diagram

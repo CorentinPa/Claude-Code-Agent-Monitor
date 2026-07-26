@@ -64,6 +64,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { ChevronDown, Loader2, ArrowDown, MessagesSquare, RefreshCw } from "lucide-react";
 import { api } from "../../lib/api";
 import { eventBus } from "../../lib/eventBus";
+import { isRemoteDataRefreshMessage } from "../../lib/remoteDataEvents";
 import { MessageList } from "./MessageList";
 import type { TranscriptMessage, TranscriptInfo, WSMessage } from "../../lib/types";
 
@@ -236,6 +237,10 @@ export function ConversationView({ sessionId, initialTranscriptId }: Conversatio
   // also poll below to catch what WS misses.
   useEffect(() => {
     const unsubscribe = eventBus.subscribe((msg: WSMessage) => {
+      if (isRemoteDataRefreshMessage(msg)) {
+        fetchNewMessages();
+        return;
+      }
       if (msg.type !== "new_event") return;
       const data = msg.data as { session_id?: string };
       if (data.session_id !== sessionId) return;

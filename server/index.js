@@ -407,22 +407,25 @@ function startBackgroundServices() {
  * staging dir and feeds it through the shared importer (see
  * server/lib/remote-sync.js), so remote usage appears here in near real time.
  * A first pass runs shortly after boot; thereafter every DASHBOARD_REMOTE_SYNC_MS
- * (default 60s). Set the interval to 0 to disable. Unref'd so it never blocks
- * shutdown; overlapping ticks are prevented by an in-run guard plus the
- * per-source lock in remote-sync.
+ * (default 15s). Set the interval to 0 to disable. Unref'd so it never blocks
+ * shutdown; overlapping ticks queue one follow-up sweep (same as local sync).
  */
 function startRemoteSourceSync(broadcast) {
   const POLL_MS = process.env.DASHBOARD_REMOTE_SYNC_MS
     ? Number(process.env.DASHBOARD_REMOTE_SYNC_MS)
-    : 60_000;
+    : 15_000;
   if (!Number.isFinite(POLL_MS) || POLL_MS <= 0) return;
 
   const dbModule = require("./db");
   const { syncAllEnabled } = require("./lib/remote-sync");
   let running = false;
+  let queued = false;
 
   const tick = () => {
-    if (running) return;
+    if (running) {
+      queued = true;
+      return;
+    }
     // Cheap gate: skip all SSH work unless the user has an enabled source.
     let count = 0;
     try {
@@ -437,11 +440,15 @@ function startRemoteSourceSync(broadcast) {
       .catch((err) => console.warn("remote source sync tick failed:", err?.message || err))
       .finally(() => {
         running = false;
+        if (queued) {
+          queued = false;
+          tick();
+        }
       });
   };
 
-  // First pass 8s after boot (let the local import settle first), then interval.
-  const boot = setTimeout(tick, 8_000);
+  // First pass 2s after boot (let local import settle), then interval.
+  const boot = setTimeout(tick, 2_000);
   if (boot.unref) boot.unref();
   const timer = setInterval(tick, POLL_MS);
   if (timer.unref) timer.unref();

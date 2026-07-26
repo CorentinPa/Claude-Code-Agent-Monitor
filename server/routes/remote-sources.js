@@ -111,6 +111,9 @@ router.post("/", (req, res) => {
   const row = stmts.getRemoteSource.get(id);
   broadcast("remote_source.status", { id, status: row.status });
   res.status(201).json({ source: serialize(row) });
+  if (enabled) {
+    syncSource(require("../db"), row, { broadcast }).catch(() => {});
+  }
 });
 
 // POST /sync-all — sync every enabled source now (sequential; per-source
@@ -149,6 +152,9 @@ router.patch("/:id", (req, res) => {
   const row = stmts.getRemoteSource.get(req.params.id);
   broadcast("remote_source.status", { id: row.id, status: row.status });
   res.json({ source: serialize(row) });
+  if (v.enabled === 1 && !existing.enabled) {
+    syncSource(require("../db"), row, { broadcast }).catch(() => {});
+  }
 });
 
 // DELETE /:id — remove config + staging dir. ?purge=true also deletes the

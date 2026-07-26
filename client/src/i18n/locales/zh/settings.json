@@ -407,14 +407,19 @@
     "fieldPort": "端口（可选）",
     "fieldIdentity": "身份文件（可选）",
     "fieldRemoteHome": "远程 Claude 主目录（可选）",
+    "fieldRemoteHomeHint": "Linux/macOS：默认 ~/.claude（或绝对路径，如 /home/you/.claude）。通过 Windows SSH 且 Claude 在 WSL 中：留空（自动检测）或使用 wsl:~/.claude。原生 Windows：C:/Users/you/.claude。",
     "fieldEnabled": "在后台自动同步",
     "empty": "尚无远程数据源。",
     "emptyHint": "添加一台你通过 SSH 访问的机器，以拉取其 Claude Code 使用数据。",
     "paused": "自动同步已关闭",
     "sessionCount": "{{n}} 个会话",
+    "sessionCountLinked": "已关联 {{n}}",
+    "sessionCountHint": "关联到此数据源的会话（数据范围为“全部”时，列表中可能还有其他会话）",
     "lastSync": "上次同步：{{when}}",
     "neverSynced": "从未同步",
     "imported": "已导入 {{n}}",
+    "syncNew": "新增 {{n}}",
+    "syncOnRemote": "远程 {{n}}",
     "test": "测试",
     "syncNow": "同步",
     "syncAll": "全部同步",
@@ -425,5 +430,6 @@
     "deleteAndPurge": "移除 + 删除数据",
     "removeKeep": "移除（保留数据）",
     "remoteSourceBadgeTitle": "从远程机器收集"
-  }
+  },
+  "cursorPathsNote": "仅供参考：Cursor 会话也会计入——Cursor 与 Claude Code 使用相同的 ~/.claude 路径（本机及已同步的远程机器）。"
 }

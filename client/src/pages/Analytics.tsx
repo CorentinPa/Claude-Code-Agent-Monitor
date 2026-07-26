@@ -73,6 +73,7 @@ import {
 } from "lucide-react";
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
+import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
 import { fmt, fmtCost, fmtCostFull, formatModelName } from "../lib/format";
 import { Tip } from "../components/Tip";
@@ -693,8 +694,7 @@ export function Analytics() {
         msg.type === "session_updated" ||
         msg.type === "new_event" ||
         msg.type === "agent_created" ||
-        msg.type === "remote_source.status" ||
-        (msg.type === "import.progress" && (msg.data as { phase?: string })?.phase === "complete")
+        isRemoteDataRefreshMessage(msg)
       ) {
         load();
       }
