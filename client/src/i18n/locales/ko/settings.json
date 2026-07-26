@@ -407,14 +407,19 @@
     "fieldPort": "포트 (선택 사항)",
     "fieldIdentity": "인증서 파일 (선택 사항)",
     "fieldRemoteHome": "원격 Claude 홈 (선택 사항)",
+    "fieldRemoteHomeHint": "Linux/macOS: 기본값 ~/.claude(또는 /home/you/.claude 같은 절대 경로). Windows SSH + WSL의 Claude: 비워 두기(자동 감지) 또는 wsl:~/.claude. 네이티브 Windows: C:/Users/you/.claude.",
     "fieldEnabled": "백그라운드에서 자동 동기화",
     "empty": "아직 원격 소스가 없습니다.",
     "emptyHint": "SSH로 접속하는 머신을 추가하여 해당 머신의 Claude Code 사용량을 가져오세요.",
     "paused": "자동 동기화 꺼짐",
     "sessionCount": "세션 {{n}}개",
+    "sessionCountLinked": "{{n}}개 연결됨",
+    "sessionCountHint": "이 소스에 연결된 세션(데이터 범위가 전체일 때 보이는 모든 세션이 아님)",
     "lastSync": "마지막 동기화: {{when}}",
     "neverSynced": "동기화된 적 없음",
     "imported": "{{n}}개 가져옴",
+    "syncNew": "신규 {{n}}",
+    "syncOnRemote": "원격 {{n}}",
     "test": "테스트",
     "syncNow": "동기화",
     "syncAll": "모두 동기화",
@@ -425,5 +430,6 @@
     "deleteAndPurge": "제거 + 데이터 삭제",
     "removeKeep": "제거 (데이터 유지)",
     "remoteSourceBadgeTitle": "원격 머신에서 수집됨"
-  }
+  },
+  "cursorPathsNote": "안내: Cursor 세션도 집계됩니다. Cursor는 Claude Code와 동일한 ~/.claude 경로를 사용합니다(로컬 및 동기화된 원격)."
 }

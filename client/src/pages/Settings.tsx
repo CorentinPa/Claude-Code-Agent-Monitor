@@ -112,6 +112,7 @@ import {
 } from "lucide-react";
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
+import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { tabbyPrefs } from "../components/Tabby/prefs";
 import { fmt, fmtCost, getCurrentLocale } from "../lib/format";
 import { subscribeToPush, unsubscribeFromPush } from "../lib/push";
@@ -573,8 +574,11 @@ export function Settings() {
           .then(setSysInfo)
           .catch(() => {});
       }
+      if (isRemoteDataRefreshMessage(msg)) {
+        load();
+      }
     });
-  }, []);
+  }, [load]);
 
   useEffect(() => {
     if (!actionResult) return;
@@ -1354,7 +1358,8 @@ export function Settings() {
           <FolderOpen className="w-4 h-4 text-gray-500" />
           {t("claudeHome.title")}
         </h3>
-        <p className="text-xs text-gray-500 mb-4">{t("claudeHome.description")}</p>
+        <p className="text-xs text-gray-500 mb-1">{t("claudeHome.description")}</p>
+        <p className="text-[11px] text-gray-600 italic mb-4 leading-snug">{t("cursorPathsNote")}</p>
 
         <div className="card p-5 space-y-4">
           <div className="flex items-center gap-3">

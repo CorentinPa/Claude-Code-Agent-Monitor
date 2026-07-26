@@ -407,14 +407,19 @@
     "fieldPort": "Cổng (tùy chọn)",
     "fieldIdentity": "Tệp danh tính (tùy chọn)",
     "fieldRemoteHome": "Thư mục Claude từ xa (tùy chọn)",
+    "fieldRemoteHomeHint": "Linux/macOS: mặc định ~/.claude (hoặc đường dẫn tuyệt đối như /home/you/.claude). SSH vào Windows mà Claude chạy trong WSL: để trống (tự phát hiện) hoặc dùng wsl:~/.claude. Windows thuần: C:/Users/you/.claude.",
     "fieldEnabled": "Tự động đồng bộ ở chế độ nền",
     "empty": "Chưa có nguồn từ xa nào.",
     "emptyHint": "Thêm một máy bạn kết nối qua SSH để kéo dữ liệu sử dụng Claude Code của máy đó về.",
     "paused": "Tắt tự động đồng bộ",
     "sessionCount": "{{n}} phiên",
+    "sessionCountLinked": "{{n}} đã liên kết",
+    "sessionCountHint": "Phiên gắn với nguồn này (không phải mọi phiên bạn thấy khi phạm vi dữ liệu là Tất cả)",
     "lastSync": "Đồng bộ lần cuối: {{when}}",
     "neverSynced": "Chưa bao giờ đồng bộ",
     "imported": "Đã nhập {{n}}",
+    "syncNew": "{{n}} mới",
+    "syncOnRemote": "{{n}} trên máy từ xa",
     "test": "Kiểm tra",
     "syncNow": "Đồng bộ",
     "syncAll": "Đồng bộ tất cả",
@@ -425,5 +430,6 @@
     "deleteAndPurge": "Xóa + xóa dữ liệu",
     "removeKeep": "Xóa (giữ dữ liệu)",
     "remoteSourceBadgeTitle": "Được thu thập từ một máy từ xa"
-  }
+  },
+  "cursorPathsNote": "Chỉ mang tính thông tin: phiên Cursor cũng được tính — Cursor tình cờ dùng cùng đường dẫn ~/.claude với Claude Code (cục bộ và trên máy từ xa đã đồng bộ)."
 }

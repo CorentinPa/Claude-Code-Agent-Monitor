@@ -110,7 +110,7 @@ describe("remote-sync validateSourceInput", () => {
     ],
     ["host with space", { label: "x", host: "a b" }, "INVALID_HOST"],
     ["host with ;", { label: "x", host: "a;rm -rf /" }, "INVALID_HOST"],
-    ["host with : (breaks rsync spec)", { label: "x", host: "a:b" }, "INVALID_HOST"],
+    ["host with : (breaks scp spec)", { label: "x", host: "a:b" }, "INVALID_HOST"],
     ["missing label", { host: "a" }, "INVALID_LABEL"],
     ["port out of range", { label: "x", host: "a", ssh_port: 99999 }, "INVALID_PORT"],
     [
@@ -149,20 +149,188 @@ describe("remote-sync validateSourceInput", () => {
 });
 
 describe("remote-sync command builders", () => {
-  it("builds ssh option args with port + identity", () => {
-    const args = remoteSync.sshOptionArgs({ ssh_port: 2222, identity_file: "/k" });
-    assert.deepEqual(args, [
+  it("builds ssh option args with port + identity", async () => {
+    const args = await remoteSync.sshOptionArgs({ ssh_port: 2222, identity_file: "/k" });
+    assert.ok(args.includes("-p"));
+    assert.equal(args[args.indexOf("-p") + 1], "2222");
+    assert.ok(args.includes("-i"));
+    assert.equal(args[args.indexOf("-i") + 1], "/k");
+    assert.ok(args.includes("IdentitiesOnly=yes"));
+  });
+  it("builds scp option args with capital -P for port", async () => {
+    const args = await remoteSync.scpOptionArgs({ ssh_port: 2222, identity_file: "/k" });
+    assert.ok(args.includes("-P"));
+    assert.equal(args[args.indexOf("-P") + 1], "2222");
+  });
+  it("parses ssh -G output for identity agent discovery", () => {
+    const cfg = remoteSync.parseSshGOutput(
+      "hostname example.com\nidentityagent /tmp/agent.sock\nport 22\n"
+    );
+    assert.equal(cfg.identityagent, "/tmp/agent.sock");
+    assert.equal(cfg.port, "22");
+  });
+  it("buildSshChildEnv sets HOME and does not override SSH_AUTH_SOCK", () => {
+    const env = remoteSync.buildSshChildEnv();
+    assert.ok(env.HOME);
+    if (process.env.SSH_AUTH_SOCK) {
+      assert.equal(env.SSH_AUTH_SOCK, process.env.SSH_AUTH_SOCK);
+    }
+  });
+  it("identityAgentArgsFromConfig follows ssh -G only for concrete agent paths", () => {
+    assert.deepEqual(remoteSync.identityAgentArgsFromConfig("none"), []);
+    assert.deepEqual(remoteSync.identityAgentArgsFromConfig("SSH_AUTH_SOCK"), []);
+    assert.deepEqual(remoteSync.identityAgentArgsFromConfig("/tmp/custom-agent.sock"), [
       "-o",
-      "BatchMode=yes",
-      "-o",
-      "ConnectTimeout=10",
-      "-p",
-      "2222",
-      "-i",
-      "/k",
-      "-o",
-      "IdentitiesOnly=yes",
+      "IdentityAgent=/tmp/custom-agent.sock",
     ]);
+    const home = os.homedir();
+    assert.deepEqual(remoteSync.identityAgentArgsFromConfig("~/Library/agent.sock"), [
+      "-o",
+      `IdentityAgent=${path.join(home, "Library/agent.sock")}`,
+    ]);
+  });
+  it("adds PowerShell and WSL probes for ~-rooted remote homes (Windows remotes)", () => {
+    const probes = remoteSync.connectionProbeCommands({ remote_home: "~/.claude" });
+    assert.equal(probes.length, 3);
+    assert.match(probes[0], /sh -c/);
+    assert.match(probes[0], /~\/\.claude\/projects/);
+    assert.match(probes[1], /powershell\.exe/);
+    assert.match(probes[1], /\.claude\\projects/);
+    assert.match(probes[2], /wsl\.exe/);
+    assert.match(probes[2], /~\/\.claude\/projects/);
+  });
+  it("uses only wsl.exe for wsl: remote homes", () => {
+    const probes = remoteSync.connectionProbeCommands({ remote_home: "wsl:~/.claude" });
+    assert.equal(probes.length, 1);
+    assert.match(probes[0], /wsl\.exe/);
+  });
+
+  it("connectionSuccessMessage reflects explicit vs auto-detected WSL", () => {
+    const wslProbe = "wsl.exe -e sh -c 'test -d ~/.claude/projects && echo CCAM_OK'";
+    assert.match(
+      remoteSync.connectionSuccessMessage({ remote_home: "wsl:~/.claude" }, wslProbe),
+      /wsl:~\/\.claude/
+    );
+    assert.doesNotMatch(
+      remoteSync.connectionSuccessMessage({ remote_home: "wsl:~/.claude" }, wslProbe),
+      /auto-detected/i
+    );
+    assert.match(
+      remoteSync.connectionSuccessMessage({ remote_home: null }, wslProbe),
+      /auto-detected/i
+    );
+    assert.match(
+      remoteSync.connectionSuccessMessage({ remote_home: null }, "sh -c 'echo CCAM_OK'"),
+      /Remote Claude Code history found/
+    );
+  });
+  it("accepts wsl: and UNC remote_home values", () => {
+    const wsl = remoteSync.validateSourceInput({
+      label: "WSL",
+      host: "u@win",
+      remote_home: "wsl:/home/hoang/.claude",
+    });
+    assert.equal(wsl.remoteHome, "wsl:/home/hoang/.claude");
+    assert.equal(
+      remoteSync.remoteProjectsPath({ remote_home: wsl.remoteHome }),
+      "wsl:/home/hoang/.claude/projects"
+    );
+    const unc = remoteSync.validateSourceInput({
+      label: "UNC",
+      host: "u@win",
+      remote_home: "//wsl.localhost/Ubuntu/home/hoang/.claude",
+    });
+    assert.equal(unc.remoteHome, "//wsl.localhost/Ubuntu/home/hoang/.claude");
+    assert.equal(
+      remoteSync.remoteProjectsPath({ remote_home: unc.remoteHome }),
+      "//wsl.localhost/Ubuntu/home/hoang/.claude/projects"
+    );
+  });
+  it("builds a wsl tar command for WSL-hosted Claude homes", () => {
+    assert.equal(
+      remoteSync.wslTarRemoteCmd("~/.claude"),
+      "wsl.exe -e sh -c 'tar -cC ~/.claude/projects .'"
+    );
+  });
+  it("adds cmd.exe probe only for Windows drive-letter remote homes", () => {
+    const probes = remoteSync.connectionProbeCommands({
+      remote_home: "C:/Users/hoang/.claude",
+    });
+    assert.equal(probes.length, 1);
+    assert.match(probes[0], /cmd \/c/);
+    assert.match(probes[0], /C:\\Users\\hoang\\.claude\\projects/);
+  });
+  it("uses sh probe for POSIX absolute remote homes", () => {
+    const probes = remoteSync.connectionProbeCommands({ remote_home: "/opt/cc" });
+    assert.deepEqual(probes, [
+      "sh -c 'test -d /opt/cc/projects && echo CCAM_OK || echo CCAM_NO_DIR'",
+    ]);
+  });
+  it("accepts Windows-style remote_home with forward slashes", () => {
+    const v = remoteSync.validateSourceInput({
+      label: "Win",
+      host: "u@win",
+      remote_home: "C:/Users/hoang/.claude",
+    });
+    assert.equal(v.remoteHome, "C:/Users/hoang/.claude");
+    assert.equal(
+      remoteSync.remoteProjectsPath({ remote_home: v.remoteHome }),
+      "C:/Users/hoang/.claude/projects"
+    );
+    assert.equal(
+      remoteSync.scpRemoteSpec({ host: "u@win", remote_home: v.remoteHome }),
+      "u@win:C:/Users/hoang/.claude/projects/."
+    );
+  });
+  it("expands tilde in ssh -G IdentityAgent paths and strips quotes", () => {
+    const home = os.homedir();
+    assert.equal(
+      remoteSync.expandSshConfigPath("~/Library/agent.sock"),
+      path.join(home, "Library/agent.sock")
+    );
+    assert.equal(remoteSync.expandSshConfigPath('"/tmp/quoted.sock"'), "/tmp/quoted.sock");
+    assert.equal(remoteSync.expandSshConfigPath("/tmp/a"), "/tmp/a");
+  });
+  it("sshConfigFileArgs points at user config when present", () => {
+    const args = remoteSync.sshConfigFileArgs();
+    const cfg = path.join(os.homedir(), ".ssh", "config");
+    if (fs.existsSync(cfg)) {
+      assert.deepEqual(args, ["-F", cfg]);
+    } else {
+      assert.deepEqual(args, []);
+    }
+  });
+  it("treats blank identity_file as null", () => {
+    const v = remoteSync.validateSourceInput({
+      label: "x",
+      host: "a",
+      identity_file: "   ",
+    });
+    assert.equal(v.identityFile, null);
+  });
+  it("detects legacy scp protocol errors for -O retry", () => {
+    assert.equal(
+      remoteSync.isLegacyScpProtocolError("subsystem request failed on channel 0"),
+      true
+    );
+    assert.equal(remoteSync.isLegacyScpProtocolError("Permission denied"), false);
+  });
+  it("strips ANSI escapes from command output", () => {
+    assert.equal(remoteSync.stripAnsi("\u001b[31;1mscp: not found\u001b[0m"), "scp: not found");
+  });
+  it("resolves ssh/scp binaries on Windows when OpenSSH is in System32", () => {
+    const prev = process.platform;
+    const prevWin = process.env.WINDIR;
+    try {
+      Object.defineProperty(process, "platform", { value: "win32" });
+      process.env.WINDIR = process.env.WINDIR || "C:\\Windows";
+      const ssh = remoteSync.resolveSshBinary("ssh");
+      assert.match(ssh, /ssh\.exe$/i);
+    } finally {
+      Object.defineProperty(process, "platform", { value: prev });
+      if (prevWin === undefined) delete process.env.WINDIR;
+      else process.env.WINDIR = prevWin;
+    }
   });
   it("defaults the remote projects path to ~/.claude/projects", () => {
     assert.equal(remoteSync.remoteProjectsPath({}), "~/.claude/projects");
@@ -406,11 +574,11 @@ describe("reconcileRemoteSessionStatus", () => {
     }
   });
 
-  function stageSession(id, ageMs) {
+  function stageSession(id, ageMs, contentLine = "{}") {
     const proj = path.join(stageRoot, "-Users-x-proj");
     fs.mkdirSync(proj, { recursive: true });
     const f = path.join(proj, `${id}.jsonl`);
-    fs.writeFileSync(f, "{}\n");
+    fs.writeFileSync(f, `${contentLine}\n`);
     const t = new Date(Date.now() - ageMs);
     fs.utimesSync(f, t, t);
     return f;
@@ -474,6 +642,36 @@ describe("reconcileRemoteSessionStatus", () => {
     assert.equal(stmts.getSession.get("recon-stale").status, "completed");
     assert.ok(stmts.getSession.get("recon-stale").ended_at, "ended_at stamped");
     assert.equal(stmts.getAgent.get("recon-stale-main").status, "completed");
+  });
+
+  it("completes an active session when mtime is fresh but transcript content is stale", () => {
+    stmts.insertSession.run(
+      "recon-touch",
+      "s",
+      "active",
+      "/home/ubuntu/touched",
+      "claude-opus-4-8",
+      null
+    );
+    stmts.setSessionSource.run(SRC.id, "recon-touch");
+    stmts.insertAgent.run(
+      "recon-touch-main",
+      "recon-touch",
+      "Main",
+      "main",
+      null,
+      "waiting",
+      null,
+      null,
+      null
+    );
+    const stale = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    stageSession("recon-touch", 1_000, `{"timestamp":"${stale}"}`);
+
+    remoteSync.reconcileRemoteSessionStatus(dbModule, SRC, stageRoot);
+
+    assert.equal(stmts.getSession.get("recon-touch").status, "completed");
+    assert.equal(stmts.getAgent.get("recon-touch-main").status, "completed");
   });
 
   it("never touches a session owned by a different source", () => {

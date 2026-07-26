@@ -86,6 +86,7 @@ import {
 import { api } from "../lib/api";
 import type { RemoteSource, RemoteSourceInput } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
+import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
 import type { ScopeMode } from "../lib/dataScope";
 
@@ -157,10 +158,10 @@ export function RemoteSources() {
     load();
   }, [load]);
 
-  // Refresh on any remote-source status change (sync started/finished/errored).
+  // Refresh when a sync finishes or remote-imported rows change (session counts).
   useEffect(() => {
     return eventBus.subscribe((msg) => {
-      if (msg.type === "remote_source.status") load();
+      if (msg.type === "remote_source.status" || isRemoteDataRefreshMessage(msg)) load();
     });
   }, [load]);
 
@@ -326,6 +327,12 @@ export function RemoteSources() {
         {t(
           "remoteSources.description",
           "Collect Claude Code usage from other machines over SSH — e.g. a dev box or cloud VM you drive over SSH while running this dashboard locally. Authentication uses your own SSH setup (~/.ssh/config, keys, agent); no passwords are stored here."
+        )}
+      </p>
+      <p className="text-[11px] text-gray-600 italic mb-4 leading-snug">
+        {t(
+          "cursorPathsNote",
+          "Informational: Cursor sessions count here too — Cursor happens to use the same ~/.claude paths as Claude Code (locally and on synced remotes)."
         )}
       </p>
 
@@ -529,10 +536,16 @@ export function RemoteSources() {
               </label>
               <input
                 className="input w-full font-mono"
-                placeholder="~/.claude"
+                placeholder="~/.claude or wsl:~/.claude"
                 value={form.remote_home ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, remote_home: e.target.value }))}
               />
+              <p className="mt-1 text-[11px] text-gray-500 leading-snug">
+                {t(
+                  "remoteSources.fieldRemoteHomeHint",
+                  "Linux/macOS: default ~/.claude (or an absolute path like /home/you/.claude). Windows SSH + Claude in WSL: leave blank (auto-detect) or use wsl:~/.claude. Native Windows: C:/Users/you/.claude."
+                )}
+              </p>
             </div>
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
@@ -606,8 +619,14 @@ export function RemoteSources() {
                         </span>
                       )}
                       {s.session_count != null && s.session_count > 0 && (
-                        <span className="text-[10px] text-gray-400 bg-surface-2 border border-border px-1.5 py-0.5 rounded-full">
-                          {t("remoteSources.sessionCount", "{{n}} sessions", {
+                        <span
+                          className="text-[10px] text-gray-400 bg-surface-2 border border-border px-1.5 py-0.5 rounded-full"
+                          title={t(
+                            "remoteSources.sessionCountHint",
+                            "Sessions linked to this source (not every session visible when data scope is All)"
+                          )}
+                        >
+                          {t("remoteSources.sessionCountLinked", "{{n}} linked", {
                             n: s.session_count,
                           })}
                         </span>
@@ -625,8 +644,12 @@ export function RemoteSources() {
                           })
                         : t("remoteSources.neverSynced", "Never synced")}
                       {s.last_sync_counts?.imported != null &&
-                        ` · ${t("remoteSources.imported", "{{n}} imported", {
+                        ` · ${t("remoteSources.syncNew", "{{n}} new", {
                           n: s.last_sync_counts.imported,
+                        })}`}
+                      {s.last_sync_counts?.sessions_tagged != null &&
+                        ` · ${t("remoteSources.syncOnRemote", "{{n}} on remote", {
+                          n: s.last_sync_counts.sessions_tagged,
                         })}`}
                     </div>
                     {s.status === "error" && s.last_error && (

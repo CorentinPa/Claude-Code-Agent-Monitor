@@ -407,14 +407,19 @@
     "fieldPort": "Port (optional)",
     "fieldIdentity": "Identity file (optional)",
     "fieldRemoteHome": "Remote Claude home (optional)",
+    "fieldRemoteHomeHint": "Linux/macOS: default ~/.claude (or an absolute path like /home/you/.claude). Windows SSH + Claude in WSL: leave blank (auto-detect) or use wsl:~/.claude. Native Windows: C:/Users/you/.claude.",
     "fieldEnabled": "Sync automatically in the background",
     "empty": "No remote sources yet.",
     "emptyHint": "Add a machine you reach over SSH to pull its Claude Code usage in.",
     "paused": "Auto-sync off",
     "sessionCount": "{{n}} sessions",
+    "sessionCountLinked": "{{n}} linked",
+    "sessionCountHint": "Sessions linked to this source (not every session visible when data scope is All)",
     "lastSync": "Last sync: {{when}}",
     "neverSynced": "Never synced",
     "imported": "{{n}} imported",
+    "syncNew": "{{n}} new",
+    "syncOnRemote": "{{n}} on remote",
     "test": "Test",
     "syncNow": "Sync",
     "syncAll": "Sync all",
@@ -425,5 +430,6 @@
     "deleteAndPurge": "Remove + delete data",
     "removeKeep": "Remove (keep data)",
     "remoteSourceBadgeTitle": "Collected from a remote machine"
-  }
+  },
+  "cursorPathsNote": "Informational: Cursor sessions count here too — Cursor happens to use the same ~/.claude paths as Claude Code (locally and on synced remotes)."
 }

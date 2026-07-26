@@ -826,6 +826,9 @@ POST /api/remote-sources
 | `ssh_port` | integer | No | SSH port (defers to SSH default / config when omitted) |
 | `identity_file` | string | No | Private-key path passed to ssh (`-i`) |
 | `remote_home` | string | No | Remote Claude home (defaults to remote `~/.claude`) |
+
+> **Cursor (informational):** Sessions imported from `~/.claude` include **Cursor** agent usage on that machine too — Cursor happens to use the same paths as Claude Code. CCAM does not tag which app created a session.
+
 | `enabled` | boolean | No | Whether the source is eligible for syncs (default `true`) |
 
 Returns `{ "source": RemoteSource }` with HTTP **201**.
@@ -1167,6 +1170,23 @@ Broadcast whenever Claude Code configuration changes — either by dashboard mut
 ```json
 { "type": "cc_config_changed", "data": { "source": "dashboard", "action": "write", "scope": "user", "type": "skill", "name": "my-skill" } }
 { "type": "cc_config_changed", "data": { "source": "fs", "paths": ["/Users/foo/.claude/settings.json"] } }
+```
+
+#### remote_data.updated
+
+Broadcast once per successful remote sync (background poller, manual **Sync now**, or immediate pull after add/re-enable). Clients use this — and the per-session `session_created` / `session_updated` frames emitted in the same pass — to refetch sessions, costs, and analytics without polling.
+
+```json
+{
+  "type": "remote_data.updated",
+  "data": {
+    "sourceId": "src_a1b2c3",
+    "source": "src_a1b2c3",
+    "label": "dev-box",
+    "counters": { "imported": 1, "skipped": 0, "sessions_tagged": 3 },
+    "last_sync_at": "2026-07-26T21:15:00.000Z"
+  }
+}
 ```
 
 #### remote_source.status

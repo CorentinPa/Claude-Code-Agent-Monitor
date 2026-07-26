@@ -8313,9 +8313,14 @@ exports[`screen snapshots > Settings 1`] = `
         CLAUDE_HOME
       </h3>
       <p
-        class="text-xs text-gray-500 mb-4"
+        class="text-xs text-gray-500 mb-1"
       >
         Root directory for Claude Code session data. Changing this updates the scan path for transcripts and imports immediately.
+      </p>
+      <p
+        class="text-[11px] text-gray-600 italic mb-4 leading-snug"
+      >
+        Informational: Cursor sessions count here too — Cursor happens to use the same ~/.claude paths as Claude Code (locally and on synced remotes).
       </p>
       <div
         class="card p-5 space-y-4"
@@ -8382,9 +8387,14 @@ exports[`screen snapshots > Settings 1`] = `
           Import History
         </h3>
         <p
-          class="text-xs text-gray-500 mb-4"
+          class="text-xs text-gray-500 mb-1"
         >
           Bring existing Claude Code sessions into the dashboard. Token counts, per-model cost, compactions, subagents, tool uses, and turn durations are reconstructed from the original JSONL transcripts - identical to how live sessions are captured.
+        </p>
+        <p
+          class="text-[11px] text-gray-600 italic mb-4 leading-snug"
+        >
+          Informational: Cursor sessions count here too — Cursor happens to use the same ~/.claude paths as Claude Code (locally and on synced remotes).
         </p>
         <div
           class="card p-5 space-y-5"
@@ -8930,6 +8940,11 @@ exports[`screen snapshots > Settings 1`] = `
           class="text-xs text-gray-500 mb-4"
         >
           Collect Claude Code usage from other machines over SSH - e.g. a dev box or cloud VM you drive over SSH while running this dashboard locally. Authentication uses your own SSH setup (~/.ssh/config, keys, agent); no passwords are stored here.
+        </p>
+        <p
+          class="text-[11px] text-gray-600 italic mb-4 leading-snug"
+        >
+          Informational: Cursor sessions count here too — Cursor happens to use the same ~/.claude paths as Claude Code (locally and on synced remotes).
         </p>
         <div
           class="card p-5 mb-4"
@@ -10125,7 +10140,7 @@ exports[`screen snapshots > Settings 1`] = `
             <p
               class="text-[10px] text-amber-400/90 mt-1"
             >
-              UI build v1.4.2 (rebuild client to match)
+              UI build v1.4.5 (rebuild client to match)
             </p>
           </div>
           <div

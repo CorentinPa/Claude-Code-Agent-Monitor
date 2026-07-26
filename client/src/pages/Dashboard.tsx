@@ -96,6 +96,7 @@ import {
 } from "lucide-react";
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
+import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
 import { StatCard } from "../components/StatCard";
 import { AgentCard } from "../components/AgentCard";
@@ -1085,9 +1086,7 @@ export function Dashboard() {
         msg.type === "agent_updated" ||
         msg.type === "session_created" ||
         msg.type === "session_updated" ||
-        // A remote source finished syncing → new remote data may have landed.
-        msg.type === "remote_source.status" ||
-        (msg.type === "import.progress" && (msg.data as { phase?: string })?.phase === "complete")
+        isRemoteDataRefreshMessage(msg)
       ) {
         // Debounce rapid-fire updates (e.g., 5 agents created in 100ms)
         if (debounceRef.timer) clearTimeout(debounceRef.timer);

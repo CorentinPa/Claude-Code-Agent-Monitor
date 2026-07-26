@@ -290,7 +290,8 @@ export function ImportHistory() {
         <History className="w-4 h-4 text-gray-500" />
         {t("import.title")}
       </h3>
-      <p className="text-xs text-gray-500 mb-4">{t("import.description")}</p>
+      <p className="text-xs text-gray-500 mb-1">{t("import.description")}</p>
+      <p className="text-[11px] text-gray-600 italic mb-4 leading-snug">{t("cursorPathsNote")}</p>
 
       <div className="card p-5 space-y-5">
         {/* Step-by-step instructions */}

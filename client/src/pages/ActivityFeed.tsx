@@ -73,6 +73,7 @@ import { useTranslation } from "react-i18next";
 import { Activity, Pause, Play, RefreshCw, ChevronRight, ExternalLink } from "lucide-react";
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
+import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
 import { AgentStatusBadge } from "../components/StatusBadge";
 import { EmptyState } from "../components/EmptyState";
@@ -275,10 +276,7 @@ export function ActivityFeed() {
     const unsubscribe = eventBus.subscribe((msg) => {
       // A remote source finished syncing → new remote events may exist; do a
       // filter-aware refresh (respects pause via refreshWithPagination's guard).
-      if (
-        msg.type === "remote_source.status" ||
-        (msg.type === "import.progress" && (msg.data as { phase?: string })?.phase === "complete")
-      ) {
+      if (isRemoteDataRefreshMessage(msg)) {
         if (!pausedRef.current) refreshWithPagination();
         return;
       }

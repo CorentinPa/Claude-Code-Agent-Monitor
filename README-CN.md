@@ -287,6 +287,8 @@ flowchart LR
 
 Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Agent：
 
+> **Cursor 会话（仅供参考）：** CCAM 会导入落在 `~/.claude` 下的所有 Agent 转录——本机以及已同步的远程机器。**Cursor** 的用量同样计入：Cursor 恰好与 Claude Code 使用相同的路径存放 Agent 会话。CCAM 不会区分是哪个应用写入了文件。
+
 | 功能 | 描述 |
 |------|------|
 | **Dashboard** | 两个标签页（存储于 `localStorage`）：**Monitor** — 概览统计（6 张统计卡片）、可折叠子 Agent 层级的活跃 Agent 卡片、近期活动流，项目数量通过 `ResizeObserver` 动态填满视口高度。**Health** — 综合系统健康评分环（加权：0.4 × 成功率 + 0.25 × 缓存命中率 + 0.25 × (100 − 错误率) + 0.1 × (100 − 堆内存 %)）、存储引擎甜甜圈图（记录分布）、缓存性能 / 错误率 / 成功率仪表、Top 8 工具调用水平条形图、子 Agent 效能条、模型 Token 分布、压缩影响统计。所有健康指标每 5 秒从 `/api/settings/info` 和 `/api/workflows` 自动刷新。所有图表均有跟随光标的工具提示并自动避免视口边缘溢出 |
@@ -312,7 +314,7 @@ Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Ag
 | **子会话/恢复会话** | 新事件到达时自动重新激活会话,正确处理 `/resume` 和孤立会话。周期性清理(每 ¼ 个 `DASHBOARD_STALE_MINUTES`,夹在 60 秒–5 分钟之间)标记遗漏事件检测的废弃会话 |
 | **预存会话检测** | 服务器启动时已在运行的会话以"活跃"状态导入（基于近期 JSONL 文件修改时间）。Stop 事件也会重新激活已导入的完成/废弃会话，因此进行中的会话的第一个 Hook 始终会显示在 Dashboard 上 |
 | **持续项目同步** | 启动时对 `~/.claude/projects` 的自动导入是一次性的（由标记位把关），因此在首次启动**之后**才创建的项目文件夹——其会话从不经过 Hook 流入（例如 host-only Hook 被禁用）——在手动重新扫描之前都将不可见。后台同步（`startSessionSync`）通过三个共享同一个 mtime 缓存 + 单次合并扫描的触发器弥补了这个空隙：启动时的**立即**扫描、一个去抖的 **`fs.watch`**（新会话文件 / 项目文件夹一出现就触发；在 macOS/Windows 上递归监听，在 Linux 上监听根目录 + 直接子文件夹，以规避用户态递归监听器的隐患），以及一个**周期性轮询**（`DASHBOARD_SESSION_SYNC_MS`，默认 30 秒）。每次扫描只重新解析 mtime 前进过的文件，并广播 `session_created`/`session_updated`（外加主 Agent），让 UI 实时刷新；DB 中已有且未变更的会话会被跳过、不再重新解析，因此重启成本保持为 O(新增/变更文件) |
-| **远程数据源** | 通过 SSH 从其他机器收集 Claude Code 使用数据 —— dashboard 对每个远程主机的 `~/.claude/projects` 目录执行 `rsync` 并导入,按来源为会话打标签。提供全局数据范围选择器(仅本地 / 全部 / 指定来源),按所选来源收窄整个应用。通过后台轮询实现近实时。远程会话**不接收本地实时 Hook**,因此被排除在所有本地存活性/过期启发式判断之外(`ps`/`lsof` 回收、看门狗 Transcript 扫描、启动清理与周期性废弃清理——均以 `source = 'local'` 为门槛);它们的实时状态改为在**每次同步时依据镜像 Transcript 重新核对**——镜像 Transcript 在 `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS`(默认 10 分钟)内被修改则视为远程 CLI 仍在运行(⇒ `active`),一旦镜像停止推进则核对为 `completed` |
+| **远程数据源** | 通过 SSH 实时从其他机器收集 Claude Code 数据。Dashboard 通过 **scp**（Windows SSH 上 WSL 托管的 Claude 使用 `wsl.exe` + `tar`）将每台机器的 `~/.claude/projects` 镜像到按源隔离的沙箱暂存目录，经与本地历史**相同的导入器**处理，并为导入会话打上来源标签（`sessions.source`）。后台轮询器（`DASHBOARD_REMOTE_SYNC_MS`，默认 15 秒；`0` 禁用）保持近实时——新增或重新启用源也会立即拉取——成功同步会广播 `remote_data.updated` 及逐会话的 `session_created` / `session_updated` 帧，打开页面无需手动 Sync 即可刷新。全局**数据范围**选择器（仅本地 / 全部 / 指定源）可收窄整个应用。在 **Settings → Remote Data Sources** 和 `ccam remote-sources` 中管理；状态经 `remote_source.status` 推送，Sessions 行显示来源徽章。远程会话**不接收本地实时 Hook**，因此被排除在所有本地存活性/过期启发式之外；其**实时状态在每次同步时依据镜像 Transcript 重新核对**——JSONL 内最新事件时间戳（回退到镜像 mtime）落在 `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS`（默认 10 分钟）内则视为远程 CLI 仍在运行（⇒ `active`），镜像停止推进则核对为 `completed` |
 | **响应式设计** | 适配移动端的布局，堆叠网格、可滚动表格和可折叠侧边栏 |
 | **界面本地化** | 内置语言切换，UI 文案与无障碍标签已覆盖英文（`en`）、中文（`zh`）、越南语（`vi`）和韩语（`ko`）。覆盖范围现已贯穿 Workflows 页面的所有 tooltip：统计卡片的计算说明与按值分桶的解读、每个图表的「此图展示什么 / 如何阅读 / 为何重要」浮层、所有图形悬停 tooltip（编排 DAG、工具流、Pipeline、模型委派、并发时间线）、Workflow Patterns 详情面板的叙述与建议、设置页 → 模型定价的信息浮层、CLAUDE_HOME 面板，以及完整的 Import History 流程 |
 | **种子数据** | 内置种子脚本，用于演示和开发 |
@@ -523,7 +525,7 @@ sequenceDiagram
    - **错误检测看门狗** — 后台定时器每 15 秒运行一次，扫描没有近期 Hook 事件（>10 秒）的活跃会话。它重新读取 Transcript 文件查找 API 错误（认证失败、速率限制、配额耗尽），从会话 `cwd` 推导 Transcript 路径（用于没有 `transcript_path` 的导入会话），并在发现 API 错误时将会话/Agent 标记为 `error`。这可以捕获 Claude CLI 在 API 错误后不触发 Hook 的情况（例如 401 认证失败时 CLI 只显示错误并等待）
    - **用户中断（Esc）恢复** — 用户按 `Esc` 取消回合时**不会触发任何 Hook**（Claude Code 已知的限制），因此若不加干预，主 Agent 会永远卡在 `working` 状态。同一个 15 秒看门狗以两种方式恢复这些会话：(1) 当取消在 Transcript 中留下 `[Request interrupted by user]` 标记时（Esc 发生在已有部分输出之后），Transcript 缓存通过 `pendingInterrupt` 标记它 —— 该标志纯粹由 Transcript 顺序推导得出（最新的中断与最新的真实回合活动相比，使用同一时钟，因此即便是亚秒级取消也有效）—— 会话在约 15 秒内转入**等待中**；(2) 当 Esc 在**任何输出之前**按下时，Claude Code 完全不写入标记，因此应用空闲超时回退 —— 当主 Agent 处于 `working`、**没有进行中的工具**（`current_tool` 为 null），且 `DASHBOARD_WORKING_IDLE_SECONDS`（默认 `120`）期间**既无 Hook 事件也无 Transcript 推进**时，该回合被视为已死，会话转入**等待中**。两条路径都记录一个 `Interrupted` 事件，并将会话置于与正常 `Stop` 相同的等待中状态。流式输出（Transcript 仍在增长）和进行中的工具调用（`current_tool` 已设置）不受影响；罕见的误判会在下一次真实 Hook 时自愈
    - **死亡会话存活性回收（liveness reap）** — 退出 Claude Code（Ctrl+C、关闭终端）会触发 `SessionEnd` Hook，但如果此刻仪表盘没有运行，该事件将永远丢失，会话会一直停留在**等待中**，直到废弃清理（默认 3 小时）。同一个 15 秒看门狗通过**进程存活性探测**弥补这一缺口：列出正在运行的 `claude` CLI 进程（macOS 上 `ps` + `lsof`，Linux 上 `/proc`），并将 `cwd` 中不存在任何存活 claude 进程的 `active` 会话标记为完成——落入与真实 `SessionEnd` 相同的 `completed` 状态，并在时间线上留下一条合成的 `SessionEnd` 事件。保护条件：在看门狗节拍上，会话的 Transcript 必须至少有 `DASHBOARD_LIVENESS_IDLE_SECONDS`（默认 `60`）未被写入（磁盘上没有 Transcript 时以最后一次 Hook 写入为后备时钟）——启动时的回收**跳过该门槛**，因此即使在启动前一秒退出的会话也会立即清除；探测在 Windows 上、容器内（看不到宿主机进程）、`ps`/`lsof` 失败时，或通过 `DASHBOARD_LIVENESS_PROBE=0` 显式禁用时会报告"无法回答"（不做任何更改）。在**混合**部署中，回收还会自动跳过任何 `cwd` 不是 POSIX 绝对路径的会话——通过家庭 Hook（household hooks）从另一台机器转发来的会话会报告来源机器自己的路径（例如 Windows 的 `D:\Git\ai-deck`），本地的 `ps`/`lsof`/`/proc` 扫描永远无法匹配它，因此远程会话得到保护，而无需为真正本地的会话禁用探测。远程数据源会话（`sessions.source` ≠ `local`）同样始终被跳过——它们的 `cwd` 在另一台机器上本就是合法的 POSIX 绝对路径，因此本地进程探测对它们无从判断；它们的生命周期由远程同步核对流程掌管。误判的完成会自愈：下一个 Hook 事件会重新激活会话。除 15 秒看门狗节奏外，回收还会在**启动时立即运行**（清除上次运行遗留在 DB 中的死亡会话，让它们根本来不及渲染），并在**约 5 秒后再运行一次**（覆盖启动同步刚导入的会话），因此仪表盘停机期间死亡的会话绝不会显示为等待中
-   - 周期性服务器清理捕获遗漏事件检测的废弃会话和新压缩(例如 `/compact` 不触发 Hook、会话创建后几秒内 `/resume`)。频率从 `DASHBOARD_STALE_MINUTES` 派生(¼ 阈值,夹在 60 秒–5 分钟之间)。清理共享 Hook Handler 的 Transcript 缓存,避免重复 I/O。废弃会话清理还会驱逐 Transcript 缓存条目以限制内存使用。此周期性清理与启动时的 1 小时清理都会跳过远程数据源会话(`source` ≠ `local`),因为它们的 `updated_at` 跟踪的是 `rsync` 节奏,而非远程 CLI 的真实活动——它们的状态改为依据镜像重新核对
+   - 周期性服务器清理捕获遗漏事件检测的废弃会话和新压缩(例如 `/compact` 不触发 Hook、会话创建后几秒内 `/resume`)。频率从 `DASHBOARD_STALE_MINUTES` 派生(¼ 阈值,夹在 60 秒–5 分钟之间)。清理共享 Hook Handler 的 Transcript 缓存,避免重复 I/O。废弃会话清理还会驱逐 Transcript 缓存条目以限制内存使用。此周期性清理与启动时的 1 小时清理都会跳过远程数据源会话(`source` ≠ `local`),因为它们的 `updated_at` 跟踪的是 `scp` 同步节奏,而非远程 CLI 的真实活动——它们的状态改为依据镜像重新核对,以 JSONL 内最新事件时间戳为准
    - **持续项目同步**（`startSessionSync`）让 `~/.claude/projects` 在一次性、由标记位把关的启动回填之外仍可被发现：之后才加入、其会话从不经过 Hook 流入的项目，否则在手动重新扫描之前都将不可见。启动时的立即扫描、一个去抖的 `fs.watch`（在 macOS/Windows 上递归监听，在 Linux 上监听根目录 + 直接子文件夹），以及一个 `DASHBOARD_SESSION_SYNC_MS` 轮询（默认 30 秒；`0` 禁用轮询，但监听器保持运行），三者共享同一个 mtime 缓存与一次合并扫描，只重新解析 mtime 前进过的文件 —— 并跳过已导入且未变更的会话、不再重新解析，因此重启成本保持为 O(新增/变更文件)。每个新发现/增长的会话都会广播 `session_created`/`session_updated` 外加其主 Agent，与 Hook 发出的帧相同
 4. **WebSocket** 将变更广播到所有已连接客户端
 5. **UI** 接收更新并重新渲染受影响的组件
@@ -617,9 +619,9 @@ flowchart LR
 | `DASHBOARD_LIVENESS_PROBE` | `1`（开启） | 设为 `0` 可禁用看门狗的**死亡会话存活性回收**（基于 `ps`/`lsof` 的探测，将 `claude` 进程已不存在的 `active` 会话标记为完成——恢复仪表盘停机期间丢失的 `SessionEnd`）。从**另一台机器**（家庭 Hook）转发来的会话会报告非 POSIX 的 `cwd`，会被回收自动跳过，因此混合的本地 + 转发部署不再需要关闭此项；仅在纯远程部署（本地进程无法证明任何事情）时才禁用它。在 Windows 和容器内自动禁用 |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | **看门狗节拍**存活性回收的空闲门槛：只有当会话的 Transcript 至少有这么长时间未被写入时（磁盘上没有 Transcript 时以最后一次 Hook 写入为后备时钟），才会将其标记为完成，因此回合中或刚 resume 的会话绝不会因一次瞬时的探测偏差而消失。启动时的回收跳过该门槛——boot 时由探测单独决定，因此启动前一刻退出的会话会立即清除 |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | 持续 `~/.claude/projects` 后台同步的轮询间隔（毫秒），用于显示启动后才加入、其会话从不经过 Hook 流入的项目。无论如何 `fs.watch` 监听器都会近乎即时触发；该轮询是安全兜底（监听器可能错过事件 / 在网络文件系统上不触发）。设为 `0` 可禁用轮询，同时让监听器保持运行 |
-| `DASHBOARD_REMOTE_SYNC_MS` | `60000` | 通过 `rsync` 拉取远程数据源的间隔（毫秒）。设为 `0` 可禁用远程源轮询 |
-| `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000`（10 分钟） | 一个**远程数据源**会话实时状态的新鲜度窗口。每次同步时，镜像 Transcript 在此窗口内被修改过的远程会话会被视为仍在运行（`active`）；一旦镜像停止推进的时间超过此窗口，会话就被核对为 `completed`。远程会话不接收实时 Hook，因此本项取代了对它们跳过的本地存活性/过期扫描。链路较慢或空闲回合很长时可调大 |
-| `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` | `600000` | 每个远程源 `rsync` 的超时时间 |
+| `DASHBOARD_REMOTE_SYNC_MS` | `15000` | 通过 `scp` 拉取远程数据源的间隔（毫秒）。新增或重新启用数据源时会立即同步一次。设为 `0` 可禁用远程源轮询 |
+| `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000`（10 分钟） | 一个**远程数据源**会话实时状态的新鲜度窗口。每次同步时，镜像 Transcript 的 **JSONL 最后事件** 在此窗口内的远程会话会被视为仍在运行（`active`）；一旦镜像停止推进的时间超过此窗口，会话就被核对为 `completed`。远程会话不接收实时 Hook，因此本项取代了对它们跳过的本地存活性/过期扫描。链路较慢或空闲回合很长时可调大 |
+| `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` | `600000` | 每个远程源 `scp` 的超时时间 |
 | `DASHBOARD_REMOTE_TEST_TIMEOUT_MS` | `15000` | 到源的 SSH 连接探测超时时间 |
 | `NODE_ENV` | `development` | 设为 `production` 以提供构建后的客户端 |
 
@@ -1123,7 +1125,7 @@ npm run monitoring:docker:up
 | `PATCH`  | `/api/remote-sources/:id`        | 更新某个远程源 |
 | `DELETE` | `/api/remote-sources/:id`        | 删除某个远程源 |
 | `POST`   | `/api/remote-sources/:id/test`   | 测试到该源的 SSH 连接 |
-| `POST`   | `/api/remote-sources/:id/sync`   | 立即触发该源的 `rsync` + 导入 |
+| `POST`   | `/api/remote-sources/:id/sync`   | 立即触发该源的 `scp` + 导入 |
 
 ### 导入历史（Import History）
 

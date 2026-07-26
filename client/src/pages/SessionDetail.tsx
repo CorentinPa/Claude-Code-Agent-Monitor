@@ -87,6 +87,7 @@ import {
 } from "lucide-react";
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
+import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { AgentCard } from "../components/AgentCard";
 import { SessionOverview } from "../components/SessionOverview";
 import { ConversationView } from "../components/conversation/ConversationView";
@@ -501,6 +502,15 @@ export function SessionDetail() {
 
   useEffect(() => {
     const unsubscribe = eventBus.subscribe((msg) => {
+      if (isRemoteDataRefreshMessage(msg)) {
+        load();
+        if (eventsRefreshTimerRef.current) clearTimeout(eventsRefreshTimerRef.current);
+        eventsRefreshTimerRef.current = setTimeout(() => {
+          eventsRefreshTimerRef.current = null;
+          refreshEventsWithPagination();
+        }, EVENTS_REFRESH_DEBOUNCE_MS);
+        return;
+      }
       if (
         msg.type === "agent_created" ||
         msg.type === "agent_updated" ||

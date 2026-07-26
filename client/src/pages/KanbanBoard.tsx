@@ -67,6 +67,7 @@ import { useTranslation } from "react-i18next";
 import { RefreshCw, Columns3, ChevronDown, HelpCircle } from "lucide-react";
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
+import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { AgentCard } from "../components/AgentCard";
 import { SessionCard } from "../components/SessionCard";
 import { EmptyState } from "../components/EmptyState";
@@ -182,6 +183,11 @@ export function KanbanBoard() {
   useEffect(() => {
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     return eventBus.subscribe((msg: WSMessage) => {
+      if (isRemoteDataRefreshMessage(msg)) {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(load, 300);
+        return;
+      }
       if (view === "agents") {
         if (
           msg.type === "agent_created" ||

@@ -170,6 +170,8 @@ graph LR
 
 Tracks Claude Code sessions (one per CLI invocation or background task). Schema mirrors `server/db.js`.
 
+> **Cursor (informational):** Rows imported from `~/.claude` JSONL transcripts may also represent **Cursor** agent sessions — Cursor happens to use the same on-disk layout as Claude Code. The schema does not record which app created a session.
+
 ```sql
 CREATE TABLE sessions (
     id TEXT PRIMARY KEY,                                              -- UUID from Claude Code
@@ -476,7 +478,7 @@ CREATE TABLE remote_sources (
 | `created_at` | TEXT | YES | ISO 8601 creation timestamp |
 | `updated_at` | TEXT | YES | ISO 8601 timestamp of the last edit |
 
-Managed through the `/api/remote-sources/*` routes; sync/status changes are broadcast over the WebSocket as `remote_source.status`. See [docs/API.md → Remote Data Sources](./API.md#remote-data-sources).
+Managed through the `/api/remote-sources/*` routes; sync/status changes are broadcast over the WebSocket as `remote_source.status` and, on success, `remote_data.updated` plus per-session `session_created` / `session_updated`. See [docs/API.md → Remote Data Sources](./API.md#remote-data-sources).
 
 ---
 

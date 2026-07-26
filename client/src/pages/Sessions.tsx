@@ -76,6 +76,7 @@ import {
 import { api } from "../lib/api";
 import type { RemoteSource } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
+import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
 import { SessionStatusBadge } from "../components/StatusBadge";
 import { EmptyState } from "../components/EmptyState";
@@ -233,15 +234,12 @@ export function Sessions() {
       if (msg.type === "run_status") {
         loadDashboardRuns();
       }
-      // A remote source finished syncing (or its status changed): new remote
-      // sessions may have landed, so refetch the list and refresh badge labels.
+      // A remote source finished syncing: new remote sessions may have landed.
       if (msg.type === "remote_source.status") {
         loadSourceLabels();
+        if (isRemoteDataRefreshMessage(msg)) load();
+      } else if (isRemoteDataRefreshMessage(msg)) {
         load();
-      }
-      if (msg.type === "import.progress") {
-        const d = msg.data as { phase?: string };
-        if (d && d.phase === "complete") load();
       }
     });
     // loadDashboardRuns is a stable useCallback declared below; referenced at
