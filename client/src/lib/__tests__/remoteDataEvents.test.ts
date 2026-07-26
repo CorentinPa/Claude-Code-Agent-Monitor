@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from "vitest";
 import { isRemoteDataRefreshMessage } from "../remoteDataEvents";
-import type { WSMessage } from "../types";
+import type { ImportProgressMessage, WSMessage } from "../types";
 
 function msg(type: WSMessage["type"], data: WSMessage["data"]): WSMessage {
   return { type, data, timestamp: "2026-01-01T00:00:00.000Z" };
@@ -38,7 +38,11 @@ describe("isRemoteDataRefreshMessage", () => {
   it("returns true for remote import.progress complete", () => {
     expect(
       isRemoteDataRefreshMessage(
-        msg("import.progress", { phase: "complete", source: "remote", importId: "remote-src_1" })
+        msg("import.progress", {
+          phase: "complete",
+          source: "remote",
+          importId: "remote-src_1",
+        } as ImportProgressMessage)
       )
     ).toBe(true);
   });
@@ -46,7 +50,11 @@ describe("isRemoteDataRefreshMessage", () => {
   it("returns false for local import.progress complete", () => {
     expect(
       isRemoteDataRefreshMessage(
-        msg("import.progress", { phase: "complete", source: "default", importId: "x" })
+        msg("import.progress", {
+          phase: "complete",
+          source: "default",
+          importId: "x",
+        } as ImportProgressMessage)
       )
     ).toBe(false);
   });

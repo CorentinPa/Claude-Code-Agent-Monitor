@@ -4,7 +4,7 @@
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
-import type { RemoteSourceStatusPayload, WSMessage } from "./types";
+import type { ImportProgressMessage, RemoteSourceStatusPayload, WSMessage } from "./types";
 
 /**
  * True when a WebSocket message means remote-imported data may have changed and
@@ -16,7 +16,7 @@ export function isRemoteDataRefreshMessage(msg: WSMessage): boolean {
     return (msg.data as RemoteSourceStatusPayload).status === "ok";
   }
   if (msg.type === "import.progress") {
-    const d = msg.data as { phase?: string; source?: string };
+    const d = msg.data as ImportProgressMessage;
     return d.phase === "complete" && d.source === "remote";
   }
   return false;

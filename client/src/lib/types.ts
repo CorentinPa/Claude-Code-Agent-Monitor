@@ -1167,8 +1167,8 @@ export interface ImportProgressMessage {
   phase: "start" | "scan" | "extract" | "parse" | "complete" | "error" | "extract_error";
   /** Which import flow triggered this run. "default" scans the standard Claude
    *  Code projects dir; "path" scans a user-supplied path; "upload" ingests an
-   *  uploaded file. */
-  source?: "default" | "path" | "upload";
+   *  uploaded file; "remote" is a background SSH pull from a Remote Data Source. */
+  source?: "default" | "path" | "upload" | "remote";
   /** Items processed so far, for a determinate progress bar. Numerator of
    *  `processed / total`. */
   processed?: number;
