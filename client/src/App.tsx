@@ -69,6 +69,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useCallback } from "react";
 import { Layout } from "./components/Layout";
+import { DocumentTitle } from "./components/DocumentTitle";
 import { SplashScreen } from "./components/SplashScreen";
 import { Dashboard } from "./pages/Dashboard";
 import { KanbanBoard } from "./pages/KanbanBoard";
@@ -102,6 +103,7 @@ export default function App() {
     <>
       <SplashScreen />
       <BrowserRouter>
+        <DocumentTitle />
         <Routes>
           <Route element={<Layout wsConnected={connected} />}>
             <Route index element={<Dashboard />} />
