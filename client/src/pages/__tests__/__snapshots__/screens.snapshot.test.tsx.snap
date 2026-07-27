@@ -6725,11 +6725,7 @@ exports[`screen snapshots > Session detail 1`] = `
             d="M8 6h13"
           />
         </svg>
-        Timeline (
-        0
-        /
-        0
-        )
+        Timeline (0/0)
       </button>
     </div>
     <div>

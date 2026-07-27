@@ -764,7 +764,7 @@ export function SessionDetail() {
           }`}
         >
           <MessageSquare className="w-4 h-4" />
-          Conversation
+          {t("detail.conversation")}
         </button>
         <button
           onClick={() => {
@@ -778,7 +778,7 @@ export function SessionDetail() {
           }`}
         >
           <List className="w-4 h-4" />
-          Timeline ({events.length}/{eventsTotal})
+          {t("detail.timeline", { shown: events.length, total: eventsTotal })}
         </button>
       </div>
 
@@ -786,10 +786,7 @@ export function SessionDetail() {
       {transcriptNotFound && (
         <div className="flex items-center gap-2 px-4 py-2.5 mb-3 text-sm text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>
-            Conversation transcript not found for this agent. The transcript file may be missing or
-            not yet linked.
-          </span>
+          <span>{t("detail.transcriptNotFound")}</span>
           <button
             onClick={() => setTranscriptNotFound(false)}
             className="ml-auto text-amber-400/60 hover:text-amber-400 transition-colors"
