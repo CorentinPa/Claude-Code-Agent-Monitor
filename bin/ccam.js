@@ -1238,18 +1238,20 @@ async function cmdImport(flags, positional) {
 // ── Administration ──────────────────────────────────────────────────────────
 
 async function cmdDoctor() {
+  let failed = false;
   await get("/api/health");
   heading("ccam doctor", baseUrl());
   console.log(`${c.green("✔")}  API reachable  ${baseUrl()}`);
   const info = await get("/api/settings/info");
   const hooks = info.hooks || {};
-  console.log(
-    `${hooks.installed ? c.green("✔") : c.red("✖")}  Claude Code hooks  ${
-      hooks.installed
-        ? `installed (${hooks.path || "~/.claude/settings.json"})`
-        : "NOT installed — run: npm run install-hooks"
-    }`
-  );
+  if (hooks.installed) {
+    console.log(
+      `${c.green("✔")}  Claude Code hooks  installed (${hooks.path || "~/.claude/settings.json"})`
+    );
+  } else {
+    failed = true;
+    console.log(`${c.red("✖")}  Claude Code hooks  NOT installed — run: npm run install-hooks`);
+  }
   const db = info.db || {};
   console.log(
     `${c.green("✔")}  Database  ${db.path || "?"} (${((db.size || 0) / 1048576).toFixed(1)} MB)`
@@ -1262,6 +1264,34 @@ async function cmdDoctor() {
     `${c.green("✔")}  Server uptime  ${Math.floor((srv.uptime || 0) / 60)} min (node ${srv.node_version || "?"})`
   );
   console.log(`${c.green("✔")}  WS connections  ${srv.ws_connections ?? 0}`);
+
+  try {
+    const { sources = [] } = await get("/api/remote-sources");
+    if (sources.length === 0) {
+      console.log(`${c.green("✔")}  Remote sources  none configured`);
+    } else {
+      const errored = sources.filter((s) => s.status === "error");
+      console.log(
+        `${errored.length ? c.yellow("!") : c.green("✔")}  Remote sources  ${sources.length} configured` +
+          (errored.length ? ` (${errored.length} in error)` : "")
+      );
+      for (const s of sources) {
+        const mark =
+          s.status === "error" ? c.red("✖") : s.status === "ok" ? c.green("·") : c.dim("·");
+        console.log(
+          `${mark}    ${s.label || s.id}  ${s.status}` +
+            (s.last_sync_at ? `  last sync ${s.last_sync_at}` : "") +
+            (s.last_error ? `  ${c.red(s.last_error)}` : "")
+        );
+      }
+      if (errored.length) failed = true;
+    }
+  } catch (err) {
+    failed = true;
+    console.log(`${c.red("✖")}  Remote sources  ${err.message || err}`);
+  }
+
+  if (failed) process.exit(1);
 }
 
 async function cmdInfo() {
@@ -1520,7 +1550,7 @@ const COMMAND_GROUPS = [
   [
     "Administration",
     [
-      ["doctor", "", "Connectivity, hooks, and database diagnosis"],
+      ["doctor", "", "Connectivity, hooks, database, and remote sources diagnosis"],
       ["info", "", "Raw system info JSON"],
       ["export", "[file.json]", "Export all data as JSON"],
       ["cleanup", "--hours N --days M", "Abandon stale / purge old sessions"],
@@ -1729,8 +1759,12 @@ const OFFLINE_HANDLERS = {
   },
   async doctor() {
     heading("ccam doctor", "offline");
+    let failed = true; // offline is always a failure for live monitoring
     console.log(
       `${c.red("○")}  Dashboard server  NOT running ${c.dim(`(tried ${baseUrl()})`)} — start with: ${c.bold("ccam start")}`
+    );
+    console.log(
+      `${c.dim("·")}  Remote sources  require a live server (ccam remote-sources / Settings)`
     );
     const file = dbPath();
     if (fs.existsSync(file)) {
@@ -1748,6 +1782,7 @@ const OFFLINE_HANDLERS = {
         }
       }
     } else {
+      failed = true;
       console.log(`${c.red("✖")}  Database  not found at ${file}`);
     }
     try {
@@ -1758,12 +1793,16 @@ const OFFLINE_HANDLERS = {
       const installed =
         fs.existsSync(settingsPath) &&
         fs.readFileSync(settingsPath, "utf8").includes("hook-handler.js");
-      console.log(
-        `${installed ? c.green("✔") : c.red("✖")}  Claude Code hooks  ${installed ? `installed (${settingsPath})` : "NOT installed — run: npm run install-hooks"}`
-      );
+      if (installed) {
+        console.log(`${c.green("✔")}  Claude Code hooks  installed (${settingsPath})`);
+      } else {
+        failed = true;
+        console.log(`${c.red("✖")}  Claude Code hooks  NOT installed — run: npm run install-hooks`);
+      }
     } catch {
       console.log(`${c.dim("·")}  Claude Code hooks  could not be checked`);
     }
+    if (failed) process.exit(1);
   },
 };
 
