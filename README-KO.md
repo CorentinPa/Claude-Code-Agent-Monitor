@@ -124,14 +124,6 @@ graph LR
 
 실시간 모니터링 대시보드 외에도, `mcp/`에 대시보드 자체를 조사하고 관리하기 위한 도구 카탈로그를 노출하는 로컬 MCP 서버 구현이 포함되어 있어 대시보드 작업을 Claude Code 워크플로에 직접 통합하기 쉽습니다. 또한 대시보드 상호작용, 분석, 워크플로 인텔리전스를 위한 Claude Code 플러그인, 스킬, 서브에이전트를 제공하는 에이전트 확장 레이어도 있습니다.
 
-<a href="https://www.star-history.com/?repos=hoangsonww%2FClaude-Code-Agent-Monitor&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=hoangsonww/Claude-Code-Agent-Monitor&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=hoangsonww/Claude-Code-Agent-Monitor&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=hoangsonww/Claude-Code-Agent-Monitor&type=date&legend=top-left" />
- </picture>
-</a>
-
 ### 국제화 (i18n)
 
 UI에는 영어(`en`), 중국어(`zh`), 베트남어(`vi`), 한국어(`ko`)를 위한 내장 로케일 전환 기능이 탑재되어 있습니다. 언어 리소스는 네임스페이스별로 로드되며, 새로고침 후에도 사용자 선호가 안정적으로 유지되도록 브라우저 스토리지를 통해 저장됩니다.

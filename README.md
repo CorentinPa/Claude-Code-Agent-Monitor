@@ -124,14 +124,6 @@ graph LR
 
 In addition to the real-time monitoring dashboard, it also includes a local MCP server implementation in `mcp/` that exposes a catalog of tools for introspecting and managing the dashboard itself, making it easy to integrate dashboard operations directly into your Claude Code workflows. There is also an agent extension layer, which provides Claude Code plugins, skills, and subagents for dashboard interaction, analytics, and workflow intelligence.
 
-<a href="https://www.star-history.com/?repos=hoangsonww%2FClaude-Code-Agent-Monitor&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=hoangsonww/Claude-Code-Agent-Monitor&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=hoangsonww/Claude-Code-Agent-Monitor&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=hoangsonww/Claude-Code-Agent-Monitor&type=date&legend=top-left" />
- </picture>
-</a>
-
 ### Internationalization (i18n)
 
 The UI ships with built-in locale switching for English (`en`), Chinese (`zh`), Vietnamese (`vi`), and Korean (`ko`). Language resources are loaded by namespace and persisted through browser storage for stable user preference across refreshes.
