@@ -158,6 +158,7 @@ Read-focused tools:
 - `dashboard_get_pricing_rules`
 - `dashboard_get_total_cost`
 - `dashboard_get_session_cost`
+- `dashboard_list_remote_sources`
 
 Mutation tools (require `MCP_DASHBOARD_ALLOW_MUTATIONS=true`):
 
@@ -172,6 +173,8 @@ Mutation tools (require `MCP_DASHBOARD_ALLOW_MUTATIONS=true`):
 - `dashboard_cleanup_data`
 - `dashboard_reimport_history`
 - `dashboard_reinstall_hooks`
+- `dashboard_sync_remote_source`
+- `dashboard_sync_all_remote_sources`
 
 Destructive tools (require mutation flag + destructive flag):
 
