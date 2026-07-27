@@ -65,9 +65,10 @@ import { registerAgentTools } from "./domains/agent-tools.js";
 import { registerEventTools } from "./domains/event-tools.js";
 import { registerPricingTools } from "./domains/pricing-tools.js";
 import { registerMaintenanceTools } from "./domains/maintenance-tools.js";
+import { registerRemoteTools } from "./domains/remote-tools.js";
 
 /**
- * Registers all 26 `dashboard_*` tools with the given {@link ToolContext} in
+ * Registers all 29 `dashboard_*` tools with the given {@link ToolContext} in
  * one call. `server.ts`'s `buildServer` calls this per `McpServer` instance;
  * `transports/tool-collector.ts`'s `collectAllTools` independently
  * re-implements the same registrations for REPL mode (no live server), so
@@ -80,4 +81,5 @@ export function registerAllTools(context: ToolContext): void {
   registerEventTools(context);
   registerPricingTools(context);
   registerMaintenanceTools(context);
+  registerRemoteTools(context);
 }

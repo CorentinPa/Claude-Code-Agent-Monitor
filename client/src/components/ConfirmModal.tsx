@@ -9,61 +9,14 @@
  * Clicking the backdrop, pressing Escape, or clicking the X cancels. The confirm
  * button can be styled non-destructive for neutral confirmations.
  *
+ * ## Accessibility
+ * Focus moves to Cancel on open (safer default), Tab cycles within the dialog,
+ * Escape cancels, and focus restores to the previously focused element on close.
+ *
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
-/* =============================================================================
- * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
- * =============================================================================
- * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/components/ConfirmModal.tsx`
- * **Purpose:** Dashboard module consumed by the React client, MCP tools, or desktop shell depending on deployment mode.
- *
- * ## Design constraints
- * - Local-first: no telemetry leaves the machine unless the user configures webhooks.
- * - Fail-safe hooks path on the server must never block Claude Code; UI mirrors that
- *   philosophy by degrading gracefully (empty states, stale badges, reconnect loops).
- * - Destructive flows stay behind explicit confirmation modals and server-side gates.
- * - Internationalization: user-visible strings belong in i18n JSON, not literals here.
- *
- * ## Remote data & SSH
- * Remote Data Sources let operators aggregate multiple machines. SSH entries describe
- * how to reach a peer dashboard; the global data scope (`dataScope.ts`) narrows every
- * scoped GET via `?sources=`. Health checks and import history surface in Settings.
- *
- * ## Observability
- * Prometheus scrapes `GET /api/metrics` (see `monitoring/`). Grafana ships four
- * provisioned boards (overview, sessions, tools, alerts). Native npm scripts and
- * Docker Compose profiles are documented in `monitoring/README.md`.
- *
- * ## Public surface
- * - `ConfirmModalProps` — exported API; see TSDoc on the symbol for behavior.
- * - `ConfirmModal` — exported API; see TSDoc on the symbol for behavior.
- *
- * ## Testing pointers
- * - Prefer colocated `__tests__` with Vitest + Testing Library for UI.
- * - Server contract changes require `npm run test:server` and OpenAPI sync.
- * - MCP edits: `npm run mcp:typecheck` and `npm run mcp:build`.
- *
- * ## Related docs
- * - `ARCHITECTURE.md` — hooks → API → SQLite → WebSocket → UI pipeline.
- * - `docs/API.md` — REST reference.
- * - `.claude/skills/file-headers/` — mandatory `@author` header policy.
- * ============================================================================= */
-/* -----------------------------------------------------------------------------
- * EXPORT CATALOG — quick index of symbols defined below (documentation only).
- * -----------------------------------------------------------------------------
- * **ConfirmModalProps**
- *   Part of this module's public contract. Downstream imports should treat
- *   the signature and return type as stable unless release notes say otherwise.
- *   When behavior changes, update the `@file` overview and relevant tests.
- *
- * **ConfirmModal**
- *   Part of this module's public contract. Downstream imports should treat
- *   the signature and return type as stable unless release notes say otherwise.
- *   When behavior changes, update the `@file` overview and relevant tests.
- *
- * ----------------------------------------------------------------------------- */
 
-import { useEffect } from "react";
+import { useEffect, useId, useRef } from "react";
 import { AlertTriangle, X } from "lucide-react";
 
 /** Props for {@link ConfirmModal}. */
@@ -103,13 +56,51 @@ export function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
+  const titleId = useId();
+  const messageId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!open) return;
+
+    previouslyFocused.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    // Prefer Cancel so Enter/activation doesn't immediately destroy data.
+    const focusTimer = window.setTimeout(() => cancelRef.current?.focus(), 0);
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCancel();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onCancel();
+        return;
+      }
+      if (e.key !== "Tab" || !panelRef.current) return;
+
+      const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable.item(0);
+      const last = focusable.item(focusable.length - 1);
+      if (!first || !last) return;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
+
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", onKey);
+      previouslyFocused.current?.focus?.();
+      previouslyFocused.current = null;
+    };
   }, [open, onCancel]);
 
   if (!open) return null;
@@ -118,12 +109,16 @@ export function ConfirmModal({
     <div
       className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
       onClick={onCancel}
-      role="dialog"
-      aria-modal="true"
+      role="presentation"
     >
       <div
+        ref={panelRef}
         className="relative w-full max-w-md rounded-xl border border-border bg-surface-1 shadow-xl shadow-black/40"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={message ? messageId : undefined}
       >
         <div className="flex items-start gap-3 p-5">
           {destructive && (
@@ -132,10 +127,17 @@ export function ConfirmModal({
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-gray-100">{title}</h3>
-            {message && <p className="text-xs text-gray-400 mt-1 leading-relaxed">{message}</p>}
+            <h3 id={titleId} className="text-sm font-semibold text-gray-100">
+              {title}
+            </h3>
+            {message && (
+              <p id={messageId} className="text-xs text-gray-400 mt-1 leading-relaxed">
+                {message}
+              </p>
+            )}
           </div>
           <button
+            type="button"
             onClick={onCancel}
             className="text-gray-500 hover:text-gray-300 p-1 -mt-1 -mr-1"
             aria-label={cancelLabel}
@@ -144,10 +146,16 @@ export function ConfirmModal({
           </button>
         </div>
         <div className="flex items-center justify-end gap-2 px-5 pb-5">
-          <button onClick={onCancel} className="btn-ghost border border-border text-xs">
+          <button
+            ref={cancelRef}
+            type="button"
+            onClick={onCancel}
+            className="btn-ghost border border-border text-xs"
+          >
             {cancelLabel}
           </button>
           <button
+            type="button"
             onClick={onConfirm}
             disabled={busy}
             className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50 ${

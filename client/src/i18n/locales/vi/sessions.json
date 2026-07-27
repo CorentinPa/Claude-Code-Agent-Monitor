@@ -34,6 +34,9 @@
     "unparented": "Subagent không có cha",
     "costBreakdown": "Phân rã chi phí",
     "eventTimeline": "Dòng thời gian sự kiện",
-    "noEvents": "Chưa có sự kiện được ghi nhận."
+    "noEvents": "Chưa có sự kiện được ghi nhận.",
+    "conversation": "Hội thoại",
+    "timeline": "Dòng thời gian ({{shown}}/{{total}})",
+    "transcriptNotFound": "Không tìm thấy bản ghi hội thoại cho agent này. Tệp transcript có thể bị thiếu hoặc chưa được liên kết."
   }
 }

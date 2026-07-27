@@ -71,6 +71,7 @@
 
 import { useState, useCallback } from "react";
 import { Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Sidebar, SIDEBAR_STORAGE_KEY, loadCollapsed } from "./Sidebar";
 import { UpdateNotifier } from "./UpdateNotifier";
 import { Tabby } from "./Tabby/Tabby";
@@ -86,6 +87,7 @@ interface LayoutProps {
  * @param props See {@link LayoutProps}.
  */
 export function Layout({ wsConnected }: LayoutProps) {
+  const { t } = useTranslation("nav");
   const [collapsed, setCollapsed] = useState(loadCollapsed);
 
   const toggle = useCallback(() => {
@@ -100,11 +102,16 @@ export function Layout({ wsConnected }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-surface-0">
+      <a href="#main-content" className="skip-to-content">
+        {t("skipToContent")}
+      </a>
       <UpdateNotifier />
       <Tabby />
       <Sidebar wsConnected={wsConnected} collapsed={collapsed} onToggle={toggle} />
       <main
-        className="min-h-screen min-w-0 transition-[margin-left,width] duration-200"
+        id="main-content"
+        tabIndex={-1}
+        className="min-h-screen min-w-0 transition-[margin-left,width] duration-200 outline-none"
         style={{
           marginLeft: collapsed ? "4.25rem" : "15rem",
           width: collapsed ? "calc(100% - 4.25rem)" : "calc(100% - 15rem)",

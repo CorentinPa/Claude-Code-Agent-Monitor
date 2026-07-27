@@ -355,13 +355,15 @@ describe("ccam CLI — import & administration", () => {
     assert.match(err, /Usage: ccam import/);
   });
 
-  it("doctor reports API, hooks, database, and uptime lines", async () => {
+  it("doctor reports API, hooks, database, remotes, and uptime lines", async () => {
     const { code, out } = await ccam("doctor");
-    assert.equal(code, 0);
+    // Exit 1 when hooks are missing (common in the test harness) — still prints a full report.
+    assert.ok(code === 0 || code === 1, `unexpected exit ${code}`);
     assert.match(out, /API reachable/);
     assert.match(out, /Claude Code hooks/);
     assert.match(out, /Database/);
     assert.match(out, /Server uptime/);
+    assert.match(out, /Remote sources/);
   });
 
   it("info dumps system info JSON", async () => {
@@ -509,10 +511,11 @@ describe("ccam CLI — offline mode (server down, DB read directly)", () => {
 
   it("doctor works offline and reports the server as down", async () => {
     const { code, out } = await offline("doctor");
-    assert.equal(code, 0);
+    assert.equal(code, 1);
     assert.match(out, /NOT running/);
     assert.match(out, /Database/);
     assert.match(out, /rows: sessions/);
+    assert.match(out, /Remote sources/);
   });
 
   it("cost refuses offline with the server-side-math reason", async () => {

@@ -34,6 +34,9 @@
     "unparented": "独立Subagent",
     "costBreakdown": "费用明细",
     "eventTimeline": "事件时间线",
-    "noEvents": "暂无事件记录。"
+    "noEvents": "暂无事件记录。",
+    "conversation": "对话",
+    "timeline": "时间线 ({{shown}}/{{total}})",
+    "transcriptNotFound": "未找到此 Agent 的对话记录。Transcript 文件可能缺失或尚未关联。"
   }
 }

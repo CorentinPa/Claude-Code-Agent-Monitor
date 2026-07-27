@@ -124,14 +124,6 @@ graph LR
 
 Ngoài bảng thông tin giám sát thời gian thực, nó còn bao gồm triển khai máy chủ MCP cục bộ trong `mcp/` hiển thị danh mục các công cụ để xem xét nội tâm và quản lý bảng thông tin, giúp dễ dàng tích hợp trực tiếp các hoạt động của bảng thông tin vào quy trình làm việc của Claude Code của bạn. Ngoài ra còn có một lớp mở rộng tác nhân, cung cấp các plugin, kỹ năng và tác nhân phụ của Claude Code để tương tác trên trang tổng quan, phân tích và thông tin về quy trình làm việc.
 
-<a href="https://www.star-history.com/?repos=hoangsonww%2FClaude-Code-Agent-Monitor&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=hoangsonww/Claude-Code-Agent-Monitor&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=hoangsonww/Claude-Code-Agent-Monitor&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=hoangsonww/Claude-Code-Agent-Monitor&type=date&legend=top-left" />
- </picture>
-</a>
-
 ### Quốc tế hóa (i18n)
 
 Giao diện người dùng đi kèm với tính năng chuyển đổi ngôn ngữ tích hợp cho tiếng Anh (`en`), tiếng Trung (`zh`), tiếng Việt (`vi`) và tiếng Hàn (`ko`). Tài nguyên ngôn ngữ được tải theo không gian tên và được lưu giữ trong bộ nhớ của trình duyệt để mang lại ưu tiên người dùng ổn định trong các lần làm mới.

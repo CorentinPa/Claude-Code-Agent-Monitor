@@ -107,6 +107,11 @@ describe("collectAllTools", () => {
     assert.ok(names.has("dashboard_reimport_history"));
     assert.ok(names.has("dashboard_reinstall_hooks"));
     assert.ok(names.has("dashboard_clear_all_data"));
+
+    // Remote Data Sources
+    assert.ok(names.has("dashboard_list_remote_sources"));
+    assert.ok(names.has("dashboard_sync_remote_source"));
+    assert.ok(names.has("dashboard_sync_all_remote_sources"));
   });
 
   it("mutation tools throw when mutations disabled", async () => {

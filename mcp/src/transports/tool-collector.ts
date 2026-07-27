@@ -79,7 +79,7 @@ import {
  * Used by REPL mode to invoke tools directly.
  *
  * A hand-maintained, server-less mirror of `tools/index.ts`'s
- * `registerAllTools`/`tools/domains/*.ts`: it re-declares the same 26
+ * `registerAllTools`/`tools/domains/*.ts`: it re-declares the same 29
  * `dashboard_*` tools using {@link createCollectorRegistrar} instead of
  * {@link createToolRegistrar}, so no `McpServer` or MCP protocol overhead is
  * needed — the REPL calls handlers directly and renders results with its
@@ -323,6 +323,34 @@ export function collectAllTools(
     assertDestructiveEnabled(config, args.confirmation_token as string);
     return api.post("/api/settings/clear-data");
   });
+
+  // ── Remote Data Sources ─────────────────────────────────────
+  register(
+    "dashboard_list_remote_sources",
+    "List configured Remote Data Sources (SSH machines).",
+    {},
+    async () => api.get("/api/remote-sources")
+  );
+  register(
+    "dashboard_sync_remote_source",
+    "Trigger an immediate SSH pull+import for one Remote Data Source.",
+    {
+      source_id: z.string().min(1),
+    },
+    async (args) => {
+      assertMutationsEnabled(config);
+      return api.post(`/api/remote-sources/${encodeURIComponent(args.source_id as string)}/sync`);
+    }
+  );
+  register(
+    "dashboard_sync_all_remote_sources",
+    "Trigger an immediate SSH pull+import for every enabled Remote Data Source.",
+    {},
+    async () => {
+      assertMutationsEnabled(config);
+      return api.post("/api/remote-sources/sync-all");
+    }
+  );
 
   return tools;
 }
