@@ -6220,6 +6220,9 @@ exports[`screen snapshots > Run 1`] = `
               class="relative"
             >
               <button
+                aria-controls=":r1:"
+                aria-expanded="false"
+                aria-haspopup="listbox"
                 class="w-full flex items-center justify-between gap-2 bg-surface-2 border border-border rounded-md px-3 py-1.5 text-[11px] text-gray-100 focus:outline-none focus:border-accent/50 hover:bg-surface-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 type="button"
               >
@@ -6258,6 +6261,9 @@ exports[`screen snapshots > Run 1`] = `
             class="relative"
           >
             <button
+              aria-controls=":r2:"
+              aria-expanded="false"
+              aria-haspopup="listbox"
               class="w-full flex items-center justify-between gap-2 bg-surface-2 border border-border rounded-md px-3 py-1.5 text-[11px] text-gray-100 focus:outline-none focus:border-accent/50 hover:bg-surface-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               type="button"
             >
@@ -6295,6 +6301,9 @@ exports[`screen snapshots > Run 1`] = `
             class="relative"
           >
             <button
+              aria-controls=":r3:"
+              aria-expanded="false"
+              aria-haspopup="listbox"
               class="w-full flex items-center justify-between gap-2 bg-surface-2 border border-border rounded-md px-3 py-1.5 text-[11px] text-gray-100 focus:outline-none focus:border-accent/50 hover:bg-surface-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               type="button"
             >
@@ -7406,6 +7415,9 @@ exports[`screen snapshots > Sessions 1`] = `
             class="relative"
           >
             <button
+              aria-controls=":r0:"
+              aria-expanded="false"
+              aria-haspopup="listbox"
               class="w-full flex items-center justify-between gap-2 bg-surface-2 border border-border rounded-md px-3 py-1.5 text-[11px] text-gray-100 focus:outline-none focus:border-accent/50 hover:bg-surface-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               type="button"
             >
