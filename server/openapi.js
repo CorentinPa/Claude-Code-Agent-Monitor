@@ -328,7 +328,7 @@ function createOpenApiSpec() {
             version: {
               type: "string",
               description: "Dashboard release version from package.json",
-              example: "1.4.6",
+              example: "1.4.8",
             },
             timestamp: { type: "string", format: "date-time" },
           },
@@ -1390,6 +1390,30 @@ function createOpenApiSpec() {
               schema: { type: "string" },
               description:
                 "Case-insensitive search across `id` / `name` / `cwd`. Composes with the status filter when both are present.",
+            },
+            {
+              name: "cwd",
+              in: "query",
+              required: false,
+              style: "form",
+              explode: true,
+              schema: { type: "array", items: { type: "string" } },
+              description:
+                "One or more exact working directories. Repeat `cwd` to include sessions from multiple projects; combines with status and text search.",
+            },
+            {
+              name: "sort_by",
+              in: "query",
+              required: false,
+              schema: { type: "string", enum: ["time", "duration", "price"], default: "time" },
+              description: "Session ordering dimension.",
+            },
+            {
+              name: "sort_desc",
+              in: "query",
+              required: false,
+              schema: { type: "boolean", default: true },
+              description: "Sort descending when true and ascending when false.",
             },
             { $ref: "#/components/parameters/LimitQuery" },
             { $ref: "#/components/parameters/OffsetQuery" },
