@@ -7,7 +7,7 @@
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
 import { Checkbox } from "./Checkbox";
 
@@ -62,6 +62,7 @@ export function MultiSelect({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
+  const dialogId = useId();
 
   const filteredOptions = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
@@ -115,7 +116,14 @@ export function MultiSelect({
         aria-label={`${label}: ${selectedLabel}`}
         aria-haspopup="dialog"
         aria-expanded={open}
+        aria-controls={dialogId}
         onClick={() => setOpen((current) => !current)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && open) {
+            event.preventDefault();
+            close();
+          }
+        }}
         className={`flex h-[38px] w-full items-center gap-2 rounded-lg border px-3 text-left text-sm transition-colors focus:outline-none focus:border-accent/50 active:translate-y-px ${
           value.length > 0
             ? "border-accent/40 bg-accent/10 text-gray-100"
@@ -138,6 +146,7 @@ export function MultiSelect({
 
       {open && (
         <div
+          id={dialogId}
           role="dialog"
           aria-label={label}
           className={`absolute z-30 w-[min(32rem,calc(100vw-2rem))] max-w-none overflow-hidden rounded-lg border border-border bg-surface-1 shadow-xl shadow-black/40 ${

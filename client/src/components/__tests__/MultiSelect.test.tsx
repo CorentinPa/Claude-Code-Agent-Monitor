@@ -69,4 +69,17 @@ describe("MultiSelect", () => {
       screen.getByRole("checkbox", { name: "/work/very-long-project-directory-name" })
     ).toBeInTheDocument();
   });
+
+  it("links the trigger to its dialog and closes with Escape", () => {
+    renderMultiSelect();
+    const trigger = screen.getByRole("button", { name: /project directories: all projects/i });
+    fireEvent.click(trigger);
+
+    const dialog = screen.getByRole("dialog", { name: "Project directories" });
+    expect(trigger).toHaveAttribute("aria-controls", dialog.id);
+
+    fireEvent.keyDown(trigger, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "Project directories" })).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
 });
