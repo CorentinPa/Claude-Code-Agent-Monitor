@@ -7296,6 +7296,8 @@ exports[`screen snapshots > Sessions 1`] = `
             </span>
           </div>
           <p
+            aria-atomic="true"
+            aria-live="polite"
             class="text-xs text-gray-500"
           >
             0 session recorded
@@ -7304,6 +7306,7 @@ exports[`screen snapshots > Sessions 1`] = `
       </div>
       <button
         class="btn-ghost flex-shrink-0"
+        type="button"
       >
         <svg
           class="lucide lucide-refresh-cw w-4 h-4"
@@ -7362,6 +7365,7 @@ exports[`screen snapshots > Sessions 1`] = `
           />
         </svg>
         <input
+          aria-label="Search sessions..."
           class="input w-full pl-10"
           placeholder="Search sessions..."
           type="text"
@@ -7451,8 +7455,10 @@ exports[`screen snapshots > Sessions 1`] = `
         />
         <button
           aria-label="Descending order"
+          aria-pressed="true"
           class="p-1.5 rounded hover:bg-surface-3 text-gray-400 hover:text-gray-200 transition-colors shrink-0"
           title="Descending order"
+          type="button"
         >
           <svg
             class="lucide lucide-arrow-down-wide-narrow w-4 h-4"
@@ -7488,32 +7494,44 @@ exports[`screen snapshots > Sessions 1`] = `
         class="flex gap-1 bg-surface-1 rounded-lg p-1 border border-border ml-auto shrink-0"
       >
         <button
+          aria-pressed="true"
           class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap bg-surface-4 text-gray-200"
+          type="button"
         >
           All
         </button>
         <button
+          aria-pressed="false"
           class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap text-gray-500 hover:text-gray-300"
+          type="button"
         >
           Active
         </button>
         <button
+          aria-pressed="false"
           class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap text-gray-500 hover:text-gray-300"
+          type="button"
         >
           Waiting
         </button>
         <button
+          aria-pressed="false"
           class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap text-gray-500 hover:text-gray-300"
+          type="button"
         >
           Completed
         </button>
         <button
+          aria-pressed="false"
           class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap text-gray-500 hover:text-gray-300"
+          type="button"
         >
           Error
         </button>
         <button
+          aria-pressed="false"
           class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap text-gray-500 hover:text-gray-300"
+          type="button"
         >
           Abandoned
         </button>

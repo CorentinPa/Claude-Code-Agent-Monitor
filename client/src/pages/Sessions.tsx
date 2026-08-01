@@ -306,13 +306,13 @@ export function Sessions() {
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500" aria-live="polite" aria-atomic="true">
               {t("sessionCount", { count: total })}
               {filter ? ` ${filter}` : ""}
             </p>
           </div>
         </div>
-        <button onClick={load} className="btn-ghost flex-shrink-0">
+        <button type="button" onClick={load} className="btn-ghost flex-shrink-0">
           <RefreshCw className="w-4 h-4" /> {t("common:refresh")}
         </button>
       </div>
@@ -324,6 +324,7 @@ export function Sessions() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <input
             type="text"
+            aria-label={t("searchPlaceholder")}
             placeholder={t("searchPlaceholder")}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -353,7 +354,9 @@ export function Sessions() {
           </div>
           <div className="w-px h-4 bg-border mx-1" />
           <button
+            type="button"
             onClick={() => setSortDesc(!sortDesc)}
+            aria-pressed={sortDesc}
             className="p-1.5 rounded hover:bg-surface-3 text-gray-400 hover:text-gray-200 transition-colors shrink-0"
             title={sortDesc ? t("sortDescending") : t("sortAscending")}
             aria-label={sortDesc ? t("sortDescending") : t("sortAscending")}
@@ -367,7 +370,9 @@ export function Sessions() {
           {FILTER_OPTIONS.map((opt) => (
             <button
               key={opt.value}
+              type="button"
               onClick={() => setFilter(opt.value)}
+              aria-pressed={filter === opt.value}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
                 filter === opt.value
                   ? "bg-surface-4 text-gray-200"
@@ -513,6 +518,7 @@ export function Sessions() {
               </span>
               <div className="flex items-center gap-1">
                 <button
+                  type="button"
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
                   className="px-3 py-1.5 text-xs font-medium rounded-md bg-surface-2 text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
@@ -523,6 +529,7 @@ export function Sessions() {
                   {page + 1} / {totalPages}
                 </span>
                 <button
+                  type="button"
                   onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                   disabled={page >= totalPages - 1}
                   className="px-3 py-1.5 text-xs font-medium rounded-md bg-surface-2 text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
