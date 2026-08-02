@@ -345,6 +345,8 @@ npm run install-hooks
 
 The installer opens an interactive multi-select: use arrow keys, <kbd>Space</kbd>, and <kbd>Enter</kbd> to choose **Claude Code**, **Codex (beta)**, or both (Claude Code is preselected). Claude Code entries live in `~/.claude/settings.json`; Codex entries live in `~/.codex/hooks.json`. If a selected dashboard hook set already exists, it warns before replacing only this dashboard's entries — unrelated hooks are preserved. You can make the same selection later in **Settings → Hook Configuration → Install hooks**.
 
+On first dashboard entry, choose the data source and the app opens a provider-aware live-monitoring setup gate. It can install the selected hooks in place with overwrite warnings and command output, or you can explicitly confirm they are already installed before entering the dashboard.
+
 Codex rollouts in `~/.codex/sessions` are also discovered continuously. The dashboard reads their append-only JSONL incrementally, so sessions, tokens, costs, conversation rows, and WebSocket updates stay current even if a hook notification is missed.
 
 ### 3. Start

@@ -14,8 +14,31 @@
     "description": "Chọn dữ liệu hiển thị trên toàn bộ bảng điều khiển. Bạn có thể đổi lại trong Cài đặt.",
     "claude": { "description": "Phiên Claude Code, agent và chi phí của bạn." },
     "codex": { "description": "Phiên Codex, mức dùng token GPT và chi phí." },
-    "both": "Cả hai",
+    "both": {
+      "label": "Cả hai",
+      "description": "Tất cả phiên Claude Code và Codex, mức sử dụng và chi phí."
+    },
     "beta": "Beta",
+    "continue": "Tiếp tục đến bảng điều khiển"
+  },
+  "hookGate": {
+    "kicker": "Theo dõi trực tiếp",
+    "title": "Thiết lập giám sát trực tiếp",
+    "description": "Cài các hook cục bộ gọn nhẹ để phiên và sự kiện mới xuất hiện ngay khi diễn ra.",
+    "selectedProviders": "Nguồn đã chọn",
+    "realTime": "Hook gửi sự kiện vòng đời đến bảng điều khiển cục bộ này theo thời gian thực. Dữ liệu vẫn ở trên máy của bạn.",
+    "checking": "Đang kiểm tra cấu hình hook hiện có...",
+    "installed": "Hook đã được cài và sẵn sàng để giám sát trực tiếp",
+    "existing": "Đã phát hiện hook bảng điều khiển hiện có",
+    "ready": "Sẵn sàng cài các hook đã chọn",
+    "overrideWarning": "Một nguồn đã chọn đã có hook bảng điều khiển. Cài đặt chỉ làm mới các mục của bảng điều khiển. Các hook khác của bạn vẫn được giữ nguyên.",
+    "output": "Kết quả cài đặt",
+    "failure": "Không thể cài tất cả hook đã chọn. Hãy xem kết quả, sau đó thử lại hoặc tiếp tục nếu bạn đã hoàn tất thiết lập theo cách khác.",
+    "checkFailed": "Không thể kiểm tra cấu hình hook hiện tại. Bạn vẫn có thể cài các hook đã chọn.",
+    "preserveNote": "Chỉ các hook của bảng điều khiển được quản lý. Các hook khác của bạn không thay đổi.",
+    "alreadyInstalled": "Tôi đã cài hook",
+    "install": "Cài hook",
+    "installing": "Đang cài hook...",
     "continue": "Tiếp tục đến bảng điều khiển"
   },
   "taglines": [

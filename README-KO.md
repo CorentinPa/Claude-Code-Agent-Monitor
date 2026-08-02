@@ -345,6 +345,8 @@ npm run install-hooks
 
 설치 프로그램은 대화형 다중 선택기를 엽니다. 화살표 키, <kbd>Space</kbd>, <kbd>Enter</kbd>로 **Claude Code**, **Codex (beta)** 또는 둘 다를 선택하세요(Claude Code가 기본 선택됨). Claude Code 항목은 `~/.claude/settings.json`에, Codex 항목은 `~/.codex/hooks.json`에 있습니다. 선택한 제품의 대시보드 Hook이 이미 있으면 이 대시보드의 항목만 교체하기 전에 경고하며 관련 없는 Hook은 보존됩니다. 이후 **Settings → Hook Configuration → Install hooks**에서도 같은 선택을 할 수 있습니다.
 
+대시보드를 처음 열면 데이터 제공자를 선택한 뒤 제공자별 실시간 모니터링 설정 화면이 열립니다. 여기에서 덮어쓰기 경고와 명령 출력을 확인하며 선택한 Hook을 설치하거나, 이미 설치했다는 사실을 명시적으로 확인한 뒤 대시보드로 이동할 수 있습니다.
+
 `~/.codex/sessions`의 Codex rollout도 지속적으로 검색됩니다. 대시보드는 append-only JSONL을 증분으로 읽으므로 Hook 알림 하나를 놓쳐도 세션, 토큰, 비용, 대화 행, WebSocket 업데이트가 최신 상태로 유지됩니다.
 
 ### 3. 시작

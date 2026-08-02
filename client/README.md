@@ -32,6 +32,7 @@ Enterprise-grade React + TypeScript dashboard for real-time Claude Code agent mo
 ## Table of Contents
 
 - [Overview](#overview)
+- [First-run hook setup](#first-run-hook-setup)
 - [Architecture](#architecture)
 - [Component Hierarchy](#component-hierarchy)
 - [State Management](#state-management)
@@ -59,6 +60,10 @@ The client is a single-page application (SPA) built with modern web technologies
 - **React Router 6.28** - Client-side routing with nested layouts
 - **WebSocket** - Real-time event streaming from server
 - **Lucide Icons** - Modern, consistent icon set
+
+### First-run hook setup
+
+`SplashScreen.tsx` asks which provider data to display (Claude Code, Codex, or both) before the router becomes available. Continuing opens a provider-locked live-monitoring setup gate. It checks the existing hook state, warns before refreshing dashboard-owned entries, calls `POST /api/settings/install-hooks`, and shows command output in place. Users can continue only after that in-app install succeeds or by explicitly confirming that hooks were already installed. This prevents a first dashboard visit from silently looking inactive when live hook capture has not been configured.
 
 ```mermaid
 graph TB
@@ -180,6 +185,7 @@ client/
 │   │   ├── EmptyState.tsx
 │   │   ├── Sidebar.tsx
 │   │   ├── Layout.tsx
+│   │   ├── SplashScreen.tsx   # First-run provider choice and live-hook setup gate
 │   │   ├── RemoteSources.tsx  # Remote Data Sources settings panel (SSH multi-machine collection)
 │   │   └── workflows/      # D3.js workflow visualization components (12 files)
 │   │

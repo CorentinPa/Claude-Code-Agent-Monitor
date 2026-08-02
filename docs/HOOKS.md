@@ -157,6 +157,8 @@ npm run install-hooks
 
 The installer is interactive: use arrow keys, <kbd>Space</kbd>, then <kbd>Enter</kbd> to select Claude Code, Codex (beta), or both. It starts with Claude Code selected. Existing dashboard hook entries are detected and warned about before replacement; unrelated entries remain untouched. The same multi-select is available from **Settings → Hook Configuration → Install hooks**.
 
+On a browser's first dashboard visit, select the provider data to display and the app opens a provider-locked live-monitoring setup gate. It checks the selected providers' hook state, warns before dashboard-owned entries are refreshed, installs through the same endpoint, and displays the command output. A user can explicitly confirm that hooks were already installed, but otherwise the dashboard continues only after the in-app installation completes.
+
 > [!IMPORTANT]
 > **Hooks are a host-side step.** Claude Code runs on your host, so the hook
 > command must reference a `hook-handler.js` path that exists on the **host**.

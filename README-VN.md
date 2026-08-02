@@ -345,6 +345,8 @@ npm run install-hooks
 
 Trình cài đặt mở bộ chọn đa lựa chọn tương tác: dùng phím mũi tên, <kbd>Space</kbd> và <kbd>Enter</kbd> để chọn **Claude Code**, **Codex (beta)** hoặc cả hai (Claude Code được chọn sẵn). Mục Claude Code nằm trong `~/.claude/settings.json`; mục Codex nằm trong `~/.codex/hooks.json`. Nếu bộ hook dashboard đã tồn tại cho lựa chọn đó, trình cài đặt sẽ cảnh báo trước khi chỉ thay thế các mục của dashboard này — các hook không liên quan được giữ nguyên. Bạn cũng có thể chọn tương tự trong **Settings → Hook Configuration → Install hooks**.
 
+Khi vào dashboard lần đầu, hãy chọn nguồn dữ liệu; ứng dụng sẽ mở cổng thiết lập giám sát trực tiếp theo nguồn đã chọn. Bạn có thể cài hook ngay tại đó với cảnh báo ghi đè và kết quả lệnh, hoặc xác nhận rõ rằng hook đã được cài trước khi vào dashboard.
+
 Các rollout Codex trong `~/.codex/sessions` cũng được phát hiện liên tục. Dashboard đọc JSONL chỉ-ghi-nối thêm theo kiểu tăng dần, vì vậy phiên, token, chi phí, hàng hội thoại và cập nhật WebSocket luôn mới ngay cả khi bỏ lỡ một thông báo hook.
 
 ### 3. Bắt đầu

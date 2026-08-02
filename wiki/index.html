@@ -1801,7 +1801,10 @@ npm run mcp:start:repl         # interactive CLI with tab completion
             <kbd>Space</kbd>, then <kbd>Enter</kbd> to choose Claude Code, Codex (beta), or both.
             If a selected dashboard hook is already present, it warns before replacing only that
             entry and preserves unrelated hooks. The same guided installer is available from
-            <strong>Settings → Hook Configuration</strong>.
+            <strong>Settings → Hook Configuration</strong>. On the first dashboard visit, choose a data
+            source, then use the provider-locked live-monitoring setup gate to install the selected
+            hooks in place and review its output. You can also explicitly confirm hooks are already
+            installed before continuing.
           </p>
 
           <h3>Alternative: Docker / Podman</h3>
@@ -6906,7 +6909,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=42" defer></script>
+    <script src="i18n-content.js?v=43" defer></script>
     <script src="script.js?v=39" defer></script>
     <script>
       (function () {

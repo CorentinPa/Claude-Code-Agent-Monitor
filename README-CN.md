@@ -347,6 +347,8 @@ npm run install-hooks
 
 安装程序会打开交互式多选器：使用方向键、<kbd>Space</kbd> 和 <kbd>Enter</kbd> 选择 **Claude Code**、**Codex（beta）** 或两者（默认选中 Claude Code）。Claude Code 条目位于 `~/.claude/settings.json`；Codex 条目位于 `~/.codex/hooks.json`。如果所选产品的 Dashboard Hook 已存在，安装程序会在仅替换本 Dashboard 的条目前发出警告——无关 Hook 会被保留。之后也可在 **Settings → Hook Configuration → Install hooks** 中进行相同选择。
 
+首次进入仪表板时，请选择数据来源，应用会打开与所选提供方对应的实时监控设置引导。您可在其中直接安装所选 Hook，查看覆盖警告和命令输出；如果已经安装，也可明确确认后进入仪表板。
+
 `~/.codex/sessions` 中的 Codex rollout 也会持续被发现。Dashboard 会增量读取其仅追加 JSONL，因此即使漏掉某个 Hook 通知，会话、Token、成本、会话记录和 WebSocket 更新仍会保持最新。
 
 ### 3. 启动

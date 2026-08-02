@@ -936,7 +936,21 @@ export const api = {
           };
           load_stats: { m5: number; m15: number; h1: number };
         };
-        hooks: { installed: boolean; path: string; hooks: Record<string, boolean> };
+        hooks: {
+          installed: boolean;
+          path: string;
+          hooks: Record<string, boolean>;
+          providers?: Record<
+            "claude" | "codex",
+            {
+              installed: boolean;
+              has_dashboard_hooks?: boolean;
+              has_existing_hooks?: boolean;
+              path: string;
+              hooks: Record<string, boolean>;
+            }
+          >;
+        };
         server: {
           version: string;
           uptime: number;

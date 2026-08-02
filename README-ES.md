@@ -343,7 +343,11 @@ npm run setup
 npm run install-hooks
 ```
 
-Esto agrega entradas de gancho a `~/.claude/settings.json` que reenvían eventos al panel de control. Los ganchos existentes se conservan.
+El instalador abre un selector múltiple interactivo: usa las teclas de flecha, <kbd>Space</kbd> y <kbd>Enter</kbd> para elegir **Claude Code**, **Codex (beta)** o ambos (Claude Code está preseleccionado). Las entradas de Claude Code se encuentran en `~/.claude/settings.json`; las de Codex en `~/.codex/hooks.json`. Si ya existe un conjunto de hooks del panel para la selección, avisa antes de reemplazar únicamente las entradas de este panel y conserva los hooks no relacionados. Más adelante puedes hacer la misma selección en **Settings → Hook Configuration → Install hooks**.
+
+Al entrar al panel por primera vez, elige la fuente de datos y la aplicación abrirá una puerta de configuración de monitorización en vivo para el proveedor elegido. Puede instalar los hooks seleccionados directamente, con avisos de reemplazo y salida de comandos, o puedes confirmar explícitamente que ya están instalados antes de entrar al panel.
+
+Los rollouts de Codex en `~/.codex/sessions` también se detectan de forma continua. El panel lee su JSONL de solo anexado de manera incremental, por lo que las sesiones, los tokens, los costos, las filas de conversación y las actualizaciones de WebSocket se mantienen al día aunque se pierda una notificación de hook.
 
 ### 3. inicio
 
