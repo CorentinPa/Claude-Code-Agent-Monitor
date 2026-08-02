@@ -124,14 +124,7 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
             <FolderOpen className="w-3.5 h-3.5" />
           </div>
           <div className="min-w-0 overflow-hidden">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <p className="text-sm font-medium text-gray-200 truncate">{title}</p>
-              {isCodex && (
-                <span className="flex-none rounded border border-emerald-400/25 bg-emerald-400/10 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-300">
-                  Codex · {shortId}
-                </span>
-              )}
-            </div>
+            <p className="text-sm font-medium text-gray-200 truncate">{title}</p>
             <p className="text-[11px] text-gray-500 font-mono truncate">
               {session.id.slice(0, 12)}
             </p>
