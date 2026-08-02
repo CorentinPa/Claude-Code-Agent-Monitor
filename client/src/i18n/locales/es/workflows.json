@@ -20,7 +20,7 @@
     "filterPhase": "Filtrar por fase",
     "clearFilter": "Limpiar",
     "resultsLabel": "Resultados",
-    "promptLabel": "Prompt",
+    "promptLabel": "Instrucción",
     "resultLabel": "Resultado",
     "loadingFull": "Cargando texto completo…",
     "tokens": "tokens",

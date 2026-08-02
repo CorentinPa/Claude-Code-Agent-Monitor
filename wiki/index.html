@@ -77,7 +77,7 @@
 
     <!-- Assets -->
     <link rel="stylesheet" href="../fonts/fonts.css" />
-    <link rel="stylesheet" href="style.css?v=10" />
+    <link rel="stylesheet" href="style.css?v=11" />
 
     <!-- Global page styles -->
     <style>
@@ -534,11 +534,24 @@
           />
         </div>
 
-        <div class="lang-switch" role="group" aria-label="Language">
-          <button type="button" class="lang-btn" data-lang="en">EN</button>
-          <button type="button" class="lang-btn" data-lang="zh">中文</button>
-          <button type="button" class="lang-btn" data-lang="vi">VI</button>
-          <button type="button" class="lang-btn" data-lang="ko">한국어</button>
+        <div class="lang-switch">
+          <button
+            type="button"
+            class="lang-select-trigger"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-label="Select language"
+          >
+            <span class="lang-select-current">English</span>
+            <span class="lang-select-chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div class="lang-select-menu" role="listbox" aria-label="Language" hidden>
+            <button type="button" class="lang-option active" data-lang="en" role="option" aria-selected="true">English</button>
+            <button type="button" class="lang-option" data-lang="zh" role="option" aria-selected="false">中文</button>
+            <button type="button" class="lang-option" data-lang="vi" role="option" aria-selected="false">Tiếng Việt</button>
+            <button type="button" class="lang-option" data-lang="ko" role="option" aria-selected="false">한국어</button>
+            <button type="button" class="lang-option" data-lang="es" role="option" aria-selected="false">Español</button>
+          </div>
         </div>
 
         <div class="sidebar-nav">
@@ -660,6 +673,26 @@
           </div>
         </div>
       </nav>
+
+      <div class="lang-switch mobile-language-switch">
+        <button
+          type="button"
+          class="lang-select-trigger"
+          aria-haspopup="listbox"
+          aria-expanded="false"
+          aria-label="Select language"
+        >
+          <span class="lang-select-current">English</span>
+          <span class="lang-select-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div class="lang-select-menu" role="listbox" aria-label="Language" hidden>
+          <button type="button" class="lang-option active" data-lang="en" role="option" aria-selected="true">English</button>
+          <button type="button" class="lang-option" data-lang="zh" role="option" aria-selected="false">中文</button>
+          <button type="button" class="lang-option" data-lang="vi" role="option" aria-selected="false">Tiếng Việt</button>
+          <button type="button" class="lang-option" data-lang="ko" role="option" aria-selected="false">한국어</button>
+          <button type="button" class="lang-option" data-lang="es" role="option" aria-selected="false">Español</button>
+        </div>
+      </div>
 
       <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ MAIN CONTENT ━━━ -->
       <main class="main-content">
@@ -5599,7 +5632,7 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
                 names. Each webhook provider ships a collapsible step-by-step setup guide linking to
                 the official docs. A one-click <strong>"Send test"</strong> probe fires a synthetic
                 alert and reports the delivery result inline, and targets can be scoped to specific
-                rules. Fully localized (en / zh / vi / ko).
+                rules. Fully localized (en / zh / vi / ko / es).
               </p>
             </div>
           </div>
@@ -5978,12 +6011,12 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
           <h2>Internationalization (i18n)</h2>
 
           <p>
-            The entire UI ships in <strong>four languages — English, 简体中文, Tiếng Việt, and 한국어</strong>
+            The entire UI ships in <strong>five languages — English, 简体中文, Tiếng Việt, 한국어, and Español</strong>
             — built on <code>i18next</code> + <code>react-i18next</code> with
             <code>i18next-browser-languagedetector</code>. Coverage is end-to-end: every page, chart
             tooltip, Settings flow, Workflow narrative, Config Explorer tab, Run page, and the Alerts
             rule-help tooltips + webhook setup guides are translated. Switch languages from the
-            sidebar (EN / 中文 / VI / 한국어) — the choice persists in <code>localStorage</code>.
+            sidebar's custom language dropdown — the choice persists in <code>localStorage</code>.
           </p>
 
           <div class="feature-grid">
@@ -6846,11 +6879,11 @@ npm run install-hooks</code></pre>
     </div>
     <!-- /.wiki-layout -->
 
-    <!-- Body-content translations (zh/vi) — must load before script.js so the
+    <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=40" defer></script>
-    <script src="script.js?v=32" defer></script>
+    <script src="i18n-content.js?v=42" defer></script>
+    <script src="script.js?v=39" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

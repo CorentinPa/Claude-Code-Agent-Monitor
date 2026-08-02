@@ -53,11 +53,11 @@
     },
     "stop": {
       "label": "Turno terminado",
-      "desc": "Claude terminó su respuesta; la sesión está inactiva hasta que envíes el siguiente prompt."
+      "desc": "Claude terminó su respuesta; la sesión está inactiva hasta que envíes la siguiente instrucción."
     },
     "session_start": {
-      "label": "En prompt",
-      "desc": "La sesión acaba de comenzar o reanudarse y está en un prompt vacío — aún no se ha solicitado nada."
+      "label": "Esperando una instrucción",
+      "desc": "La sesión acaba de comenzar o reanudarse y está en una instrucción vacía; aún no se ha solicitado nada."
     },
     "interrupted": {
       "label": "Interrumpido",
@@ -111,14 +111,14 @@
     "isError": "Error",
     "transcriptPath": "Ruta de Transcripción",
     "agentTranscriptPath": "Ruta de Transcripción del Subagente",
-    "hookEventName": "Nombre del Evento Hook",
+    "hookEventName": "Nombre del evento de gancho",
     "stopReason": "Razón de Parada",
-    "stopHookActive": "Hook de Parada Activo",
+    "stopHookActive": "Gancho de parada activo",
     "subagentType": "Tipo de Subagente",
     "agentType": "Tipo de Agente",
     "notificationType": "Tipo de Notificación",
     "message": "Mensaje",
-    "prompt": "Prompt",
+    "prompt": "Instrucción",
     "model": "Modelo",
     "reason": "Razón",
     "source": "Fuente",
@@ -130,7 +130,7 @@
     "compactionNumber": "Número de Compresión",
     "totalCompactions": "Total de Compresiones",
     "lastAssistantMessage": "Último Mensaje del Asistente",
-    "rawPayload": "Payload Raw",
+    "rawPayload": "Carga útil sin procesar",
     "copy": "Copiar",
     "copied": "Copiado",
     "noPayload": "No se capturó payload para este evento.",
@@ -162,7 +162,7 @@
       "title": "Acerca de eventos, filtros y agrupación",
       "subtitle": "Desbloquea información más profunda: insignias, ciclos de vida y mecánicas de filtros explicados.",
       "valuesTitle": "Qué acepta cada filtro",
-      "valueStatusDesc": "Atajo preestablecido que se expande a valores de event_type (Working → PreToolUse, Completed → Stop/SubagentStop/Compaction, ...).",
+      "valueStatusDesc": "Atajo preestablecido que se expande a valores de event_type (En ejecución → PreToolUse, Completado → Stop/SubagentStop/Compaction, ...).",
       "valueEventTypeDesc": "Cadenas de event_type crudas de la BD. Obtenidas de /api/events/facets.",
       "valueToolNameDesc": "Valores de tool_name actualmente en la BD (Bash, Edit, Read, Grep, herramientas mcp__...). Obtenidos de /api/events/facets.",
       "valueAgentIdDesc": "UUIDs completos de agentes (principal + subagentes). Selecciona uno o más para acotar a agentes específicos.",
@@ -178,11 +178,11 @@
       "statusIdleDesc": "Ciclo de vida o metadatos (Notification, TurnDuration, SessionStart, SessionEnd).",
       "lifecycleTitle": "Ciclo de vida del evento",
       "lifecycleDesc": "Una llamada de herramienta típica emite dos eventos compartiendo el mismo tool_use_id:",
-      "lifecycleFlow": "PreToolUse (Working) → PostToolUse (Connected) → ... → Stop (Completed)",
+      "lifecycleFlow": "PreToolUse (En ejecución) → PostToolUse (Conectado) → ... → Stop (Completado)",
       "filtersTitle": "Cómo funcionan los filtros",
       "filterTip1": "Los filtros se componen con AND entre categorías. Dentro de una categoría, la selección múltiple es OR.",
-      "filterTip2": "Status es un atajo que se expande a valores de event_type (Working → PreToolUse, Completed → Stop/SubagentStop/Compaction, ...). Status + Event type se componen como OR en event_type.",
-      "filterTipGrouping": "Consejo de agrupación: una fila agrupada necesita ambos eventos Pre y Post. Si filtras por Status, elige Working + Connected juntos para mantener los pares intactos; de lo contrario, un grupo solo mostrará la mitad de la llamada.",
+      "filterTip2": "Estado es un atajo que se expande a valores de event_type (En ejecución → PreToolUse, Completado → Stop/SubagentStop/Compaction, ...). Estado + tipo de evento se combinan como OR en event_type.",
+      "filterTipGrouping": "Consejo de agrupación: una fila agrupada necesita ambos eventos Pre y Post. Si filtras por estado, elige En ejecución + Conectado para mantener los pares intactos; de lo contrario, un grupo solo mostrará la mitad de la llamada.",
       "filterTip3": "La búsqueda de texto coincide con el resumen, tool_name y el payload raw (columna data).",
       "filterTip4": "El rango de fechas se aplica al created_at de cada evento."
     }

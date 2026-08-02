@@ -1,6 +1,6 @@
 {
   "title": "Configuración",
-  "subtitle": "Gestiona precios, notificaciones, datos y hooks",
+  "subtitle": "Gestiona precios, notificaciones, datos y ganchos",
   "exportData": "Exportar Datos",
   "acrossSessions": "En todas las sesiones rastreadas",
   "basedOnUsage": "Basado en el uso de tokens por modelo",
@@ -53,13 +53,13 @@
     "saveFailed": "No se pudo actualizar CLAUDE_HOME"
   },
   "hooks": {
-    "title": "Configuración de Hooks",
-    "description": "Los hooks de Claude Code reenvían eventos al panel en tiempo real.",
-    "allInstalled": "Todos los hooks instalados",
-    "incomplete": "Hooks incompletos",
-    "reinstall": "Reinstalar Hooks",
-    "success": "Hooks instalados correctamente",
-    "failed": "Error al instalar los hooks"
+    "title": "Configuración de ganchos",
+    "description": "Los ganchos de Claude Code reenvían eventos al panel en tiempo real.",
+    "allInstalled": "Todos los ganchos instalados",
+    "incomplete": "Ganchos incompletos",
+    "reinstall": "Reinstalar ganchos",
+    "success": "Ganchos instalados correctamente",
+    "failed": "Error al instalar los ganchos"
   },
   "notifications": {
     "title": "Notificaciones",

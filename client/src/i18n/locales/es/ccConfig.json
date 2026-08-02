@@ -1,6 +1,6 @@
 {
-  "title": "Explorador de Config de Claude",
-  "subtitle": "Tu configuración de Claude Code de un vistazo - plugins, skills, subagentes, servidores MCP, hooks y configuración.",
+  "title": "Explorador de configuración de Claude",
+  "subtitle": "Tu configuración de Claude Code de un vistazo: complementos, habilidades, subagentes, servidores MCP, ganchos y ajustes.",
   "refresh": "Actualizar",
   "refreshing": "Actualizando…",
   "lastUpdated": "Última actualización {{time}}",
@@ -14,14 +14,14 @@
   },
   "tabs": {
     "overview": "Resumen",
-    "skills": "Skills",
+    "skills": "Habilidades",
     "agents": "Subagentes",
     "commands": "Comandos de barra",
     "outputStyles": "Estilos de salida",
-    "plugins": "Plugins",
-    "marketplaces": "Marketplaces",
+    "plugins": "Complementos",
+    "marketplaces": "Mercados",
     "mcp": "Servidores MCP",
-    "hooks": "Hooks",
+    "hooks": "Ganchos",
     "keybindings": "Atajos de teclado",
     "settings": "Configuración",
     "memory": "Memoria"
@@ -63,7 +63,7 @@
   },
   "plugins": {
     "manifest": "Manifiesto",
-    "marketplace": "Marketplace",
+    "marketplace": "Mercado",
     "version": "Versión",
     "installedAt": "Instalado",
     "lastUpdated": "Actualizado",
@@ -73,27 +73,27 @@
     "enabled": "Habilitado",
     "disabled": "Deshabilitado",
     "contributes": "Contribuye",
-    "skills_one": "{{count}} skill",
-    "skills_other": "{{count}} skills",
+    "skills_one": "{{count}} habilidad",
+    "skills_other": "{{count}} habilidades",
     "agents_one": "{{count}} agente",
     "agents_other": "{{count}} agentes",
     "commands_one": "{{count}} comando",
     "commands_other": "{{count}} comandos",
     "outputStyles_one": "{{count}} estilo de salida",
     "outputStyles_other": "{{count}} estilos de salida",
-    "hooks_one": "{{count}} script de hook",
-    "hooks_other": "{{count}} scripts de hook",
+    "hooks_one": "{{count}} script de gancho",
+    "hooks_other": "{{count}} scripts de gancho",
     "author": "Autor",
     "homepage": "Página de inicio",
     "license": "Licencia",
     "description": "Descripción"
   },
   "marketplaces": {
-    "manifest": "Manifiesto de marketplaces conocidos",
-    "noMarketplaces": "No hay marketplaces registrados.",
+    "manifest": "Manifiesto de mercados conocidos",
+    "noMarketplaces": "No hay mercados registrados.",
     "source": "Fuente",
     "lastUpdated": "Última sincronización",
-    "pluginCount": "Plugins",
+    "pluginCount": "Complementos",
     "owner": "Propietario",
     "installLocation": "Ruta de instalación",
     "addCmd": "claude plugin marketplace add <repo>"
@@ -123,14 +123,14 @@
   },
   "hookScripts": {
     "title": "Scripts ~/.claude/hooks/",
-    "subtitle": "Scripts de ayuda referenciados por tus comandos hook. Se ejecutan cuando settings.json `hooks.<event>.hooks[].command` los invoca.",
+    "subtitle": "Scripts auxiliares referenciados por tus comandos de gancho. Se ejecutan cuando settings.json `hooks.<event>.hooks[].command` los invoca.",
     "empty": "No hay scripts en ~/.claude/hooks/."
   },
   "mcp": {
     "userScope": "Servidores de ámbito de usuario",
     "projectScope": "Servidores de ámbito de proyecto",
     "command": "Comando",
-    "args": "Args",
+    "args": "Argumentos",
     "env": "Nombres de variables de entorno",
     "url": "URL",
     "headers": "Nombres de cabeceras",
@@ -139,8 +139,8 @@
     "noServers": "No se encontraron servidores MCP."
   },
   "hooks": {
-    "noHooks": "No hay hooks configurados.",
-    "matcher": "Matcher",
+    "noHooks": "No hay ganchos configurados.",
+    "matcher": "Patrón",
     "command": "Comando",
     "type": "Tipo",
     "timeout": "Tiempo de espera",
@@ -190,11 +190,11 @@
     "saveSuccessNew": "Creado.",
     "deleteSuccess": "Eliminado · copia de seguridad en {{path}}",
     "confirmDelete": "¿Eliminar este elemento?",
-    "confirmDeleteBody": "Esto moverá el archivo (o carpeta de skill, incluidos los activos empaquetados) a una copia de seguridad con marca de tiempo antes de eliminarlo. La copia de seguridad vive fuera de los directorios que Claude Code escanea, por lo que la entrada desaparecerá de tu CLI.",
+    "confirmDeleteBody": "Esto moverá el archivo (o carpeta de habilidad, incluidos los activos empaquetados) a una copia de seguridad con marca de tiempo antes de eliminarlo. La copia de seguridad vive fuera de los directorios que Claude Code escanea, por lo que la entrada desaparecerá de tu CLI.",
     "confirmDeletePath": "Ruta: {{path}}",
     "confirmDeleteAction": "Sí, hacer copia de seguridad y eliminar",
     "templates": {
-      "skills": "---\nname: my-skill\ndescription: Descripción de una línea (mostrada cuando Claude elige el skill)\n---\n\nCuerpo - qué hace el skill, cuándo usarlo, ejemplos.\n",
+      "skills": "---\nname: my-skill\ndescription: Descripción de una línea (mostrada cuando Claude elige la habilidad)\n---\n\nCuerpo: qué hace la habilidad, cuándo usarla y ejemplos.\n",
       "agents": "---\nname: my-agent\ndescription: Cuándo invocar este subagente\ntools: Read, Grep\nmodel: sonnet\n---\n\nPrompt del sistema para el subagente.\n",
       "commands": "---\ndescription: Descripción de una línea mostrada en el menú de barra\n---\n\nQué hace /mi-comando.\n",
       "output-styles": "---\nname: my-style\ndescription: Descripción del estilo de salida\n---\n\nInstrucciones de estilo.\n",
@@ -217,19 +217,19 @@
   },
   "explain": {
     "hooks": {
-      "title": "Los hooks son de solo lectura aquí a propósito",
-      "body": "Los hooks viven en el bloque `hooks` de los archivos `settings.json` que Claude Code escribe constantemente. Editarlos desde el panel competiría con la CLI en vivo y podría romper silenciosamente la ingesta propia del panel (la entrada `hook-handler.js` abajo).",
+      "title": "Los ganchos son de solo lectura aquí a propósito",
+      "body": "Los ganchos viven en el bloque `hooks` de los archivos `settings.json` que Claude Code escribe constantemente. Editarlos desde el panel competiría con la CLI en vivo y podría romper silenciosamente la ingesta propia del panel (la entrada `hook-handler.js` abajo).",
       "howTo": "Edítalos tú mismo con uno de:",
       "cmd1": "claude config /hooks",
-      "cmd1Note": "Editor interactivo de hooks dentro de Claude Code",
+      "cmd1Note": "Editor interactivo de ganchos dentro de Claude Code",
       "cmd2": "$EDITOR ~/.claude/settings.json",
-      "cmd2Note": "Editar a mano el bloque de hooks de nivel de usuario",
+      "cmd2Note": "Editar a mano el bloque de ganchos de nivel de usuario",
       "cmd3": "$EDITOR .claude/settings.json",
-      "cmd3Note": "Editar a mano el bloque de hooks de nivel de proyecto"
+      "cmd3Note": "Editar a mano el bloque de ganchos de nivel de proyecto"
     },
     "settings": {
       "title": "La configuración es de solo lectura aquí a propósito",
-      "body": "Estos archivos JSON son reescritos por la CLI `claude` en vivo en cada cambio de modelo, cambio de tema, habilitación de plugin, etc. Una escritura del panel competiría con la CLI y perdería estado.",
+      "body": "Estos archivos JSON son reescritos por la CLI `claude` en vivo en cada cambio de modelo, cambio de tema, habilitación de complemento, etc. Una escritura del panel competiría con la CLI y perdería estado.",
       "howTo": "Edita la configuración a través del propio Claude Code:",
       "cmd1": "claude config set <key> <value>",
       "cmd1Note": "Establecer una clave individual de forma segura",
@@ -239,11 +239,11 @@
       "cmd3Note": "Editar a mano (solo cuando no haya ningún proceso `claude` en ejecución)"
     },
     "plugins": {
-      "title": "Los plugins son gestionados por la CLI",
-      "body": "Los plugins son paquetes con su propio registro - `installed_plugins.json` más rutas de instalación bajo `plugins/cache/`. El panel los lee pero delega la instalación/desinstalación a `claude plugin …` para que el registro se mantenga consistente.",
-      "install": "Instalar un plugin:",
+      "title": "Los complementos son gestionados por la CLI",
+      "body": "Los complementos son paquetes con su propio registro: `installed_plugins.json` más rutas de instalación bajo `plugins/cache/`. El panel los lee pero delega la instalación y desinstalación a `claude plugin …` para que el registro se mantenga consistente.",
+      "install": "Instalar un complemento:",
       "installCmd": "claude plugin install <marketplace>/<plugin>",
-      "uninstall": "Desinstalar este plugin:",
+      "uninstall": "Desinstalar este complemento:",
       "uninstallButton": "Copiar comando de desinstalación"
     },
     "mcp": {

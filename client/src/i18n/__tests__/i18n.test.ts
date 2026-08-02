@@ -42,6 +42,17 @@ describe("i18n resources", () => {
     expect(i18n.t("nav:languageShort.es")).toBe("ES");
   });
 
+  it("should provide Spanish translations across every feature namespace", async () => {
+    await i18n.changeLanguage("es");
+
+    expect(i18n.t("common:awaitingReason.session_start.label")).toBe("Esperando una instrucción");
+    expect(i18n.t("analytics:total30d")).toBe("Total (30 días)");
+    expect(i18n.t("ccConfig:tabs.skills")).toBe("Habilidades");
+    expect(i18n.t("run:fields.prompt")).toBe("Instrucción");
+    expect(i18n.t("settings:hooks.title")).toBe("Configuración de ganchos");
+    expect(i18n.t("workflows:runs.promptLabel")).toBe("Instrucción");
+  });
+
   it("should support non-explicit Spanish locale tags", async () => {
     await i18n.changeLanguage("es-ES");
 

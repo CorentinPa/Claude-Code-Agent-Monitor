@@ -6,10 +6,10 @@
     "conversation": "Conversación",
     "conversationHint": "Múltiples turnos — sigue escribiendo mientras el agente trabaja.",
     "headless": "Único",
-    "headlessHint": "Un solo prompt, una sola respuesta. La entrada estándar se cierra tras el inicio."
+    "headlessHint": "Una sola instrucción, una sola respuesta. La entrada estándar se cierra tras el inicio."
   },
   "fields": {
-    "prompt": "Prompt",
+    "prompt": "Instrucción",
     "promptPlaceholder": "Pregúntale cualquier cosa a Claude…",
     "cwd": "Directorio de trabajo",
     "cwdHint": "Ruta absoluta. Por defecto el cwd del propio panel.",
@@ -68,7 +68,7 @@
   },
   "empty": {
     "title": "Nada aún",
-    "body": "Escribe un prompt y haz clic en Ejecutar. La salida se transmite aquí mientras el modelo piensa, llama herramientas y responde."
+    "body": "Escribe una instrucción y haz clic en Ejecutar. La salida se transmite aquí mientras el modelo piensa, llama herramientas y responde."
   },
   "events": {
     "you": "Tú",
@@ -153,7 +153,7 @@
     "model": "Modelo",
     "effort": "Esfuerzo",
     "permissionMode": "Modo",
-    "cwd": "Cwd",
+    "cwd": "Directorio de trabajo",
     "session": "Sesión",
     "envelopes": "Eventos",
     "duration": "Transcurrido"
