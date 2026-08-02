@@ -1154,6 +1154,12 @@
                     real time, plus the first user prompt as a fallback descriptor for
                     placeholder-named sessions and agents.
                   </p>
+                  <p>
+                    Codex also reads its native session index, so <code>/rename</code> titles reach
+                    session and agent cards in real time. Its conversation reader includes human
+                    turns plus <code>exec</code> custom-tool calls and outputs, and loads older pages
+                    when you reach the top of the transcript.
+                  </p>
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-emerald">📉</div>
@@ -6915,7 +6921,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=44" defer></script>
+    <script src="i18n-content.js?v=45" defer></script>
     <script src="script.js?v=40" defer></script>
     <script>
       (function () {

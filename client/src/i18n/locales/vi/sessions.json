@@ -51,6 +51,9 @@
     "noEvents": "Chưa có sự kiện được ghi nhận.",
     "conversation": "Hội thoại",
     "timeline": "Dòng thời gian ({{shown}}/{{total}})",
-    "transcriptNotFound": "Không tìm thấy bản ghi hội thoại cho agent này. Tệp transcript có thể bị thiếu hoặc chưa được liên kết."
+    "transcriptNotFound": "Không tìm thấy bản ghi hội thoại cho agent này. Tệp transcript có thể bị thiếu hoặc chưa được liên kết.",
+    "transcript": {
+      "loadOlder": "↑ Tải các tin nhắn cũ hơn"
+    }
   }
 }

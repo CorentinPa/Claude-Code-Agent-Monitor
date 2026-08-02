@@ -1,7 +1,8 @@
 /**
  * @file Resolves and safely updates the local Codex state directory and its
- * append-only rollout transcripts. A Settings change persists a dashboard-only
- * override and notifies the live synchronizer without changing the Codex CLI.
+ * append-only rollout transcripts and native session titles. A Settings change
+ * persists a dashboard-only override and notifies the live synchronizer without
+ * changing the Codex CLI.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -14,6 +15,10 @@ const { writeEnvFile } = require("./claude-home");
 // second scanner. This keeps a runtime home change immediate while preserving
 // the single, idempotent ingest path used by hooks and the background watcher.
 const homeChangeListeners = new Set();
+// Codex writes CLI `/rename` values to this lightweight index rather than the
+// append-only rollout. Cache it by stat fingerprint so the live synchronizer
+// can honor native titles without repeatedly parsing the whole JSONL file.
+let sessionTitleIndex = { path: null, fingerprint: null, titles: new Map() };
 
 function getCodexHome() {
   return path.resolve(
@@ -25,8 +30,52 @@ function getCodexSessionsDir() {
   return path.join(getCodexHome(), "sessions");
 }
 
+function getCodexSessionIndexPath() {
+  return path.join(getCodexHome(), "session_index.jsonl");
+}
+
 function getCodexHooksPath() {
   return path.join(getCodexHome(), "hooks.json");
+}
+
+function getCodexSessionTitles() {
+  const indexPath = getCodexSessionIndexPath();
+  let fingerprint = null;
+  try {
+    const stat = fs.statSync(indexPath);
+    fingerprint = `${stat.size}:${stat.mtimeMs}`;
+  } catch {
+    sessionTitleIndex = { path: indexPath, fingerprint: null, titles: new Map() };
+    return sessionTitleIndex.titles;
+  }
+  if (sessionTitleIndex.path === indexPath && sessionTitleIndex.fingerprint === fingerprint) {
+    return sessionTitleIndex.titles;
+  }
+
+  const titles = new Map();
+  try {
+    for (const line of fs.readFileSync(indexPath, "utf8").split("\n")) {
+      if (!line.trim()) continue;
+      try {
+        const entry = JSON.parse(line);
+        const id = typeof entry?.id === "string" ? entry.id : null;
+        const title = typeof entry?.thread_name === "string" ? entry.thread_name.trim() : "";
+        if (id && title) titles.set(id, title);
+      } catch {
+        // Codex may be in the middle of appending a line. Keep every complete
+        // title we can read and retry on its next filesystem notification.
+      }
+    }
+  } catch {
+    // The state directory is optional and may disappear during a Settings edit.
+  }
+  sessionTitleIndex = { path: indexPath, fingerprint, titles };
+  return titles;
+}
+
+function getCodexSessionTitle(sessionId) {
+  if (typeof sessionId !== "string" || !sessionId) return null;
+  return getCodexSessionTitles().get(sessionId) || null;
 }
 
 /** Subscribe to a successful runtime Codex-home change. */
@@ -54,6 +103,7 @@ function setCodexHome(newPath) {
   }
 
   process.env.DASHBOARD_CODEX_HOME = resolved;
+  sessionTitleIndex = { path: null, fingerprint: null, titles: new Map() };
   writeEnvFile("DASHBOARD_CODEX_HOME", resolved);
   for (const listener of homeChangeListeners) {
     try {
@@ -68,6 +118,9 @@ function setCodexHome(newPath) {
 module.exports = {
   getCodexHome,
   getCodexSessionsDir,
+  getCodexSessionIndexPath,
+  getCodexSessionTitles,
+  getCodexSessionTitle,
   getCodexHooksPath,
   onCodexHomeChanged,
   setCodexHome,

@@ -523,13 +523,19 @@ function startWorkflowPoll(broadcast) {
  */
 function startCodexSessionSync(broadcast) {
   const fs = require("fs");
-  const { getCodexSessionsDir, onCodexHomeChanged } = require("./lib/codex-home");
-  const { findCodexTranscripts, ingestCodexTranscript } = require("./lib/codex-ingest");
+  const { getCodexHome, getCodexSessionsDir, onCodexHomeChanged } = require("./lib/codex-home");
+  const {
+    findCodexTranscripts,
+    ingestCodexTranscript,
+    refreshCodexSessionTitles,
+  } = require("./lib/codex-ingest");
   const fingerprints = new Map();
   let running = false;
   let queued = false;
   let watcher = null;
   let watchedSessionsDir = null;
+  let homeWatcher = null;
+  let watchedCodexHome = null;
 
   function publish(result) {
     if (!result?.changed || !result.session) return;
@@ -550,6 +556,11 @@ function startCodexSessionSync(broadcast) {
       // watcher attachment on each safety-net sweep so it becomes event-driven
       // as soon as Codex creates the directory instead of polling forever.
       watchSessionsDir();
+      watchCodexHome();
+      // `/rename` updates Codex's root-level session index instead of adding a
+      // rollout line. Refresh those titles before evaluating transcript bytes
+      // so cards change in real time even for an otherwise idle session.
+      for (const result of refreshCodexSessionTitles()) publish(result);
       for (const transcriptPath of findCodexTranscripts(sessionsDir)) {
         let stat;
         try {
@@ -627,7 +638,39 @@ function startCodexSessionSync(broadcast) {
       // The poll remains the fallback on filesystems without watcher support.
     }
   }
+  function watchCodexHome() {
+    const codexHome = getCodexHome();
+    if (codexHome !== watchedCodexHome) {
+      try {
+        homeWatcher?.close();
+      } catch {
+        // Polling remains the fallback if a previous watcher cannot close.
+      }
+      homeWatcher = null;
+      watchedCodexHome = codexHome;
+    }
+    if (homeWatcher || !fs.existsSync(codexHome)) return;
+    try {
+      const nextWatcher = fs.watch(codexHome, { recursive: false }, (_event, filename) => {
+        if (!filename || path.basename(String(filename)) === "session_index.jsonl") schedule();
+      });
+      homeWatcher = nextWatcher;
+      nextWatcher.on("error", () => {
+        if (homeWatcher !== nextWatcher) return;
+        try {
+          nextWatcher.close();
+        } catch {
+          // The polling sweep will retry this optional watcher.
+        }
+        homeWatcher = null;
+      });
+      if (nextWatcher.unref) nextWatcher.unref();
+    } catch {
+      // The polling sweep remains the title-sync safety net.
+    }
+  }
   watchSessionsDir();
+  watchCodexHome();
 
   // Settings can repoint Codex while the dashboard is running. Clear old-file
   // fingerprints, re-arm the watcher, and schedule a fresh sweep after the
@@ -635,6 +678,7 @@ function startCodexSessionSync(broadcast) {
   onCodexHomeChanged(() => {
     fingerprints.clear();
     watchSessionsDir();
+    watchCodexHome();
     setImmediate(runSweep);
   });
 }

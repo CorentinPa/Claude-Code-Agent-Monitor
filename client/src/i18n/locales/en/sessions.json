@@ -51,7 +51,10 @@
     "noEvents": "No events recorded.",
     "conversation": "Conversation",
     "timeline": "Timeline ({{shown}}/{{total}})",
-    "transcriptNotFound": "Conversation transcript not found for this agent. The transcript file may be missing or not yet linked."
+    "transcriptNotFound": "Conversation transcript not found for this agent. The transcript file may be missing or not yet linked.",
+    "transcript": {
+      "loadOlder": "↑ Load older messages"
+    }
   },
   "remoteSourceBadgeTitle": "Collected from a remote machine"
 }

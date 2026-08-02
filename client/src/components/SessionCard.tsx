@@ -2,8 +2,9 @@
  * @file SessionCard.tsx
  * @description Compact session card for the Kanban board's "Sessions" view.
  * Mirrors AgentCard's information hierarchy (icon · title · meta line) but
- * surfaces session-relevant fields: model, agent count, cost, last activity.
- * Clicking the card navigates to the session detail page.
+ * surfaces session-relevant fields: model, agent count, cost, last activity,
+ * and a meaningful Codex title or stable short session ID. Clicking the card
+ * navigates to the session detail page.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -87,7 +88,16 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
   const isActive = session.status === "active";
   const isWaiting = isSessionAwaitingInput(session);
   const status = effectiveSessionStatus(session);
-  const title = session.name?.trim() || t("session.anonymous");
+  const rawTitle = session.name?.trim() || "";
+  const isCodex = session.provider === "codex";
+  const shortId = session.id.slice(0, 8);
+  // A fresh Codex rollout has no title until its first prompt or native
+  // `/rename`. Do not make the card look like an indistinguishable "Codex"
+  // entry in that short window: the stable native session ID remains useful.
+  const title =
+    isCodex && (!rawTitle || rawTitle === "Codex session")
+      ? `Codex · ${shortId}`
+      : rawTitle || t("session.anonymous");
   const agentCount = session.agent_count ?? 0;
   const model = formatModelName(session.model);
   const lastActivity = session.last_activity || session.ended_at || session.started_at;
@@ -116,9 +126,9 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
           <div className="min-w-0 overflow-hidden">
             <div className="flex items-center gap-1.5 min-w-0">
               <p className="text-sm font-medium text-gray-200 truncate">{title}</p>
-              {session.provider === "codex" && (
+              {isCodex && (
                 <span className="flex-none rounded border border-emerald-400/25 bg-emerald-400/10 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-300">
-                  Codex
+                  Codex · {shortId}
                 </span>
               )}
             </div>

@@ -203,6 +203,41 @@ describe("AgentCard", () => {
     expect(screen.getByText("Main Agent - work - e3f8e613")).toBeInTheDocument();
   });
 
+  it("uses a native Codex title instead of a bare Codex agent name", () => {
+    renderCard(
+      <AgentCard
+        agent={makeAgent({ name: "Codex", session_id: "019fbb99-bd87-7c80-afec-ee65e2ebbe1c" })}
+        session={
+          {
+            id: "019fbb99-bd87-7c80-afec-ee65e2ebbe1c",
+            name: "hehe",
+            provider: "codex",
+            status: "active",
+          } as never
+        }
+      />
+    );
+    expect(screen.getByText("Codex · hehe")).toBeInTheDocument();
+    expect(screen.queryByText("Codex")).not.toBeInTheDocument();
+  });
+
+  it("uses the stable Codex session ID while a native title is unavailable", () => {
+    renderCard(
+      <AgentCard
+        agent={makeAgent({ name: "Codex", session_id: "019fbb99-bd87-7c80-afec-ee65e2ebbe1c" })}
+        session={
+          {
+            id: "019fbb99-bd87-7c80-afec-ee65e2ebbe1c",
+            name: "Codex session",
+            provider: "codex",
+            status: "active",
+          } as never
+        }
+      />
+    );
+    expect(screen.getByText("Codex · 019fbb99")).toBeInTheDocument();
+  });
+
   it("should not render subagent_type when null", () => {
     const { container } = renderCard(<AgentCard agent={makeAgent({ subagent_type: null })} />);
     // Only the name should be in the name container, no subagent type

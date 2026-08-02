@@ -351,6 +351,8 @@ On first dashboard entry, choose the data source and the app opens a provider-aw
 
 Codex rollouts in `~/.codex/sessions` are also discovered continuously. The dashboard reads their append-only JSONL incrementally, so sessions, tokens, costs, conversation rows, and WebSocket updates stay current even if a hook notification is missed.
 
+Codex `/rename` titles are read from its native session index and update session and agent cards in real time. Its conversation replay includes human turns plus `exec` custom-tool calls and outputs, with cursor pagination that loads older messages at the top of the transcript.
+
 ### 3. Start
 
 ```bash

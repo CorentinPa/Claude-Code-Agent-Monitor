@@ -690,15 +690,53 @@ router.get("/:id/transcripts", async (req, res) => {
 //   before: JSONL line number, only return messages before this line (history mode)
 //   offset: legacy pagination offset (compatible, mutually exclusive with after/before)
 function codexContentText(content) {
+  if (typeof content === "string") return content;
   if (!Array.isArray(content)) return "";
   return content
-    .map((part) => (typeof part?.text === "string" ? part.text : ""))
+    .map((part) => {
+      if (typeof part?.text === "string") return part.text;
+      // Preserve the fact that a user shared an image without exposing a local
+      // file path or a base64 payload in the dashboard transcript.
+      if (part?.type === "input_image") return "[Image attached]";
+      return "";
+    })
     .filter(Boolean)
     .join("\n");
 }
 
-/** Translate Codex rollout response items into the shared conversation DTO. */
+function codexToolInput(input) {
+  if (typeof input === "string") {
+    try {
+      return truncateObj(JSON.parse(input), 10240);
+    } catch {
+      // `exec` is a Codex custom tool call whose input is source code, not JSON.
+      // Keeping it under `code` lets the client render it as readable JavaScript.
+      return truncateObj({ code: input }, 10240);
+    }
+  }
+  return truncateObj(input || {}, 10240);
+}
+
+function codexToolOutput(output) {
+  if (typeof output === "string") return truncate(output, 10240);
+  if (Array.isArray(output)) return truncate(codexContentText(output), 10240);
+  return truncate(JSON.stringify(output || ""), 10240);
+}
+
+/** Translate Codex rollout records into the shared conversation DTO. */
 function parseCodexMessage(entry, line) {
+  if (entry.type === "event_msg" && entry.payload?.type === "user_message") {
+    const text = typeof entry.payload.message === "string" ? entry.payload.message : "";
+    if (!text.trim()) return null;
+    return {
+      type: "user",
+      sender: "user",
+      timestamp: entry.timestamp || null,
+      content: [{ type: "text", text: truncate(text, 10240) }],
+      line,
+      _codexUserKind: "event",
+    };
+  }
   if (entry.type !== "response_item") return null;
   const item = entry.payload || {};
   const timestamp = entry.timestamp || null;
@@ -706,15 +744,21 @@ function parseCodexMessage(entry, line) {
     const text = codexContentText(item.content);
     // Codex injects this descriptor at session start; it is not a human turn.
     if (!text.trim() || text.trim().startsWith("<environment_context>")) return null;
+    // `event_msg:user_message` is Codex's durable human-turn record. A matching
+    // response item normally immediately precedes it, but keep response-user
+    // records too: the reader dedupes adjacent twins and preserves image-only
+    // or future Codex shapes that do not emit the event record.
+    if (item.role !== "assistant" && item.role !== "user") return null;
     return {
       type: item.role === "assistant" ? "assistant" : "user",
       sender: item.role === "assistant" ? "assistant" : "user",
       timestamp,
       content: [{ type: "text", text: truncate(text, 10240) }],
       line,
+      ...(item.role === "user" ? { _codexUserKind: "response" } : {}),
     };
   }
-  if (item.type === "function_call") {
+  if (item.type === "function_call" || item.type === "custom_tool_call") {
     return {
       type: "assistant",
       sender: "assistant",
@@ -724,13 +768,13 @@ function parseCodexMessage(entry, line) {
           type: "tool_use",
           name: item.name || "tool",
           id: item.call_id || null,
-          input: truncateObj(item.arguments || "", 10240),
+          input: codexToolInput(item.arguments ?? item.input),
         },
       ],
       line,
     };
   }
-  if (item.type === "function_call_output") {
+  if (item.type === "function_call_output" || item.type === "custom_tool_call_output") {
     return {
       type: "user",
       sender: "tool",
@@ -739,10 +783,7 @@ function parseCodexMessage(entry, line) {
         {
           type: "tool_result",
           id: item.call_id || null,
-          output: truncate(
-            typeof item.output === "string" ? item.output : JSON.stringify(item.output || ""),
-            10240
-          ),
+          output: codexToolOutput(item.output),
           is_error: false,
         },
       ],
@@ -757,6 +798,7 @@ async function readCodexTranscript(jsonlPath, { limit, afterLine, beforeLine, of
   let lineNum = 0;
   let total = 0;
   let hasMore = false;
+  let previousCodexUserResponse = null;
   const rl = readline.createInterface({
     input: fs.createReadStream(jsonlPath, { encoding: "utf8" }),
     crlfDelay: Infinity,
@@ -774,7 +816,34 @@ async function readCodexTranscript(jsonlPath, { limit, afterLine, beforeLine, of
     const message = parseCodexMessage(entry, lineNum);
     if (!message) continue;
     if (beforeLine !== null && lineNum >= beforeLine) break;
+    const messageText = message.content
+      .filter((content) => content.type === "text")
+      .map((content) => content.text || "")
+      .join("\n");
+    // Codex writes the same human turn twice: a response_item message then an
+    // immediately following event_msg:user_message. Keep exactly one while
+    // retaining either form when it appears on its own at a page boundary.
+    if (
+      message._codexUserKind === "event" &&
+      previousCodexUserResponse &&
+      lineNum - previousCodexUserResponse.line <= 1 &&
+      messageText === previousCodexUserResponse.text
+    ) {
+      // The response record was already counted and retained. Drop only its
+      // immediately-following event twin so totals and cursor pages stay exact.
+      previousCodexUserResponse = null;
+      continue;
+    }
     total++;
+    // Track response-user records even before an `after` cursor. A rollout may
+    // flush the response and its event twin in separate writes; carrying this
+    // one-record context prevents the next incremental request from appending
+    // that same human turn a second time.
+    if (message._codexUserKind === "response") {
+      previousCodexUserResponse = { line: lineNum, text: messageText };
+    } else if (message._codexUserKind === "event") {
+      previousCodexUserResponse = null;
+    }
     if (afterLine !== null && lineNum <= afterLine) continue;
     if (offset > 0 && total <= offset) continue;
     messages.push(message);
@@ -783,7 +852,7 @@ async function readCodexTranscript(jsonlPath, { limit, afterLine, beforeLine, of
         hasMore = true;
         break;
       }
-    } else if (beforeLine !== null || messages.length > limit) {
+    } else if (messages.length > limit) {
       messages.shift();
       hasMore = true;
     }
@@ -791,7 +860,10 @@ async function readCodexTranscript(jsonlPath, { limit, afterLine, beforeLine, of
 
   const firstLine = messages[0]?.line || 0;
   const lastLine = messages[messages.length - 1]?.line || 0;
-  messages.forEach((message) => delete message.line);
+  messages.forEach((message) => {
+    delete message.line;
+    delete message._codexUserKind;
+  });
   return { messages, total, has_more: hasMore, first_line: firstLine, last_line: lastLine };
 }
 
@@ -1168,3 +1240,4 @@ function truncateObj(obj, maxLen) {
 module.exports = router;
 // Exported for unit tests — sender attribution is correctness-critical.
 module.exports.classifyTranscriptSender = classifyTranscriptSender;
+module.exports.readCodexTranscript = readCodexTranscript;

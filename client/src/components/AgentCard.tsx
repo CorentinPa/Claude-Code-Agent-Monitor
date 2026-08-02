@@ -1,6 +1,6 @@
 /**
  * @file AgentCard.tsx
- * @description Defines the AgentCard component that displays a summary of an agent's information, including its name, status, task, current tool, and timestamps. The card is clickable and navigates to the agent's session details when clicked. It also visually distinguishes active agents with a border highlight.
+ * @description Defines the AgentCard component that displays a summary of an agent's information, including its name, status, task, current tool, timestamps, and a native Codex session title when available. The card is clickable and navigates to the agent's session details when clicked. It also visually distinguishes active agents with a border highlight.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -115,10 +115,18 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
     : typeof agent.cost === "number"
       ? agent.cost
       : 0;
-  // Real (user-given) session name - the auto-generated "Session <id8>"
-  // fallback carries no extra info next to the ID, so it is suppressed.
+  // Real (user-given) session name - auto-generated Claude/Codex fallbacks
+  // carry no extra info next to the ID, so they are suppressed.
   const sessionName = session?.name?.trim() || "";
-  const realSessionName = /^Session [0-9a-f]{8}$/i.test(sessionName) ? "" : sessionName;
+  const realSessionName = /^(Session [0-9a-f]{8}|Codex session)$/i.test(sessionName)
+    ? ""
+    : sessionName;
+  const isCodexMain = isMain && session?.provider === "codex" && agent.name.trim() === "Codex";
+  const displayName = isCodexMain
+    ? `Codex · ${realSessionName || agent.session_id.slice(0, 8)}`
+    : isMain
+      ? mainAgentDisplayName(agent.name, realSessionName)
+      : agent.name;
   // A subagent's own model lives in its metadata (resolved from its transcript,
   // not the parent session's — see issue #185). Use it everywhere this card
   // shows a model so a Haiku QA agent under an Opus orchestrator reads as
@@ -198,9 +206,10 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
             <p className="text-sm font-medium text-gray-200 truncate">
               {/* Auto-generated main-agent titles (e.g. "Main Agent - Session
                   229d93fd" or "Main Agent - work - e3f8e613") swap the
-                  placeholder for the real session name when one exists; custom
-                  (sub)agent names are left untouched. */}
-              {isMain ? mainAgentDisplayName(agent.name, realSessionName) : agent.name}
+                  placeholder for the real session name when one exists. Codex
+                  main agents use their native renamed title (or short ID) so
+                  a board never shows a bare, indistinguishable "Codex". */}
+              {displayName}
             </p>
             {subtitle && <p className="text-[11px] text-gray-500 truncate">{subtitle}</p>}
           </div>
@@ -253,7 +262,9 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
           </span>
         )}
         <span className="ml-auto flex items-center gap-1 min-w-0 opacity-50">
-          {realSessionName && <span className="truncate max-w-[10rem]">{realSessionName} ·</span>}
+          {realSessionName && !isCodexMain && (
+            <span className="truncate max-w-[10rem]">{realSessionName} ·</span>
+          )}
           <span className="font-mono flex-shrink-0">{agent.session_id.slice(0, 8)}</span>
         </span>
       </div>

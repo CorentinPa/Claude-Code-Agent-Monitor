@@ -351,6 +351,8 @@ Al entrar al panel por primera vez, elige la fuente de datos y la aplicación ab
 
 Los rollouts de Codex en `~/.codex/sessions` también se detectan de forma continua. El panel lee su JSONL de solo anexado de manera incremental, por lo que las sesiones, los tokens, los costos, las filas de conversación y las actualizaciones de WebSocket se mantienen al día aunque se pierda una notificación de hook.
 
+Los títulos de `/rename` de Codex se leen desde su índice de sesiones nativo y actualizan las tarjetas de sesión y agente en tiempo real. La repetición de conversaciones incluye turnos humanos, llamadas y salidas de herramientas personalizadas `exec`, con paginación por cursor que carga mensajes anteriores al llegar a la parte superior de la transcripción.
+
 ### 3. inicio
 
 ```bash

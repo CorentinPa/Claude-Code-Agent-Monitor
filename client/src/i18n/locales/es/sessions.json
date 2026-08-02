@@ -37,7 +37,10 @@
     "noEvents": "No se registraron eventos.",
     "conversation": "Conversación",
     "timeline": "Línea de tiempo ({{shown}}/{{total}})",
-    "transcriptNotFound": "No se encontró la transcripción de la conversación para este agente. El archivo de transcripción puede estar ausente o aún no vinculado."
+    "transcriptNotFound": "No se encontró la transcripción de la conversación para este agente. El archivo de transcripción puede estar ausente o aún no vinculado.",
+    "transcript": {
+      "loadOlder": "↑ Cargar mensajes anteriores"
+    }
   },
   "remoteSourceBadgeTitle": "Recopilado desde una máquina remota"
 }

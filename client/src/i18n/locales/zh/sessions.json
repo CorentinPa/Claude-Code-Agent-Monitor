@@ -51,6 +51,9 @@
     "noEvents": "暂无事件记录。",
     "conversation": "对话",
     "timeline": "时间线 ({{shown}}/{{total}})",
-    "transcriptNotFound": "未找到此 Agent 的对话记录。Transcript 文件可能缺失或尚未关联。"
+    "transcriptNotFound": "未找到此 Agent 的对话记录。Transcript 文件可能缺失或尚未关联。",
+    "transcript": {
+      "loadOlder": "↑ 加载更早的消息"
+    }
   }
 }

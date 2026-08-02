@@ -351,6 +351,8 @@ Khi vào dashboard lần đầu, hãy chọn nguồn dữ liệu; ứng dụng s
 
 Các rollout Codex trong `~/.codex/sessions` cũng được phát hiện liên tục. Dashboard đọc JSONL chỉ-ghi-nối thêm theo kiểu tăng dần, vì vậy phiên, token, chi phí, hàng hội thoại và cập nhật WebSocket luôn mới ngay cả khi bỏ lỡ một thông báo hook.
 
+Tiêu đề `/rename` của Codex được đọc từ chỉ mục phiên gốc và cập nhật thẻ phiên cùng agent theo thời gian thực. Chế độ xem lại hội thoại gồm các lượt của người dùng, lời gọi và đầu ra custom tool `exec`, với phân trang bằng cursor để tải các tin nhắn cũ hơn ở đầu transcript.
+
 ### 3. Bắt đầu
 
 ```bash

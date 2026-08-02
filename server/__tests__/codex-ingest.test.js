@@ -15,7 +15,11 @@ process.env.DASHBOARD_DB_PATH = path.join(TMP, "dashboard.db");
 process.env.DASHBOARD_CODEX_HOME = path.join(TMP, "codex");
 
 const { db, stmts } = require("../db");
-const { ingestCodexHook, ingestCodexTranscript } = require("../lib/codex-ingest");
+const {
+  ingestCodexHook,
+  ingestCodexTranscript,
+  refreshCodexSessionTitles,
+} = require("../lib/codex-ingest");
 
 const SESSION_ID = "019a4ba6-a2b6-75f0-b186-bddd23ae4f2f";
 const ROLLOUT = path.join(
@@ -25,6 +29,16 @@ const ROLLOUT = path.join(
   "08",
   "01",
   `rollout-2026-08-01T12-00-00-${SESSION_ID}.jsonl`
+);
+
+const RENAMED_SESSION_ID = "019fbb99-bd87-7c80-afec-ee65e2ebbe1c";
+const RENAMED_ROLLOUT = path.join(
+  process.env.DASHBOARD_CODEX_HOME,
+  "sessions",
+  "2026",
+  "08",
+  "01",
+  `rollout-2026-08-01T13-00-00-${RENAMED_SESSION_ID}.jsonl`
 );
 
 function append(record) {
@@ -113,5 +127,31 @@ describe("Codex rollout ingestor", () => {
     assert.equal(result.changed, true);
     assert.equal(stmts.getSession.get(SESSION_ID).status, "completed");
     assert.equal(stmts.getAgent.get(`codex:${SESSION_ID}`).status, "completed");
+  });
+
+  it("uses and live-syncs Codex's native /rename title from session_index.jsonl", () => {
+    const indexPath = path.join(process.env.DASHBOARD_CODEX_HOME, "session_index.jsonl");
+    fs.writeFileSync(
+      indexPath,
+      `${JSON.stringify({ id: RENAMED_SESSION_ID, thread_name: "hehe" })}\n`
+    );
+    fs.mkdirSync(path.dirname(RENAMED_ROLLOUT), { recursive: true });
+    fs.writeFileSync(
+      RENAMED_ROLLOUT,
+      `${JSON.stringify(
+        record("session_meta", { id: RENAMED_SESSION_ID, cwd: "/workspace/renamed" })
+      )}\n`
+    );
+
+    const created = ingestCodexTranscript(RENAMED_ROLLOUT);
+    assert.equal(created.session.name, "hehe");
+
+    fs.appendFileSync(
+      indexPath,
+      `${JSON.stringify({ id: RENAMED_SESSION_ID, thread_name: "ship transcript fixes" })}\n`
+    );
+    const updates = refreshCodexSessionTitles();
+    assert.equal(updates.length, 1);
+    assert.equal(updates[0].session.name, "ship transcript fixes");
   });
 });

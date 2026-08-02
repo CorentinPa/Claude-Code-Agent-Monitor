@@ -233,6 +233,22 @@ curl http://localhost:4820/api/sessions/sess_abc123
 
 ---
 
+#### Get Conversation Transcript
+
+```http
+GET /api/sessions/:id/transcript
+```
+
+Returns a cursor-paginated transcript page. Pass `limit` (up to 200), `after` to
+read newer JSONL lines, or `before` to load the preceding page; responses include
+`first_line`, `last_line`, and `has_more` for the next request. Claude Code
+responses include its normal conversation and local command records. Codex
+responses include human turns, legacy `function_call` records, and the primary
+`custom_tool_call` stream (including `exec` input and paired output), so clients
+can render the actual command flow rather than only `wait` calls.
+
+---
+
 #### Get Session Stats
 
 ```http

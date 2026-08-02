@@ -6,6 +6,8 @@
  */
 window.__WIKI_CONTENT_I18N = {
   zh: {
+    "Codex also reads its native session index, so <code>/rename</code> titles reach session and agent cards in real time. Its conversation reader includes human turns plus <code>exec</code> custom-tool calls and outputs, and loads older pages when you reach the top of the transcript.":
+      "Codex 还会读取其原生会话索引，因此 <code>/rename</code> 标题会实时显示在会话和 agent 卡片上。其对话读取器包含用户回合以及 <code>exec</code> 自定义工具调用和输出，并会在到达 transcript 顶部时加载更早的页面。",
     "Optional Codex home. Settings saves this dashboard-only override, re-arms live rollout watching, and immediately scans the new <code>sessions/</code> tree.":
       "可选的 Codex 主目录。设置会保存此仪表盘专用覆盖、重新启用实时 rollout 监控，并立即扫描新的 <code>sessions/</code> 树。",
     "<strong>Dashboard Data</strong> lets you switch the entire app between Claude Code, Codex, or both. Sessions, agents, events, token totals, workflows, analytics, and costs refetch immediately. The same page saves separate Claude Code and Codex homes; saving the Codex home re-arms live rollout watching and performs a fresh scan.":
@@ -1340,6 +1342,8 @@ window.__WIKI_CONTENT_I18N = {
       "<strong>服务端分页</strong>的表格，列出每一个已记录的会话。每一页只获取对应的数据片段，因此无论会话数量多少，成本计算都保持有界。针对 <code>id</code>、<code>name</code> 和 <code>cwd</code> 的不区分大小写搜索在服务端运行，并带有 300 ms 防抖；状态过滤器可与搜索组合以精确缩小范围。可搜索的复选框项目选择器支持选择多个目录；完整长路径仍可查看，紧凑的触发器文字让筛选栏保持易读。排序使用相同的自定义下拉模式。每一行显示会话的真实名称（从 transcript 实时同步：<code>/rename</code> 或 <code>claude -n</code> 标题，否则使用自动标题，再否则使用首条用户 prompt，并回退到短 ID）、状态徽章、agent 数量、时长、模型和预估成本。点击任意行即可深入查看完整的会话详情视图，包含对话记录和 agent 层级。",
   },
   vi: {
+    "Codex also reads its native session index, so <code>/rename</code> titles reach session and agent cards in real time. Its conversation reader includes human turns plus <code>exec</code> custom-tool calls and outputs, and loads older pages when you reach the top of the transcript.":
+      "Codex cũng đọc chỉ mục phiên gốc, vì vậy tiêu đề <code>/rename</code> xuất hiện trên thẻ phiên và agent theo thời gian thực. Trình đọc hội thoại gồm lượt của người dùng cùng lời gọi và đầu ra custom tool <code>exec</code>, đồng thời tải các trang cũ hơn khi bạn chạm đầu transcript.",
     "Optional Codex home. Settings saves this dashboard-only override, re-arms live rollout watching, and immediately scans the new <code>sessions/</code> tree.":
       "Thư mục Codex tùy chọn. Cài đặt lưu ghi đè riêng cho dashboard này, kích hoạt lại việc theo dõi rollout trực tiếp và quét ngay cây <code>sessions/</code> mới.",
     "<strong>Dashboard Data</strong> lets you switch the entire app between Claude Code, Codex, or both. Sessions, agents, events, token totals, workflows, analytics, and costs refetch immediately. The same page saves separate Claude Code and Codex homes; saving the Codex home re-arms live rollout watching and performs a fresh scan.":
@@ -2692,6 +2696,8 @@ window.__WIKI_CONTENT_I18N = {
       "Bảng <strong>phân trang phía máy chủ</strong> liệt kê mọi phiên đã ghi. Mỗi trang chỉ lấy phần dữ liệu của mình nên việc tính chi phí luôn có giới hạn, dù có bao nhiêu phiên. Tìm kiếm không phân biệt hoa thường trên <code>id</code>, <code>name</code> và <code>cwd</code> chạy ở phía máy chủ với độ trễ chống dội 300 ms; bộ lọc trạng thái kết hợp với tìm kiếm để thu hẹp chính xác. Bộ chọn dự án dạng hộp kiểm có thể tìm kiếm hỗ trợ chọn nhiều thư mục; đường dẫn dài vẫn có thể xem đầy đủ, còn văn bản gọn trên nút giữ thanh lọc dễ đọc. Sắp xếp dùng cùng mẫu menu tùy chỉnh. Mỗi hàng hiển thị tên thật của phiên (đồng bộ trực tiếp từ bản ghi: tiêu đề <code>/rename</code> hoặc <code>claude -n</code>, nếu không thì tiêu đề tự động, nếu vẫn không có thì prompt đầu tiên của người dùng, với dự phòng là ID ngắn), huy hiệu trạng thái, số lượng agent, thời lượng, mô hình và chi phí ước tính. Nhấp vào bất kỳ hàng nào để đi sâu vào chế độ xem chi tiết đầy đủ của phiên với bản ghi hội thoại và phân cấp agent.",
   },
   ko: {
+    "Codex also reads its native session index, so <code>/rename</code> titles reach session and agent cards in real time. Its conversation reader includes human turns plus <code>exec</code> custom-tool calls and outputs, and loads older pages when you reach the top of the transcript.":
+      "Codex는 네이티브 세션 인덱스도 읽으므로 <code>/rename</code> 제목이 세션과 agent 카드에 실시간으로 반영됩니다. 대화 리더에는 사용자 턴과 <code>exec</code> custom-tool 호출 및 출력이 포함되며, transcript 상단에 도달하면 이전 페이지를 불러옵니다.",
     "Optional Codex home. Settings saves this dashboard-only override, re-arms live rollout watching, and immediately scans the new <code>sessions/</code> tree.":
       "선택적 Codex 홈입니다. 설정은 이 대시보드 전용 재정의를 저장하고 실시간 rollout 감시를 다시 시작하며 새 <code>sessions/</code> 트리를 즉시 스캔합니다.",
     "<strong>Dashboard Data</strong> lets you switch the entire app between Claude Code, Codex, or both. Sessions, agents, events, token totals, workflows, analytics, and costs refetch immediately. The same page saves separate Claude Code and Codex homes; saving the Codex home re-arms live rollout watching and performs a fresh scan.":
@@ -4028,6 +4034,8 @@ window.__WIKI_CONTENT_I18N = {
       "<strong>서버 페이지네이션</strong> 테이블은 기록된 모든 세션을 보여줍니다. 각 페이지는 해당 구간만 가져오므로 세션 수와 관계없이 비용 계산 범위가 제한됩니다. <code>id</code>, <code>name</code>, <code>cwd</code>에 대한 대소문자 구분 없는 검색은 300 ms 디바운스와 함께 서버 측에서 실행되며 상태 필터와 조합할 수 있습니다. 검색 가능한 체크박스 프로젝트 선택기로 여러 디렉터리를 고를 수 있고, 긴 경로는 전체를 확인할 수 있으며 간결한 트리거 텍스트가 필터 바를 읽기 쉽게 유지합니다. 정렬도 같은 맞춤 드롭다운 패턴을 사용합니다. 각 행은 세션의 실제 이름(트랜스크립트에서 실시간으로 동기화됨: <code>/rename</code> 또는 <code>claude -n</code> 제목, 없으면 자동 생성된 제목, 그마저도 없으면 첫 사용자 프롬프트, 최종적으로 짧은 ID로 대체), 상태 배지, 에이전트 수, 지속 시간, 모델, 예상 비용을 표시합니다. 행을 클릭하면 대화 트랜스크립트와 에이전트 계층 구조가 포함된 전체 세션 상세 화면으로 이동합니다.",
   },
   es: {
+    "Codex also reads its native session index, so <code>/rename</code> titles reach session and agent cards in real time. Its conversation reader includes human turns plus <code>exec</code> custom-tool calls and outputs, and loads older pages when you reach the top of the transcript.":
+      "Codex también lee su índice de sesiones nativo, por lo que los títulos de <code>/rename</code> llegan a las tarjetas de sesión y agente en tiempo real. Su lector de conversaciones incluye turnos humanos, llamadas y salidas de herramientas personalizadas <code>exec</code>, y carga páginas anteriores al llegar a la parte superior de la transcripción.",
     "Optional Codex home. Settings saves this dashboard-only override, re-arms live rollout watching, and immediately scans the new <code>sessions/</code> tree.":
       "Directorio de Codex opcional. Configuración guarda esta anulación exclusiva del panel, reactiva la supervisión en vivo de los rollouts y analiza inmediatamente el nuevo árbol <code>sessions/</code>.",
     "<strong>Dashboard Data</strong> lets you switch the entire app between Claude Code, Codex, or both. Sessions, agents, events, token totals, workflows, analytics, and costs refetch immediately. The same page saves separate Claude Code and Codex homes; saving the Codex home re-arms live rollout watching and performs a fresh scan.":

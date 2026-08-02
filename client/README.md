@@ -193,7 +193,7 @@ client/
 │   │   ├── Dashboard.tsx
 │   │   ├── KanbanBoard.tsx
 │   │   ├── Sessions.tsx       # Server-paginated table with searchable multi-project filtering and custom sort menus; shows each session's real name (synced live from the transcript), falls back to the short ID
-│   │   ├── SessionDetail.tsx  # Agent tree + event timeline + Conversation tab (slash-command pills & output, inline rename markers)
+│   │   ├── SessionDetail.tsx  # Agent tree + event timeline + cursor-paginated Conversation tab (slash-command pills/output, rename markers, Codex exec calls)
 │   │   ├── ActivityFeed.tsx  # Real-time event log; row click expands payload; Session btn navigates
 │   │   ├── Analytics.tsx
 │   │   ├── Workflows.tsx

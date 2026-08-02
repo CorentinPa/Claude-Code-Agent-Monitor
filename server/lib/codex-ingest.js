@@ -1,14 +1,19 @@
 /**
  * @file Incrementally ingests Codex rollout JSONL transcripts into dashboard
- * sessions, events, and cost buckets. The byte cursor and cumulative counter
- * snapshot make watcher and hook notifications idempotent and real-time safe.
+ * sessions, events, costs, and native `/rename` titles. The byte cursor and
+ * cumulative counter snapshot make watcher and hook notifications idempotent
+ * and real-time safe.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
 const fs = require("fs");
 const path = require("path");
 const { db, stmts } = require("../db");
-const { getCodexSessionsDir } = require("./codex-home");
+const {
+  getCodexSessionsDir,
+  getCodexSessionTitle,
+  getCodexSessionTitles,
+} = require("./codex-home");
 
 const MAX_EVENT_SUMMARY = 500;
 const CONTEXT_SHORT_LIMIT = 272000;
@@ -126,6 +131,41 @@ function persistEvent(sessionId, agentId, record) {
   return db.prepare("SELECT * FROM events WHERE id = ?").get(info.lastInsertRowid);
 }
 
+/** Keep dashboard cards aligned with the title chosen in Codex's `/rename` UI. */
+function syncCodexSessionTitle(session) {
+  if (!session?.id) return { changed: false, session };
+  const title = getCodexSessionTitle(session.id);
+  if (!title || title === session.name) return { changed: false, session };
+  const changed = stmts.updateSessionName.run(title, session.id, title).changes > 0;
+  return { changed, session: changed ? stmts.getSession.get(session.id) : session };
+}
+
+/**
+ * Sync title-only Codex changes which do not append to a rollout transcript.
+ * `/rename` is written to `session_index.jsonl`, so this runs independently of
+ * the incremental transcript byte cursor.
+ */
+function refreshCodexSessionTitles() {
+  const titles = getCodexSessionTitles();
+  if (!titles.size) return [];
+  const sessions = db.prepare("SELECT * FROM sessions WHERE provider = 'codex'").all();
+  const changed = [];
+  for (const session of sessions) {
+    if (!titles.has(session.id)) continue;
+    const synced = syncCodexSessionTitle(session);
+    if (synced.changed) {
+      changed.push({
+        changed: true,
+        created: false,
+        session: synced.session,
+        agent: stmts.getAgent.get(`codex:${session.id}`),
+        events: [],
+      });
+    }
+  }
+  return changed;
+}
+
 function createCodexSession(meta, transcriptPath) {
   const sessionId = meta?.id || sessionIdFromPath(transcriptPath);
   if (!sessionId) return null;
@@ -143,7 +183,7 @@ function createCodexSession(meta, transcriptPath) {
   });
   stmts.insertCodexSession.run(
     sessionId,
-    "Codex session",
+    getCodexSessionTitle(sessionId) || "Codex session",
     "active",
     cwd,
     "unknown",
@@ -311,7 +351,9 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
     counters.reasoning_output_tokens
   );
   stmts.touchSession.run(session.id);
-  session = stmts.getSession.get(session.id);
+  // A native `/rename` lives outside the rollout, so it wins over the first
+  // user prompt even when both files changed around the same time.
+  session = syncCodexSessionTitle(stmts.getSession.get(session.id)).session;
   return {
     changed: true,
     created,
@@ -375,5 +417,6 @@ module.exports = {
   ingestCodexTranscript,
   ingestCodexHook,
   applyCodexHookLifecycle,
+  refreshCodexSessionTitles,
   isCodexTranscript,
 };
