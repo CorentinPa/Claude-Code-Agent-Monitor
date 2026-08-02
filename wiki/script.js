@@ -777,7 +777,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
   window.__lightboxSlides = slides;
 })();
 
-/* ─── Wiki i18n (en source in DOM; zh / vi swap by English-text key) ──────────
+/* ─── Wiki i18n (en source in DOM; zh / vi / ko / es swap by English-text key) ─
  * The wiki is a static page, so localization swaps text in place. The scannable
  * layer (nav, section labels, headings, hero, UI chrome) is keyed by plain text
  * in T below; body content (paragraphs, list items, table cells, image
@@ -911,6 +911,11 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Error Propagation Map": "错误传播图",
       "Evaluation engine": "评估引擎",
       "Event Ingestion Pipeline": "事件摄取管道",
+      "Embedded Dashboard & Deep Navigation": "嵌入式仪表板与深度导航",
+      "Server startup": "服务器启动",
+      "Hook-to-broadcast latency": "Hook 到广播延迟",
+      "JS bundle (63 KB gzipped)": "JS 包（gzip 后 63 KB）",
+      "SQLite inserts/sec (WAL)": "SQLite 插入/秒（WAL）",
       "Events, Stats, Analytics": "事件、统计、分析",
       "First-Boot Bootstrap": "首次启动引导",
       "Fresh-by-Default Caching": "默认保鲜的缓存",
@@ -919,6 +924,10 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       Health: "健康",
       "History Import": "历史导入",
       "Hook Configuration": "Hook 配置",
+      "Hook latency": "Hook 延迟",
+      "Hook types captured": "已捕获的 Hook 类型",
+      "Server memory": "服务器内存",
+      "Events before slowdown": "性能下降前的事件数",
       "Hook Events Captured": "捕获的 Hook 事件",
       "Hook Handler Design": "Hook 处理器设计",
       "Hook Installation Flow": "Hook 安装流程",
@@ -934,6 +943,9 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Key Client Modules": "关键客户端模块",
       Launch: "启动",
       "Live Dashboard": "实时仪表盘",
+      "Live Monitoring Sidebar": "实时监控侧边栏",
+      "Interactive Analytics & Usage": "交互式分析与使用情况",
+      "Smart Auto-Detection & Connection": "智能自动检测与连接",
       "Local MCP Server": "本地 MCP 服务器",
       "Local MCP Server Runtime": "本地 MCP 服务器运行时",
       "Locale-aware formatting": "区域感知格式化",
@@ -950,6 +962,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Optional: Enable MCP and Agent Extensions": "可选：启用 MCP 与 Agent 扩展",
       "Plain Docker / Podman (no Compose)": "纯 Docker / Podman（不用 Compose）",
       "Plugin Architecture": "插件架构",
+      Plugin: "插件",
       "Port Discovery": "端口发现",
       Pricing: "定价",
       "Progressive Web App": "渐进式 Web 应用",
@@ -997,6 +1010,24 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "What It Adds": "它新增了什么",
       "Workflow Analytics": "工作流分析",
       "Workflow Graphs": "工作流图",
+      "Workflow Runs": "工作流运行",
+      "ccam CLI": "ccam CLI",
+      Metrics: "指标",
+      "How It Works": "工作原理",
+      "Data Scope": "数据范围",
+      "Live Status": "实时状态",
+      "Security Model": "安全模型",
+      "API Endpoints": "API 端点",
+      "WebSocket Events": "WebSocket 事件",
+      CLI: "CLI",
+      "12 discovery tabs": "12 个发现标签页",
+      "Safe mutations": "安全修改",
+      "Keybindings editor": "按键绑定编辑器",
+      "Memory store": "内存存储",
+      "Read-only by design": "按设计只读",
+      "Live refresh": "实时刷新",
+      "Editable vs read-only": "可编辑与只读",
+      "API endpoints": "API 端点",
       Workflows: "工作流",
     },
     vi: {
@@ -1117,6 +1148,11 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Error Propagation Map": "Bản đồ lan truyền lỗi",
       "Evaluation engine": "Công cụ đánh giá",
       "Event Ingestion Pipeline": "Quy trình thu nhận sự kiện",
+      "Embedded Dashboard & Deep Navigation": "Bảng điều khiển nhúng và điều hướng sâu",
+      "Server startup": "Khởi động máy chủ",
+      "Hook-to-broadcast latency": "Độ trễ từ hook đến phát sóng",
+      "JS bundle (63 KB gzipped)": "Gói JS (63 KB nén gzip)",
+      "SQLite inserts/sec (WAL)": "Số lần chèn SQLite/giây (WAL)",
       "Events, Stats, Analytics": "Sự kiện, thống kê, phân tích",
       "First-Boot Bootstrap": "Khởi tạo lần đầu",
       "Fresh-by-Default Caching": "Cache mặc định luôn mới",
@@ -1125,6 +1161,10 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       Health: "Sức khỏe",
       "History Import": "Nhập lịch sử",
       "Hook Configuration": "Cấu hình Hook",
+      "Hook latency": "Độ trễ hook",
+      "Hook types captured": "Các loại hook đã ghi nhận",
+      "Server memory": "Bộ nhớ máy chủ",
+      "Events before slowdown": "Sự kiện trước khi chậm lại",
       "Hook Events Captured": "Sự kiện Hook được ghi",
       "Hook Handler Design": "Thiết kế bộ xử lý Hook",
       "Hook Installation Flow": "Quy trình cài Hook",
@@ -1140,6 +1180,9 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Key Client Modules": "Các module client chính",
       Launch: "Khởi chạy",
       "Live Dashboard": "Bảng điều khiển trực tiếp",
+      "Live Monitoring Sidebar": "Thanh bên giám sát thời gian thực",
+      "Interactive Analytics & Usage": "Phân tích và sử dụng tương tác",
+      "Smart Auto-Detection & Connection": "Tự động phát hiện và kết nối thông minh",
       "Local MCP Server": "Máy chủ MCP cục bộ",
       "Local MCP Server Runtime": "Runtime máy chủ MCP cục bộ",
       "Locale-aware formatting": "Định dạng theo locale",
@@ -1157,6 +1200,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Optional: Enable MCP and Agent Extensions": "Tùy chọn: bật MCP và tiện ích Agent",
       "Plain Docker / Podman (no Compose)": "Docker / Podman thuần (không Compose)",
       "Plugin Architecture": "Kiến trúc plugin",
+      Plugin: "Plugin",
       "Port Discovery": "Khám phá cổng",
       Pricing: "Giá",
       "Progressive Web App": "Progressive Web App",
@@ -1204,6 +1248,24 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "What It Adds": "Nó bổ sung gì",
       "Workflow Analytics": "Phân tích quy trình",
       "Workflow Graphs": "Đồ thị quy trình",
+      "Workflow Runs": "Lần chạy quy trình",
+      "ccam CLI": "ccam CLI",
+      Metrics: "Chỉ số",
+      "How It Works": "Cách hoạt động",
+      "Data Scope": "Phạm vi dữ liệu",
+      "Live Status": "Trạng thái trực tiếp",
+      "Security Model": "Mô hình bảo mật",
+      "API Endpoints": "Điểm cuối API",
+      "WebSocket Events": "Sự kiện WebSocket",
+      CLI: "CLI",
+      "12 discovery tabs": "12 tab khám phá",
+      "Safe mutations": "Thay đổi an toàn",
+      "Keybindings editor": "Trình chỉnh sửa phím tắt",
+      "Memory store": "Kho bộ nhớ",
+      "Read-only by design": "Chỉ đọc theo thiết kế",
+      "Live refresh": "Làm mới trực tiếp",
+      "Editable vs read-only": "Có thể chỉnh sửa và chỉ đọc",
+      "API endpoints": "Điểm cuối API",
       Workflows: "Quy trình",
     },
     ko: {
@@ -1308,6 +1370,11 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Error Propagation Map": "오류 전파 맵",
       "Evaluation engine": "평가 엔진",
       "Event Ingestion Pipeline": "이벤트 수집 파이프라인",
+      "Embedded Dashboard & Deep Navigation": "내장 대시보드 및 심층 탐색",
+      "Server startup": "서버 시작",
+      "Hook-to-broadcast latency": "Hook-브로드캐스트 지연 시간",
+      "JS bundle (63 KB gzipped)": "JS 번들(gzip 63 KB)",
+      "SQLite inserts/sec (WAL)": "SQLite 초당 삽입 수(WAL)",
       "Events, Stats, Analytics": "이벤트, 통계, 분석",
       "First-Boot Bootstrap": "최초 부팅 부트스트랩",
       "Fresh-by-Default Caching": "기본 신선 캐싱",
@@ -1315,6 +1382,10 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Guided setup": "가이드 설정",
       "History Import": "히스토리 가져오기",
       "Hook Configuration": "Hook 설정",
+      "Hook latency": "Hook 지연 시간",
+      "Hook types captured": "캡처된 Hook 유형",
+      "Server memory": "서버 메모리",
+      "Events before slowdown": "성능 저하 전 이벤트 수",
       "Hook Events Captured": "캡처되는 Hook 이벤트",
       "Hook Handler Design": "Hook 핸들러 설계",
       "Hook Installation Flow": "Hook 설치 흐름",
@@ -1326,6 +1397,9 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Kanban Board": "Kanban 보드",
       "Key Client Modules": "주요 클라이언트 모듈",
       "Live Dashboard": "실시간 대시보드",
+      "Live Monitoring Sidebar": "실시간 모니터링 사이드바",
+      "Interactive Analytics & Usage": "대화형 분석 및 사용량",
+      "Smart Auto-Detection & Connection": "스마트 자동 감지 및 연결",
       "Local MCP Server": "로컬 MCP 서버",
       "Local MCP Server Runtime": "로컬 MCP 서버 런타임",
       "Locale-aware formatting": "로케일 인식 포맷팅",
@@ -1343,6 +1417,7 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Optional: Enable MCP and Agent Extensions": "선택 사항: MCP 및 에이전트 확장 활성화",
       "Plain Docker / Podman (no Compose)": "순수 Docker / Podman (Compose 미사용)",
       "Plugin Architecture": "플러그인 아키텍처",
+      Plugin: "플러그인",
       "Port Discovery": "포트 검색",
       "Progressive Web App": "프로그레시브 웹 앱",
       "Provider payloads": "프로바이더 페이로드",
@@ -1382,11 +1457,271 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "What It Adds": "추가되는 기능",
       "Workflow Analytics": "워크플로 분석",
       "Workflow Graphs": "워크플로 그래프",
+      "Workflow Runs": "워크플로 실행",
+      "ccam CLI": "ccam CLI",
+      Metrics: "지표",
+      "How It Works": "작동 방식",
+      "Data Scope": "데이터 범위",
+      "Live Status": "실시간 상태",
+      "Security Model": "보안 모델",
+      "API Endpoints": "API 엔드포인트",
+      "WebSocket Events": "WebSocket 이벤트",
+      CLI: "CLI",
+      "12 discovery tabs": "12개의 탐색 탭",
+      "Safe mutations": "안전한 변경",
+      "Keybindings editor": "키 바인딩 편집기",
+      "Memory store": "메모리 저장소",
+      "Read-only by design": "설계상 읽기 전용",
+      "Live refresh": "실시간 새로고침",
+      "Editable vs read-only": "편집 가능 및 읽기 전용",
+      "API endpoints": "API 엔드포인트",
+    },
+    es: {
+      "Search docs...": "Buscar documentación...",
+      "No results found": "No se encontraron resultados",
+      "Project Wiki": "Wiki del proyecto",
+      "Real-time · Local-first · Zero-config":
+        "En tiempo real · Primero local · Configuración cero",
+      "A professional monitoring platform for Claude Code agent activity. Captures sessions, agents, and tool events via native hooks, persists them in SQLite, and streams updates to a React UI over WebSocket — with no external services required.":
+        "Una plataforma de monitoreo profesional para la actividad del agente Claude Code. Captura sesiones, agentes y eventos de herramientas a través de ganchos nativos, los persiste en SQLite y transmite actualizaciones a una interfaz de usuario React a través de WebSocket, sin necesidad de servicios externos.",
+      "Getting Started": "Empezar",
+      Architecture: "Arquitectura",
+      "Data & APIs": "Datos y API",
+      Integrations: "Integraciones",
+      "Ops & Reference": "Operaciones y referencia",
+      "◈ Architecture": "◈ Arquitectura",
+      "◈ Components & UI": "◈ Componentes y interfaz de usuario",
+      "◈ Configuration": "◈ Configuración",
+      "◈ Data": "◈ Datos",
+      "◈ Features": "◈ Características",
+      "◈ Getting Started": "◈ Comenzando",
+      "◈ Integrations": "◈ Integraciones",
+      "◈ Introduction": "◈ Introducción",
+      "◈ Operations": "◈ Operaciones",
+      "◈ Reference": "◈ Referencia",
+      Overview: "Descripción general",
+      Features: "Características",
+      "Quick Start": "Inicio rápido",
+      Configuration: "Configuración",
+      "Scripts Reference": "Referencia de scripts",
+      "System Overview": "Visión general del sistema",
+      "What's Included": "Qué está incluido",
+      "System Architecture": "Arquitectura del sistema",
+      "Data Flow": "Flujo de datos",
+      "Server Architecture": "Arquitectura del servidor",
+      "Client Architecture": "Arquitectura del cliente",
+      "State Management": "Gestión estatal",
+      "Database Design": "Diseño de bases de datos",
+      "API Reference": "Referencia de API",
+      "WebSocket Protocol": "Protocolo WebSocket",
+      "Hook Integration": "Integración de ganchos",
+      "Import Pipeline": "Pipeline de importación",
+      "MCP & Agent Extensions": "Extensiones de MCP y agentes",
+      "Plugin Marketplace": "Mercado de complementos",
+      "Statusline Utility": "Herramienta de línea de estado",
+      "VS Code Extension": "Extensión de VS Code",
+      "Desktop App (macOS & Windows)": "Aplicación para escritorio (macOS y Windows)",
+      "Settings Page": "Página de ajustes",
+      "Alerts & Webhooks": "Alertas y Webhooks",
+      "Update Notifier": "Notificador de actualización",
+      "Connection Status": "Estado de la conexión",
+      "Prometheus & Grafana": "Prometheus y Grafana",
+      Tabby: "Tabby",
+      "🐾 Tabby — Reactive Cat Companion": "🐾 Tabby — Compañero de gato reactivo",
+      Internationalization: "Internacionalización",
+      "Internationalization (i18n)": "Internacionalización (i18n)",
+      "Deployment Modes": "Modos de despliegue",
+      "Docker / Podman": "Docker / Podman",
+      Performance: "Rendimiento",
+      "Performance Characteristics": "Características del rendimiento",
+      Security: "Seguridad",
+      "Security Considerations": "Consideraciones de seguridad",
+      Troubleshooting: "Resolución de problemas",
+      "Tech Choices": "Opciones tecnológicas",
+      "Technology Choices": "Opciones tecnológicas",
+      "Check 1 — Is the server running?": "Verificación 1: ¿Está funcionando el servidor?",
+      "Check 2 — Are hooks installed?": "Verificación 2: ¿Se han instalado los ganchos?",
+      "Check 3 — Start a new Claude Code session":
+        "Verificar 3 - Iniciar una nueva sesión de Claude Code",
+      "Check 4 — Is Node.js in PATH?": "Verificar 4: ¿Está Node.js en PATH?",
+      macOS: "macOS",
+      Windows: "Windows",
+      "Option A — download the latest GitHub Release (recommended)":
+        "Opción A: descargar la última versión de GitHub (recomendada)",
+      "Option B — per-commit CI artifact": "Opción B: artefacto CI por compromiso",
+      "Option C — build locally": "Opción C: construir localmente",
+      "14 first-class providers": "14 proveedores de primera clase",
+      "5-min Scheduler": "Programador de 5 minutos",
+      "Accessibility & Resilience": "Accesibilidad y resiliencia",
+      "Activity Feed": "Feed de actividad",
+      "Agent Extension Layout": "Diseño de extensión del agente",
+      "Agent State Machine": "Máquina de Estado del Agente",
+      Agents: "Agentes",
+      Alerts: "Alertas",
+      "Alternative: Docker / Podman": "Alternativa: Docker / Podman",
+      Analytics: "Análisis",
+      "API Surface": "Superficie de la API",
+      "Ask → Run Claude Handoff": "Pregunta → Ejecuta Claude Handoff",
+      "Auto-Reload on Update": "Recarga automática en la actualización",
+      "Auto-Start at Login": "Inicio automático al iniciar sesión",
+      "Auto-Surface Speech Bubbles": "Bolas de diálogo de voz automáticas en la superficie",
+      "Available Plugins": "Plugins disponibles",
+      "Bounded Cache Memory": "Memoria de caché limitada",
+      "Browser Notifications": "Notificaciones del navegador",
+      "Claude + Codex Extensions": "Extensión de Claude + Codex",
+      "Claude Config Explorer": "Explorador de configuración de Claude",
+      "Clear Quarantine": "Liberación de cuarentena",
+      "Clear SmartScreen": "Borrar SmartScreen",
+      "CLI Tools": "Herramientas CLI",
+      "Client Data Loading Pattern": "Patrón de carga de datos del cliente",
+      "Client Routes": "Rutas del cliente",
+      Clone: "Clonar",
+      "Close Hides, Server Stays Up": "Cerrar Oculta, el Servidor Se Mantiene Activado",
+      "Common Issues": "Problemas comunes",
+      "Concurrency Timeline": "Cronología de concurrencia",
+      "Constant-Time Sweep": "Recorrido de tiempo constante",
+      "Container Runtime (Docker / Podman)": "Tiempo de ejecución del contenedor (Docker / Podman)",
+      "Continuous Project Sync": "Sincronización continua del proyecto",
+      "Cost Tracking": "Seguimiento de costos",
+      "Data Export": "Exportación de datos",
+      "Data Management": "Gestión de datos",
+      "Data Model Reference": "Referencia del modelo de datos",
+      "Data Persistence & CLI Reliability": "Persistencia de datos y fiabilidad de la CLI",
+      "Delivery engine": "Motor de entrega",
+      "Detection & fallback": "Detección y fallback",
+      "Dismissal Memory": "Memoria de despido",
+      "Docker Deployment": "Implementación de Docker",
+      "Drag to Applications": "Arrastrar a Aplicaciones",
+      "Environment Variables": "Variables del entorno",
+      "Error Propagation Map": "Mapa de propagación de errores",
+      "Evaluation engine": "Motor de evaluación",
+      "Event Ingestion Pipeline": "Pipeline de ingestión de eventos",
+      "Embedded Dashboard & Deep Navigation": "Panel integrado y navegación profunda",
+      "Server startup": "Inicio del servidor",
+      "Hook-to-broadcast latency": "Latencia del gancho a la transmisión",
+      "JS bundle (63 KB gzipped)": "Paquete JS (63 KB comprimido con gzip)",
+      "SQLite inserts/sec (WAL)": "Inserciones de SQLite/segundo (WAL)",
+      "Events, Stats, Analytics": "Eventos, estadísticas, análisis",
+      "First-Boot Bootstrap": "Bootstrap de arranque inicial",
+      "Fresh-by-Default Caching": "Caching fresco por defecto",
+      "GitHub Star History": "Historial de estrellas de GitHub",
+      "Guided setup": "Configuración guiada",
+      Health: "Salud",
+      "History Import": "Importación de historial",
+      "Hook Configuration": "Configuración del gancho",
+      "Hook latency": "Latencia de ganchos",
+      "Hook types captured": "Tipos de ganchos capturados",
+      "Server memory": "Memoria del servidor",
+      "Events before slowdown": "Eventos antes de que el rendimiento disminuya",
+      "Hook Events Captured": "Eventos de captura de gancho",
+      "Hook Handler Design": "Diseño del manipulador de ganchos",
+      "Hook Installation Flow": "Flujo de instalación del gancho",
+      "Hooks Ingestion": "Ingestión de ganchos",
+      "How to Get It": "Cómo conseguirlo",
+      "Idempotence & Cost Accuracy": "Idempotencia y precisión de costos",
+      "Import History": "Historial de importaciones",
+      "In-Process Architecture": "Arquitectura en proceso",
+      Indexes: "Índices",
+      Install: "Instalar",
+      Installation: "Instalación",
+      "Kanban Board": "Tablero Kanban",
+      "Key Client Modules": "Módulos clave del cliente",
+      Launch: "Iniciar",
+      "Live Dashboard": "Panel de control en vivo",
+      "Live Monitoring Sidebar": "Barra lateral de monitorización en tiempo real",
+      "Interactive Analytics & Usage": "Análisis y uso interactivos",
+      "Smart Auto-Detection & Connection": "Detección y conexión automáticas inteligentes",
+      "Local MCP Server": "Servidor MCP local",
+      "Local MCP Server Runtime": "Tiempo de ejecución del servidor MCP local",
+      "Locale-aware formatting": "Formato con conciencia del lugar",
+      "Menu-Bar / Notification-Area (Tray) Icon":
+        "Icono de Barra de Menú / Área de Notificaciones ( bandeja)",
+      "Message Envelope": "Envelope de mensaje",
+      "Model Pricing": "Precio del modelo",
+      "Multi-Stage Build": "Construcción de múltiples etapas",
+      "Namespaced resources": "Recursos con espacio de nombres",
+      "Native Application Menu": "Menú de aplicaciones nativas",
+      "No sessions appearing after starting Claude Code":
+        "No aparecen sesiones después de iniciar Claude Code",
+      "Non-Blocking Detection": "Detección no bloqueante",
+      "Notification Preferences": "Preferencias de notificaciones",
+      "Open the DMG": "Abrir el DMG",
+      "Optional: Enable MCP and Agent Extensions":
+        "Opcional: Habilitar las extensiones MCP y Agent",
+      "Plain Docker / Podman (no Compose)": "Docker / Podman simple (sin Compose)",
+      "Plugin Architecture": "Arquitectura de plugins",
+      Plugin: "Complemento",
+      "Port Discovery": "Descubrimiento del puerto",
+      Pricing: "Precios",
+      "Progressive Web App": "Aplicación web progresiva",
+      "Provider payloads": "Carga útil del proveedor",
+      "PWA & Service Worker": "PWA y trabajador de servicio",
+      "Reactive Mascot — Eight Moods": "Mascota Reactiva — Ocho Ámbitos de Estilo",
+      "Responsive Design": "Diseño Responsivo",
+      "Root Helper Scripts": "Scripts de ayuda para root",
+      "Rule types": "Tipos de reglas",
+      "Run Claude": "Corra Claude",
+      "Run the Installer": "Ejecutar el instalador",
+      "Runs Alongside the Web Dashboard": "Funciona junto al panel de control web",
+      "Safety Model": "Modelo de seguridad",
+      Screenshots: "Capturas de pantalla",
+      "Server Modules": "Módulos del servidor",
+      "Session Detail": "Detalles de la sesión",
+      "Session Drill-In": "Entrenamiento de la sesión",
+      "Session State Machine": "Máquina de estado de sesión",
+      Sessions: "Sesiones",
+      "Sessions Table": "Tabla de sesiones",
+      Settings: "Configuración",
+      "Settings & Management": "Configuración y gestión",
+      "Single-Instance Lock": "Bloqueo de instancia única",
+      "Situation-Aware Command": "Comando con conciencia de la situación",
+      "Skill Usage Examples": "Ejemplos de uso de habilidades",
+      "Soft Failure Semantics": "Semántica de fallos suaves",
+      "SQLite Configuration": "Configuración de SQLite",
+      Start: "Inicio",
+      Statusline: "Línea de estado",
+      "Subagent Hierarchy": "Jerarquía de subagentes",
+      "Supported Source Layouts": "Diseños de fuentes compatibles",
+      "System Health": "Estado de salud del sistema",
+      "Technical terms preserved": "Términos técnicos preservados",
+      "The ⌘B Panel": "El panel ⌘B",
+      "Three Modes, One Pipeline": "Tres modos, un oleoducto",
+      "Transcript Cache": "Cache de transcripciones",
+      "Two UI Surfaces": "Dos superficies de interfaz de usuario",
+      "Upload Request Sequence": "Secuencia de solicitud de carga de archivos",
+      "Use Claude": "Utiliza Claude",
+      Verification: "Verificación",
+      "Volume Mounts": "Montajes de volumen",
+      Webhooks: "Webhooks",
+      "WebSocket Progress Events": "Eventos de progreso de WebSocket",
+      "WebSocket Push": "Push WebSocket",
+      "What It Adds": "Lo que agrega",
+      "Workflow Analytics": "Análisis de flujo de trabajo",
+      "Workflow Graphs": "Gráficos de flujo de trabajo",
+      "Workflow Runs": "Ejecuciones de flujos de trabajo",
+      "ccam CLI": "CLI de ccam",
+      Metrics: "Métricas",
+      "How It Works": "Cómo funciona",
+      "Data Scope": "Alcance de datos",
+      "Live Status": "Estado en directo",
+      "Security Model": "Modelo de seguridad",
+      "API Endpoints": "Puntos finales de API",
+      "WebSocket Events": "Eventos de WebSocket",
+      CLI: "CLI",
+      "12 discovery tabs": "12 pestañas de descubrimiento",
+      "Safe mutations": "Modificaciones seguras",
+      "Keybindings editor": "Editor de asignaciones de teclas",
+      "Memory store": "Almacén de memoria",
+      "Read-only by design": "Solo lectura por diseño",
+      "Live refresh": "Actualización en tiempo real",
+      "Editable vs read-only": "Editable frente a solo lectura",
+      "API endpoints": "Puntos finales de API",
+      Workflows: "Flujos de trabajo",
     },
   };
 
   const PLAIN =
-    ".logo-sub, .section-label, .nav-section, .nav-empty, .main-content h2, .main-content h3, .main-content h4, .hero-desc";
+    ".logo-sub, .section-label, .nav-section, .nav-empty, .stat-label, .t-label, .main-content h2, .main-content h3, .main-content h4, .main-content th, .hero-desc";
   const norm = (s) => (s || "").replace(/\s+/g, " ").trim();
   const tr = (lang, en) => (lang === "en" ? en : (T[lang] && T[lang][norm(en)]) || en);
 
@@ -1409,13 +1744,131 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
   // source for each element is cached in a Map so re-applying a language always
   // translates from English (idempotent). Data ships in i18n-content.js.
   const CONTENT = (typeof window !== "undefined" && window.__WIKI_CONTENT_I18N) || {};
-  const H = { zh: CONTENT.zh || {}, vi: CONTENT.vi || {}, ko: CONTENT.ko || {} };
+  const H = {
+    zh: CONTENT.zh || {},
+    vi: CONTENT.vi || {},
+    ko: CONTENT.ko || {},
+    es: CONTENT.es || {},
+  };
+  // Attribute values do not participate in the body-content pass above. Keep
+  // Spanish image descriptions and assistive labels localized too, including
+  // every screenshot in the long-form wiki.
+  const ATTR = {
+    es: {
+      "Activity Feed Overview": "Resumen del feed de actividad",
+      "Analytics Overview": "Resumen de análisis",
+      "CLI statusline showing model, user, git branch, context window bar, and token counts":
+        "Línea de estado de la CLI que muestra el modelo, el usuario, la rama de Git, la barra de ventana de contexto y los recuentos de tokens",
+      "Claude Code Agent Monitor dashboard showing live agent cards, stats, and recent activity feed":
+        "Panel de Claude Code Agent Monitor con tarjetas de agentes en tiempo real, estadísticas y el feed de actividad reciente",
+      "Claude Code Monitor running as a native desktop app":
+        "Claude Code Monitor ejecutándose como una aplicación de escritorio nativa",
+      "Claude Code Monitor running as a native desktop app on Windows, showing the Activity Feed, native Windows window menu, and Tabby companion":
+        "Claude Code Monitor ejecutándose como una aplicación de escritorio nativa en Windows, con el feed de actividad, el menú nativo de ventana de Windows y el compañero Tabby",
+      "Claude Config Explorer": "Explorador de configuración de Claude",
+      "Claude Config Explorer — 12-tab inspector with overview counts, scope filter, and tab bar":
+        "Explorador de configuración de Claude — inspector de 12 pestañas con recuentos generales, filtro de ámbito y barra de pestañas",
+      "Claude Config Explorer — Skills tab":
+        "Explorador de configuración de Claude — pestaña Habilidades",
+      "Claude Config Explorer — Skills tab with searchable skill list and edit actions":
+        "Explorador de configuración de Claude — pestaña Habilidades con lista de habilidades buscable y acciones de edición",
+      "Connection details modal with throughput sparkline, top event types, and recent activity":
+        "Modal de detalles de conexión con minigráfico de rendimiento, principales tipos de eventos y actividad reciente",
+      "Dashboard Overview": "Resumen del panel",
+      "Dashboard — System Health tab": "Panel — pestaña Estado del sistema",
+      "Dynamic Workflow Run expanded with phase filters and per-agent results":
+        "Ejecución dinámica de flujo de trabajo expandida con filtros de fase y resultados por agente",
+      "Dynamic Workflow Runs on the Workflows page":
+        "Ejecuciones dinámicas de flujo de trabajo en la página Flujos de trabajo",
+      "Dynamic Workflow Runs on the session detail page":
+        "Ejecuciones dinámicas de flujo de trabajo en la página de detalle de sesión",
+      "Grafana CCAM — Overview dashboard": "Grafana CCAM — panel de resumen",
+      "Grafana CCAM — Overview dashboard with live fleet metrics":
+        "Grafana CCAM — panel de resumen con métricas de flota en tiempo real",
+      "Interactive Swagger UI rendering the dashboard's OpenAPI 3.0 spec, with collapsible endpoint groups, request/response schemas, and try-it-out controls":
+        "Swagger UI interactivo que representa la especificación OpenAPI 3.0 del panel, con grupos de endpoints plegables, esquemas de solicitud/respuesta y controles para probarla",
+      "Kanban Board — Agents view": "Tablero Kanban — vista de agentes",
+      "Kanban Board — Sessions view": "Tablero Kanban — vista de sesiones",
+      Language: "Idioma",
+      "MCP Server interactive REPL showing the MCP Tools banner, server info, and tool listing with colored output":
+        "REPL interactivo del servidor MCP que muestra el banner de herramientas MCP, información del servidor y la lista de herramientas con salida en color",
+      "Next features": "Características siguientes",
+      "Previous features": "Características anteriores",
+      "Prometheus CCAM console": "Consola de Prometheus CCAM",
+      "Prometheus CCAM console landing page": "Página de inicio de la consola de Prometheus CCAM",
+      "Prometheus Graph UI running CCAM PromQL":
+        "Interfaz Graph de Prometheus ejecutando PromQL de CCAM",
+      "Prometheus Graph with CCAM PromQL": "Gráfico de Prometheus con PromQL de CCAM",
+      "ReDoc API reference": "Referencia de API de ReDoc",
+      "ReDoc rendering the dashboard's OpenAPI 3.0 spec as a read-optimized three-panel reference, served self-hosted and fully offline":
+        "ReDoc representa la especificación OpenAPI 3.0 del panel como una referencia de tres paneles optimizada para lectura, alojada localmente y totalmente sin conexión",
+      "Run Claude — live streaming output": "Ejecutar Claude — salida en streaming en tiempo real",
+      "Run Claude — pre-run configuration": "Ejecutar Claude — configuración previa a la ejecución",
+      "Search docs...": "Buscar documentación...",
+      "Select language": "Seleccionar idioma",
+      "Session Detail — Agents tab": "Detalle de sesión — pestaña Agentes",
+      "Session Detail — Conversation tab": "Detalle de sesión — pestaña Conversación",
+      "Session Detail — Timeline tab": "Detalle de sesión — pestaña Cronología",
+      "Sessions Overview": "Resumen de sesiones",
+      "Settings Overview": "Resumen de configuración",
+      "Settings page Import History section showing rescan default folder, scan custom path, and upload controls with progress output":
+        "Sección Historial de importaciones de la página Configuración que muestra volver a analizar la carpeta predeterminada, analizar una ruta personalizada y controles de carga con salida de progreso",
+      "Settings page Remote Data Sources section showing configured SSH sources with live status, the data-scope selector, and per-source sync controls":
+        "Sección Fuentes de datos remotas de la página Configuración que muestra fuentes SSH configuradas con estado en tiempo real, el selector de ámbito de datos y controles de sincronización por fuente",
+      "Settings page with model pricing editor, hook status, data management, and system info":
+        "Página Configuración con editor de precios de modelos, estado de hooks, gestión de datos e información del sistema",
+      "Settings — Alerts & Webhooks": "Configuración — Alertas y webhooks",
+      "Settings — Alerts & Webhooks: rule list, fired-alert feed, and webhook channels":
+        "Configuración — Alertas y webhooks: lista de reglas, feed de alertas activadas y canales de webhook",
+      "Settings — Remote Data Sources": "Configuración — Fuentes de datos remotas",
+      "Swagger UI API docs": "Documentación de API de Swagger UI",
+      "Tabby Companio": "Compañero Tabby",
+      "Toggle sidebar": "Alternar barra lateral",
+      "Update modal showing commits-behind count and copy-to-clipboard command":
+        "Modal de actualización que muestra el número de commits pendientes y el comando para copiar al portapapeles",
+      "VS Code Extension sidebar showing live health, analytics, and navigation":
+        "Barra lateral de la extensión de VS Code que muestra estado, análisis y navegación en tiempo real",
+      "Wiki navigation": "Navegación de la wiki",
+      "Windows NSIS installer step 1 — Choose Installation Options":
+        "Instalador NSIS de Windows, paso 1 — Elegir opciones de instalación",
+      "Windows NSIS installer step 2 — Choose Install Location":
+        "Instalador NSIS de Windows, paso 2 — Elegir ubicación de instalación",
+      "Windows NSIS installer step 3 — Completing Setup":
+        "Instalador NSIS de Windows, paso 3 — Completando la instalación",
+      "Workflows Overview": "Resumen de flujos de trabajo",
+    },
+  };
+  const META = {
+    en: {
+      title: "Claude Code Agent Monitor - Project Wiki",
+      description:
+        "Comprehensive technical wiki for Claude Code Agent Monitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding.",
+      socialTitle: "Claude Code Agent Monitor - Project Wiki",
+      socialDescription:
+        "Comprehensive technical wiki for Claude Code Agent Monitor — real-time local monitoring with MCP server integration plus Claude Code and Codex extension scaffolding.",
+      twitterDescription:
+        "Real-time local monitoring for Claude Code agent activity with MCP integration, extension scaffolding, analytics, and WebSocket push.",
+      socialImageAlt: "Claude Code Agent Monitor — real-time Claude Code monitoring platform",
+    },
+    es: {
+      title: "Claude Code Agent Monitor - Wiki del proyecto",
+      description:
+        "Wiki técnica completa para Claude Code Agent Monitor: monitorización local en tiempo real con integración de servidor MCP y andamiaje de extensiones para Claude Code y Codex.",
+      socialTitle: "Claude Code Agent Monitor - Wiki del proyecto",
+      socialDescription:
+        "Wiki técnica completa para Claude Code Agent Monitor: monitorización local en tiempo real con integración de servidor MCP y andamiaje de extensiones para Claude Code y Codex.",
+      twitterDescription:
+        "Monitorización local en tiempo real de la actividad del agente Claude Code con integración MCP, andamiaje de extensiones, análisis y envío por WebSocket.",
+      socialImageAlt:
+        "Claude Code Agent Monitor — plataforma de monitorización de Claude Code en tiempo real",
+    },
+  };
   const trH = (lang, en) => (lang === "en" ? en : (H[lang] && H[lang][norm(en)]) || en);
   // Heading / section-label translations from the content bundle fill any gaps
   // in T. Existing T entries always win, so this never regresses the scannable
   // layer — it only adds headings T didn't already cover.
   if (CONTENT.plain) {
-    ["zh", "vi", "ko"].forEach((lng) => {
+    ["zh", "vi", "ko", "es"].forEach((lng) => {
       const src = CONTENT.plain[lng] || {};
       for (const k in src) if (!(k in T[lng])) T[lng][k] = src[k];
     });
@@ -1435,6 +1888,66 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
   const htmlEls = Array.from(document.querySelectorAll(HTML_SEL));
   const enHtml = new Map();
   htmlEls.forEach((el) => enHtml.set(el, el.innerHTML));
+  const attrNames = ["alt", "aria-label", "placeholder", "title"];
+  const attrEls = Array.from(
+    document.querySelectorAll("[alt], [aria-label], [placeholder], [title]")
+  );
+  const enAttrs = new Map();
+  attrEls.forEach((el) => {
+    const attrs = {};
+    attrNames.forEach((name) => {
+      if (el.hasAttribute(name)) attrs[name] = el.getAttribute(name);
+    });
+    enAttrs.set(el, attrs);
+  });
+  const languageLabels = {
+    en: "English",
+    zh: "中文",
+    vi: "Tiếng Việt",
+    ko: "한국어",
+    es: "Español",
+  };
+  const languageSwitches = Array.from(document.querySelectorAll(".lang-switch"));
+  const languageTriggers = Array.from(document.querySelectorAll(".lang-select-trigger"));
+
+  function setLanguageMenu(languageSwitch, open) {
+    const languageTrigger = languageSwitch?.querySelector(".lang-select-trigger");
+    const languageMenu = languageSwitch?.querySelector(".lang-select-menu");
+    if (!languageTrigger || !languageMenu) return;
+    languageTrigger.setAttribute("aria-expanded", String(open));
+    languageMenu.hidden = !open;
+  }
+
+  function closeLanguageMenus() {
+    languageSwitches.forEach((languageSwitch) => setLanguageMenu(languageSwitch, false));
+  }
+
+  function updateLanguageControl(activeLanguage) {
+    document.querySelectorAll(".lang-select-current").forEach((languageCurrent) => {
+      languageCurrent.textContent = languageLabels[activeLanguage] || languageLabels.en;
+    });
+    document.querySelectorAll(".lang-option").forEach((option) => {
+      const active = option.dataset.lang === activeLanguage;
+      option.classList.toggle("active", active);
+      option.setAttribute("aria-selected", String(active));
+    });
+  }
+
+  function updateMetadata(activeLanguage) {
+    const meta = META[activeLanguage] || META.en;
+    document.title = meta.title;
+    const setContent = (selector, value) => {
+      const element = document.querySelector(selector);
+      if (element) element.setAttribute("content", value);
+    };
+    setContent('meta[name="description"]', meta.description);
+    setContent('meta[property="og:title"]', meta.socialTitle);
+    setContent('meta[property="og:description"]', meta.socialDescription);
+    setContent('meta[property="og:image:alt"]', meta.socialImageAlt);
+    setContent('meta[name="twitter:title"]', meta.socialTitle);
+    setContent('meta[name="twitter:description"]', meta.twitterDescription);
+    setContent('meta[name="twitter:image:alt"]', meta.socialImageAlt);
+  }
 
   function apply(lang) {
     document.querySelectorAll(PLAIN).forEach((el) => {
@@ -1456,13 +1969,25 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       const en = enHtml.get(el);
       if (en != null) el.innerHTML = trH(lang, en);
     });
+    enAttrs.forEach((attrs, el) => {
+      Object.entries(attrs).forEach(([name, en]) => {
+        el.setAttribute(name, (ATTR[lang] && ATTR[lang][en]) || en);
+      });
+    });
     const search = document.getElementById("sidebar-search");
     if (search) search.placeholder = tr(lang, "Search docs...");
     document.documentElement.lang =
-      lang === "zh" ? "zh-CN" : lang === "vi" ? "vi" : lang === "ko" ? "ko" : "en";
-    document
-      .querySelectorAll(".lang-btn")
-      .forEach((b) => b.classList.toggle("active", b.dataset.lang === lang));
+      lang === "zh"
+        ? "zh-CN"
+        : lang === "vi"
+          ? "vi"
+          : lang === "ko"
+            ? "ko"
+            : lang === "es"
+              ? "es"
+              : "en";
+    updateLanguageControl(lang);
+    updateMetadata(lang);
     if (typeof window.__wikiRunSearch === "function") window.__wikiRunSearch();
   }
 
@@ -1476,15 +2001,37 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
           ? "vi"
           : n.indexOf("ko") === 0
             ? "ko"
-            : "en";
+            : n.indexOf("es") === 0
+              ? "es"
+              : "en";
   }
 
-  document.querySelectorAll(".lang-btn").forEach((b) => {
-    b.addEventListener("click", () => {
-      lang = b.dataset.lang;
+  if (!Object.hasOwn(languageLabels, lang)) lang = "en";
+
+  document.querySelectorAll(".lang-option").forEach((option) => {
+    option.addEventListener("click", () => {
+      lang = option.dataset.lang;
       localStorage.setItem("wiki-lang", lang);
       apply(lang);
+      closeLanguageMenus();
     });
+  });
+
+  languageTriggers.forEach((languageTrigger) => {
+    languageTrigger.addEventListener("click", () => {
+      const languageSwitch = languageTrigger.closest(".lang-switch");
+      const isOpen = languageTrigger.getAttribute("aria-expanded") === "true";
+      closeLanguageMenus();
+      setLanguageMenu(languageSwitch, !isOpen);
+    });
+    languageTrigger.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeLanguageMenus();
+    });
+  });
+  document.addEventListener("mousedown", (event) => {
+    if (!languageSwitches.some((languageSwitch) => languageSwitch.contains(event.target))) {
+      closeLanguageMenus();
+    }
   });
 
   apply(lang);

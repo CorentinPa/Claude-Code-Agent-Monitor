@@ -1753,19 +1753,22 @@ hr {
 
 /* ─── Language switch ───────────────────────────────────────────────────── */
 .lang-switch {
-  display: flex;
-  gap: 4px;
+  position: relative;
   padding: 10px 16px 12px;
   border-bottom: 1px solid var(--border);
 }
-.lang-btn {
-  flex: 1;
+.lang-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 5px 0;
+  padding: 7px 9px;
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -1773,17 +1776,93 @@ hr {
     border-color 0.15s,
     background 0.15s;
 }
-.lang-btn:hover {
+.lang-select-trigger:hover,
+.lang-select-trigger[aria-expanded="true"] {
   color: var(--text);
-  border-color: var(--text-dim);
-}
-.lang-btn.active {
-  color: #a5b4fc;
   border-color: var(--accent);
+}
+.lang-select-chevron {
+  color: #a5b4fc;
+  font-size: 16px;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+.lang-select-trigger[aria-expanded="true"] .lang-select-chevron {
+  transform: rotate(180deg);
+}
+.lang-select-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% - 8px);
+  right: 16px;
+  left: 16px;
+  overflow: hidden;
+  padding: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.32);
+}
+.lang-option {
+  display: flex;
+  width: 100%;
+  padding: 7px 8px;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+.lang-option:hover,
+.lang-option:focus-visible {
+  color: var(--text);
+  background: var(--bg-hover);
+  outline: none;
+}
+.lang-option.active {
+  color: #a5b4fc;
   background: var(--accent-glow);
 }
 body.sidebar-collapsed .sidebar .lang-switch {
   display: none;
+}
+
+.mobile-language-switch {
+  display: none;
+}
+
+@media (max-width: 1400px) {
+  .mobile-language-switch {
+    display: block;
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 110;
+    width: 176px;
+    padding: 0;
+    border: 0;
+  }
+
+  .mobile-language-switch .lang-select-menu {
+    top: calc(100% + 6px);
+    right: 0;
+    left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .mobile-language-switch {
+    top: 12px;
+    right: 12px;
+    width: min(176px, calc(100vw - 24px));
+  }
 }
 
 /* ─── Sidebar search: empty state ───────────────────────────────────────── */

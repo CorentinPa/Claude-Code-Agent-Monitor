@@ -1320,6 +1320,10 @@ window.__WIKI_CONTENT_I18N = {
       'Prometheus 文本展示格式（v0.0.4）的实时计数器：按状态划分的 sessions 与 agents、事件总数、按种类累计的 token、已连接的 WebSocket 客户端、已配置的远程数据源、进程运行时长与 RSS，以及构建版本——以便将 CCAM 抓取到 Prometheus / Grafana。只读，且——由于位于 <code>/api</code> 之下——处于 DNS 重绑定 Host 头防护和可选的 <code>DASHBOARD_TOKEN</code> 之后：非回环抓取器（例如 Docker 中通过 <code>host.docker.internal</code> 访问的 Prometheus）必须用 <code>DASHBOARD_ALLOWED_HOSTS</code> 加入白名单，否则抓取会返回 <code>403 EBADHOST</code>，并且在设置了令牌时必须发送该令牌。一个开箱即用、预置了 "CCAM — Overview" 仪表盘的 Prometheus + Grafana 组合位于 <code>monitoring/</code>（<code>cd monitoring &amp;&amp; docker compose up -d</code>；Grafana 在 3000 端口）。',
     "Comma-separated extra <code>Host</code>-header names allowed past the DNS-rebinding guard — needed for a non-loopback client or scraper, such as Prometheus in Docker reaching <code>/api/metrics</code> via <code>host.docker.internal</code>; an unlisted host is rejected with <code>403 EBADHOST</code>":
       "逗号分隔的额外 <code>Host</code> 头名称，允许其通过 DNS 重绑定防护——非回环客户端或抓取器需要它，例如 Docker 中通过 <code>host.docker.internal</code> 访问 <code>/api/metrics</code> 的 Prometheus；未列入的主机会被拒绝并返回 <code>403 EBADHOST</code>",
+    "The entire UI ships in <strong>five languages — English, 简体中文, Tiếng Việt, 한국어, and Español</strong> — built on <code>i18next</code> + <code>react-i18next</code> with <code>i18next-browser-languagedetector</code>. Coverage is end-to-end: every page, chart tooltip, Settings flow, Workflow narrative, Config Explorer tab, Run page, and the Alerts rule-help tooltips + webhook setup guides are translated. Switch languages from the sidebar's custom language dropdown — the choice persists in <code>localStorage</code>.":
+      "整个 UI 提供<strong>五种语言——English、简体中文、Tiếng Việt、한국어 和 Español</strong>，基于 <code>i18next</code> + <code>react-i18next</code> 与 <code>i18next-browser-languagedetector</code> 构建。覆盖范围端到端：每个页面、图表工具提示、Settings 流程、Workflow 叙述、Config Explorer 标签页、Run 页面，以及 Alerts 规则帮助工具提示和 webhook 设置指南均已翻译。通过侧边栏的自定义语言下拉菜单切换语言，选择会保存在 <code>localStorage</code> 中。",
+    'Every alert-rule field has a help tooltip — the event-type, tool-name, and summary-contains fields include example chips of real hook events and built-in tool names. Each webhook provider ships a collapsible step-by-step setup guide linking to the official docs. A one-click <strong>"Send test"</strong> probe fires a synthetic alert and reports the delivery result inline, and targets can be scoped to specific rules. Fully localized (en / zh / vi / ko / es).':
+      "每个告警规则字段都有帮助提示——event-type、tool-name 和 summary-contains 字段包含真实 hook 事件和内置工具名称的示例标签。每个 webhook 提供方都附带一份可折叠的分步设置指南，并链接到官方文档。一键 <strong>“Send test”</strong> 探测会触发一个合成告警并就地报告投递结果，且目标可限定到特定规则。完全本地化（en / zh / vi / ko / es）。",
     "<strong>Server-paginated</strong> table of every recorded session — each page fetches only its slice so cost computation stays bounded no matter how many sessions exist. Case-insensitive search across <code>id</code>, <code>name</code>, and <code>cwd</code> runs server-side with a 300 ms debounce; the status filter composes with search for precise narrowing. A searchable checkbox project picker supports selecting multiple directories; long paths remain available in full, while compact trigger text keeps the filter bar readable. Sorting uses the same custom dropdown pattern. Each row shows the session's real name (synced live from the transcript — a <code>/rename</code> or <code>claude -n</code> title, else the auto title, else the first user prompt, with a short-ID fallback), status badge, agent count, duration, model, and estimated cost. Click any row to drill into the full session detail view with conversation transcript and agent hierarchy.":
       "<strong>服务端分页</strong>的表格，列出每一个已记录的会话。每一页只获取对应的数据片段，因此无论会话数量多少，成本计算都保持有界。针对 <code>id</code>、<code>name</code> 和 <code>cwd</code> 的不区分大小写搜索在服务端运行，并带有 300 ms 防抖；状态过滤器可与搜索组合以精确缩小范围。可搜索的复选框项目选择器支持选择多个目录；完整长路径仍可查看，紧凑的触发器文字让筛选栏保持易读。排序使用相同的自定义下拉模式。每一行显示会话的真实名称（从 transcript 实时同步：<code>/rename</code> 或 <code>claude -n</code> 标题，否则使用自动标题，再否则使用首条用户 prompt，并回退到短 ID）、状态徽章、agent 数量、时长、模型和预估成本。点击任意行即可深入查看完整的会话详情视图，包含对话记录和 agent 层级。",
   },
@@ -2656,6 +2660,10 @@ window.__WIKI_CONTENT_I18N = {
       'Các bộ đếm trực tiếp ở định dạng Prometheus text-exposition (v0.0.4): sessions và agents theo trạng thái, tổng số sự kiện, token tích lũy theo loại, số client WebSocket đang kết nối, các nguồn dữ liệu từ xa đã cấu hình, thời gian chạy tiến trình và RSS, cùng phiên bản build — để CCAM có thể được scrape vào Prometheus / Grafana. Chỉ-đọc, và — vì nằm dưới <code>/api</code> — nằm sau lớp bảo vệ Host-header chống DNS-rebinding và <code>DASHBOARD_TOKEN</code> tùy chọn: một scraper không phải loopback (ví dụ Prometheus trong Docker qua <code>host.docker.internal</code>) phải được đưa vào danh sách cho phép bằng <code>DASHBOARD_ALLOWED_HOSTS</code> nếu không lần scrape sẽ trả về <code>403 EBADHOST</code>, và phải gửi token khi có đặt token. Một bộ Prometheus + Grafana chạy-ngay với bảng điều khiển "CCAM — Overview" dựng sẵn nằm trong <code>monitoring/</code> (<code>cd monitoring &amp;&amp; docker compose up -d</code>; Grafana ở cổng 3000).',
     "Comma-separated extra <code>Host</code>-header names allowed past the DNS-rebinding guard — needed for a non-loopback client or scraper, such as Prometheus in Docker reaching <code>/api/metrics</code> via <code>host.docker.internal</code>; an unlisted host is rejected with <code>403 EBADHOST</code>":
       "Các tên <code>Host</code>-header bổ sung, phân tách bằng dấu phẩy, được cho phép vượt qua lớp bảo vệ chống DNS-rebinding — cần cho một client hoặc scraper không phải loopback, chẳng hạn Prometheus trong Docker truy cập <code>/api/metrics</code> qua <code>host.docker.internal</code>; một host không có trong danh sách sẽ bị từ chối với <code>403 EBADHOST</code>",
+    "The entire UI ships in <strong>five languages — English, 简体中文, Tiếng Việt, 한국어, and Español</strong> — built on <code>i18next</code> + <code>react-i18next</code> with <code>i18next-browser-languagedetector</code>. Coverage is end-to-end: every page, chart tooltip, Settings flow, Workflow narrative, Config Explorer tab, Run page, and the Alerts rule-help tooltips + webhook setup guides are translated. Switch languages from the sidebar's custom language dropdown — the choice persists in <code>localStorage</code>.":
+      "Toàn bộ giao diện có <strong>năm ngôn ngữ — English, 简体中文, Tiếng Việt, 한국어 và Español</strong> — được xây dựng trên <code>i18next</code> + <code>react-i18next</code> cùng <code>i18next-browser-languagedetector</code>. Phạm vi bao phủ là đầu-cuối: mọi trang, chú giải biểu đồ, luồng Settings, tường thuật Workflow, thẻ Config Explorer, trang Run, cùng chú giải trợ giúp quy tắc Alerts và hướng dẫn thiết lập webhook đều được dịch. Chọn ngôn ngữ từ menu thả xuống tùy chỉnh ở thanh bên; lựa chọn được lưu trong <code>localStorage</code>.",
+    'Every alert-rule field has a help tooltip — the event-type, tool-name, and summary-contains fields include example chips of real hook events and built-in tool names. Each webhook provider ships a collapsible step-by-step setup guide linking to the official docs. A one-click <strong>"Send test"</strong> probe fires a synthetic alert and reports the delivery result inline, and targets can be scoped to specific rules. Fully localized (en / zh / vi / ko / es).':
+      "Mỗi trường của quy tắc cảnh báo đều có chú giải trợ giúp — các trường event-type, tool-name và summary-contains bao gồm các chip ví dụ về sự kiện hook thật và tên công cụ tích hợp sẵn. Mỗi nhà cung cấp webhook đi kèm một hướng dẫn thiết lập từng bước có thể thu gọn, liên kết tới tài liệu chính thức. Một thăm dò <strong>“Send test”</strong> bằng một cú nhấp sẽ kích hoạt một cảnh báo tổng hợp và báo cáo kết quả gửi ngay tại chỗ, và các đích có thể được giới hạn theo các quy tắc cụ thể. Được bản địa hóa hoàn toàn (en / zh / vi / ko / es).",
     "<strong>Server-paginated</strong> table of every recorded session — each page fetches only its slice so cost computation stays bounded no matter how many sessions exist. Case-insensitive search across <code>id</code>, <code>name</code>, and <code>cwd</code> runs server-side with a 300 ms debounce; the status filter composes with search for precise narrowing. A searchable checkbox project picker supports selecting multiple directories; long paths remain available in full, while compact trigger text keeps the filter bar readable. Sorting uses the same custom dropdown pattern. Each row shows the session's real name (synced live from the transcript — a <code>/rename</code> or <code>claude -n</code> title, else the auto title, else the first user prompt, with a short-ID fallback), status badge, agent count, duration, model, and estimated cost. Click any row to drill into the full session detail view with conversation transcript and agent hierarchy.":
       "Bảng <strong>phân trang phía máy chủ</strong> liệt kê mọi phiên đã ghi. Mỗi trang chỉ lấy phần dữ liệu của mình nên việc tính chi phí luôn có giới hạn, dù có bao nhiêu phiên. Tìm kiếm không phân biệt hoa thường trên <code>id</code>, <code>name</code> và <code>cwd</code> chạy ở phía máy chủ với độ trễ chống dội 300 ms; bộ lọc trạng thái kết hợp với tìm kiếm để thu hẹp chính xác. Bộ chọn dự án dạng hộp kiểm có thể tìm kiếm hỗ trợ chọn nhiều thư mục; đường dẫn dài vẫn có thể xem đầy đủ, còn văn bản gọn trên nút giữ thanh lọc dễ đọc. Sắp xếp dùng cùng mẫu menu tùy chỉnh. Mỗi hàng hiển thị tên thật của phiên (đồng bộ trực tiếp từ bản ghi: tiêu đề <code>/rename</code> hoặc <code>claude -n</code>, nếu không thì tiêu đề tự động, nếu vẫn không có thì prompt đầu tiên của người dùng, với dự phòng là ID ngắn), huy hiệu trạng thái, số lượng agent, thời lượng, mô hình và chi phí ước tính. Nhấp vào bất kỳ hàng nào để đi sâu vào chế độ xem chi tiết đầy đủ của phiên với bản ghi hội thoại và phân cấp agent.",
   },
@@ -3976,10 +3984,1976 @@ window.__WIKI_CONTENT_I18N = {
       'Prometheus 텍스트 노출 형식(v0.0.4)의 실시간 카운터: 상태별 sessions 및 agents, 총 이벤트 수, 종류별 누적 token, 연결된 WebSocket 클라이언트, 구성된 원격 데이터 소스, 프로세스 가동 시간 및 RSS, 그리고 빌드 버전 — CCAM을 Prometheus / Grafana로 스크레이핑할 수 있도록 합니다. 읽기 전용이며 — <code>/api</code> 아래에 있으므로 — DNS 리바인딩 Host 헤더 가드와 선택적 <code>DASHBOARD_TOKEN</code> 뒤에 위치합니다: 루프백이 아닌 스크레이퍼(예: <code>host.docker.internal</code>을 통해 접근하는 Docker 내 Prometheus)는 <code>DASHBOARD_ALLOWED_HOSTS</code>로 허용 목록에 추가해야 하며, 그렇지 않으면 스크레이프가 <code>403 EBADHOST</code>를 반환하고, 토큰이 설정된 경우 해당 토큰을 함께 보내야 합니다. "CCAM — Overview" 대시보드가 미리 프로비저닝된 즉시 실행 가능한 Prometheus + Grafana 스택이 <code>monitoring/</code>에 있습니다(<code>cd monitoring &amp;&amp; docker compose up -d</code>; Grafana는 3000 포트).',
     "Comma-separated extra <code>Host</code>-header names allowed past the DNS-rebinding guard — needed for a non-loopback client or scraper, such as Prometheus in Docker reaching <code>/api/metrics</code> via <code>host.docker.internal</code>; an unlisted host is rejected with <code>403 EBADHOST</code>":
       "쉼표로 구분된 추가 <code>Host</code> 헤더 이름으로, DNS 리바인딩 가드를 통과하도록 허용합니다 — 루프백이 아닌 클라이언트나 스크레이퍼에 필요하며, 예를 들어 <code>host.docker.internal</code>을 통해 <code>/api/metrics</code>에 접근하는 Docker 내 Prometheus가 있습니다; 목록에 없는 host는 <code>403 EBADHOST</code>로 거부됩니다",
+    "The entire UI ships in <strong>five languages — English, 简体中文, Tiếng Việt, 한국어, and Español</strong> — built on <code>i18next</code> + <code>react-i18next</code> with <code>i18next-browser-languagedetector</code>. Coverage is end-to-end: every page, chart tooltip, Settings flow, Workflow narrative, Config Explorer tab, Run page, and the Alerts rule-help tooltips + webhook setup guides are translated. Switch languages from the sidebar's custom language dropdown — the choice persists in <code>localStorage</code>.":
+      "전체 UI는 <strong>다섯 가지 언어 — English, 简体中文, Tiếng Việt, 한국어, Español</strong> — 로 제공되며 <code>i18next</code> + <code>react-i18next</code>와 <code>i18next-browser-languagedetector</code>를 기반으로 구축되었습니다. 모든 페이지, 차트 툴팁, Settings 흐름, Workflow 내러티브, Config Explorer 탭, Run 페이지, Alerts 규칙 도움말 툴팁과 webhook 설정 가이드까지 전 영역이 번역됩니다. 사이드바의 맞춤 언어 드롭다운에서 전환할 수 있으며 선택은 <code>localStorage</code>에 저장됩니다.",
+    'Every alert-rule field has a help tooltip — the event-type, tool-name, and summary-contains fields include example chips of real hook events and built-in tool names. Each webhook provider ships a collapsible step-by-step setup guide linking to the official docs. A one-click <strong>"Send test"</strong> probe fires a synthetic alert and reports the delivery result inline, and targets can be scoped to specific rules. Fully localized (en / zh / vi / ko / es).':
+      '모든 알림 규칙 필드에는 도움말 툴팁이 있습니다 — 이벤트 유형, 도구 이름, 요약 포함 필드에는 실제 훅 이벤트와 내장 도구 이름의 예시 칩이 함께 제공됩니다. 각 웹훅 프로바이더는 공식 문서로 연결되는 접을 수 있는 단계별 설정 가이드를 제공합니다. 클릭 한 번으로 실행하는 <strong>"테스트 전송"</strong> 기능은 가상의 알림을 발생시켜 전달 결과를 즉시 표시하며, 대상을 특정 규칙으로 범위를 제한할 수도 있습니다. en / zh / vi로 완전히 현지화되어 있습니다.',
     "<strong>Server-paginated</strong> table of every recorded session — each page fetches only its slice so cost computation stays bounded no matter how many sessions exist. Case-insensitive search across <code>id</code>, <code>name</code>, and <code>cwd</code> runs server-side with a 300 ms debounce; the status filter composes with search for precise narrowing. A searchable checkbox project picker supports selecting multiple directories; long paths remain available in full, while compact trigger text keeps the filter bar readable. Sorting uses the same custom dropdown pattern. Each row shows the session's real name (synced live from the transcript — a <code>/rename</code> or <code>claude -n</code> title, else the auto title, else the first user prompt, with a short-ID fallback), status badge, agent count, duration, model, and estimated cost. Click any row to drill into the full session detail view with conversation transcript and agent hierarchy.":
       "<strong>서버 페이지네이션</strong> 테이블은 기록된 모든 세션을 보여줍니다. 각 페이지는 해당 구간만 가져오므로 세션 수와 관계없이 비용 계산 범위가 제한됩니다. <code>id</code>, <code>name</code>, <code>cwd</code>에 대한 대소문자 구분 없는 검색은 300 ms 디바운스와 함께 서버 측에서 실행되며 상태 필터와 조합할 수 있습니다. 검색 가능한 체크박스 프로젝트 선택기로 여러 디렉터리를 고를 수 있고, 긴 경로는 전체를 확인할 수 있으며 간결한 트리거 텍스트가 필터 바를 읽기 쉽게 유지합니다. 정렬도 같은 맞춤 드롭다운 패턴을 사용합니다. 각 행은 세션의 실제 이름(트랜스크립트에서 실시간으로 동기화됨: <code>/rename</code> 또는 <code>claude -n</code> 제목, 없으면 자동 생성된 제목, 그마저도 없으면 첫 사용자 프롬프트, 최종적으로 짧은 ID로 대체), 상태 배지, 에이전트 수, 지속 시간, 모델, 예상 비용을 표시합니다. 행을 클릭하면 대화 트랜스크립트와 에이전트 계층 구조가 포함된 전체 세션 상세 화면으로 이동합니다.",
   },
+  es: {
+    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. Login <code>admin</code> / <code>admin</code> on port 3000</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Observabilidad · Grafana</strong> — panel de control de inicio predeterminado <em>CCAM - Visión general</em> (cuatro tableros provistos automáticamente): instantánea de la flota en vivo, totales de la base de datos, gráficos de desglose y tarifas de <code>/api/metrics</code> Rasguños. acceso <code>admin</code> / <code>admin</code> En el puerto 3000</span>',
+    '<span class="caption-icon">🔥</span> <span><strong>Observability · Prometheus console</strong> — pre-built landing page at <code>/consoles/index.html</code> with live metric cards, session/token tables, and drill-down links into the Graph UI (Prometheus 3.x compatible — queries the HTTP API directly)</span>':
+      '<span class="caption-icon">🔥</span> <span><strong>Observabilidad · Consola Prometheus</strong> — página de destino preconstruida en <code>/consoles/index.html</code> Con tarjetas métricas en vivo, tablas de sesiones/tokens y enlaces de profundización a la interfaz de usuario gráfica (compatible con Prometheus 3.x, consulta directamente la API HTTP)</span>',
+    '<span class="caption-icon">📈</span> <span><strong>Observability · Prometheus Graph</strong> — run PromQL against scraped CCAM series (e.g. <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>, <code>rate(ccam_tokens_total[5m])</code>) with starter expressions from the CCAM console and recording rules in <code>monitoring/prometheus/ccam-rules.yml</code></span>':
+      '<span class="caption-icon">📈</span> <span><strong>Observabilidad · Gráfico Prometheus</strong> - Ejecute PromQL contra series CCAM raspadas (por ejemplo, <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>, <code>rate(ccam_tokens_total[5m])</code>) con expresiones iniciales de la consola CCAM y reglas de grabación en <code>monitoring/prometheus/ccam-rules.yml</code></span>',
+    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login (<code>admin</code> / <code>admin</code> on port 3000): fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM - Descripción general</strong> — panel de control de la página de inicio predeterminado después de iniciar sesión (<code>admin</code> / <code>admin</code> en el puerto 3000): instantánea de la flota, totales de la base de datos, gráficos de desglose y tarifas en vivo <code>/api/metrics</code> rasguños - sin muestras ni datos sintéticos</span>',
+    '<span class="caption-icon">🔥</span> <span><strong>Prometheus · CCAM console</strong> — static HTML at <code>/consoles/index.html</code> (Prometheus 3.x compatible): live metric cards, session/token tables, and one-click Graph drill-down links that query the Prometheus HTTP API directly</span>':
+      '<span class="caption-icon">🔥</span> <span><strong>Prometeo · Consola CCAM</strong> — HTML estático en <code>/consoles/index.html</code> (Compatible con Prometheus 3.x): tarjetas métricas en vivo, tablas de sesiones/tokens y enlaces de profundización gráfica con un solo clic que consultan la API HTTP de Prometheus directamente.</span>',
+    '<span class="caption-icon">📈</span> <span><strong>Prometheus · Graph</strong> — ad-hoc PromQL against scraped CCAM series; starter expressions ship in the CCAM console and <code>monitoring/README.md</code>, with derived rates in <code>monitoring/prometheus/ccam-rules.yml</code></span>':
+      '<span class="caption-icon">📈</span> <span><strong>Prometeo · Gráfico</strong> — PromQL ad hoc contra series CCAM raspadas; las expresiones iniciales se envían en la consola CCAM y <code>monitoring/README.md</code>, con tasas derivadas en <code>monitoring/prometheus/ccam-rules.yml</code></span>',
+    "CCAM exposes a read-only <strong>Prometheus text-exposition</strong> endpoint at <code>GET /api/metrics</code> — sessions and agents by status, cumulative events and tokens, connected WebSocket clients, configured remote sources, process uptime/RSS, and build version — so the same dashboard you use for Claude Code monitoring can be scraped into your own observability stack. A turnkey stack lives in <code>monitoring/</code>: npm-managed binaries (no Homebrew/apt) or optional Docker Compose, with Grafana datasource and four dashboards auto-provisioned on first start.":
+      "CCAM expone un solo modo de lectura <strong>Exposición textual de Prometeo</strong> Punto final en <code>GET /api/metrics</code> — sesiones y agentes por estado, eventos acumulativos y tokens, clientes WebSocket conectados, fuentes remotas configuradas, tiempo de actividad del proceso/RSS y versión de la compilación, para que el mismo panel de control que utiliza para el monitoreo de Claude Code pueda escrapearse en su propia pila de observabilidad. Una pila llave en mano reside en <code>monitoring/</code>: binarios gestionados por npm (sin Homebrew/apt) o Docker Compose opcional, con fuente de datos Grafana y cuatro paneles de control provistos automáticamente en la primera iniciación.",
+    "<strong>Quick start (npm):</strong> run the dashboard on loopback, then <code>npm run monitoring:install</code> once and <code>npm run monitoring:up</code>. Open Grafana at <code>http://localhost:3000</code> and Prometheus at <code>http://localhost:9090</code>. The pre-built CCAM console is at <code>http://localhost:9090/consoles/index.html</code> (also reachable from the Prometheus UI under <strong>Consoles</strong>). For an all-Docker path use <code>npm run monitoring:docker:up</code> or <code>npm run docker:full:up</code> for dashboard + Prometheus + Grafana together. Verify with <code>npm run monitoring:verify</code> — the <code>ccam</code> scrape target should read <strong>UP</strong>.":
+      "<strong>Inicio rápido (npm):</strong> Ejecuta el panel de control en bucle, luego <code>npm run monitoring:install</code> Una vez y <code>npm run monitoring:up</code>. Grafana en <code>http://localhost:3000</code> Y Prometeo en <code>http://localhost:9090</code>. console CCAM preconstruida está en <code>http://localhost:9090/consoles/index.html</code> (también accesible desde la interfaz de usuario de Prometheus en <strong>Consolas</strong>). Para un uso de ruta todo-Docker <code>npm run monitoring:docker:up</code> Oregón <code>npm run docker:full:up</code> Para panel de control + Prometheus + Grafana juntos. Verifique con <code>npm run monitoring:verify</code> — el <code>ccam</code> El objetivo de la raspadura debería leer <strong>UP</strong>.",
+    "Four Grafana boards": "Cuatro tableros Grafana",
+    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. Credentials default to <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>.":
+      "<strong>CCAM - Visión general</strong> (página de inicio predeterminada), <strong>CCAM - Sesiones y agentes</strong>, <strong>CCAM - Tokens y eventos</strong>, y <strong>CCAM — Plataforma</strong> — todo provisto de <code>monitoring/grafana/dashboards/</code> Con PromQL contra tu raspado en vivo. Las credenciales por defecto son <code>admin</code> / <code>admin</code> a través de <code>monitoring/grafana.defaults.env</code>.",
+    "Prometheus console": "Consola Prometheus",
+    "Prometheus 3.x dropped the legacy console template libraries, so CCAM ships a <strong>static HTML console</strong> at <code>monitoring/prometheus/consoles/index.html</code> that fetches <code>/api/v1/query</code> directly — live cards, session tables, and Graph links without Go-template errors on <code>/consoles/index.html</code>.":
+      "Prometheus 3.x eliminó las bibliotecas de plantillas de consola heredadas, por lo que CCAM incluye un <strong>Consola HTML estática</strong> att <code>monitoring/prometheus/consoles/index.html</code> Que recoge <code>/api/v1/query</code> Directamente: tarjetas en vivo, tablas de sesión y enlaces a gráficos sin errores de plantilla Go en <code>/consoles/index.html</code>.",
+    "Recording rules": "Reglas de grabación",
+    "<code>monitoring/prometheus/ccam-rules.yml</code> derives convenient rates and aggregates from raw <code>ccam_*</code> series (e.g. <code>rate(ccam_tokens_total[5m])</code>) so Grafana panels and ad-hoc Graph queries stay fast without hand-rolling every expression.":
+      "<code>monitoring/prometheus/ccam-rules.yml</code> Deriva tarifas convenientes y agrupa datos brutos <code>ccam_*</code> Serie (por ejemplo <code>rate(ccam_tokens_total[5m])</code>) por lo que los paneles de Grafana y las consultas gráficas ad hoc se mantienen rápidas sin tener que ejecutar manualmente cada expresión.",
+    "Scrape &amp; auth guard": "Raspar y proteger la autenticación",
+    "Loopback scrapes (<code>127.0.0.1:4820</code>) work out of the box. When Prometheus runs in Docker and reaches the host via <code>host.docker.internal</code>, add that host to <code>DASHBOARD_ALLOWED_HOSTS</code> or the scrape returns <code>403 EBADHOST</code>. If <code>DASHBOARD_TOKEN</code> is set, scrapers must send the same bearer token.":
+      "Rasguños de retroceso (<code>127.0.0.1:4820</code>) funciona de inmediato. Cuando Prometheus se ejecuta en Docker y llega al host a través de <code>host.docker.internal</code>, agrega ese anfitrión a <code>DASHBOARD_ALLOWED_HOSTS</code> O el rasguño vuelve <code>403 EBADHOST</code>. si <code>DASHBOARD_TOKEN</code> Está establecido, los raspadores deben enviar el mismo token portador.",
+    "Full reference": "Referencia completa",
+    'Commands, Docker vs npm paths, dashboard UIDs, starter PromQL, and troubleshooting (Grafana login reset, target DOWN) are documented in <a href="../monitoring/README.md"><code>monitoring/README.md</code></a> and the <a href="#api-reference">API reference</a> entry for <code>GET /api/metrics</code>.':
+      'Los comandos, rutas de Docker vs npm, UIDs del panel de control, PromQL de inicio y resolución de problemas (restablecimiento de la sesión de Grafana, objetivo DESPUESTO) están documentados en <a href="../monitoring/README.md"><code>monitoring/README.md</code></a> Y el <a href="#api-reference">Referencia de API</a> Entrada para <code>GET /api/metrics</code>.',
+    "Pull Claude Code history from other machines over SSH. Each remote's <code>~/.claude/projects</code> tree is mirrored via <code>scp</code> into a sandboxed staging directory, fed through the same importer as local history, and every session is tagged with its source. A background poller keeps remote data near-real-time, a global data-scope selector (Local only / All / a specific source) narrows the whole app, and sessions from a remote show a source badge. Auth defers entirely to the host's SSH stack — no passwords or secrets are stored. Managed in <b>Settings → Remote Data Sources</b>.":
+      "Sube la historia del código Claude de otras máquinas a través de SSH. Cada máquina remota <code>~/.claude/projects</code> El árbol se refleja a través de <code>scp</code> En una carpeta de ensayo sandbox, alimentada por el mismo importador que el historial local, y cada sesión se etiqueta con su fuente. Un monitor de fondo mantiene los datos remotos casi en tiempo real, un selector global de alcance de datos (Solo local / Todos / una fuente específica) reduce toda la aplicación, y las sesiones de un remoto muestran un distintivo de fuente. La autenticación se deja completamente en manos de la pila SSH del host, no se almacenan contraseñas ni secretos. Administrado en <b>Configuración → Fuentes de datos remotas</b>.",
+    "Remote Data Sources": "Fuentes de datos remotas",
+    "List, add, and test SSH data sources; sync one source (or all when no id is given); and remove a source, optionally purging the sessions it imported":
+      "Listar, agregar y probar fuentes de datos SSH; sincronizar una fuente (o todas cuando no se proporciona un ID); y eliminar una fuente, opcionalmente borrando las sesiones que importó.",
+    "Beyond local history, the dashboard can pull Claude Code activity from <b>other machines over SSH</b> and fold it into the same views as your local sessions. Each remote's <code>~/.claude/projects</code> tree is mirrored via <code>scp</code> (or <code>wsl.exe</code> + <code>tar</code> when Claude runs in WSL on a Windows SSH host) into a sandboxed staging directory, fed through the exact same importer used for local history, and every imported session is tagged with the source it came from. A background poller (<code>DASHBOARD_REMOTE_SYNC_MS</code>, default <code>15000</code> ms) keeps remote data near-real-time — adding or re-enabling a source also triggers an immediate pull — and successful syncs broadcast <code>remote_data.updated</code> plus per-session <code>session_created</code> / <code>session_updated</code> frames. A global <b>data scope</b> selector lets you narrow the entire app to local sessions only, all sources, or a specific machine. Sources are managed in <b>Settings → Remote Data Sources</b>.":
+      "Más allá de la historia local, el panel de control puede obtener la actividad de Claude Code de <b>Otras máquinas a través de SSH</b> Y cómpralo en las mismas vistas que tus sesiones locales. Cada remoto <code>~/.claude/projects</code> El árbol se refleja a través de <code>scp</code> (o <code>wsl.exe</code> + <code>tar</code> Cuando Claude se ejecuta en WSL en un host SSH de Windows) en una carpeta de ensayo sandbox, alimentada por el mismo importador exacto utilizado para el historial local, y cada sesión importada se etiqueta con la fuente de la que procede. Un píldora de seguimiento en segundo plano (<code>DASHBOARD_REMOTE_SYNC_MS</code>, predeterminado <code>15000</code> ms) mantiene los datos remotos en tiempo real cercano, agregar o volver a habilitar una fuente también desencadena una extracción inmediata, y las sincronizaciones exitosas transmiten <code>remote_data.updated</code> Más por sesión <code>session_created</code> / <code>session_updated</code> Marco. Un global <b>Ámbito de los datos</b> El selector te permite restringir toda la aplicación a sesiones locales solo, todas las fuentes o una máquina específica. Las fuentes se gestionan en <b>Configuración → Fuentes de datos remotas</b>.",
+    "Each remote is mirrored over SSH, imported through the local pipeline, and tagged by source — the poller (default 15 s) keeps it near-real-time":
+      "Cada remoto se refleja a través de SSH, se importa a través del pipeline local y se etiqueta por fuente: el poller (por defecto 15 s) lo mantiene casi en tiempo real.",
+    "Add a source with an SSH destination — either a <code>user@host</code> pair or an alias defined in your <code>~/.ssh/config</code> — plus an optional port, identity file, and remote home directory. Use <b>Test connection</b> to verify reachability before saving, then <b>Sync now</b> to pull immediately, or let the background poller do it on its own schedule. Removing a source can optionally purge the sessions it imported.":
+      "Agregue una fuente con un destino SSH, ya sea un <code>user@host</code> Pareja o un alias definido en tu <code>~/.ssh/config</code> — además de un puerto opcional, un archivo de identidad y una carpeta de inicio remota. uso <b>Prueba de conexión</b> Para verificar la accesibilidad antes de guardar, luego <b>Sincronizar ahora</b> Para descargar inmediatamente, o dejar que el monitor de fondo lo haga a su propio ritmo. Eliminar una fuente puede purgar opcionalmente las sesiones que importó.",
+    "A global data-scope selector narrows the whole app: choose <b>Local only</b>, <b>All</b> sources, or one specific machine. The scope flows into every data view through a <code>sources</code> query parameter on the sessions, events, agents, stats, and analytics endpoints, and sessions imported from a remote carry a <b>source badge</b> so their origin is always visible.":
+      "Un selector de alcance de datos global reduce toda la aplicación: elija <b>Solo local</b>, <b>todos</b> Fuentes, o una máquina específica. El alcance fluye a través de cada vista de datos a través de un <code>sources</code> Parámetro de consulta en los puntos finales de sesiones, eventos, agentes, estadísticas y análisis, y las sesiones importadas desde una ubicación remota llevan un <b>Insignia de fuente</b> Así que su origen siempre es visible.",
+    "Authentication defers entirely to the host's own SSH stack — <code>~/.ssh/config</code>, <code>ssh-agent</code>, on-disk keys, and <code>known_hosts</code>. The dashboard stores <b>no passwords or secrets</b>; it only records the SSH destination and connection options you supply. <code>StrictHostKeyChecking</code> is left at its default, so the remote host must already be present in <code>known_hosts</code> — an unknown host fails the connection rather than being trusted blindly.":
+      "La autenticación se deja totalmente a la propia pila SSH del host — <code>~/.ssh/config</code>, <code>ssh-agent</code>, claves en disco y <code>known_hosts</code>. del panel de instrumentos almacena <b>Sin contraseñas ni secretos</b>; solo registra el destino SSH y las opciones de conexión que proporcione. <code>StrictHostKeyChecking</code> Se deja en su configuración predeterminada, por lo que el host remoto ya debe estar presente en <code>known_hosts</code> — un anfitrión desconocido falla la conexión en lugar de ser confiado ciegamente.",
+    "Interval for the background remote poller (add/re-enable also syncs immediately); <code>0</code> disables the poller while leaving manual sync available":
+      "Intervalo para el recuento remoto de fondo (agregar/reactivar también se sincroniza inmediatamente); <code>0</code> Desactiva el poller mientras deja la sincronización manual disponible",
+    "Ceiling on a single scp-and-import run before it is aborted":
+      "Techo en una sola ejecución de scp-and-import antes de que se aborte",
+    "Timeout for the <b>Test connection</b> probe":
+      "Tiempo de espera para el <b>Prueba de conexión</b> catéter",
+    "Freshness window (10 min) for a Remote Data Source session's live status — judged from the newest JSONL event timestamp in the mirror (mtime fallback); remote sessions receive no live hooks, so this replaces the local liveness and stale sweeps (which skip them)":
+      "Ventana de frescura (10 min) para el estado en vivo de una sesión de Fuente de Datos Remota, evaluado por el tiempo de inicio del evento JSONL más reciente en el espejo (mtime fallback); las sesiones remotas no reciben ningún gancho en vivo, por lo que esto reemplaza la vitalidad local y las escaneos obsoletos (que los saltan)",
+    "Because a remote session is pulled over SSH, it never emits live hooks to this dashboard, so remote sessions (<code>source</code> ≠ <code>local</code>) are excluded from every local liveness and stale sweep — the process liveness reap, the watchdog transcript scan, the startup cleanup, and the periodic abandon sweep all skip them. Instead, a remote session's live status is reconciled from the mirrored transcript on every sync: activity is judged from the <b>newest event timestamp inside the JSONL</b> (falling back to mirror mtime). If the last event is within <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) the session stays <code>active</code>; once the mirror stops advancing for longer than that window, the session is reconciled to <code>completed</code>. This keeps a still-running remote session from being wrongly shown as Completed.":
+      "Debido a que una sesión remota se ejecuta a través de SSH, nunca emite ganchos en vivo a este panel de control, por lo que las sesiones remotas (<code>source</code> ≠ <code>local</code>) están excluidos de cada limpieza local de actividad y antigüedad: la actividad de recogida del proceso, la escanear de transcripciones de vigilancia, la limpieza de inicio de sesión y la limpieza periódica de abandono todos los pasan por alto. En cambio, el estado de actividad de una sesión remota se reconcilia a partir de la transcripción reflejada en cada sincronización: la actividad se juzga a partir del <b>Fecha y hora del último evento dentro del JSONL</b> (volviendo al tiempo de mapeo del espejo). Si el último evento está dentro de <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (por defecto 10 minutos) la sesión se mantiene <code>active</code>; una vez que el espejo deja de avanzar durante más tiempo que esa ventana, la sesión se reconcilia con <code>completed</code>. sesión remota en ejecución se muestra correctamente como completada.",
+    "List configured sources with their status": "Lista de fuentes configuradas con su estado",
+    "Add a source — SSH destination plus optional port, identity file, and remote home":
+      "Agregue una fuente: destino SSH más puerto opcional, archivo de identidad y hogar remoto",
+    "Edit an existing source": "Editar una fuente existente",
+    "Remove a source; optionally purge the sessions it imported":
+      "Eliminar una fuente; opcionalmente purgar las sesiones que importó",
+    "Test SSH reachability without importing anything":
+      "Prueba la accesibilidad SSH sin importar nada",
+    "Trigger an immediate scp-and-import for that source":
+      "Desatará un scp-y-importación inmediata para esa fuente",
+    "The <code>sources</code> query parameter is also accepted on <code>/api/sessions</code>, <code>/api/events</code>, <code>/api/agents</code>, <code>/api/stats</code>, and <code>/api/analytics</code> to scope any view to <code>local</code>, <code>all</code>, or a comma-separated list of source IDs.":
+      "el <code>sources</code> El parámetro de consulta también se acepta en <code>/api/sessions</code>, <code>/api/events</code>, <code>/api/agents</code>, <code>/api/stats</code>, y <code>/api/analytics</code> Para delimitar cualquier vista a <code>local</code>, <code>all</code>, o una lista separada por comas de identificadores de origen.",
+    "Sync progress and connection state broadcast on <code>/ws</code> as <code>remote_source.status</code> messages, so the Settings panel and the source badges update live as a remote connects, syncs, or fails.":
+      "Transmite el progreso de sincronización y el estado de conexión en <code>/ws</code> arsénico <code>remote_source.status</code> Mensajes, por lo que el panel de Configuración y las insignias de origen se actualizan en vivo a medida que se conecta, sincroniza o falla una fuente remota.",
+    "The same operations are available from the terminal via <code>ccam remote-sources</code>, with subcommands <code>list</code>, <code>add</code>, <code>test &lt;id&gt;</code>, <code>sync [id]</code> (all sources when no id is given), and <code>rm &lt;id&gt; [--purge]</code> to remove a source and optionally drop the sessions it imported.":
+      "Las mismas operaciones están disponibles desde el terminal a través de <code>ccam remote-sources</code>, con subcomandos <code>list</code>, <code>add</code>, <code>test &lt;id&gt;</code>, <code>sync [id]</code> (todas las fuentes cuando no se da un ID), y <code>rm &lt;id&gt; [--purge]</code> Para eliminar una fuente y, opcionalmente, eliminar las sesiones que importó.",
+    "Local-only by default": "Solo local por defecto",
+    "The image bakes <code>DASHBOARD_HOST=0.0.0.0</code> (the server binds loopback by default, but a container's loopback is a separate namespace the published port cannot reach) and <code>DASHBOARD_DATA_DIR=/app/data</code> (the read-only <code>~/.claude</code> mount cannot hold the SQLite data dir). The trust boundary is the host port publish: the examples use <code>-p 127.0.0.1:4820:4820</code>, so the dashboard is local-only. To expose it on a LAN, publish on <code>0.0.0.0</code> (<code>-p 4820:4820</code>) and set <code>DASHBOARD_TOKEN</code>.":
+      "La imagen se hornea <code>DASHBOARD_HOST=0.0.0.0</code> (el servidor vincula el bucle de vuelta por defecto, pero el bucle de vuelta de un contenedor es un namespace separado al que la puerto publicado no puede llegar) y <code>DASHBOARD_DATA_DIR=/app/data</code> (el de solo lectura <code>~/.claude</code> El montaje no puede mantener el directorio de datos SQLite). El límite de confianza es la publicación de la puerto del host: los ejemplos utilizan <code>-p 127.0.0.1:4820:4820</code>, por lo que el panel de control es solo local. Para exponerlo en una LAN, publique en <code>0.0.0.0</code> (<code>-p 4820:4820</code>) y establecer <code>DASHBOARD_TOKEN</code>.",
+    "The CLI also manages the server itself: <code>ccam status</code> shows an up/down indicator and <code>ccam start</code> boots a detached production server. When the server is down, read-only commands fall back to reading <code>data/dashboard.db</code> directly under an explicit offline banner, while live or server-computed commands refuse with the specific reason.":
+      "El CLI también gestiona el propio servidor: <code>ccam status</code> Muestra un indicador de arriba/abajo y <code>ccam start</code> Inicia sesión en un servidor de producción independiente. Cuando el servidor está inactivo, los comandos de solo lectura se vuelven a leer <code>data/dashboard.db</code> Directamente debajo de un banner explícito de modo sin conexión, mientras que los comandos en vivo o calculados por el servidor se niegan con la razón específica.",
+    "The full dashboard feature surface is also available from any terminal through the dependency-free <code>ccam</code> CLI (<code>bin/ccam.js</code>). It is linked automatically by <code>npm run setup</code> (via a fail-soft <code>npm link</code>), discovers the running server through the same <code>~/.claude/.agent-dashboard.json</code> registry the hook handler uses (override with <code>CLAUDE_DASHBOARD_PORT</code> / <code>DASHBOARD_PORT</code>), and renders a full terminal UI — box-drawn tables, status icons, inline bar charts, and agent trees — that degrades to plain text when piped (<code>--no-color</code> / <code>NO_COLOR</code> / <code>FORCE_COLOR</code> respected), so it is equally at home in an interactive shell, <code>grep</code> pipelines, or CI.":
+      "La superficie completa de la función del panel de control también está disponible desde cualquier terminal a través del sin dependencias <code>ccam</code> CLI (<code>bin/ccam.js</code>). Está vinculado automáticamente por <code>npm run setup</code> (a través de un fallo suave <code>npm link</code>), descubre el servidor en ejecución a través del mismo <code>~/.claude/.agent-dashboard.json</code> Registrar el gestor de ganchos que utiliza (sustituir con <code>CLAUDE_DASHBOARD_PORT</code> / <code>DASHBOARD_PORT</code>), y genera una interfaz de usuario completa para terminales: tablas dibujadas en cuadrados, iconos de estado, gráficos de barras en línea y árboles de agentes, que se degradan a texto plano cuando se canaliza (<code>--no-color</code> / <code>NO_COLOR</code> / <code>FORCE_COLOR</code> respetado), por lo que está igualmente en su salsa en una cáscara interactiva, <code>grep</code> Trenes de gas, o CI.",
+    "For a live monitoring session, <code>ccam repl</code> (aliases <code>shell</code> / <code>i</code>) opens an interactive shell where you type commands without the <code>ccam</code> prefix — with a CCAM welcome banner, tab-completion, persisted arrow-key history, a live server-status prompt (<code>●</code> up / <code>○</code> offline), a grouped <code>help</code> / <code>help &lt;cmd&gt;</code> menu, and a <code>watch [secs] &lt;cmd&gt;</code> built-in that auto-refreshes any command. Each entered line runs as an isolated child process, so an offline refusal or a blocking <code>tail</code> never takes the shell down.":
+      "Para una sesión de monitoreo en vivo, <code>ccam repl</code> (alias <code>shell</code> / <code>i</code>) abre una cáscara interactiva donde escribes comandos sin el <code>ccam</code> prefijo — con un banner de bienvenida CCAM, completación de pestañas, historial persistente de teclas de flecha, una solicitud de estado del servidor en vivo (<code>●</code> Arriba / <code>○</code> Desconectado), un agrupado <code>help</code> / <code>help &lt;cmd&gt;</code> Menú, y un <code>watch [secs] &lt;cmd&gt;</code> Instalado que se actualiza automáticamente cualquier comando. Cada línea ingresada se ejecuta como un proceso hijo aislado, por lo que una negativa sin conexión o un bloqueo <code>tail</code> Nunca baja la cáscara.",
+    Group: "grupo",
+    Commands: "Comandos",
+    "What you get": "Lo que obtienes",
+    Monitoring: "monitoreo",
+    "Reachability, totals and status distributions, the Kanban board rendered as text columns, and a live event feed that polls for new rows every 2 seconds":
+      "Alcance, totales y distribuciones de estado, la pizarra Kanban renderizada como columnas de texto y un feed de eventos en vivo que encuesta por nuevas filas cada 2 segundos",
+    "Up/down indicator, a background server start that waits for health, and the interactive <code>ccam repl</code> shell — tab-completion, persisted history, a live server-status prompt, and a <code>watch</code> auto-refresh":
+      "Indicador de arriba/abajo, un inicio de servidor de fondo que espera la salud, y el interactivo <code>ccam repl</code> Shell — completación de pestañas, historial persistente, una solicitud de estado del servidor en vivo y un <code>watch</code> Actualizar automático",
+    Data: "información",
+    "Filterable tables plus a per-session deep dive with an indented agent tree, per-session cost, and the most recent events":
+      "Tablas filtrables más un análisis profundo por sesión con un árbol de agentes hundido, costo por sesión y los eventos más recientes",
+    Insights: "Perspectivas",
+    "Token totals and top tools, workflow-intelligence stats with detected patterns, dynamic Workflow-tool runs, and the per-model cost breakdown, which can be scoped to a single session with <code>--session</code>, surfaces server-tool surcharges (web search / code execution), warns about models with usage but no matching pricing rule (priced at $0, excluded from the total), and points to <code>ccam pricing set</code>":
+      "Totales de tokens y herramientas principales, estadísticas de inteligencia de flujo de trabajo con patrones detectados, ejecuciones dinámicas de herramientas de flujo de trabajo y la desglose de costos por modelo, que se pueden limitar a una sola sesión con <code>--session</code>, muestra recargos por herramientas de servidor de las superficies (búsqueda web / ejecución de código), advierte sobre modelos con uso pero sin una regla de precios correspondiente (preciados a 0 $, excluidos del total) y señala a <code>ccam pricing set</code>",
+    "Alerts &amp; Webhooks": "Alertas y Webhooks",
+    "The fired-alert feed with acknowledge / acknowledge-all, the rule list, and synthetic test deliveries against any webhook target":
+      "El feed de alerta de disparo con reconocimiento / reconocimiento-todo, la lista de reglas y entregas de pruebas sintéticas contra cualquier objetivo webhook",
+    Pricing: "fijación de precios",
+    "Full pricing-rule CRUD with per-mtok rates — including 1-hour cache-write, fast-tier, and time-limited intro rates — straight from the terminal, with Fast In/Out and Intro In/Out columns in the list view":
+      "Regla de precios completa CRUD con tarifas por mtok, incluyendo tarifas de escritura de caché de 1 hora, nivel rápido y tarifas de introducción con tiempo limitado, directamente desde el terminal, con las columnas Fast In/Out y Intro In/Out en la vista de lista.",
+    Import: "importación",
+    "The same idempotent ingestion pipeline the Settings page uses, reporting imported / backfilled / skipped / error counts":
+      "El mismo pipeline de ingestión idempotente que utiliza la página de Configuración, que informa de los conteos de importación / rellenado / saltos / errores",
+    Administration: "administración",
+    "Connectivity and hook diagnosis, raw system info, full JSON export, session cleanup, hook reinstallation, an update check that prints how far behind the canonical remote you are plus the copy-paste update command, and a guarded wipe that refuses to run without <code>--yes</code>":
+      "Conectividad y diagnóstico de ganchos, información del sistema bruta, exportación completa de JSON, limpieza de sesiones, reinstalación de ganchos, una comprobación de actualización que imprime cuánto estás atrasado con respecto al remoto canónico, además del comando de actualización de copia y pegar, y una borrado protegido que se niega a ejecutarse sin <code>--yes</code>",
+    "Safe by default": "Seguro por defecto",
+    "Read commands only issue GETs; mutating commands map one-to-one to explicit dashboard actions; and the single destructive command, <code>clear-data</code>, always refuses to run without an explicit <code>--yes</code> flag. Exit codes are script-friendly: 0 on success, 1 on any failure. See <code>docs/CLI.md</code> for the complete reference.":
+      "Los comandos de lectura solo emiten GETs; los comandos mutantes se mapean de forma uno a uno a las acciones explícitas del panel de control; y el único comando destructivo, <code>clear-data</code>, siempre se niega a correr sin un explícito <code>--yes</code> Bandera. Los códigos de salida son compatibles con scripts: 0 en caso de éxito, 1 en cualquier fallo. ver <code>docs/CLI.md</code> Para la referencia completa.",
+    "The whole dashboard as terminal commands — <code>ccam stats</code>, <code>kanban</code>, <code>tail</code>, <code>session &lt;id&gt;</code>, <code>analytics</code>, <code>alerts</code>, <code>pricing</code>, <code>import</code>, <code>doctor</code>, <code>export</code> and more. Zero dependencies, linked by <code>npm run setup</code>, auto-discovers the running server, renders a full terminal UI (box-drawn tables, status icons, inline bar charts, agent trees), and pipes cleanly (colors off when not a TTY). The one destructive command is gated behind <code>--yes</code>.":
+      "Todo el panel de control como comandos terminales — <code>ccam stats</code>, <code>kanban</code>, <code>tail</code>, <code>session &lt;id&gt;</code>, <code>analytics</code>, <code>alerts</code>, <code>pricing</code>, <code>import</code>, <code>doctor</code>, <code>export</code> Y más. Cero dependencias, vinculadas por <code>npm run setup</code>, descubre automáticamente el servidor en ejecución, genera una interfaz de usuario completa del terminal (tablas dibujadas en cuadrados, iconos de estado, gráficos de barras en línea, árboles de agentes) y canaliza de forma limpia (colores apagados cuando no es un TTY). El único comando destructivo está bloqueado detrás de <code>--yes</code>.",
+    '<span class="caption-icon">📡</span> Live dashboard — real-time agent cards, stats, and activity feed':
+      '<span class="caption-icon">📡</span> Panel de control en vivo: tarjetas de agentes en tiempo real, estadísticas y flujo de actividad',
+    "Claude Code Agent Monitor integrates with Claude Code through its native hook system. When Claude Code performs any action — tool use, session start, subagent orchestration, session end — it fires a hook that calls a small Node.js script bundled with this project. That script forwards the event over HTTP to the dashboard server, which stores it in SQLite and broadcasts it to the browser over WebSocket.":
+      "El Monitor de Agentes de Claude Code se integra con Claude Code a través de su sistema de ganchos nativo. Cuando Claude Code realiza cualquier acción, como el uso de herramientas, el inicio de sesión, la orquestación de subagentes o el final de sesión, dispara un gancho que llama a un pequeño script Node.js incluido en este proyecto. Ese script envia el evento por HTTP al servidor del panel de control, que lo almacena en SQLite y lo transmite al navegador a través de WebSocket.",
+    "End-to-end data pipeline from Claude Code to the browser":
+      "Pipeline de datos de extremo a extremo desde Claude Code hasta el navegador",
+    "Local-first by design": "Primero local por diseño",
+    "The server binds <code>127.0.0.1</code> (loopback) by default, so it is not network-reachable and everything runs on your machine. No data leaves your system. No API keys. No external services. Exposing it more widely is opt-in via <code>DASHBOARD_HOST</code> and should be paired with <code>DASHBOARD_TOKEN</code>.":
+      "El servidor se vincula <code>127.0.0.1</code> (loopback) por defecto, por lo que no es accesible desde la red y todo se ejecuta en su máquina. Ningún dato sale de su sistema. Ningunas claves API. Ningún servicio externo. Exponerlo más ampliamente es opcional a través de <code>DASHBOARD_HOST</code> Y debería combinarse con <code>DASHBOARD_TOKEN</code>.",
+    "Every feature is driven by real hook events — nothing is hardcoded or simulated in production mode.":
+      "Cada función está impulsada por eventos de conexión reales, nada está codificado de forma estática ni se simula en modo de producción.",
+    "Two tabs: <strong>Monitor</strong> shows overview stats, active agent cards with collapsible subagent hierarchy, and a recent activity feed whose item count fills available viewport height. <strong>Health</strong> renders a composite system health score ring, storage engine donut chart, cache/error/success gauges, tool invocation bars, subagent effectiveness ratios, model token distribution, and compaction stats. Both tabs auto-refresh every 5 seconds via WebSocket push so the view is always current without manual reload.":
+      "Dos pestañas: <strong>monitor</strong> muestra estadísticas generales, tarjetas de agentes activos con jerarquía de subagentes colapsable y un feed de actividad reciente cuyo número de elementos llena la altura disponible de la ventana de visualización. <strong>bienestar</strong> Genera un anillo de puntuación de salud del sistema compuesto, un gráfico de donut del motor de almacenamiento, indicadores de caché/errores/éxito, barras de invocación de herramientas, índices de eficacia de subagentes, distribución de tokens del modelo y estadísticas de compactación. Ambas pestañas se actualizan automáticamente cada 5 segundos a través de WebSocket push, por lo que la vista siempre es actual sin necesidad de recarga manual.",
+    "Toggle between <strong>Agents</strong> (Working / Waiting / Completed / Error) and <strong>Sessions</strong> (Active / Waiting / Completed / Error / Abandoned) swim lanes. A yellow <strong>Waiting</strong> column flags items sitting on the user — fresh prompt, between turns, or permission gate. Hover any column header for lifecycle tooltips explaining each state transition. Cards surface model name, cumulative cost, and the current tool being called. Counts update in real time via WebSocket so the board is always in sync with the live event store. Hover a Waiting badge to see why — needs input, turn done, at prompt, or interrupted.":
+      "Alternar entre <strong>Agentes</strong> (Trabajando / Esperando / Terminado / Error) y <strong>sesión</strong> (Lanes de natación activas / en espera / completadas / error / abandonadas). Un amarillo <strong>espera</strong> Las banderas de la columna indican los elementos que se encuentran en el usuario: mensaje de inicio de sesión actual, entre turnos o puerta de permisos. Haga clic sobre cualquier encabezado de columna para ver las herramientas de ayuda del ciclo de vida que explican cada transición de estado. Las tarjetas muestran el nombre del modelo de superficie, el costo acumulado y la herramienta actual que se está llamando. Las cuentas se actualizan en tiempo real a través de WebSocket, por lo que la tabla siempre está sincronizada con el almacén de eventos en vivo. Haga clic en un distintivo de Esperando para ver por qué: necesita entrada, turno terminado, en el mensaje de inicio de sesión o interrumpido.",
+    "<strong>Server-paginated</strong> table of every recorded session — each page fetches only its slice so cost computation stays bounded no matter how many sessions exist. Case-insensitive search across <code>id</code>, <code>name</code>, and <code>cwd</code> runs server-side with a 300 ms debounce; the status filter composes with search for precise narrowing. Each row shows the session's real name (synced live from the transcript — a <code>/rename</code> or <code>claude -n</code> title, else the auto title, else the first user prompt, with a short-ID fallback), status badge, agent count, duration, model, and estimated cost. Click any row to drill into the full session detail view with conversation transcript and agent hierarchy.":
+      "<strong>Paginado por servidor</strong> Tabla de cada sesión registrada: cada página solo recupera su fracción, por lo que el cálculo de costos se mantiene limitado independientemente de cuántas sesiones existan. Búsqueda insensible a mayúsculas y minúsculas en todo el <code>id</code>, <code>name</code>, y <code>cwd</code> Funciona en el lado del servidor con un retraso de 300 ms; el filtro de estado se compone con la búsqueda para un estrechamiento preciso. Cada fila muestra el nombre real de la sesión (sincronizado en vivo desde la transcripción, un <code>/rename</code> Oregón <code>claude -n</code> Título, de lo contrario el título automático, de lo contrario la primera solicitud del usuario, con un fallback de ID corto), distintivo de estado, número de agentes, duración, modelo y costo estimado. Haga clic en cualquier fila para profundizar en la vista detallada completa de la sesión con transcripción de la conversación y jerarquía de agentes.",
+    "Per-session deep dive with a collapsible agent hierarchy tree and a full chronological event timeline showing every tool call name and summary. An overview panel at the top surfaces tile counters for events, tool calls, subagents, compactions, errors, and duration. Top-tool usage bars and a subagent type breakdown give quick distribution reads. The conversation viewer renders markdown with syntax highlighting, per-tool styled blocks, slash-command pills with their captured TUI output, and inline session-rename markers. Messages typed mid-turn (queued while Claude was still working) appear where Claude actually received them, and harness notifications are attributed to System. Export the entire session as JSON or share the permalink for async review. When the session is waiting on you, a yellow banner under the header names the reason and how long it has been waiting.":
+      "Un análisis profundo por sesión con un árbol jerárquico de agentes colapsables y una cronología completa de eventos cronológicos que muestra el nombre y el resumen de cada llamada de herramienta. Un panel general en la parte superior muestra los contadores de superficies de los eventos, las llamadas de herramientas, los subagentes, las compresiones, los errores y la duración. Las barras de uso de las herramientas principales y la desglose del tipo de subagente proporcionan lecturas de distribución rápidas. El visualizador de conversaciones renderiza markdown con resaltado de sintaxis, bloques con estilo por herramienta, píldoras de comandos de guión con su salida TUI capturada y marcadores de renombramiento de sesión en línea. Los mensajes ingresados a mitad de turno (que se agendaron mientras Claude seguía trabajando) aparecen donde Claude los recibió realmente, y las notificaciones de gestión se atribuyen al Sistema. Exporta toda la sesión como JSON o comparte el enlace permanente para la revisión asincrónica. Cuando la sesión está esperando a que la realices, un banner amarillo debajo de los nombres del encabezado indica la razón y cuánto tiempo ha estado esperando.",
+    "A rules-based alerting engine evaluates the live event stream server-side: <strong>event pattern</strong> (match event type / tool / summary text, optionally N matches within a time window), <strong>inactivity</strong>, <strong>stuck agent</strong>, and <strong>token threshold</strong> — each with per-(rule, session, agent) cooldown dedup. Fired alerts surface in a live feed and fan out to <strong>14 first-class webhook providers</strong> — Slack, Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream — plus any generic JSON endpoint (with optional HMAC-SHA256 signing and custom headers). Delivery is detached and fail-safe with a request timeout, bounded retry/backoff, secret redaction, a one-click test probe, and a per-target delivery log. Rules and channels are managed together in <strong>Settings → Alerts</strong>.":
+      "Un motor de alerta basado en reglas evalúa el flujo de eventos en vivo desde el lado del servidor: <strong>Patrón de eventos</strong> (tipo de evento de coincidencia / herramienta / texto de resumen, opcionalmente N coincidencias dentro de un rango de tiempo), <strong>inactividad</strong>, <strong>Agente atascado</strong>, y <strong>Límite de tokens</strong> — cada uno con deduplicación de tiempo de espera por (regla, sesión, agente). Las alertas lanzadas aparecen en un feed en vivo y se extienden a <strong>14 proveedores de webhook de primera clase</strong> — Slack, Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream — además de cualquier punto final JSON genérico (con firma HMAC-SHA256 opcional y encabezados personalizados). La entrega es separada y segura con un tiempo de espera de solicitud, retiro/retraso limitado, redacción secreta, una sonda de prueba de un solo clic y un registro de entrega por objetivo. Las reglas y canales se gestionan juntos en <strong>Configuración → Alertas</strong>.",
+    "A native desktop app — a macOS <code>.app</code> (shipped as a <code>.dmg</code>) and a Windows <code>.exe</code> (NSIS installer plus a no-install portable build) — built with Electron 35. It <strong>embeds the Express server in-process</strong> — <code>require()</code>-ing <code>server/index.js</code> directly, with no child process and no IPC — and renders the built React client in a <code>BrowserWindow</code>. Adds a menu-bar / notification-area (tray) icon, a native application menu, auto-start at login (macOS Login Items via <code>SMAppService</code>; Windows per-user <code>HKCU\\…\\Run</code>), and a single-instance lock. Closing the window hides it while the server keeps running, and the app auto-installs Claude Code hooks on first boot so an install-only user gets events flowing without a checkout.":
+      "Una aplicación nativa para escritorio, un macOS <code>.app</code> (enviado como un <code>.dmg</code>) y una ventana de Windows <code>.exe</code> (Instalador NSIS más una versión portátil sin instalación) - construida con Electron 35. lo <strong>Incorpora el servidor Express en el proceso</strong> — <code>require()</code>-ando <code>server/index.js</code> Directamente, sin proceso de niño ni IPC, y renderiza el cliente React construido en un <code>BrowserWindow</code>. eñade un icono de barra de menú / área de notificaciones ( bandeja), un menú de aplicación nativo, inicio automático al iniciar sesión (elementos de inicio de sesión de macOS a través de <code>SMAppService</code>; Ventanas por usuario <code>HKCU\\…\\Run</code>), y un bloqueo de instancia única. Cerrar la ventana lo oculta mientras el servidor sigue funcionando, y la aplicación instala automáticamente los ganchos de Claude Code en la primera iniciación, por lo que un usuario que solo instala recibe eventos sin necesidad de realizar una compra.",
+    "Real-time streaming event log showing tool calls, agent state changes, errors, and compaction events as they arrive. Pause/resume with automatic buffering, paginated history for scrollback, and auto-scrolling to the latest entry. Click any row to expand its full hook payload inline. A dedicated <strong>Session →</strong> button navigates directly to session detail without collapsing the expanded state. Every entry is color-coded by event type and grouped by session for quick scanning of concurrent work.":
+      "Registro de eventos de transmisión en tiempo real que muestra llamadas de herramientas, cambios de estado del agente, errores y eventos de compactación a medida que llegan. Pausa/resume con búferización automática, historial paginado para desplazamiento hacia atrás y desplazamiento automático hasta la última entrada. Haga clic en cualquier fila para expandir su carga útil completa de gancho en línea. Un dedicado <strong>Sesión →</strong> El botón navega directamente a los detalles de la sesión sin colapsar el estado expandido. Cada entrada está codificada por color según el tipo de evento y agrupada por sesión para una rápida escaneo del trabajo concurrente.",
+    "Token usage breakdown by model with stacked bar charts, tool frequency rankings, agent type distribution donuts, and session outcome pie charts. A 52-week activity heatmap aligned by day-of-week shows density with hover tooltips. 30-day sparkline trends track cost and session volume at a glance. The cost summary panel totals input, output, and cache spend across all models. A live/offline indicator and auto-refresh via WebSocket keep everything current. All charts are responsive and adapt to mobile viewports.":
+      "Desglose del uso de tokens por modelo con gráficos de barras apiladas, clasificaciones de frecuencia de herramientas, rosquillas de distribución de tipos de agentes y gráficos circulares de resultados de sesiones. Un mapa de calor de actividad de 52 semanas alineado por día de la semana muestra la densidad con etiquetas de herramientas flotantes. Las tendencias de sparkline de 30 días rastrean el costo y el volumen de la sesión de un vistazo. El panel de resumen de costos suma la entrada, la salida y el gasto en caché en todos los modelos. Un indicador en vivo/desconectado y la actualización automática a través de WebSocket mantienen todo actualizado. Todos los gráficos son responsivos y se adaptan a las vistas móviles.",
+    "Every UI update is pushed over a persistent WebSocket with sub-5 ms dispatch latency — zero polling anywhere. If the connection drops, automatic 2-second reconnect kicks in while a ping/pong heartbeat detects stale connections early. A sidebar indicator turns green/red so you always know whether you're live. The WebSocket carries typed JSON envelopes for new events, session updates, agent transitions, compaction results, and import progress — all parsed into the same eventBus the REST layer uses.":
+      "Cada actualización de la interfaz de usuario se envía a través de un WebSocket persistente con una latencia de despacho inferior a 5 ms, sin necesidad de consultar la conexión en ningún momento. Si la conexión se pierde, se inicia una reconectividad automática de 2 segundos mientras que un latido de ping/pong detecta temprano las conexiones obsoletas. Un indicador en la barra lateral se vuelve verde/rojo para que siempre sepa si está conectado. El WebSocket transporta envoltorios JSON escritos por teclado para nuevos eventos, actualizaciones de sesión, transiciones de agente, resultados de compactación y progreso de importación, todo ello analizado en el mismo eventBus que utiliza la capa REST.",
+    "Standalone CLI statusline for Claude Code that prints model name, user, working directory, git branch, and a color-coded context-window bar (green → yellow → red). Token counts show input (green ↑), output (cyan ↓), and cache (dim) separately. Session cost in USD shifts color by configurable thresholds. ANSI-colored output updates on every turn. Python-based with a thin shell wrapper — drop it into your prompt or tmux status line. Works with any terminal emulator that supports 256-color ANSI.":
+      "Línea de estado CLI independiente para Claude Code que imprime el nombre del modelo, el usuario, el directorio de trabajo, la rama de git y una barra de ventana de contexto codificada por colores (verde → amarillo → rojo). Los conteos de tokens muestran la entrada (verde ↑), la salida (cian ↓) y la caché (mala) por separado. El costo de la sesión en USD cambia el color según los umbrales configurables. La salida de color ANSI se actualiza en cada turno. Basado en Python con un envoltorio de cáscara delgada: simplemente colócalo en tu línea de comando o en la línea de estado de tmux. Funciona con cualquier emulador de terminal que admita ANSI de 256 colores.",
+    "Import existing Claude Code sessions from three sources — rescan the default <code>~/.claude/projects</code> folder, scan any absolute path on disk, or drag-drop <code>.jsonl</code>, <code>.zip</code>, <code>.tar.gz</code>, and <code>.gz</code> archives through <b>Settings → Import History</b>. All paths funnel into the same ingestion pipeline the server uses for live hooks, so imported tokens and per-model cost match real-time capture exactly. Re-imports are idempotent via session-ID dedup, and archive extraction is guarded against path traversal and zip-bomb expansion.":
+      "Importar sesiones de código Claude existentes de tres fuentes: volver a escanear la predeterminada <code>~/.claude/projects</code> Carpeta, escanee cualquier ruta absoluta en el disco o arrastre y suelte <code>.jsonl</code>, <code>.zip</code>, <code>.tar.gz</code>, y <code>.gz</code> Archivos a través de <b>Configuración → Historial de importaciones</b>. se dirigen todos los caminos a la misma tubería de ingestión que el servidor utiliza para los ganchos en vivo, por lo que los tokens importados y el costo por modelo coinciden exactamente con la captura en tiempo real. Las reimportaciones son idempotentes mediante deduplicación del ID de la sesión, y la extracción de archivos está protegida contra la travesía de caminos y la expansión de zip-bomb.",
+    "The startup auto-import of <code>~/.claude/projects</code> is one-time and marker-gated, so a project folder created after first launch — whose sessions never flow through hooks (for example with host-only hooks disabled) — would stay invisible until a manual rescan. A background sync closes that gap with three triggers sharing one mtime cache and a single coalesced sweep: an immediate sweep at startup, a debounced <code>fs.watch</code> (recursive on macOS and Windows; root plus immediate child folders on Linux to avoid the userland recursive-watcher hazard) that fires the moment a new session file or project folder appears, and a periodic safety-net poll tunable via <code>DASHBOARD_SESSION_SYNC_MS</code> (default <code>30000</code> ms; <code>0</code> disables the poll while leaving the watcher running). Each sweep re-parses only files whose mtime advanced and broadcasts <code>session_created</code> / <code>session_updated</code> (plus the main agent) so the UI refreshes live, while an already-imported unchanged session is skipped without re-parsing.":
+      "La importación automática inicial de <code>~/.claude/projects</code> Es único y con puerta de marcador, por lo que una carpeta de proyecto creada después del primer lanzamiento, cuyas sesiones nunca fluyen a través de ganchos (por ejemplo, con los ganchos solo para el host desactivados), permanecería invisible hasta una escanear manual. Una sincronización en segundo plano cierra esa brecha con tres desencadenantes que comparten una caché mtime y una sola escanear coalescida: una escanear inmediata al inicio, una debounced <code>fs.watch</code> (recursivo en macOS y Windows; directorio raíz más hijos inmediatos en Linux para evitar el peligro del observador recursivo en el sistema operativo) que dispara en el momento en que aparece un nuevo archivo de sesión o directorio de proyecto, y una encuesta periódica de red de seguridad ajustable a través de <code>DASHBOARD_SESSION_SYNC_MS</code> (por defecto <code>30000</code> Sra.; <code>0</code> desactiva la encuesta mientras deja que el observador siga funcionando). Cada escaneo solo reparse los archivos cuyo mtime ha avanzado y transmite <code>session_created</code> / <code>session_updated</code> (más el agente principal) por lo que la interfaz de usuario se actualiza en vivo, mientras que una sesión ya importada e inalterada se omite sin volver a analizarla.",
+    "Incremental JSONL reader shared across the hook handler, compaction scanner, conversation viewer, and import pipeline. Byte-offset tracking skips already-parsed content; cache hits short-circuit disk I/O so even sessions with tens of thousands of turns stay fast. It also extracts the live session title (<code>custom-title</code> / <code>ai-title</code>) so renames surface in real time, plus the first user prompt as a fallback descriptor for placeholder-named sessions and agents.":
+      "El lector JSONL incremental compartido entre el gestor de ganchos, el escáner de compactación, el visualizador de conversaciones y la tubería de importación. El seguimiento del desplazamiento de bytes omite el contenido ya procesado; los accesos a la caché cortocircuita la E/S del disco, por lo que incluso las sesiones con decenas de miles de giros siguen siendo rápidas. También extrae el título de la sesión en vivo (<code>custom-title</code> / <code>ai-title</code>) renombra la superficie en tiempo real, además del primer mensaje de usuario como descriptor de respaldo para sesiones y agentes con nombres de lugar de almacenamiento.",
+    "LRU eviction of cold session buffers plus a tail-cap on per-entry growable arrays (turn durations, API errors, compaction entries). A session that runs for days cannot grow a single cache entry without bound, and each entry stores its parsed result only once — no shadow copy.":
+      "Desalojo LRU de los búferes de sesiones frías, además de una tapa de cola en matrices crecientes por entrada (duraciones de turno, errores API, entradas de compactación). Una sesión que se ejecuta durante días no puede crecer una sola entrada de caché sin límites, y cada entrada almacena su resultado analizado solo una vez, sin copia de sombra.",
+    "The periodic compaction sweep reads each active session's transcript path directly from <code>sessions.transcript_path</code> (a partial index covers exactly those rows), so the work is O(active sessions) instead of a <code>json_extract</code> scan over the whole events table.":
+      "La escanearía de compactación periódica lee el camino de transcripción de cada sesión activa directamente desde <code>sessions.transcript_path</code> (un índice parcial cubre exactamente esas filas), por lo que el trabajo es O(sesiones activas) en lugar de un <code>json_extract</code> Escanee toda la tabla de eventos.",
+    "Collapsible parent–child agent tree rendered on both Dashboard and Session Detail. Agents with subagents display expand/collapse chevrons; leaf agents show a dot indicator. The tree auto-expands when any child transitions to active and correctly tracks backgrounded subagents without premature completion. Depth is unlimited — deeply nested chains render as indented rows with connecting lines. Each node shows model, current tool, status badge, and cumulative token cost for tracing spend down the spawn chain.":
+      "Árbol de agentes padre-hijo colapsable renderizado tanto en el Panel de control como en los Detalles de la sesión. Los agentes con subagentes muestran flechas de expansión/colapso; los agentes de hoja muestran un indicador de punto. El árbol se expande automáticamente cuando cualquier hijo pasa a activo y rastrea correctamente los subagentes en segundo plano sin completar prematuramente. La profundidad es ilimitada: las cadenas profundamente anidadas se muestran como filas recortadas con líneas de conexión. Cada nodo muestra el modelo, la herramienta actual, el distintivo de estado y el costo acumulativo de los tokens para rastrear el gasto a lo largo de la cadena de generación.",
+    "Per-model cost estimation with configurable pricing rules — set input, output, and cache-read rates per model variant through the Settings UI. View total and per-session breakdowns on Sessions, Session Detail, and Analytics. Compaction- aware token accounting preserves baselines across context compressions so no usage is silently dropped. Cost chips appear on Kanban cards, session rows, and the sidebar summary. Subagent cards show each subagent's own cost, computed from that subagent's transcript token usage priced at current rates, so a subagent card no longer misleadingly reads as if it cost the whole session; main-agent cards still show the session total. Pricing changes retroactively recalculate all stored sessions, and imports apply the same rate table.":
+      "Estimación de costos por modelo con reglas de precios configurables: establece tasas de entrada, salida y lectura de caché por variante de modelo a través de la interfaz de usuario de Configuración. Ve los desgloses totales y por sesión en Sesiones, Detalles de sesión y Análisis. La contabilidad de tokens consciente de la compactación preserva las bases de datos a través de las compresiones de contexto, por lo que ningún uso se elimina silenciosamente. Las fichas de costo aparecen en las tarjetas Kanban, las filas de sesión y el resumen de la barra lateral. Las tarjetas de subagente muestran el propio costo de cada subagente, calculado a partir del uso de tokens de la transcripción de ese subagente con precios a las tasas actuales, por lo que una tarjeta de subagente ya no se lee engañosamente como si costara toda la sesión; las tarjetas de agente principal todavía muestran el total de la sesión. Los cambios de precios recalculan retroactivamente todas las sesiones almacenadas y las importaciones aplican la misma tabla de tarifas.",
+    "Model pricing editor with per-token rate configuration for every Claude variant. Hook installation status with one-click reinstall and per-hook health checks. Full JSON data export covering sessions, agents, events, tokens, and pricing rules. Session cleanup controls to abandon stale sessions or purge old data by age. Browser notification preferences with per-event toggles. A system information panel shows database row counts, file sizes, server uptime, and WebSocket connection status at a glance.":
+      "Editor de precios de modelos con configuración de tasa por token para cada variante de Claude. Estado de instalación del gancho con reinstalación con un solo clic y comprobaciones de salud por gancho. Exportación completa de datos JSON que cubre sesiones, agentes, eventos, tokens y reglas de precios. Control de limpieza de sesiones para abandonar sesiones obsoletas o purgar datos antiguos por edad. Preferencias de notificación del navegador con interruptores por evento. Un panel de información del sistema muestra el número de filas de la base de datos, los tamaños de los archivos, el tiempo de actividad del servidor y el estado de la conexión WebSocket de un vistazo.",
+    "Local MCP sidecar with three transport modes — stdio for Claude Code native integration, HTTP+SSE for remote clients, and an interactive REPL for ad-hoc terminal queries. Exposes 25 typed tools across 6 domains: sessions, agents, events, analytics, settings, and system health. Every mutation is gated behind a tiered policy so nothing dangerous fires without opt-in. Retry-aware API access handles transient failures. Runs as a standalone Node process with no Docker or cloud dependency.":
+      "MCP local con tres modos de transporte: stdio para la integración nativa del código Claude, HTTP+SSE para clientes remotos y un REPL interactivo para consultas terminales ad hoc. Exponen 25 herramientas de tipo en 6 dominios: sesiones, agentes, eventos, análisis, configuración y estado del sistema. Cada mutación está bloqueada detrás de una política jerárquica, por lo que nada peligroso se activa sin consentimiento. El acceso a la API con detección de intentos de reintento maneja los fallos transitorios. Funciona como un proceso Node independiente sin dependencias de Docker ni de la nube.",
+    "Instruction, skills, rules, and custom-agent layers for both Claude Code and Codex. Path-scoped rules target backend, frontend, MCP, and docs directories with context-appropriate guidelines. Reusable skills cover onboarding, feature shipping, live-issue debugging, release-readiness, and MCP operations. Specialized subagents for backend, frontend, and MCP code review run in parallel with focused tooling. Everything lives in <code>.claude/</code> and is version-controlled alongside the codebase.":
+      "Instrucciones, habilidades, reglas y capas de agente personalizado para tanto Claude Code como Codex. Las reglas de alcance de ruta apuntan a los directorios de backend, frontend, MCP y documentos con directrices apropiadas para el contexto. Las habilidades reutilizables cubren la incorporación, el envío de funciones, el depuración de problemas en vivo, la preparación para el lanzamiento y las operaciones MCP. Los subagentes especializados para la revisión de código de backend, frontend y MCP se ejecutan en paralelo con herramientas enfocadas. Todo vive en <code>.claude/</code> Y está controlado por versiones junto con el código fuente.",
+    "D3.js-powered visualizations: an agent orchestration DAG showing spawn patterns across sessions, a tool-execution Sankey diagram mapping tool-to- tool transitions, and a directed pipeline graph with frequency labels. Every chart title carries an info icon that opens a popover explaining what it shows and how to read it. Hovering nodes, edges, and bars surfaces tooltips with share-of-source percentages, success-rate buckets, and timing patterns. All labels are translated to English, Vietnamese, and Chinese.":
+      "Visualizaciones impulsadas por D3.js: una DAG de orquestación de agentes que muestra patrones de generación a lo largo de las sesiones, una herramienta de mapeo de diagrama Sankey de ejecución de herramientas que muestra las transiciones de herramienta a herramienta y un gráfico de tuberías dirigidas con etiquetas de frecuencia. Cada título de gráfico lleva un icono de información que abre un popover que explica lo que muestra y cómo leerlo. Al pasar el cursor sobre nodos, bordes y superficies de barras, aparecen herramientas de información con porcentajes de participación en el código fuente, cuencos de tasa de éxito y patrones de tiempo. Todas las etiquetas se traducen al inglés, vietnamita y chino.",
+    "Subagent effectiveness scorecards with success-rate rings and day-of-week sparklines. Auto-detected workflow patterns expand on click into a detail panel with the full step chain, stats grid, and a narrative with loop detection. Model delegation flow, error propagation bars with API error cards, concurrency swim-lanes, and complexity bubble charts round out the view. Six headline stat cards each include an info popover explaining the metric and its current value. Status filter applies globally.":
+      "Tarjetas de puntuación de eficacia del subagente con anillos de tasa de éxito y líneas de chispa del día de la semana. Los patrones de flujo de trabajo detectados automáticamente se amplían al hacer clic en un panel de detalles con la cadena completa de pasos, la cuadrícula de estadísticas y una narración con detección de bucle. El flujo de delegación del modelo, las barras de propagación de errores con tarjetas de error de API, las pistas de natación de concurrencia y los gráficos de burbujas de complejidad completan la vista. Se incluyen en cada una de las seis tarjetas estadísticas principales una ventana emergente de información que explica la métrica y su valor actual. El filtro de estado se aplica globalmente.",
+    "Searchable session selector with pagination to explore any session's agent tree, tool-call timeline, and event sequence. The detail page opens with a live-updating overview — tile counters for events, tool calls, subagents, compactions, errors, and duration. Top-tool usage bars and subagent breakdown give quick reads. The conversation viewer renders markdown with syntax highlighting. Cross-filter from DAG nodes, run compaction analysis, or export as JSON — all with real-time WebSocket auto-refresh.":
+      "Selector de sesiones buscable con paginación para explorar el árbol de agentes, la línea de tiempo de llamadas de herramientas y la secuencia de eventos de cualquier sesión. La página de detalles se abre con una descripción general actualizada en tiempo real: contadores de baldosas para eventos, llamadas de herramientas, subagentes, compactaciones, errores y duración. Las barras de uso de herramientas principales y la desglose de subagentes proporcionan lecturas rápidas. El visualizador de conversaciones renderiza Markdown con resaltado de sintaxis. Filtra cruzado por nodos DAG, realiza el análisis de compactación o exporta como JSON, todo con la actualización automática de WebSocket en tiempo real.",
+    "Persistent browser notifications via Web Push (VAPID) for real-time alerts even when the tab is not focused or the browser is backgrounded. Includes macOS audio support so notifications are audible alongside system sounds. Per-event toggles let you choose which events fire — session starts, completions, errors, compactions, or agent spawns. Server-side subscription management ensures one push per event per browser. Works on Chrome, Edge, Firefox, and Safari 17+ with graceful degradation elsewhere.":
+      "Notificaciones persistentes del navegador a través de Web Push (VAPID) para alertas en tiempo real incluso cuando la pestaña no está enfocada o el navegador está en segundo plano. Incluye soporte de audio para macOS, por lo que las notificaciones son audibles junto con los sonidos del sistema. Los interruptores por evento le permiten elegir qué eventos se ejecutan: inicio, finalización, errores, compactaciones o aparecimientos de agentes de sesión. La gestión de suscripciones en el lado del servidor garantiza una notificación por evento por navegador. Funciona en Chrome, Edge, Firefox y Safari 17+ con degradación suave en otros lugares.",
+    "Ready-to-use Dockerfile and docker-compose.yml for one-command deployment. Supports both Docker and Podman with persistent volume mounts for the SQLite database and hook data. Configurable port mapping via environment variables and a health-check endpoint the container runtime can poll. Multi-stage build keeps the image lean — only production deps and the compiled bundle ship. Run <code>docker compose up -d --build</code> and the dashboard is live with zero additional setup or configuration required.":
+      "Dockerfile y docker-compose.yml listos para usar para el despliegue con un solo comando. Soporta tanto Docker como Podman con montajes de volumen persistentes para la base de datos SQLite y datos de gancho. Mapeo de puertos configurables a través de variables de entorno y un punto final de verificación de salud que el tiempo de ejecución del contenedor puede consultar. La construcción multiestadio mantiene la imagen ligera: solo se envían las dependencias de producción y el paquete compilado. carrera <code>docker compose up -d --build</code> Y el panel de control está en vivo sin necesidad de ninguna configuración o instalación adicional.",
+    "Official Claude Code plugin marketplace shipping 10 plugins with 53 skills, 14 agents, 30 slash commands, 3 CLI tools, 3 hook configs, and 1 MCP server. Deep analytics with compaction-aware baselines, productivity automation, developer diagnostics, AI-powered workflow intelligence, and dashboard MCP integration. Five newer plugins go further: <code>ccam-cost-guard</code> (budget guardrails, spend forecasts, and cost-threshold alerts), <code>ccam-sessions</code> (session forensics — search, timeline, and transcript replay), <code>ccam-workflows</code> (multi-agent orchestration and fleet intelligence), <code>ccam-quality</code> (reliability and SLO checks), and <code>ccam-config</code> (Claude Code config and memory governance). Install with <code>claude plugin install</code> — no restart needed. Each listing shows author, license, homepage, and per-skill contribution breakdown. The Config Explorer's Plugins tab surfaces installed plugins with live status.":
+      "Mercado oficial de plugins del código Claude con envío de 10 plugins con 53 habilidades, 14 agentes, 30 comandos slash, 3 herramientas CLI, 3 configuraciones de ganchos y 1 servidor MCP. Análisis profundo con bases de datos conscientes de la compactación, automatización de la productividad, diagnóstico de desarrolladores, inteligencia de flujo de trabajo impulsada por IA e integración de MCP en el panel de control. Cinco plugins más nuevos van más allá: <code>ccam-cost-guard</code> (barandillas de presupuesto, pronósticos de gasto y alertas de umbral de costo), <code>ccam-sessions</code> (forense de sesiones: búsqueda, cronología y reproducción de transcripciones), <code>ccam-workflows</code> (orquestación de múltiples agentes e inteligencia de flota), <code>ccam-quality</code> (comprobaciones de fiabilidad y SLO), y <code>ccam-config</code> (Configuración de Claude Code y gobernanza de la memoria). Instalar con <code>claude plugin install</code> — no se necesita reiniciar. Cada lista muestra el autor, la licencia, la página de inicio y la desglose de las contribuciones por habilidad. La pestaña de complementos del Explorador de Configuración muestra los complementos instalados con estado en vivo.",
+    "Spawn <code>claude</code> subprocesses straight from the dashboard with a chat-style streaming UI — multi-turn <b>Conversation</b> or single-shot <b>Headless</b> mode. One-click <b>Resume</b> on any past conversation spawns <code>claude --resume</code> seeded with the prior transcript. Re- attach reconciles in-memory logs with the on-disk JSONL so navigating away never loses history. Slash-command autocomplete, file references, live token/context-window meter, and a thinking-effort dial bring TUI parity to the browser. Same-origin guard blocks drive-by spawns.":
+      "desovar <code>claude</code> Subprocesos directamente desde el panel de control con una interfaz de usuario de streaming en estilo chat, multidireccional <b>conversación</b> O disparo único <b>sin cabeza</b> Modo. Un clic <b>currículum</b> En cualquier conversación pasada se generan <code>claude --resume</code> Semillado con la transcripción anterior. Reajusta los registros de reconciliación en memoria con el JSONL en disco para que la navegación nunca pierda el historial. Completa automáticamente el comando de guión, las referencias de archivos, el medidor de tokens/ventana de contexto en vivo y un dial de esfuerzo de pensamiento traen paridad TUI al navegador. Los bloqueos de guardia de origen compartido bloquean los spawning de paso rápido.",
+    "A 12-tab inspector at <code>/cc-config</code> for everything Claude Code knows about: skills, subagents, slash commands, output styles, plugins, marketplaces, MCP servers, hooks, settings, memory, keybindings, and statusline scripts. The Settings tab leads with a Current configuration summary of the options <code>/config</code> controls — model, verbose, theme, output style, auto-compact, notifications — resolved across scopes. The Memory tab surfaces both the user and project <code>CLAUDE.md</code> files and the per-project file-based memory store — every auto-memory <code>*.md</code> under <code>~/.claude/projects/&lt;slug&gt;/memory/</code> (a <code>MEMORY.md</code> index plus one file per remembered fact, often 100+), grouped by project, searchable, and editable. Create, edit, and delete the low-risk text-file surfaces with mandatory timestamped backups before every write. Plugins, MCP, hooks, and live settings stay read-only with explainer banners and copy-able CLI commands. Per-plugin contribution breakdowns show author and license.":
+      "Un inspector de 12 tablas en <code>/cc-config</code> Para todo lo que Claude Code sabe sobre: habilidades, subagentes, comandos slash, estilos de salida, complementos, mercados, servidores MCP, ganchos, configuraciones, memoria, atajos de teclado y scripts de línea de estado. La pestaña Configuración encabeza con un resumen de la configuración actual de las opciones <code>/config</code> Controls: modelo, verboso, tema, estilo de salida, compacto automático, notificaciones: resueltos en todos los ámbitos. La pestaña Memoria muestra tanto al usuario como al proyecto. <code>CLAUDE.md</code> Archivos y el almacenamiento de memoria basado en archivos por proyecto, cada memoria automática <code>*.md</code> bajo <code>~/.claude/projects/&lt;slug&gt;/memory/</code> (a <code>MEMORY.md</code> Índice más un archivo por hecho recordado, a menudo más de 100), agrupados por proyecto, buscables y editable. Cree, edite y elimine las superficies de archivos de texto de bajo riesgo con copias de seguridad con hora y fecha obligatorias antes de cada escritura. Los complementos, MCP, ganchos y configuraciones en vivo permanecen en modo solo lectura con banners explicativos y comandos CLI copiables. Los desgloses de contribuciones por complemento muestran el autor y la licencia.",
+    "Mobile-first layouts with stacking grids, horizontally scrollable tables, and a collapsible sidebar that auto-hides below 1400 px. All pages adapt from phone to ultrawide with consistent navigation and readable typography. Kanban columns stack vertically on narrow screens, analytics charts reflow to single-column, and the activity feed stays fully swipeable. Touch targets meet 44 px minimum. Dark theme renders consistently across iOS Safari, Chrome, and Firefox with no flash of unstyled content.":
+      "Diseños móviles primero con cuadrículas apilables, tablas que se pueden desplazar horizontalmente y una barra lateral plegable que se oculta automáticamente por debajo de 1400 píxeles. Todas las páginas se adaptan desde teléfonos hasta pantallas ultra anchas con una navegación consistente y una tipografía legible. Las columnas Kanban se apilan verticalmente en pantallas estrechas, los gráficos analíticos se rediseñan para una sola columna y el feed de actividad sigue siendo completamente deslizable. Los objetivos táctiles cumplen con un mínimo de 44 píxeles. El tema oscuro se renderiza de forma consistente en iOS Safari, Chrome y Firefox sin ningún parpadeo de contenido sin estilo.",
+    "Visualize parallel agent execution with a Gantt-style timeline showing overlapping subagent lifetimes, tool-call concurrency windows, and wait gaps. Color-coded bars distinguish working, waiting, and errored states so bottlenecks are immediately visible. Hover any bar for exact timestamps and duration. Zoom and pan across long-running sessions with hundreds of agents. The timeline shares the Workflows status filter so you can isolate active, completed, or errored sessions without leaving the view.":
+      "Visualice la ejecución paralela de agentes con una línea de tiempo en estilo Gantt que muestra las vidas útiles superpuestas de los subagentes, las ventanas de concurrencia de llamadas de herramientas y los intervalos de espera. Las barras codificadas por color distinguen los estados de trabajo, espera y error, por lo que los cuellos de botella son inmediatamente visibles. Haga clic con el ratón sobre cualquier barra para ver las fechas y horas exactas y la duración. Aproxime y desplácese por sesiones de larga duración con cientos de agentes. La línea de tiempo comparte el filtro de estado de flujos de trabajo, para que pueda aislar sesiones activas, completadas o con errores sin salir de la vista.",
+    "Professional VS Code extension with a real-time Activity Bar sidebar showing active sessions, agent counts, and recent events without leaving your editor. A status bar pulse monitor surfaces connection health and the latest event type at a glance. Deep navigation links open any session or analytics view directly in your browser. An embedded webview renders the full dashboard inside a VS Code tab with WebSocket push, theme sync, and responsive layout. Install from the marketplace or build from source.":
+      "Extensión profesional de VS Code con una barra lateral de la barra de actividad en tiempo real que muestra sesiones activas, el número de agentes y eventos recientes sin salir de su editor. Una barra de estado que muestra el pulso de la conexión y el último tipo de evento de un vistazo. Los enlaces de navegación profunda abren cualquier sesión o vista de análisis directamente en su navegador. Una vista web incorporada muestra el panel completo dentro de una pestaña de VS Code con WebSocket push, sincronización de temas y diseño responsive. Instálelo desde el mercado o construya desde la fuente.",
+    "Trace how errors cascade across agents and tool calls with a directed graph showing failure origins, retry paths, and recovery points. Each node displays the agent or tool that errored, the error message, and whether a retry succeeded or propagated upstream. Pinpoint root causes in deeply nested subagent chains. Horizontal bar charts rank the most error-prone tools and models. API error cards group failures by HTTP status and endpoint. Filter by session, time range, or error severity to narrow the view.":
+      "Rastree cómo los errores se propagan a través de los agentes y las llamadas a las herramientas con un gráfico dirigido que muestra las orígenes de los fallos, los caminos de intento de nuevo y los puntos de recuperación. Cada nodo muestra el agente o la herramienta que tuvo un error, el mensaje de error y si el intento de nuevo tuvo éxito o se propagó hacia arriba. Identifique las causas raíz en cadenas de subagentes profundamente anidadas. Los gráficos de barras horizontales clasifican las herramientas y modelos más propensos a errores. Las tarjetas de error de la API agrupan los fallos por estado HTTP y punto final. Filtre por sesión, rango de tiempo o gravedad del error para restringir la vista.",
+    'Three independent PWAs — dashboard, landing page, and wiki — each with its own Web App Manifest and Service Worker. Install to your home screen or dock for a standalone, chrome-less experience. SVG icons with <code>sizes="any"</code> and iOS standalone meta tags included.':
+      'Tres PWAs independientes: panel de control, página de destino y wiki, cada uno con su propio manifiesto de aplicaciones web y trabajador de servicios. Instálelos en su pantalla de inicio o dock para una experiencia independiente y sin Chrome. Íconos SVG con <code>sizes="any"</code> y etiquetas meta independientes de iOS incluidas.',
+    "The dashboard SW serves Vite's hashed <code>/assets/*</code> bundles cache-first (URLs are immutable per build) and treats everything else as network-first with cache fallback. Explicit <code>Cache-Control</code> headers on the production Express static middleware reinforce the policy, so a rebuild replaces the in-browser code without a hard refresh.":
+      "El SW del panel de control sirve a Vite's hashed <code>/assets/*</code> bundles almacena primero la caché (los URL son inmutables por construcción) y trata todo lo demás como primero la red con fallback de caché. explícito <code>Cache-Control</code> Los encabezados en el middleware estático de producción Express refuerzan la política, por lo que una reconstrucción reemplaza el código en el navegador sin una actualización forzosa.",
+    "A <code>controllerchange</code> listener in <code>client/src/main.tsx</code> reloads the page exactly once when a new SW takes over an already-controlled page. First installs do not reload, so the very first visit is never interrupted.":
+      "A <code>controllerchange</code> Escuchador en <code>client/src/main.tsx</code> Recarga la página exactamente una vez cuando un nuevo SW toma el control de una página ya controlada. Las primeras instalaciones no se recargan, por lo que la primera visita nunca se interrumpe.",
+    '<span class="caption-icon">📡</span> <span><strong>Dashboard · Monitor</strong> — live overview of active sessions and agents. Stats tiles, collapsible subagent hierarchy cards, and a recent activity feed. Auto-refreshes every 5 s via WebSocket</span>':
+      '<span class="caption-icon">📡</span> <span><strong>Panel de control · Monitor</strong> - visión general en vivo de las sesiones activas y los agentes. Píxeles estadísticos, tarjetas de jerarquía de subagentes colapsables y un feed de actividad reciente. Se actualiza automáticamente cada 5 segundos a través de WebSocket</span>',
+    '<span class="caption-icon">🩺</span> <span><strong>Dashboard · Health</strong> — composite health score ring, storage engine donut, cache/error/success gauges, tool invocation bars, subagent effectiveness, and model token distribution</span>':
+      '<span class="caption-icon">🩺</span> <span><strong>Panel de control · Salud</strong> — anillo de puntuación de salud compuesta, donut de motor de almacenamiento, indicadores de caché/errores/éxito, barras de invocación de herramientas, eficacia del subagente y distribución de tokens del modelo</span>',
+    '<span class="caption-icon">📋</span> <span><strong>Kanban Board (agents)</strong> — agents swim-laned by status: Working, Waiting, Completed, Error. Cards show model, cost, and current tool call. Yellow column flags agents waiting on user input</span>':
+      '<span class="caption-icon">📋</span> <span><strong>Tablero Kanban (agentes)</strong> — los agentes se ubican en carriles de natación según su estado: Trabajando, Esperando, Completado, Error. Las tarjetas muestran el modelo, el costo y la llamada de herramienta actual. La columna amarilla marca a los agentes que esperan la entrada del usuario.</span>',
+    '<span class="caption-icon">🗂️</span> <span><strong>Kanban Board (sessions)</strong> — sessions swim-laned across 5 columns: Active, Waiting, Completed, Error, Abandoned. Each card shows agent count, duration, model, and cumulative cost</span>':
+      '<span class="caption-icon">🗂️</span> <span><strong>Tablero Kanban (sesiones)</strong> — sesiones de natación en carriles a través de 5 columnas: Activa, Esperando, Completada, Error, Abandonada. Cada tarjeta muestra el número de agentes, la duración, el modelo y el costo acumulado</span>',
+    '<span class="caption-icon">📂</span> <span><strong>Sessions</strong> — searchable, filterable, server-paginated table. Each row shows status badge, agent count, duration, model, and cost. Click any row to drill into session detail</span>':
+      '<span class="caption-icon">📂</span> <span><strong>sesión</strong> — tabla indexable, filtrable y paginada por servidor. Cada fila muestra el distintivo de estado, el número de agentes, la duración, el modelo y el costo. Haga clic en cualquier fila para profundizar en los detalles de la sesión.</span>',
+    '<span class="caption-icon">🤖</span> <span><strong>Session Detail · Agents</strong> — overview tiles (events, tool calls, subagents, errors, duration), top-tool usage bars, subagent type breakdown, and a collapsible parent–child agent hierarchy tree</span>':
+      '<span class="caption-icon">🤖</span> <span><strong>Detalles de la sesión · Agentes</strong> — baldosas de visión general (eventos, llamadas de herramientas, subagentes, errores, duración), barras de uso de herramientas principales, desglose del tipo de subagente y un árbol jerárquico de agentes padre-hijo colapsable</span>',
+    '<span class="caption-icon">💬</span> <span><strong>Session Detail · Conversation</strong> — full transcript viewer with markdown rendering, syntax-highlighted code blocks, per-tool sections, and collapsible thinking blocks</span>':
+      '<span class="caption-icon">💬</span> <span><strong>Detalles de la sesión · Conversación</strong> — visualizador de transcripciones completas con renderizado de markdown, bloques de código resaltados por sintaxis, secciones por herramienta y bloques de pensamiento colapsables</span>',
+    '<span class="caption-icon">🔬</span> <span><strong>Session Detail · Timeline</strong> — chronological event timeline with multi-dimension filters, color-coded entries by type, expandable hook payloads, and direct links to the owning session and agent</span>':
+      '<span class="caption-icon">🔬</span> <span><strong>Detalles de la sesión · Línea de tiempo</strong> — línea de tiempo cronológica de eventos con filtros multidimensionales, entradas codificadas por color por tipo, cargas útiles de ganchos expandibles y enlaces directos a la sesión y agente propietarios</span>',
+    '<span class="caption-icon">📰</span> <span><strong>Activity Feed</strong> — real-time streaming event log with pause/resume buffering, multi-dimension filters, expandable hook payloads, color-coded entries, and per-row session navigation buttons</span>':
+      '<span class="caption-icon">📰</span> <span><strong>Feed de actividad</strong> — registro de eventos de transmisión en tiempo real con buffer de pausa/resume, filtros multidimensionales, cargas útiles de ganchos expandibles, entradas codificadas por color y botones de navegación de sesiones por fila</span>',
+    '<span class="caption-icon">📊</span> <span><strong>Analytics</strong> — token usage by model, tool frequency bars, 52-week activity heatmap, 30-day sparkline trends, session outcome donuts, and cost summary with WebSocket auto-refresh</span>':
+      '<span class="caption-icon">📊</span> <span><strong>análisis</strong> — uso de tokens por modelo, barras de frecuencia de herramientas, mapa de calor de actividad de 52 semanas, tendencias de sparkline de 30 días, rosquillas de resultado de sesión y resumen de costos con actualización automática de WebSocket</span>',
+    '<span class="caption-icon">🔀</span> <span><strong>Workflows</strong> — D3.js agent orchestration DAG, tool-execution Sankey diagram, directed pipeline graph, effectiveness scorecards, concurrency swim-lanes, and complexity bubble charts</span>':
+      '<span class="caption-icon">🔀</span> <span><strong>Flujos de trabajo</strong> — DAG de orquestación de agentes D3.js, diagrama Sankey de ejecución de herramientas, gráfico de tuberías dirigidas, tarjetas de puntuación de eficacia, carriles de natación de concurrencia y gráficos de burbujas de complejidad</span>',
+    '<span class="caption-icon">🧰</span> <span><strong>Claude Config Explorer</strong> — 12-tab inspector for skills, subagents, slash commands, plugins, MCP servers, hooks, settings, memory, keybindings, and statusline. Safe edits with backups</span>':
+      '<span class="caption-icon">🧰</span> <span><strong>Explorador de configuración de Claude</strong> — Inspector de 12 pestañas para habilidades, subagentes, comandos slash, complementos, servidores MCP, ganchos, configuraciones, memoria, atajos de teclado y línea de estado. Ediciones seguras con copias de seguridad</span>',
+    '<span class="caption-icon">▶️</span> <span><strong>Run Claude</strong> — spawn or resume Claude subprocesses from the browser. Pick Conversation or Headless mode, set cwd, model, permission level, and thinking effort. Same-origin guard included</span>':
+      '<span class="caption-icon">▶️</span> <span><strong>Corra Claude</strong> — Crear o reanudar subprocesos de Claude desde el navegador. Elija Conversación o modo sin cabeza, establezca el directorio actual, el modelo, el nivel de permiso y el esfuerzo de pensamiento. Incluye guardia de origen compartido</span>',
+    '<span class="caption-icon">💬</span> <span><strong>Run Claude · live stream</strong> — character-by-character streaming output. Tool uses, tool results, and thinking blocks are collapsible. Active runs switcher juggles multiple sessions</span>':
+      '<span class="caption-icon">💬</span> <span><strong>Run Claude · transmisión en vivo</strong> - salida de streaming por carácter. Los usos de las herramientas, los resultados de las herramientas y los bloques de pensamiento son colapsables. Las ejecuciones activas del interruptor manejan múltiples sesiones</span>',
+    '<span class="caption-icon">⚙️</span> <span><strong>Settings</strong> — model pricing editor with per-token rates, hook installation status, JSON data export, session cleanup controls, browser notification toggles, and system info panel with DB stats</span>':
+      '<span class="caption-icon">⚙️</span> <span><strong>Configuración</strong> — editor de precios de modelos con tarifas por token, estado de instalación de los enlaces, exportación de datos JSON, controles de limpieza de sesiones, alternaciones de notificaciones del navegador y panel de información del sistema con estadísticas de la base de datos</span>',
+    "This chart tracks how interest in Claude Code Agent Monitor has grown over time. The curve keeps climbing as more developers discover the project, share it, and use it in real workflows. Each new star is a small vote of confidence from the community.":
+      "Este gráfico rastrea cómo ha crecido el interés en Claude Code Agent Monitor con el tiempo. La curva sigue subiendo a medida que más desarrolladores descubren el proyecto, lo comparten y lo utilizan en flujos de trabajo reales. Cada nueva estrella es un pequeño voto de confianza de la comunidad.",
+    '<span class="caption-icon">⭐</span> <span> Enjoying the project? <a class="star-history-caption-link" href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor" target="_blank" rel="noopener noreferrer" >Give it a star on GitHub</a > and help more builders discover it. </span>':
+      '<span class="caption-icon">⭐</span> <span> ¿Disfrutando del proyecto? <a class="star-history-caption-link" href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor" target="_blank" rel="noopener noreferrer" >Dale una estrella en GitHub</a > Y ayudar a más constructores a descubrirlo. </span>',
+    "Hook Type": "Tipo de gancho",
+    Trigger: "gatillo",
+    "Dashboard Action": "Acción del panel de control",
+    "Claude Code session begins": "Comienza la sesión de Claude Code",
+    "Creates session and main agent. Stamps <code>awaiting_input_since</code> (with <code>awaiting_reason</code> = <code>session_start</code>) so the row lands in <strong>Waiting</strong> from the start (the CLI is at a prompt) — except a <code>compact</code>-source SessionStart (mid-turn auto-compaction), which leaves the flag untouched so a working session stays <strong>Active</strong>. Reactivates resumed sessions. Abandons orphaned sessions with no activity for <code>DASHBOARD_STALE_MINUTES</code> (default 180).":
+      "Crea sesión y agente principal. sellos <code>awaiting_input_since</code> (con <code>awaiting_reason</code> = <code>session_start</code>) así que la fila aterriza en <strong>espera</strong> Desde el principio (la CLI está en un mensaje de inicio de sesión) - excepto un <code>compact</code>-Fuente SessionStart (compactación automática a mitad de turno), que deja la bandera sin tocar para que una sesión funcional se mantenga <strong>activo</strong>. va activa las sesiones suspendidas. Abandona las sesiones huérfanas sin actividad durante <code>DASHBOARD_STALE_MINUTES</code> (por defecto 180).",
+    "User hits enter on a prompt": "El usuario pulsa enter en una solicitud",
+    'Clears the waiting flag and promotes the main agent to <span class="status-chip chip-working" ><span class="chip-dot"></span>Working</span >. The only reliable signal that text-only assistant turns have started — they emit no <code>PreToolUse</code> before <code>Stop</code>.':
+      'Borra la bandera de espera y promueve al agente principal a <span class="status-chip chip-working" ><span class="chip-dot"></span>de trabajo</span >. señal confiable de que los teléfonos con asistente de texto solo han comenzado a funcionar: no emiten ninguna <code>PreToolUse</code> antes <code>Stop</code>.',
+    "Agent begins using a tool": "El agente comienza a usar una herramienta",
+    'Clears the waiting flag, sets agent → <span class="status-chip chip-working" ><span class="chip-dot"></span>Working</span >, <code>current_tool</code> set. If tool is <code>Agent</code>, subagent record created.':
+      'Borra la bandera de espera, establece agente → <span class="status-chip chip-working" ><span class="chip-dot"></span>de trabajo</span >, <code>current_tool</code> Configurar. Si la herramienta es <code>Agent</code>, registro del subagente creado.',
+    "Tool execution completes": "La ejecución de la herramienta se completa",
+    'Clears the waiting flag (covers permission-prompt approvals mid-tool). <code>current_tool</code> cleared. Agent stays <span class="status-chip chip-working" ><span class="chip-dot"></span>Working</span >.':
+      'Borra la bandera de espera (cubre las aprobaciones de la solicitud de permiso a mitad de la herramienta). <code>current_tool</code> Liberado. El agente permanece <span class="status-chip chip-working" ><span class="chip-dot"></span>de trabajo</span >.',
+    "Claude finishes a turn": "Claude termina una vuelta",
+    'Non-error: main agent → <code>waiting</code> — UI shows <span class="status-chip chip-waiting" ><span class="chip-dot"></span>Waiting</span > until the next user input. <code>stop_reason=error</code>: marks the agent and session <span class="status-chip chip-error" ><span class="chip-dot"></span>Error</span >. Background subagents keep running.':
+      'Sin error: agente principal → <code>waiting</code> — Muestra de interfaz de usuario <span class="status-chip chip-waiting" ><span class="chip-dot"></span>espera</span > Hasta la próxima entrada del usuario. <code>stop_reason=error</code>: marca al agente y la sesión <span class="status-chip chip-error" ><span class="chip-dot"></span>error informático</span >. de los subagentes de fondo siguen funcionando.',
+    "Background agent finished": "Agente de antecedentes terminado",
+    "Matched subagent → <span class=\"status-chip chip-completed\" ><span class=\"chip-dot\"></span>Completed</span >. Deliberately does <strong>not</strong> clear the waiting flag — a backgrounded subagent finishing tells us nothing about the human. Also kicks off a fire-and-forget JSONL scan (<code>scanAndImportSubagents</code>) that walks the session's <code>subagents/agent-*.jsonl</code> files, pairs <code>tool_use</code> ↔ <code>tool_result</code> blocks by <code>tool_use_id</code>, and emits per-tool <code>PreToolUse</code> + <code>PostToolUse</code> events under each subagent's own <code>agent_id</code> — surfaces tool calls that subagents make internally and which never fire any hooks. The same scan also rebuilds the nested-subagent hierarchy — it repoints each subagent's <code>parent_agent_id</code> to the true spawner recovered from the transcript's Task tool result (<code>toolUseResult.agentId</code>), so subagents that spawn their own subagents nest correctly instead of flattening under main.":
+      'Subagente coincidente → <span class="status-chip chip-completed" ><span class="chip-dot"></span>Completado</span >. idamente lo hace <strong>no</strong> Borrar la bandera de espera: un subagente en segundo plano que termina no nos dice nada sobre el humano. También inicia una escaneo JSONL de fuego y olvido (<code>scanAndImportSubagents</code>) que camina por la sesión <code>subagents/agent-*.jsonl</code> Archivos, pares <code>tool_use</code> ↔ <code>tool_result</code> Bloques por <code>tool_use_id</code>, y emite por herramienta <code>PreToolUse</code> + <code>PostToolUse</code> Eventos bajo los propios de cada subagente <code>agent_id</code> — las llamadas de herramientas de superficies que los subagentes realizan internamente y que nunca disparan ningún gancho. El mismo escaneo también reconstruye la jerarquía de subagentes anidados: reubica el punto de referencia de cada subagente <code>parent_agent_id</code> Al verdadero generador recuperado del resultado de la herramienta de tareas de la transcripción (<code>toolUseResult.agentId</code>), por lo que los subagentes que generan sus propios subagentes anidan correctamente en lugar de aplanarse bajo el principal.',
+    "Agent sends notification": "El agente envía una notificación",
+    'Event logged to activity feed. Permission/input-prompt patterns (e.g. "needs your permission", "waiting for your input") set the agent to <code>waiting</code> and stamp <code>awaiting_input_since</code> (with <code>awaiting_reason</code> = <code>notification</code>). Compaction-related notifications tagged as <code>Compaction</code> events. Triggers a browser notification if enabled.':
+      'Evento registrado en el feed de actividad. Los patrones de permiso/petición de entrada (por ejemplo, "necesita su permiso", "esperando su entrada") establecen al agente para que <code>waiting</code> Y sello <code>awaiting_input_since</code> (con <code>awaiting_reason</code> = <code>notification</code>). Notificaciones relacionadas con la compactación etiquetadas como <code>Compaction</code> Eventos. Desactiva una notificación del navegador si está habilitada.',
+    "<code>/compact</code> detected in JSONL": "<code>/compact</code> detectado en JSONL",
+    'Creates a compaction subagent → <span class="status-chip chip-completed" ><span class="chip-dot"></span>Completed</span >. Detected via <code>isCompactSummary</code> entries in the transcript. Token baselines preserve pre-compaction totals. Periodic scanner (cadence ~¼ of <code>DASHBOARD_STALE_MINUTES</code>) catches compactions when no hooks fire.':
+      'Crea un subagente de compactación → <span class="status-chip chip-completed" ><span class="chip-dot"></span>Completado</span >. detectado a través de <code>isCompactSummary</code> Entradas en la transcripción. Las bases de referencia de tokens conservan los totales previos a la compactación. Escáner periódico (cadencia ~¼ de <code>DASHBOARD_STALE_MINUTES</code>) atrapa compactaciones cuando no disparan los ganchos.',
+    "API error detected in transcript": "Se ha detectado un error de API en la transcripción",
+    "Extracted from JSONL during history import, real-time transcript scanning, or the error detection watchdog. Captures quota limits, rate limits, auth failures, and other API errors. <strong>Immediately marks sessions and agents as error</strong> — previously recorded as events without changing status.":
+      "Extraído de JSONL durante la importación de historial, el escaneo de transcripciones en tiempo real o el rastreador de detección de errores. Captura los límites de cuota, los límites de tasa, los fallos de autenticación y otros errores de API. <strong>Marca inmediatamente las sesiones y los agentes como errores</strong> — previamente registrados como eventos sin cambiar el estado.",
+    "Turn cancelled by the user (<code>Esc</code>)":
+      "Giro cancelado por el usuario (<code>Esc</code>)",
+    "Synthesized by the watchdog because pressing <code>Esc</code> fires no hook. Recovered either from the transcript <code>[Request interrupted by user]</code> marker (flagged as <code>pendingInterrupt</code>) or, when <code>Esc</code> preceded any output and left no marker, from the idle-working timeout (<code>DASHBOARD_WORKING_IDLE_SECONDS</code>, default 120). Moves the session to <strong>Waiting</strong> — the same state a normal <code>Stop</code> produces.":
+      "Sintetizado por el vigilante porque presionando <code>Esc</code> Fuegos sin gancho. Recuperado ya sea de la transcripción <code>[Request interrupted by user]</code> Marcador (marcado como <code>pendingInterrupt</code>) o, cuando <code>Esc</code> Precedió cualquier salida y no dejó ningún marcador, desde el tiempo de espera de trabajo inactivo (<code>DASHBOARD_WORKING_IDLE_SECONDS</code>, por defecto 120). Mueve la sesión a <strong>espera</strong> — el mismo estado que un normal <code>Stop</code> Produce.",
+    "Per-turn timing recorded": "Tiempo por turno registrado",
+    "Extracted from JSONL turn boundaries. Records the duration of each assistant turn for latency analysis.":
+      "Extraído de los límites de turno JSONL. Registra la duración de cada turno asistido para el análisis de latencia.",
+    "Claude Code CLI process exits": "Salida del proceso CLI de Claude Code",
+    'Drops the waiting flag. If the session is already in <span class="status-chip chip-error" ><span class="chip-dot"></span>Error</span >, the error state is preserved; otherwise marks all agents and the session as <span class="status-chip chip-completed" ><span class="chip-dot"></span>Completed</span >. Evicts the session\'s transcript from the shared cache.':
+      'Deja caer la bandera de espera. Si la sesión ya está en <span class="status-chip chip-error" ><span class="chip-dot"></span>error informático</span >, el estado de error se preserva; de lo contrario, marca a todos los agentes y la sesión como <span class="status-chip chip-completed" ><span class="chip-dot"></span>Completado</span >. la transcripción de la sesión del caché compartido.',
+    "Clone the repository to your machine": "Clona el repositorio a tu máquina",
+    "Run <code>npm run setup</code> to install all dependencies":
+      "carrera <code>npm run setup</code> Para instalar todas las dependencias",
+    "Run <code>npm run dev</code> — server + client launch automatically":
+      "carrera <code>npm run dev</code> — lanzamiento automático del servidor + cliente",
+    "Start a new Claude Code session — events appear in real-time":
+      "Inicia una nueva sesión de Claude Code: los eventos aparecen en tiempo real.",
+    "A multi-stage <code>Dockerfile</code> and <code>docker-compose.yml</code> are included. You can run the monitor with either Docker or Podman and keep the SQLite database in a named volume.":
+      "Un multiestadio <code>Dockerfile</code> y <code>docker-compose.yml</code> están incluidos. Puedes ejecutar el monitor con Docker o Podman y mantener la base de datos SQLite en un volumen con nombre.",
+    "Hooks auto-install in local mode": "Los ganchos se instalan automáticamente en modo local",
+    "When you run the server directly on the host with <code>npm run dev</code> or <code>npm start</code>, it automatically writes Claude Code hook entries to <code>~/.claude/settings.json</code>. If you run the dashboard in Docker or Podman, install hooks from the host with <code>npm run install-hooks</code> after the container is up, then restart Claude Code. The installer refuses to run inside a container (issue #193) so it never writes a container-internal handler path into a bind-mounted host <code>~/.claude</code>; override with <code>CCAM_ALLOW_CONTAINER_HOOKS=1</code> only if Claude Code itself runs in the container.":
+      "Cuando ejecutas el servidor directamente en el host con <code>npm run dev</code> Oregón <code>npm start</code>, escribe automáticamente entradas de gancho de código Claude en <code>~/.claude/settings.json</code>. es si ejecutas el panel de control en Docker o Podman, instala los ganchos del host con <code>npm run install-hooks</code> Después de que el contenedor esté activo, reinicie Claude Code. El instalador se niega a ejecutarse dentro de un contenedor (problema #193), por lo que nunca escribe una ruta de manejador interna del contenedor en un host montado en vinculación. <code>~/.claude</code>; anular con <code>CCAM_ALLOW_CONTAINER_HOOKS=1</code> Solo si Claude Code en sí mismo se ejecuta en el contenedor.",
+    "This repository also ships a local MCP server under <code>mcp/</code> and extension scaffolding for both Claude Code and Codex. These are optional for the dashboard UI, but recommended for complete local-agent workflows. The MCP server supports stdio (for host integration), HTTP+SSE (for remote clients), and an interactive REPL (for operator debugging).":
+      "Este repositorio también envía un servidor MCP local bajo <code>mcp/</code> Y andamios de extensión para tanto Claude Code como Codex. Estos son opcionales para la interfaz de usuario del panel de control, pero recomendados para flujos de trabajo completos de agentes locales. El servidor MCP admite stdio (para la integración del host), HTTP+SSE (para clientes remotos) y un REPL interactivo (para el depuración del operador).",
+    "After starting a Claude Code session, you should see:":
+      "Después de iniciar una sesión de Claude Code, deberías ver:",
+    Page: "página",
+    Expected: "Esperado",
+    Sessions: "sesión",
+    'Your session listed with status <span class="status-chip chip-waiting"><span class="chip-dot"></span>Waiting</span> (a fresh CLI is sitting at the prompt) — flips to <span class="status-chip chip-active"><span class="chip-dot"></span>Active</span> the moment Claude starts a turn':
+      'Su sesión listada con estado <span class="status-chip chip-waiting"><span class="chip-dot"></span>espera</span> (una CLI nueva está en la consola de comandos) - cambia a <span class="status-chip chip-active"><span class="chip-dot"></span>activo</span> En el momento en que Claude comienza una vuelta',
+    "Kanban Board": "Tablero Kanban",
+    "A <em>Main Agent</em> card in the <strong>Waiting</strong> column until you type your first message; flips to <em>Working</em> on <code>UserPromptSubmit</code> / <code>PreToolUse</code> and back to <em>Waiting</em> after each <code>Stop</code>":
+      "A <em>Agente principal</em> Tarjeta en el <strong>espera</strong> Columna hasta que escribas tu primer mensaje; se voltea a <em>de trabajo</em> en <code>UserPromptSubmit</code> / <code>PreToolUse</code> Y de vuelta a <em>espera</em> Después de cada uno <code>Stop</code>",
+    "Activity Feed": "Feed de actividad",
+    'Events streaming in; click any row to expand payload, use "Session →" to drill into session details':
+      'Se están transmitiendo eventos; haga clic en cualquier fila para expandir el contenido de la carga útil, use "Sesión →" para profundizar en los detalles de la sesión',
+    Dashboard: "panel de control",
+    "Stats updating in real-time": "Actualización de estadísticas en tiempo real",
+    "Start server before Claude Code": "Inicia el servidor antes de Claude Code",
+    "Hooks only fire to a running server. If Claude Code was already running when you started the dashboard, restart the Claude Code session.":
+      "Los ganchos solo se disparan a un servidor en ejecución. Si Claude Code ya estaba ejecutándose cuando iniciaste el panel de control, reinicia la sesión de Claude Code.",
+    Variable: "variable",
+    Default: "valor por defecto",
+    Description: "descripción",
+    "Port the Express server listens on": "Puerto en el que el servidor Express escucha",
+    "Port used by the hook handler to reach the server (for custom port setups)":
+      "Puerto utilizado por el gestor de ganchos para llegar al servidor (para configuraciones de puertos personalizadas)",
+    "Base URL used by the local MCP server when calling dashboard APIs":
+      "URL base utilizada por el servidor MCP local cuando se llaman a las API del panel de control",
+    "MCP transport mode: <code>stdio</code>, <code>http</code>, <code>repl</code>":
+      "Modo de transporte MCP: <code>stdio</code>, <code>http</code>, <code>repl</code>",
+    "Port for the MCP HTTP+SSE server (only when <code>MCP_TRANSPORT=http</code>)":
+      "Puerto para el servidor MCP HTTP+SSE (solo cuando <code>MCP_TRANSPORT=http</code>)",
+    "Bind address for the MCP HTTP server": "Vincular la dirección para el servidor HTTP MCP",
+    "Path to the SQLite database file": "Ruta al archivo de la base de datos SQLite",
+    "Set to <code>0</code> to disable the dead-session liveness reap — the watchdog completes active sessions with no running <code>claude</code> process; auto-disabled on Windows and in containers. Sessions forwarded from another machine (household hooks) report a non-POSIX <code>cwd</code> and are auto-skipped, so a mixed local + forwarded deployment no longer needs this off.":
+      "Configurado en <code>0</code> Para desactivar la recolección de actividad de sesiones inactivas, el vigilante completa las sesiones activas sin ejecución <code>claude</code> Proceso; desactivado automáticamente en Windows y en contenedores. Las sesiones enviadas desde otra máquina (ganchos domésticos) informan de un no POSIX <code>cwd</code> y se saltan automáticamente, por lo que una implementación mixta local + reenviada ya no necesita que esto esté desactivado.",
+    "Idle gate for watchdog-tick liveness reaps — the transcript must not have been written for at least this long (last hook write is the fallback clock); startup passes skip the gate":
+      "La puerta inactiva para la vigilia de la vida del reloj de pulso cosecha - la transcripción no debe haber sido escrita durante al menos tanto tiempo (la última escritura del gancho es el reloj de respaldo); las transiciones de arranque saltan la puerta",
+    "Idle-working timeout the watchdog uses to recover an <code>Esc</code> cancel that left no transcript marker":
+      "El tiempo de espera de trabajo inactivo que utiliza el rastreador para recuperar un <code>Esc</code> Cancelar eso no dejó ningún marcador de transcripción",
+    "Poll interval for the background sync of <code>~/.claude/projects</code>; <code>0</code> disables the poll but keeps the filesystem watcher":
+      "Intervalo de encuesta para la sincronización de fondo de <code>~/.claude/projects</code>; <code>0</code> Desactiva la encuesta pero mantiene el observador del sistema de archivos",
+    "Set to <code>production</code> to serve built client from <code>client/dist/</code>":
+      "Configurado en <code>production</code> Para servir clientes construidos desde <code>client/dist/</code>",
+    "The server writes the following to <code>~/.claude/settings.json</code> on every startup:":
+      "El servidor escribe lo siguiente a <code>~/.claude/settings.json</code> En cada inicio de sesión:",
+    "Existing hooks are preserved. The installer only adds or updates entries containing <code>hook-handler.js</code>.":
+      "Los ganchos existentes se conservan. El instalador solo agrega o actualiza entradas que contienen <code>hook-handler.js</code>.",
+    Script: "guion",
+    Command: "mando",
+    "Install all dependencies (server + client)":
+      "Instalar todas las dependencias (servidor + cliente)",
+    "Start server + client in development mode with hot reload":
+      "Iniciar el servidor + cliente en modo de desarrollo con carga rápida",
+    "Start only the Express server with <code>--watch</code>":
+      "Inicie solo el servidor Express con <code>--watch</code>",
+    "Start only the Vite dev server": "Inicie solo el servidor de desarrollo Vite",
+    "TypeScript check + Vite production build to <code>client/dist/</code>":
+      "Verificación de TypeScript + construcción de producción de Vite para <code>client/dist/</code>",
+    "Start Express in production mode serving built client":
+      "Iniciar Express en modo de producción sirviendo al cliente construido",
+    "Manually write Claude Code hooks to <code>~/.claude/settings.json</code>":
+      "Escriba manualmente los ganchos del código Claude para <code>~/.claude/settings.json</code>",
+    "Insert demo sessions, agents, and events (8 sessions / 23 agents / 106 events)":
+      "Insertar sesiones de demostración, agentes y eventos (8 sesiones / 23 agentes / 106 eventos)",
+    "Import historical Claude Code sessions from <code>~/.claude</code> with deep JSONL extraction (API errors, turn durations, thinking blocks, subagent data)":
+      "Importar sesiones históricas del Código Claude desde <code>~/.claude</code> Con extracción profunda de JSONL (errores de API, duraciones de turno, bloqueos de pensamiento, datos de subagentes)",
+    "Delete all data from the database (keeps schema)":
+      "Borrar todos los datos de la base de datos (mantiene el esquema)",
+    "Run all server and client tests": "Ejecutar todas las pruebas del servidor y del cliente",
+    "Server integration tests only (Node built-in test runner)":
+      "Solo pruebas de integración del servidor (ejecutador de pruebas integrado en Node)",
+    "Client unit tests only (Vitest + Testing Library)":
+      "Solo pruebas unitarias del cliente (Vitest + Biblioteca de pruebas)",
+    "Install dependencies for the local MCP package under <code>mcp/</code>":
+      "Instale las dependencias del paquete MCP local en <code>mcp/</code>",
+    "Type-check MCP source without emitting build output":
+      "Comprueba el tipo de la fuente MCP sin emitir la salida de la compilación",
+    "Compile MCP server into <code>mcp/build/</code>":
+      "Compilar el servidor MCP en <code>mcp/build/</code>",
+    "Start MCP server (stdio transport — for MCP hosts)":
+      "Iniciar el servidor MCP (transporte stdio - para hosts MCP)",
+    "Start MCP HTTP+SSE server on port 8819 (Streamable HTTP + legacy SSE)":
+      "Inicie el servidor MCP HTTP+SSE en el puerto 8819 (HTTP transmisible + SSE heredado)",
+    "Start interactive MCP REPL with tab completion and colored output":
+      "Inicie MCP REPL interactivo con completación de pestañas y salida coloreada",
+    "Run MCP server in dev mode with <code>tsx</code> (stdio)":
+      "Ejecute el servidor MCP en modo de desarrollo con <code>tsx</code> (estdio)",
+    "Run MCP HTTP server in dev mode with <code>tsx</code>":
+      "Ejecute el servidor HTTP MCP en modo de desarrollo con <code>tsx</code>",
+    "Run MCP REPL in dev mode with <code>tsx</code>":
+      "Ejecute MCP REPL en modo de desarrollo con <code>tsx</code>",
+    "Build MCP container image with Docker (<code>agent-dashboard-mcp:local</code>)":
+      "Construye la imagen de contenedor MCP con Docker (<code>agent-dashboard-mcp:local</code>)",
+    "Build MCP container image with Podman (<code>localhost/agent-dashboard-mcp:local</code>)":
+      "Construye la imagen de contenedor MCP con Podman (<code>localhost/agent-dashboard-mcp:local</code>)",
+    "Run MCP server unit tests": "Ejecutar pruebas unitarias del servidor MCP",
+    "Install Electron + electron-builder under <code>desktop/</code>; rebuilds <code>better-sqlite3</code> for Electron's ABI. Preflights the native <code>better-sqlite3</code> build; prints actionable setup help (incl. a no-toolchain alternative) on failure":
+      "Instala Electron + electron-builder bajo <code>desktop/</code>; reconstruye <code>better-sqlite3</code> Para la ABI de Electron. Previa al nativo <code>better-sqlite3</code> Construir; imprime ayuda de configuración factible (incluyendo una alternativa sin cadena de herramientas) en caso de fallo",
+    "Prebuild guard + <code>tsc</code> compile of the Electron main process into <code>desktop/out/</code>":
+      "Guardia preconstruida + <code>tsc</code> Compilación del proceso principal de Electron en <code>desktop/out/</code>",
+    "Build, then launch the desktop app against <code>desktop/out/main.js</code>":
+      "Cree, luego lance la aplicación de escritorio contra <code>desktop/out/main.js</code>",
+    "Desktop smoke test — spawn Electron and probe <code>/api/health</code>":
+      "Prueba de humo en el escritorio: genera Electron y prueba <code>/api/health</code>",
+    "Build <strong>both</strong> per-arch DMGs (arm64 + x64). Correct for release — slower (packages each arch)":
+      "cuerpo <strong>ambos</strong> DMG por archivo (arm64 + x64). Correcto para la versión de lanzamiento, más lento (paquetes por cada archivo)",
+    "Build an Apple-Silicon-only DMG — fast (~1 min), recommended for a single machine":
+      "Cree un DMG exclusivo de Apple-Silicona: rápido (~1 min), recomendado para una sola máquina.",
+    "Build an Intel-only DMG — fast (macOS host)":
+      "Cree un DMG exclusivo para Intel: rápido (host macOS)",
+    "Build one merged universal DMG (arm64 + x86_64 in a single file). Optional, slowest — not what the release ships":
+      "Cree un DMG universal fusionado (arm64 + x86_64 en un solo archivo). Opcional, el más lento, no es lo que se envía con la versión de lanzamiento",
+    "Build the Windows NSIS installer <code>ClaudeCodeMonitor-Setup-&lt;ver&gt;-x64.exe</code> (Windows host)":
+      "Construir el instalador NSIS de Windows <code>ClaudeCodeMonitor-Setup-&lt;ver&gt;-x64.exe</code> (Hospedador de Windows)",
+    "Build the no-install portable <code>ClaudeCodeMonitor-&lt;ver&gt;-x64-portable.exe</code> (Windows host)":
+      "Construye el portátil sin instalación <code>ClaudeCodeMonitor-&lt;ver&gt;-x64-portable.exe</code> (Hospedador de Windows)",
+    "Regenerate <code>desktop/assets/icon.ico</code> from <code>icon.png</code> (PowerShell + .NET; Windows host)":
+      "regenerar <code>desktop/assets/icon.ico</code> de <code>icon.png</code> (PowerShell + .NET; host Windows)",
+    "Format all files with Prettier": "Formatea todos los archivos con Prettier",
+    "Check formatting without writing": "Comprueba el formato sin escribir nada",
+    "Core dashboard telemetry is composed of three processes (Claude hook source, dashboard server, browser UI). When the local MCP sidecar is enabled, it integrates with the same dashboard API via stdio, HTTP+SSE, or interactive REPL transport.":
+      "La telemetría del panel de control principal está compuesta por tres procesos (fuente de gancho Claude, servidor del panel de control, interfaz de usuario del navegador). Cuando se activa el sidecar MCP local, se integra con la misma API del panel de control a través de stdio, HTTP+SSE o transporte REPL interactivo.",
+    "Full system architecture — Claude Code process → Hook Layer → Server → Browser":
+      "Arquitectura completa del sistema: proceso Claude Code → Capa de conexión → Servidor → Navegador",
+    "Agent status transitions driven by hook events. <code>waiting</code> is a real persisted status — agents start as <code>waiting</code> and return to it after each turn. Error recovery requires active user retry (<code>UserPromptSubmit</code> or <code>PreToolUse</code>). A background watchdog detects API errors in transcripts every 15 s. The same watchdog also recovers <code>Esc</code>-cancelled turns — via either the transcript <code>[Request interrupted by user]</code> marker or the idle-working timeout when <code>Esc</code> preceded any output — and moves the session to Waiting.":
+      "Transiciones de estado del agente impulsadas por eventos de gancho. <code>waiting</code> Es un estado persistente real: los agentes comienzan como <code>waiting</code> Y vuelva a él después de cada turno. La recuperación de errores requiere que el usuario activo intente de nuevo (<code>UserPromptSubmit</code> Oregón <code>PreToolUse</code>). Un vigilante de fondo detecta errores de API en las transcripciones cada 15 segundos. El mismo vigilante también recupera <code>Esc</code>-vueltas canceladas, a través de la transcripción o de otra manera. <code>[Request interrupted by user]</code> Marcador o el tiempo de espera de funcionamiento inactivo cuando <code>Esc</code> precedió cualquier salida y mueve la sesión a Esperando.",
+    "Session status lifecycle. <code>waiting</code> is a UI overlay — persisted as <code>active</code> with <code>awaiting_input_since</code> set and <code>awaiting_reason</code> recording why (<code>session_start</code>, <code>stop</code>, <code>notification</code>, or <code>interrupted</code>). <code>SessionEnd</code> preserves error state. Error recovery requires <code>UserPromptSubmit</code> or <code>PreToolUse</code>. The watchdog also recovers <code>Esc</code>-cancelled turns (marker or idle-timeout path) and moves the session to Waiting. The dashboard surfaces the reason on every Waiting badge (hover tooltip, plus an inline chip on the Sessions table and session detail header) and in a waiting-for-input banner on the session detail page.":
+      "Ciclo de vida del estado de la sesión. <code>waiting</code> Es una superposición de interfaz de usuario - persistente como <code>active</code> con <code>awaiting_input_since</code> Configurar y <code>awaiting_reason</code> Grabando por qué (<code>session_start</code>, <code>stop</code>, <code>notification</code>, o <code>interrupted</code>). <code>SessionEnd</code> Preserva el estado de error. La recuperación de errores requiere <code>UserPromptSubmit</code> Oregón <code>PreToolUse</code>. también recupera <code>Esc</code>-cancela los turnos (ruta de marcador o tiempo de espera inactivo) y mueve la sesión a Esperando. La interfaz de usuario muestra la razón en cada distintivo de Esperando (pestaña de información al pasar el cursor sobre el objeto, además de un chip inline en la tabla de Sesiones y en el encabezado de detalles de la sesión) y en un banner de espera de entrada en la página de detalles de la sesión.",
+    "Complete event ingestion from hook fire to browser re-render":
+      "Ingestión completa del evento desde el fuego del gancho hasta la re-renderización del navegador",
+    "Initial load + WebSocket subscription lifecycle":
+      "Carga inicial + ciclo de vida de la suscripción de WebSocket",
+    "Server module dependency graph": "Gráfico de dependencias del módulo del servidor",
+    Module: "circuito",
+    Responsibility: "responsabilidad",
+    "Express app setup, middleware (CORS, JSON 1MB limit), route mounting, static serving in production, HTTP server, auto-hook installation on startup":
+      "Configuración de la aplicación Express, middleware (CORS, límite de JSON de 1 MB), montaje de rutas, servicio estático en producción, servidor HTTP, instalación automática de ganchos al inicio de sesión",
+    "SQLite connection, WAL/FK pragmas, schema migrations (<code >CREATE TABLE IF NOT EXISTS</code >), all prepared statements as a reusable <code>stmts</code> object. Tries <code>better-sqlite3</code> first, falls back to built-in <code>node:sqlite</code> via <code>compat-sqlite.js</code>":
+      "Conexión SQLite, pragmas WAL/FK, migraciones de esquema (<code >CREATE TABLE IF NOT EXISTS</code >), todas las declaraciones preparadas como reutilizables <code>stmts</code> Objeto. Intenta <code>better-sqlite3</code> En primer lugar, vuelve a lo incorporado <code>node:sqlite</code> a través de <code>compat-sqlite.js</code>",
+    "Compatibility wrapper giving Node.js built-in <code>node:sqlite</code> (<code>DatabaseSync</code>) the same API as <code>better-sqlite3</code> — pragma, transaction, prepare. Used as automatic fallback on Node 22+":
+      "Envoltorio de compatibilidad que da Node.js incorporado <code>node:sqlite</code> (<code>DatabaseSync</code>) la misma API que <code>better-sqlite3</code> — pragma, transacción, preparar. Se utiliza como fallback automático en Node 22+",
+    "WebSocket server on <code>/ws</code> path, 30s ping/pong heartbeat, typed <code>broadcast(type, data)</code> function":
+      "Servidor WebSocket encendido <code>/ws</code> Camino, latido de ping/pong de 30s, escrito a mano <code>broadcast(type, data)</code> función",
+    "Core event processing inside SQLite transactions. Auto-creates sessions/agents. Switch-case dispatch by hook type. Extracts token usage from Stop events.":
+      "Procesamiento de eventos centrales dentro de las transacciones de SQLite. Crea automáticamente sesiones/agentes. Despacho de casos por tipo de gancho. Extrae el uso de tokens de los eventos Stop.",
+    "CRUD with pagination. GET includes agent count via LEFT JOIN. POST is idempotent on session ID.":
+      "CRUD con paginación. GET incluye el número de agentes a través de LEFT JOIN. POST es idempotente en el ID de la sesión.",
+    "CRUD with status/session_id filtering. PATCH broadcasts <code>agent_updated</code>.":
+      "CRUD con filtrado por estado/session_id. Transmisiones PATCH <code>agent_updated</code>.",
+    "Read-only event listing with session_id filter and pagination.":
+      "Lista de eventos de solo lectura con filtro session_id y paginación.",
+    "Single aggregate query — total/active counts, status distributions, WS connection count.":
+      "Consulta agregada única: conteos totales/activos, distribuciones de estado, conteo de conexiones WS.",
+    "Extended analytics — token totals, tool usage counts, daily event/session trends, agent type distribution, event type breakdown, average events per session.":
+      "Análisis extendido: totales de tokens, conteos de uso de herramientas, tendencias diarias de eventos/sesiones, distribución del tipo de agente, desglose del tipo de evento, eventos promedio por sesión.",
+    "Model pricing CRUD (list, upsert, delete). Per-session and global cost calculation with pattern-based model matching and specificity sorting.":
+      "Precio de modelos CRUD (lista, inserción, eliminación). Cálculo de costos por sesión y global con coincidencia de modelos basada en patrones y clasificación por especificidad.",
+    "System info (DB size, row counts, hook status, server uptime). Data export as JSON. Session cleanup (abandon stale active sessions, purge old completed sessions). Clear all data. Reset pricing to defaults. Reinstall hooks.":
+      "Información del sistema (tamaño de la base de datos, número de filas, estado del gancho, tiempo de actividad del servidor). Exportación de datos como JSON. Limpieza de sesiones (abandonar sesiones activas obsoletas, purgar sesiones antiguas completadas). Borrar todos los datos. Restablecer los precios a los valores predeterminados. Reinstalar los ganchos.",
+    "Aggregate workflow visualization data (agent orchestration, tool transitions, collaboration networks, workflow patterns, model delegation, error propagation, concurrency, session complexity, compaction impact). Accepts <code>?status=active|completed</code> filter. Per-session drill-in with agent tree, tool timeline, and events.":
+      "Datos de visualización agregada del flujo de trabajo (orquestación de agentes, transiciones de herramientas, redes de colaboración, patrones de flujo de trabajo, delegación de modelos, propagación de errores, concurrencia, complejidad de sesiones, impacto de la compactación). Acepta <code>?status=active|completed</code> Filtro. Entrenamiento detallado por sesión con árbol de agentes, línea de tiempo de herramientas y eventos.",
+    "React component tree": "Árbol de componentes React",
+    Purpose: "propósito",
+    "<code>lib/api.ts</code>": "<code>lib/api.ts</code>",
+    "Typed fetch wrapper — one method per REST endpoint. All return typed promises.":
+      "Envoltorio de recuperación de texto — un método por punto final REST. Todo devuelve promesas de texto.",
+    "<code>lib/types.ts</code>": "<code>lib/types.ts</code>",
+    "TypeScript interfaces: <code>Session</code>, <code>Agent</code>, <code>DashboardEvent</code>, <code>Stats</code>, <code>Analytics</code>, <code>WSMessage</code>, plus all workflow-related types (<code>WorkflowData</code>, <code>SessionDrillIn</code>, etc). Status config maps.":
+      "Interfaces de TypeScript: <code>Session</code>, <code>Agent</code>, <code>DashboardEvent</code>, <code>Stats</code>, <code>Analytics</code>, <code>WSMessage</code>, además de todos los tipos relacionados con el flujo de trabajo (<code>WorkflowData</code>, <code>SessionDrillIn</code>, etc). Mapa de configuración de estado.",
+    "<code>lib/eventBus.ts</code>": "<code>lib/eventBus.ts</code>",
+    "Set-based pub/sub. <code>subscribe(fn)</code> returns an unsubscribe function for clean useEffect teardown.":
+      "Pub/sub basado en conjuntos. <code>subscribe(fn)</code> Devuelve una función de cancelación de suscripción para la desinstalación limpia de useEffect.",
+    "<code>lib/format.ts</code>": "<code>lib/format.ts</code>",
+    "Date/time formatting helpers — relative time, duration, ISO display.":
+      "Ayudantes de formateo de fecha/hora: tiempo relativo, duración, visualización ISO.",
+    "<code>hooks/useWebSocket.ts</code>": "<code>hooks/useWebSocket.ts</code>",
+    "Auto-reconnecting WebSocket React hook. 2-second reconnect interval. Publishes messages to eventBus.":
+      "Gancho React WebSocket de reconectividad automática. Intervalo de reconectividad de 2 segundos. Publica mensajes en eventBus.",
+    "The dashboard is a Progressive Web App with its own <code>manifest.json</code> and Service Worker (<code>client/public/sw.js</code>). The landing page and wiki are also independent PWAs with separate manifests and service workers.":
+      "El panel de control es una aplicación web progresiva con su propia <code>manifest.json</code> Y Trabajador de Servicio (<code>client/public/sw.js</code>). La página de inicio y la wiki también son PWAs independientes con manifiestos y trabajadores de servicio separados.",
+    Surface: "superficie",
+    Manifest: "manifiesto",
+    "Service Worker": "Trabajador de servicio",
+    Strategy: "estrategia",
+    "<code>client/public/manifest.json</code>": "<code>client/public/manifest.json</code>",
+    "<code>client/public/sw.js</code>": "<code>client/public/sw.js</code>",
+    "Precaches app shell. Cache-first for static assets (JS/CSS bundles). Network-first for navigation with offline fallback. Skips <code>/api/*</code>, <code>/ws</code>, and Vite HMR. Preserves push notification handlers.":
+      "Precarga la cáscara de la aplicación. Cache primero para activos estáticos (paquetes JS/CSS). Red primero para la navegación con fallback sin conexión. Saltos <code>/api/*</code>, <code>/ws</code>, y Vite HMR. Preserva los manejadores de notificaciones push.",
+    "Landing page": "página de aterrizaje",
+    "<code>manifest.json</code> (root)": "<code>manifest.json</code> (raíz)",
+    "<code>sw.js</code> (root)": "<code>sw.js</code> (raíz)",
+    "Precaches HTML shell, favicon, OG image. Lazy-caches screenshot PNGs on first view. Network-first HTML, cache-first assets.":
+      "Precarga la cáscara HTML, el icono favorito e la imagen OG. Carga en caché las capturas de pantalla PNG en la primera vista. HTML primero en la red, activos primero en la caché.",
+    Wiki: "wiki",
+    "<code>wiki/manifest.json</code>": "<code>wiki/manifest.json</code>",
+    "<code>wiki/sw.js</code>": "<code>wiki/sw.js</code>",
+    "Precaches <code>index.html</code>, <code>style.css</code>, <code>script.js</code>. Fully offline after one visit.":
+      "Precarga <code>index.html</code>, <code>style.css</code>, <code>script.js</code>. completamente desactivado después de una visita.",
+    'All three SWs call <code>skipWaiting()</code> on install and delete stale caches on activate (keyed by version strings like <code>dashboard-v1</code>). Manifests use SVG icons (<code>favicon.svg</code>) with <code>sizes="any"</code>. iOS standalone mode is enabled via <code>apple-mobile-web-app-capable</code> meta tags.':
+      'Los tres SW llaman <code>skipWaiting()</code> Al instalar y eliminar cachés obsoletos al activar (claveada por cadenas de versión como <code>dashboard-v1</code>). Manifesta el uso de iconos SVG (<code>favicon.svg</code>) con <code>sizes="any"</code>. El modo independiente de iOS está habilitado a través de <code>apple-mobile-web-app-capable</code> Etiquetas meta.',
+    "The client deliberately avoids Redux / Zustand / Context. Each page owns its data and lifecycle. WebSocket events trigger a reload or append — no complex state merging.":
+      "El cliente evita deliberadamente Redux / Zustand / Context. Cada página posee sus propios datos y ciclo de vida. Los eventos WebSocket desencadenan una recarga o un apéndice, sin fusión compleja de estados.",
+    "No global store — by design": "Sin tienda global, por diseño",
+    "There is no cross-page shared state. Each page fetches and owns exactly the data it displays. This simplifies debugging and avoids stale-closure hazards that are common with global stores in long-running WebSocket apps.":
+      "No hay estado compartido entre páginas. Cada página recupera y posee exactamente los datos que muestra. Esto simplifica el depuración y evita los peligros de cierre obsoleto que son comunes con las almacenes globales en aplicaciones WebSocket de larga duración.",
+    Index: "índice",
+    Table: "mesa",
+    "Column(s)": "Columna(s)",
+    "Fast agent lookup by session": "Búsqueda rápida de agentes por sesión",
+    "Kanban column queries": "Consultas de columnas Kanban",
+    "Session detail event list": "Lista de eventos de detalles de la sesión",
+    "Filter events by type": "Filtrar eventos por tipo",
+    "Activity feed ordering": "Pedido de alimentación de actividad",
+    "Status filter on sessions page": "Filtro de estado en la página de sesiones",
+    "Default sort order": "Orden de clasificación predeterminado",
+    Pragma: "Pragma",
+    Value: "valor",
+    Rationale: "razones",
+    "Concurrent reads during writes. Far better for read-heavy dashboards.":
+      "Lecturas concurrentes durante las escrituras. Mucho mejor para paneles de control con mucha carga de lectura.",
+    "Referential integrity — prevents orphaned agents/events.":
+      "Integridad referencial: evita agentes/eventos huérfanos.",
+    "Wait up to 5s for write lock instead of failing immediately under load.":
+      "Espera hasta 5 segundos para el bloqueo de escritura en lugar de fallar inmediatamente bajo carga.",
+    'All endpoints return JSON. Errors follow <code>{ "error": { "code", "message" } }</code>. The OpenAPI 3.0 spec comprehensively documents every backend route - parameters, request/response schemas, field descriptions, and examples. It is served at <code>/api/openapi.json</code> (with a committed <code>openapi.yaml</code> mirror), rendered as interactive Swagger UI at <code>/api/docs</code>, and as a clean, read-optimized ReDoc reference at <code>/api/redoc</code>. ReDoc is self-hosted, so it works fully offline.':
+      'Todos los puntos finales devuelven JSON. Seguen los errores <code>{ "error": { "code", "message" } }</code>. API 3.0 especifica documenta de forma exhaustiva cada ruta de backend: parámetros, esquemas de solicitud/respuesta, descripciones de campos y ejemplos. Se sirve en <code>/api/openapi.json</code> (con un comprometido <code>openapi.yaml</code> Espejo), renderizado como una interfaz de usuario interactiva de Swagger en <code>/api/docs</code>, y como una referencia ReDoc limpia y optimizada para la lectura en <code>/api/redoc</code>. Doc es auto alojado, por lo que funciona completamente sin conexión.',
+    '<span class="caption-icon">📘</span> <span>Swagger UI at <code>/api/docs</code> — auto-generated interactive playground for every REST endpoint. Try-it-out forms, request/response schema, auth headers, and curl snippets</span>':
+      '<span class="caption-icon">📘</span> <span>Interfaz de usuario Swagger en <code>/api/docs</code> — patio de recreo interactivo generado automáticamente para cada punto final REST. Formularios de prueba, esquema de solicitud/respuesta, encabezados de autenticación y fragmentos de curl</span>',
+    Property: "propiedad",
+    Path: "recorrido",
+    Protocol: "protocolo de comunicación",
+    "Standard WebSocket (RFC 6455)": "WebSocket estándar (RFC 6455)",
+    Heartbeat: "latido",
+    "Server pings every 30s — clients that don't pong are terminated":
+      "El servidor envía ping cada 30 segundos, los clientes que no envían ping se terminan.",
+    Reconnect: "volver a conectar",
+    "Client retries every 2 seconds on disconnect":
+      "El cliente vuelve a intentarlo cada 2 segundos al desconectarse",
+    "Client WebSocket auto-reconnect state machine":
+      "Máquina de estado de conexión automática de WebSocket del cliente",
+    "<code>scripts/hook-handler.js</code> is a minimal, fail-safe forwarder. It always exits 0 so it can never block Claude Code regardless of server state.":
+      "<code>scripts/hook-handler.js</code> Es un reenvío mínimo y seguro de fallo. Siempre sale 0 para que nunca pueda bloquear el código Claude independientemente del estado del servidor.",
+    "hook-handler.js flow — always exits 0, never blocks Claude Code":
+      "Flow de hook-handler.js: siempre sale 0, nunca bloquea el código de Claude.",
+    "Hook installation is idempotent — safe to run multiple times":
+      "La instalación del gancho es idempotente, es decir, es segura para ejecutarse varias veces.",
+    '<span class="caption-icon">📥</span> <span>Settings → Import History — rescan default paths, set a custom directory, or drag-and-drop <code>.gz</code> archives. Progress bar and result card show counts for every run</span>':
+      '<span class="caption-icon">📥</span> <span>Configuración → Historial de importación — volver a escanear los rutas predeterminadas, establecer una carpeta personalizada o arrastrar y soltar <code>.gz</code> Archivos. La barra de progreso y la tarjeta de resultados muestran los conteos para cada ejecución</span>',
+    "The dashboard ships with a first-class <b>history importer</b> that backfills sessions, agents, events, tokens, and costs from Claude Code JSONL transcripts. Live hook ingestion and manual import share the exact same parser — <code>parseSessionFile</code> + <code>importSession</code> in <code>scripts/import-history.js</code> — which is the architectural contract that guarantees imported token totals and cost values are identical to those captured in real time. Re-imports are idempotent: session IDs are the dedup key and compaction <code>baseline_*</code> columns preserve pre-compaction token totals.":
+      "El panel de instrumentos viene con una primera clase <b>Importador de historial</b> que rellena las sesiones, agentes, eventos, tokens y costos de las transcripciones de Claude Code JSONL. La ingestión de enlaces en vivo e importación manual comparten el mismo parser exactamente - <code>parseSessionFile</code> + <code>importSession</code> indio <code>scripts/import-history.js</code> — que es el contrato arquitectónico que garantiza que los totales de tokens importados y los valores de costo sean idénticos a los capturados en tiempo real. Las reimportaciones son idempotentes: los ID de sesión son la clave de deduplicación y la compactación <code>baseline_*</code> Las columnas conservan los totales de tokens de precompactación.",
+    "All three modes funnel into the same parser and DB transaction — imported numbers match live capture bit-for-bit":
+      "Los tres modos convergen en el mismo analizador y transacción de la base de datos: los números importados coinciden bit a bit con la captura en vivo.",
+    "Upload path: multipart → safe extract → walk → parse → import — every temp dir reclaimed in <code>finally</code>":
+      "Ruta de subida: multipart → extracto seguro → caminar → analizar → importar, cada directorio temporal recuperado en <code>finally</code>",
+    "The <code>baseline_*</code> columns make cost monotonic under re-imports — compacted sessions retain pre-compaction usage for billing":
+      "el <code>baseline_*</code> Las columnas hacen que el costo sea monótono bajo las reimportaciones: las sesiones compactadas conservan el uso previo a la compactación para la facturación",
+    Layout: "diseño",
+    Example: "ejemplo",
+    Handling: "manipulación",
+    "Default Claude Code": "Código Claude predeterminado",
+    "Session transcript — extracts tokens, compactions, tool uses, turn durations":
+      "Transcripción de la sesión: extrae tokens, compactaciones, usos de herramientas, duraciones de las rondas",
+    "Default subagent": "Subagente predeterminado",
+    "Paired with parent on discovery via <code>findSessionSubagents</code>":
+      "Emparejado con el progenitor en la descubrimiento a través de <code>findSessionSubagents</code>",
+    "Alternative subagent": "Subagente alternativo",
+    "Paired with parent on discovery (second layout probed automatically)":
+      "Emparejado con el padre en la exploración (segundo diseño explorado automáticamente)",
+    "Orphan subagent": "Subagente huérfano",
+    "No parent JSONL in source, but <code>sid</code> exists in DB":
+      "No hay JSONL padre en el código fuente, pero <code>sid</code> existe en la BD",
+    "<code>importFromDirectory</code> probes both layouts; attaches if the parent is found":
+      "<code>importFromDirectory</code> Probará ambos diseños; se adjunta si se encuentra el padre",
+    "Flat JSONL drop": "Caída plana de JSONL",
+    "Recognized as a loose session transcript":
+      "Reconocido como una transcripción de sesión suelta",
+    Archives: "archivo",
+    "Extracted into a per-request temp dir, then walked by the same importer":
+      "Extraído en una carpeta temporal por solicitud, luego pasó por el mismo importador",
+    "Single-file gzip": "Gzip de archivo único",
+    "Gunzipped in streaming mode with running byte-counter size cap":
+      "Desbloqueado en modo de transmisión con límite de tamaño del contador de bytes en ejecución",
+    Threat: "amenaza",
+    Mitigation: "moderación",
+    "Path traversal via archive entries":
+      "Recorrido del camino a través de las entradas del archivo",
+    "<code>archive.safeJoin</code> resolves under the extraction root; any <code>..</code> or absolute path returns <code>null</code>":
+      "<code>archive.safeJoin</code> Resuelve bajo la raíz de extracción; cualquier <code>..</code> O devoluciones de ruta absoluta <code>null</code>",
+    "Zip / tar / gzip bombs": "Bombas Zip / tar / gzip",
+    "<code>MAX_EXTRACT_BYTES</code> (default 4 GB) enforced by running byte counter; aborts with <code>ExtractionLimitError</code> → HTTP 413":
+      "<code>MAX_EXTRACT_BYTES</code> (por defecto 4 GB) aplicado mediante el funcionamiento del contador de bytes; se interrumpe con <code>ExtractionLimitError</code> → HTTP 413",
+    "Per-file upload size abuse": "Abuso del tamaño de carga de archivos por archivo",
+    "multer <code>limits.fileSize = MAX_UPLOAD_BYTES</code> (default 1 GB)":
+      "Abusar sexualmente <code>limits.fileSize = MAX_UPLOAD_BYTES</code> (por defecto 1 GB)",
+    "Too many files per request": "Demasiados archivos por solicitud",
+    "multer <code>limits.files = MAX_UPLOAD_FILES</code> (default 2000)":
+      "Abusar sexualmente <code>limits.files = MAX_UPLOAD_FILES</code> (por defecto 2000)",
+    "Unsupported file types": "Tipos de archivos no compatibles",
+    "<code>fileFilter</code> drops them early and reports them in <code>rejected_files[]</code>":
+      "<code>fileFilter</code> Los deja temprano y los informa <code>rejected_files[]</code>",
+    "Concurrent upload temp-dir collisions":
+      "Colisiones temporales de directorios de carga en paralelo",
+    "Per-request temp dir on <code>req._ccamUploadDir</code>; created in multer <code>destination</code>, reclaimed in <code>finally</code>":
+      "Directorio temporal por solicitud activado <code>req._ccamUploadDir</code>; creado en multer <code>destination</code>, recuperado en <code>finally</code>",
+    "Arbitrary absolute path on <code>scan-path</code>":
+      "Ruta absoluta arbitraria en <code>scan-path</code>",
+    "Validated: must be absolute (after <code>~</code> expansion), exist, and be a directory":
+      "Validado: debe ser absoluto (después de <code>~</code> Expansión), existir y ser un directorio",
+    "Relative / traversal paths on <code>scan-path</code>":
+      "Rutas relativas / de recorrido en <code>scan-path</code>",
+    "Rejected with <code>INVALID_INPUT</code>": "Rechazado con <code>INVALID_INPUT</code>",
+    "Maximum size per uploaded file on <code>/api/import/upload</code>":
+      "Tamaño máximo por archivo cargado en <code>/api/import/upload</code>",
+    "Maximum files per upload request": "Archivos máximos por solicitud de carga",
+    "Ceiling on total uncompressed bytes from any single archive (zip-bomb defense)":
+      "Techo sobre los bytes totales no comprimidos de cualquier archivo individual (defensa contra zip-bomb)",
+    "Every import emits <code>import.progress</code> messages on <code>/ws</code>. Messages are throttled to at most one every ~150 ms to avoid flooding the channel on multi-thousand-session imports; the terminal <code>complete</code> and <code>error</code> frames are never throttled.":
+      "Cada importación emite <code>import.progress</code> Mensajes en <code>/ws</code>. se limitan a un máximo de un mensaje cada ~150 ms para evitar inundar el canal en importaciones de múltiples sesiones de miles de usuarios; el terminal <code>complete</code> y <code>error</code> Los fotogramas nunca se limitan.",
+    "Phases: <code>start</code> → <code>scan</code> → <code>extract</code> (upload only) → <code>parse</code> → <code>complete</code>, with <code>error</code> / <code>extract_error</code> replacing <code>complete</code> on failure.":
+      "Fases: <code>start</code> → <code>scan</code> → <code>extract</code> (solo para subir archivos) → <code>parse</code> → <code>complete</code>, con <code>error</code> / <code>extract_error</code> Reemplazando <code>complete</code> En caso de fracaso.",
+    "In addition to dashboard telemetry, this project includes a production-grade local MCP server and complete extension scaffolding for both Claude Code and Codex. This gives agents a richer local tool surface while keeping all execution local-first. The MCP server supports three transport modes: stdio for host integration, HTTP+SSE for remote clients, and an interactive REPL for operator debugging.":
+      "Además de la telemetría del panel de control, este proyecto incluye un servidor MCP local de grado de producción y una estructura de escalera de extensión completa para tanto Claude Code como Codex. Esto da a los agentes una superficie de herramienta local más rica mientras mantiene toda la ejecución local primero. El servidor MCP admite tres modos de transporte: stdio para la integración del host, HTTP+SSE para los clientes remotos y un REPL interactivo para el depuración del operador.",
+    '<span class="caption-icon">🔧</span> MCP Server REPL — interactive tool invocation terminal with colored JSON output, argument prompts, error formatting, and session-aware context for rapid testing':
+      '<span class="caption-icon">🔧</span> MCP Server REPL: terminal de invocación de herramientas interactivas con salida JSON coloreada, mensajes de inicio de sesión, formato de errores y contexto consciente de sesiones para pruebas rápidas.',
+    "Local extension architecture: host instructions + skills + multi-transport MCP sidecar":
+      "Arquitectura de extensión local: instrucciones del host + habilidades + MCP sidecar de transporte múltiple",
+    "The <code>mcp/</code> package exposes dashboard-oriented tools for AI agents across three transport modes. Mutation and destructive operations are policy-gated by environment variables and disabled by default. HTTP mode serves both Streamable HTTP (protocol 2025-11-25) and legacy SSE (protocol 2024-11-05). REPL mode provides tab-completed interactive tool invocation with colored output and JSON syntax highlighting.":
+      "el <code>mcp/</code> El paquete expone herramientas orientadas a la consola para agentes de IA en tres modos de transporte. Las mutaciones y las operaciones destructivas están restringidas por políticas mediante variables ambientales y están desactivadas por defecto. El modo HTTP sirve tanto para HTTP transmisible (protocolo 2025-11-25) como para SSE heredado (protocolo 2024-11-05). El modo REPL proporciona la invocación interactiva de herramientas completadas con pestañas con salida coloreada y resaltado de sintaxis JSON.",
+    Component: "componente",
+    Location: "lugar",
+    Notes: "Notas",
+    "MCP source": "Fuente MCP",
+    "TypeScript server, tools, policy guards, transport layer, CLI UI":
+      "Servidor TypeScript, herramientas, guardias de políticas, capa de transporte, interfaz de usuario de línea de comandos",
+    "MCP build output": "Salida de la construcción de MCP",
+    "Compiled JavaScript runtime for all transport modes":
+      "Ejecución compilada de JavaScript para todos los modos de transporte",
+    "MCP docs": "Documentos MCP",
+    "Tool catalog, architecture diagrams, host integration examples, REPL guide":
+      "Catálogo de herramientas, diagramas de arquitectura, ejemplos de integración de host, guía de REPL",
+    "Transport layer": "Nivel de transporte",
+    "HTTP+SSE server, interactive REPL, tool handler collector":
+      "Servidor HTTP+SSE, REPL interactivo, recopilador de manejadores de herramientas",
+    "CLI UI": "CLI UI",
+    "ANSI banner, colors, formatter with tables, boxes, JSON highlighting":
+      "Banner ANSI, colores, formateador con tablas, cajas, resaltado JSON",
+    "Runtime commands": "Comandos de tiempo de ejecución",
+    "Start MCP in stdio, HTTP+SSE, or REPL mode (production or dev)":
+      "Inicie MCP en modo stdio, HTTP+SSE o REPL (producción o desarrollo)",
+    Target: "blanco",
+    Files: "Archivos",
+    "Claude Code": "Código Claude",
+    "Persistent project instructions + path-scoped coding rules":
+      "Instrucciones persistentes del proyecto + reglas de codificación con alcance de ruta",
+    "Claude Code Skills": "Habilidades de código Claude",
+    "Reusable workflows (onboarding, shipping, MCP ops, live debugging)":
+      "Procesos de trabajo reutilizables (integración, envío, operaciones MCP, depuración en vivo)",
+    "Claude Code Subagents": "Subagentes del código Claude",
+    "Specialized reviewers for backend, frontend, and MCP code paths":
+      "Revisores especializados para rutas de código de backend, frontend y MCP",
+    "Codex Base Instructions": "Instrucciones básicas del Codex",
+    "Project-wide guidance + execution policy defaults":
+      "Guía general para todo el proyecto + valores predeterminados de la política de ejecución",
+    "Codex Skills": "Habilidades del Codex",
+    "Task-specific skills aligned to this repository":
+      "Habilidades específicas para tareas alineadas con este repositorio",
+    "Codex Agents": "Agentes del Codex",
+    "Reusable custom-agent templates for implementation and review":
+      "Plantillas de agentes personalizadas reutilizables para la implementación y revisión",
+    Role: "papel",
+    "Receives Claude hook payloads over stdin and forwards them to dashboard API":
+      "Recibe cargas útiles de gancho Claude a través de stdin y las envía a la API del panel de control",
+    "Writes/updates hook registration in <code>~/.claude/settings.json</code>":
+      "Escribe/actualiza el registro del gancho en <code>~/.claude/settings.json</code>",
+    "Batch history importer used by server startup auto-import, the <code>/api/import/*</code> routes, and the <code>import-history</code> CLI. Exposes <code>importAllSessions()</code> for the default projects dir and the generalized <code>importFromDirectory(dbModule, rootDir, {onProgress})</code> which walks any directory recursively, classifies session vs subagent JSONLs (probes both <code>&lt;proj&gt;/&lt;sid&gt;/subagents/*</code> and <code>&lt;proj&gt;/subagents/&lt;sid&gt;/*</code> layouts), and funnels everything through the shared <code>parseSessionFile</code> + <code>importSession</code> pipeline — identical to live ingest. <b>Re-import is fully incremental</b>: a per-event-type high-water mark (<code>MAX(created_at) GROUP BY event_type</code> for the session) drives <code>ts &gt; cutoff[type]</code> dedup for Stop / PostToolUse / TurnDuration / ToolError, so long-running sessions whose transcripts grow across multiple days keep receiving new events on every re-run. <code>sessions.ended_at</code> is rolled forward when the JSONL has progressed past the stored value, and message-count metadata is refreshed on every pass. Session-ID dedup and <code>baseline_*</code> preservation keep token totals stable. Extracts tokens, API errors, turn durations, thinking blocks, usage extras, and per-subagent breakdowns":
+      "Importador de historial de lotes utilizado por la importación automática de inicio del servidor, el <code>/api/import/*</code> Rutas, y el <code>import-history</code> CLI. Expone <code>importAllSessions()</code> Para la carpeta de proyectos predeterminada y la generalizada <code>importFromDirectory(dbModule, rootDir, {onProgress})</code> Que recorre cualquier directorio recursivamente, clasifica JSONL de sesiones vs subagentes (probar ambos <code>&lt;proj&gt;/&lt;sid&gt;/subagents/*</code> y <code>&lt;proj&gt;/subagents/&lt;sid&gt;/*</code> Diseños de plantillas), y canaliza todo a través del compartido <code>parseSessionFile</code> + <code>importSession</code> túnel de tuberías — idéntico a la ingestión en vivo. <b>La reimportación es totalmente incremental</b>: un punto máximo de agua alta por tipo de evento (<code>MAX(created_at) GROUP BY event_type</code> Para la sesión) conduce <code>ts &gt; cutoff[type]</code> Deduplicación para Stop / PostToolUse / TurnDuration / ToolError, por lo que las sesiones de larga duración cuyas transcripciones crecen a lo largo de varios días siguen recibiendo nuevos eventos en cada ejecución. <code>sessions.ended_at</code> Se desplaza hacia adelante cuando el JSONL ha avanzado más allá del valor almacenado, y los metadatos de contador de mensajes se actualizan en cada pasada. Deduplicación de ID de sesión y <code>baseline_*</code> preservación mantiene los totales de tokens estables. Extrae tokens, errores de API, duraciones de turnos, bloqueos de pensamiento, extras de uso y desgloses por subagente.",
+    "Express router for Import History. Four endpoints: <code>GET /api/import/guide</code> (OS-aware instructions + default-dir stats), <code>POST /api/import/rescan</code> (default <code>~/.claude/projects</code>), <code>POST /api/import/scan-path</code> (arbitrary absolute dir with <code>~</code> expansion), <code>POST /api/import/upload</code> (multer multipart). Each request uses a per-request temp dir reclaimed in <code>finally</code>. Progress broadcast as throttled <code>import.progress</code> WebSocket messages. Limits tunable via <code>CCAM_IMPORT_MAX_BYTES</code>, <code>CCAM_IMPORT_MAX_FILES</code>, <code>CCAM_IMPORT_MAX_EXTRACT_BYTES</code>":
+      "Router Express para Historial de Importaciones. Cuatro puntos finales: <code>GET /api/import/guide</code> (Instrucciones conscientes del sistema operativo + estadísticas de la carpeta predeterminada), <code>POST /api/import/rescan</code> (por defecto <code>~/.claude/projects</code>), <code>POST /api/import/scan-path</code> (dirección absoluta arbitraria con <code>~</code> Expansión), <code>POST /api/import/upload</code> (multipart multipart). Cada solicitud utiliza una carpeta temporal por solicitud recuperada en <code>finally</code>. de transmisión de progreso como restringido <code>import.progress</code> Mensajes WebSocket. Los límites se pueden ajustar a través de <code>CCAM_IMPORT_MAX_BYTES</code>, <code>CCAM_IMPORT_MAX_FILES</code>, <code>CCAM_IMPORT_MAX_EXTRACT_BYTES</code>",
+    "Safe archive extraction: <code>.zip</code> via <code>adm-zip</code>, <code>.tar</code>/<code>.tar.gz</code>/<code>.tgz</code> via <code>tar</code>, plain <code>.gz</code> streaming via <code>zlib</code>. Every entry validated through <code>safeJoin</code> which rejects absolute paths and <code>..</code> traversal before any bytes are written. Enforces a hard <code>MAX_EXTRACT_BYTES</code> cap (default 4 GB) with <code>ExtractionLimitError</code> surfaced as HTTP 413 — defense against zip/tar/gzip bombs":
+      "Extracción segura del archivo: <code>.zip</code> a través de <code>adm-zip</code>, <code>.tar</code>/<code>.tar.gz</code>/<code>.tgz</code> a través de <code>tar</code>, simple <code>.gz</code> Transmisión en streaming a través de <code>zlib</code>. validada por cada entrada a través de <code>safeJoin</code> Que rechaza caminos absolutos y <code>..</code> Recorrido antes de que se escriban ningún byte. Impone un duro <code>MAX_EXTRACT_BYTES</code> Límite de almacenamiento (por defecto 4 GB) con <code>ExtractionLimitError</code> Surge como HTTP 413: defensa contra bombas zip/tar/gzip.",
+    "Loads deterministic demo data for testing and demos":
+      "Carga datos de demostración deterministas para pruebas y demostraciones",
+    "Removes persisted rows while preserving schema":
+      "Elimina las filas persistentes mientras preserva el esquema",
+    "The Agent Monitor ships with an official Claude Code plugin marketplace containing ten production-ready plugins (53 skills, 14 agents, 30 slash commands, 3 CLI tools, 3 hook configs, and 1 MCP server). These extend Claude Code with skills, agents, hooks, CLI tools, and MCP integration — all grounded in the real data model (token tracking with compaction baselines, cost calculation via pattern-matched pricing rules, workflow intelligence with 11 datasets per session, and session metadata including thinking blocks, turn counts, and inference geography).":
+      "El Monitor de Agentes viene con un mercado oficial de plugins de Claude Code que contiene diez plugins listos para producción (53 habilidades, 14 agentes, 30 comandos slash, 3 herramientas CLI, 3 configuraciones de ganchos y 1 servidor MCP). Estos amplían Claude Code con habilidades, agentes, ganchos, herramientas CLI e integración MCP, todo ello basado en el modelo de datos real (seguimiento de tokens con bases de compresión, cálculo de costos a través de reglas de precios que coinciden con patrones, inteligencia de flujo de trabajo con 11 conjuntos de datos por sesión y metadatos de sesión que incluyen bloques de pensamiento, conteos de turnos y geografía de inferencia).",
+    Plugin: "Plugin",
+    Skills: "Habilidades",
+    Agent: "representante",
+    "CLI Tools": "Herramientas CLI",
+    Focus: "manifiesto",
+    "Token usage (4 types + baselines), cost via pricing engine, daily trends, productivity scoring":
+      "Uso de tokens (4 tipos + bases de datos), costo a través del motor de precios, tendencias diarias, puntuación de productividad",
+    "Standup reports, sprint tracking, workflow optimization via 11 workflow intelligence datasets":
+      "Informes de pie, seguimiento de sprints, optimización del flujo de trabajo a través de 11 conjuntos de datos de inteligencia de flujo de trabajo",
+    "Session debugging, hook diagnostics, data export (JSON/CSV), system health":
+      "Depuración de sesiones, diagnóstico de ganchos, exportación de datos (JSON/CSV), estado del sistema",
+    "Pattern detection via tool flow transitions, anomaly alerting, optimization, session comparison":
+      "Detección de patrones a través de transiciones de flujo de herramientas, alerta de anomalías, optimización, comparación de sesiones",
+    "Budget guardrails: set budgets, forecast week/month-end spend, cost-threshold alerts, model-routing savings (fail-safe Stop hook)":
+      "Barandas de presupuesto: establezca presupuestos, pronostique los gastos a finales de semana/mes, alertas de umbral de costo, ahorros de enrutamiento de modelos (gancho de parada de seguridad)",
+    "Session forensics: search, timeline, transcript replay, per-cwd rollup, cleanup":
+      "Perfil forense de sesiones: búsqueda, cronología, reproducción de transcripciones, agregación por directorio de trabajo, limpieza",
+    "Multi-agent orchestration &amp; fleet intelligence: DAG map, delegation audit, concurrency, error propagation, fleet runs (11-dataset workflow intelligence API)":
+      "Orquestación multiagente e inteligencia de flota: mapa DAG, auditoría de delegación, concurrencia, propagación de errores, ejecuciones de flota (API de inteligencia de flujo de trabajo de 11 conjuntos de datos)",
+    "Reliability &amp; SLOs: error scan, API-error report, hook-failure audit, SLO check, regression alert":
+      "Reliability &amp; SLOs: escaneo de errores, informe de errores API, auditoría de fallos de conexión, verificación de SLOs, alerta de regresión",
+    "Claude Code config &amp; memory governance: config audit, memory review, skill/MCP/hook inventory (via the Config Explorer API)":
+      "Configuración y gobernanza de la memoria de Claude Code: auditoría de configuración, revisión de memoria, inventario de habilidades/MCP/ganchos (a través de la API Config Explorer)",
+    "Dashboard connector with MCP integration and one-line metric summaries":
+      "Conector de panel de control con integración MCP y resúmenes métricos de una línea",
+    "Each plugin follows the official Claude Code plugin specification. The marketplace manifest at <code>.claude-plugin/marketplace.json</code> catalogs all ten plugins. Each plugin directory contains:":
+      "Cada complemento sigue la especificación oficial del complemento Claude Code. El manifiesto del mercado en <code>.claude-plugin/marketplace.json</code> catala los diez complementos. Cada directorio de complementos contiene:",
+    "All plugins query the Agent Monitor API at <code>http://localhost:4820</code>. Key capabilities they leverage:":
+      "Todos los complementos consultan la API del Monitor de Agentes en <code>http://localhost:4820</code>. capacidades clave que utilizan:",
+    Capability: "aptitud",
+    Details: "información interna",
+    "Token tracking": "Seguimiento de tokens",
+    "4 types (input, output, cache_read, cache_write) + 4 compaction baselines per model per session":
+      "4 tipos (entrada, salida, cache_read, cache_write) + 4 líneas de base de compactación por modelo por sesión",
+    "Cost calculation": "Cálculo de costos",
+    "<code>(tokens / 1M) × rate_per_mtok</code> for each type; longest pattern match wins":
+      "<code>(tokens / 1M) × rate_per_mtok</code> Para cada tipo; la coincidencia de patrones más larga gana",
+    "Session metadata": "Métadatos de la sesión",
+    "Event types": "Tipos de eventos",
+    "Workflow intelligence": "Inteligencia de flujo de trabajo",
+    "11 datasets: stats, orchestration (DAG), toolFlow, effectiveness, patterns, modelDelegation, errorPropagation, concurrency, complexity, compaction, cooccurrence":
+      "11 conjuntos de datos: estadísticas, orquestación (DAG), toolFlow, eficacia, patrones, modelDelegation, errorPropagation, concurrencia, complejidad, compactación, coocurrencia",
+    "Agent hierarchy": "Jerarquía de agentes",
+    "Recursive parent/child tree with subagent_type, depth tracking via recursive CTE":
+      "Árbol recursivo padre/hijo con subagente_type, seguimiento de profundidad a través de CTE recursivo",
+    '📖 Full documentation: <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/docs/PLUGINS.md"><code>docs/plugins.md</code></a>':
+      '📖 Documentación completa: <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/docs/PLUGINS.md"><code>docs/plugins.md</code></a>',
+    '<span class="caption-icon">🖥️</span> Statusline — always-visible bar showing context window usage, token counts, active model, git branch, and session ID. Configurable segments with theme support':
+      '<span class="caption-icon">🖥️</span> Línea de estado: barra siempre visible que muestra el uso de la ventana de contexto, el número de tokens, el modelo activo, la rama de git y el ID de la sesión. Segmentos configurables con soporte de tema',
+    "The <code>statusline/</code> directory contains a standalone CLI statusline for Claude Code — completely independent of the web dashboard. It renders a color-coded bar at the bottom of the Claude Code terminal showing context window usage, per-direction token counts, session cost in USD, and git branch.":
+      "el <code>statusline/</code> El directorio contiene una línea de estado CLI independiente para Claude Code, completamente independiente del panel de control web. Renderiza una barra codificada por colores en la parte inferior del terminal de Claude Code que muestra el uso de la ventana de contexto, el número de tokens por dirección, el costo de la sesión en USD y la rama de git.",
+    Segment: "segmento",
+    Source: "fuente",
+    "Color Logic": "Lógica de color",
+    "Always cyan": "Siempre cian",
+    "Always green": "Siempre verde",
+    "Always yellow, <code>~</code> prefix for home":
+      "Siempre amarillo, <code>~</code> prefijo para casa",
+    "Always magenta, hidden outside git repos":
+      "Siempre magenta, oculto fuera de los repositorios de git",
+    "Green &lt; 50%, Yellow 50–79%, Red ≥ 80%": "Verde < 50 %, Amarillo 50-79 %, Rojo ≥ 80 %",
+    "Green <code>↑</code> input, cyan <code>↓</code> output, dim <code>c</code> cache reads":
+      "verde <code>↑</code> Entrada, cian <code>↓</code> Salida, atenuación <code>c</code> Lecturas de caché",
+    "Green &lt; $5, Yellow $5–$20, Red ≥ $20 (shown on API and subscription plans)":
+      "Verde < 5 $, Amarillo 5-20 $, Rojo ≥ 20 $ (mostrado en la API y planes de suscripción)",
+    "Add this to <code>~/.claude/settings.json</code>:":
+      "Agregar esto a <code>~/.claude/settings.json</code>:",
+    "No dependencies required": "No se requieren dependencias",
+    "The statusline uses only Python 3.6+ stdlib (<code>sys</code>, <code>json</code>, <code>os</code>, <code>subprocess</code>). It fails silently on empty input or JSON errors and never blocks Claude Code.":
+      "La línea de estado solo utiliza la biblioteca estándar de Python 3.6+ (<code>sys</code>, <code>json</code>, <code>os</code>, <code>subprocess</code>). Falla silenciosamente en entradas vacías o errores JSON y nunca bloquea el código Claude.",
+    '<span class="caption-icon">🔌</span> Sidebar — live health, analytics, and deep navigation links':
+      '<span class="caption-icon">🔌</span> Barra lateral: salud en vivo, análisis y enlaces de navegación profunda',
+    "The <b>Claude Code Agent Monitor</b> is a premium, high-fidelity extension designed to minimize context switching for AI engineers. It brings the full power of the dashboard directly into VS Code, allowing you to monitor complex subagent orchestration without ever leaving your active code file.":
+      "el <b>Monitor de agente de código Claude</b> Es una extensión premium de alta fidelidad diseñada para minimizar el cambio de contexto para los ingenieros de IA. Trae toda la potencia del panel de control directamente a VS Code, lo que le permite monitorear la orquestación compleja de subagentes sin nunca salir de su archivo de código activo.",
+    "A dedicated Activity Bar view that performs background polling every 5 seconds. Includes a real-time <b>Agent Health</b> monitor tracking all 5 states (Working, Connected, Idle, Completed, Error) with native VS Code theme-aware icons and colors.":
+      "Una vista dedicada de la barra de actividades que realiza encuestas en segundo plano cada 5 segundos. Incluye una en tiempo real <b>Salud del agente</b> Monitoriza el seguimiento de los 5 estados (Trabajando, Conectado, Inactivo, Completado, Error) con iconos y colores nativos de VS Code que son conscientes del tema.",
+    "Aggregates data from multiple API endpoints to display high-signal metrics directly in the sidebar: <ul style=\"margin-top: 8px; color: var(--text-muted); font-size: 13px; list-style-type: '→ '; padding-left: 15px;\"> <li><b>Token Consumption</b>: Scaled tracking from 1k to 1.0B+ tokens.</li> <li><b>Live Cost Estimates</b>: Automatic USD cost calculation based on model pricing rules.</li> <li><b>Event Frequency</b>: Total events, daily sessions, and subagent spawning rates.</li> </ul>":
+      "Agrupa datos de múltiples puntos finales de API para mostrar métricas de alto señal directamente en la barra lateral: <ul style=\"margin-top: 8px; color: var(--text-muted); font-size: 13px; list-style-type: '→ '; padding-left: 15px;\"> <li><b>Consumo de tokens</b>: Seguimiento escalonado desde 1k hasta más de 1.0B tokens.</li> <li><b>Estimaciones de costos en vivo</b>: Cálculo automático del costo en USD basado en las reglas de precios del modelo.</li> <li><b>Frecuencia de eventos</b>: Total de eventos, sesiones diarias y tasas de apareamiento de subagentes.</li> </ul>",
+    "<b>Token Consumption</b>: Scaled tracking from 1k to 1.0B+ tokens.":
+      "<b>Consumo de tokens</b>: Seguimiento escalonado desde 1k hasta más de 1.0B tokens.",
+    "<b>Live Cost Estimates</b>: Automatic USD cost calculation based on model pricing rules.":
+      "<b>Estimaciones de costos en vivo</b>: Cálculo automático del costo en USD basado en las reglas de precios del modelo.",
+    "<b>Event Frequency</b>: Total events, daily sessions, and subagent spawning rates.":
+      "<b>Frecuencia de eventos</b>: Total de eventos, sesiones diarias y tasas de apareamiento de subagentes.",
+    "Renders the full React application within a native webview tab. Supports <b>Deep Linking</b>: one-click jump from the sidebar directly to specific views like the <i>Kanban Board</i>, <i>Analytics Hub</i>, or your <i>Last 10 Sessions</i>.":
+      "Rendiza la aplicación React completa dentro de una pestaña de webview nativa. Soporta <b>Enlace profundo</b>: salto de un solo clic desde la barra lateral directamente a vistas específicas como la <i>Tablero Kanban</i>, <i>Centro de análisis</i>, o tu <i>Últimas 10 sesiones</i>.",
+    "Seamlessly scans ports <code>5173</code> (Vite Dev) and <code>4820</code> (Production) on localhost. Automatically toggles between <b>Online</b> and <b>Offline</b> modes in the sidebar as you start or stop your local server.":
+      "Escanea puertos sin problemas <code>5173</code> (Vite Dev) y <code>4820</code> (Producción) en localhost. Cambia automáticamente entre <b>en línea</b> y <b>autónomo</b> Modos en la barra lateral a medida que inicies o detengas tu servidor local.",
+    "<strong>Zero-Config Setup</strong>": "<strong>Configuración de cero configuración</strong>",
+    "The extension is designed to be plug-and-play. Once your server is running, the extension automatically discovers the API and begins streaming telemetry — no manual URL configuration required.":
+      "La extensión está diseñada para ser fácil de usar. Una vez que su servidor esté en funcionamiento, la extensión descubre automáticamente la API y comienza a transmitir telemetría, sin necesidad de configuración manual de la URL.",
+    '📖 Full developer guide: <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/vscode-extension/README.md"><code>vscode-extension/README.md</code></a>':
+      '📖 Guía completa para desarrolladores: <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/vscode-extension/README.md"><code>vscode-extension/README.md</code></a>',
+    "The dashboard ships as an optional <strong>native desktop application</strong> — a <code>desktop/</code> workspace that wraps the existing server and client into a macOS <code>.app</code> (distributed as a <code>.dmg</code>) and a Windows <code>.exe</code> (an NSIS installer plus a no-install portable build) you install once and forget. <code>desktop/</code> is a sibling workspace to <code>client/</code>, <code>server/</code>, <code>mcp/</code>, and <code>vscode-extension/</code>, built with <strong>Electron 35</strong>. It <strong>embeds the Express server in-process</strong> — it <code>require()</code>s <code>server/index.js</code> directly in the same Node runtime as the Electron main process (no child process, no IPC) — and renders the already-built React client in a <code>BrowserWindow</code>. Everything you see in the browser at <code>localhost:4820</code> lives inside this window, with native OS lifecycle on top.":
+      "El panel de instrumentos se envía como opcional <strong>Aplicación nativa para escritorio</strong> — a <code>desktop/</code> Espacio de trabajo que envuelve el servidor y el cliente existentes en un macOS <code>.app</code> (distribuido como un <code>.dmg</code>) y una ventana de Windows <code>.exe</code> (un instalador NSIS más una construcción portátil sin instalación) lo instales una vez y olvidaslo. <code>desktop/</code> Es un espacio de trabajo hermano de <code>client/</code>, <code>server/</code>, <code>mcp/</code>, y <code>vscode-extension/</code>, construido con <strong>Electrón 35</strong>. lo <strong>Incorpora el servidor Express en el proceso</strong> — eso <code>require()</code>s <code>server/index.js</code> directamente en el mismo tiempo de ejecución del Nodo que el proceso principal de Electron (sin proceso hijo, sin IPC) y renderiza el cliente React ya construido en un <code>BrowserWindow</code>. Todo lo que ves en el navegador en <code>localhost:4820</code> Vive dentro de esta ventana, con el ciclo de vida del sistema operativo nativo encima.",
+    '<span class="caption-icon">🍎🪟</span> <span>The full dashboard, natively on macOS <strong>and</strong> Windows — same React client, same Express server, real <code>BrowserWindow</code>. Menu-bar / notification-area (tray) icon included. Shipped as a macOS DMG and a Windows EXE (macOS shown) — see <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/DESKTOP.md"><code>DESKTOP.md</code></a>.</span>':
+      '<span class="caption-icon">🍎🪟</span> <span>El panel completo, nativo en macOS <strong>y</strong> Windows: mismo cliente React, mismo servidor Express, real <code>BrowserWindow</code>. - Barra de menú / icono de área de notificaciones ( bandeja) incluido. Envío como DMG de macOS y EXE de Windows (se muestra macOS) - ver <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/DESKTOP.md"><code>DESKTOP.md</code></a>.</span>',
+    '<span class="caption-icon">🪟</span> <span>The same dashboard as a native <strong>Windows</strong> app — real <code>BrowserWindow</code> with the native Windows window menu, live Activity Feed, and the Tabby companion. A notification-area (system tray) icon sits beside the clock for quick access.</span>':
+      '<span class="caption-icon">🪟</span> <span>El mismo panel de control que un nativo <strong>ventana</strong> Aplicación — real <code>BrowserWindow</code> Con el menú de ventanas nativo de Windows, el Feed de Actividades en vivo y el compañero Tabby. Un icono de área de notificaciones (mesa de inicio del sistema) se encuentra junto al reloj para un acceso rápido.</span>',
+    "<strong>One-line mental model</strong>": "<strong>Modelo mental de una línea</strong>",
+    "<em>Electron is a window onto the same code.</em> The desktop app does not reimplement the dashboard — it hosts the exact server and client the standalone deployment runs. The only change outside <code>desktop/</code> is a behavior-preserving refactor of <code>server/index.js</code>: its post-listen bootstrap was extracted into an exported <code>startBackgroundServices()</code> so the embedded server runs exactly what <code>node server/index.js</code> runs.":
+      "<em>Electron es una ventana a el mismo código.</em> La aplicación de escritorio no reimplementa el panel de control; alberga el servidor y el cliente exactos que ejecuta la implementación independiente. El único cambio fuera <code>desktop/</code> Es una refactorización que preserva el comportamiento de <code>server/index.js</code>: su bootstrap post-escucha se extrajo en un exportado <code>startBackgroundServices()</code> Así que el servidor incorporado ejecuta exactamente lo que <code>node server/index.js</code> Corre.",
+    "The Electron main process hosts the embedded server <em>and</em> manages the window, tray, and menus. The renderer is just Chromium loading <code>http://127.0.0.1:&lt;port&gt;</code> — the same origin a normal browser would use.":
+      "El proceso principal de Electron alberga el servidor integrado <em>y</em> Gestiona la ventana, la bandeja y los menús. El renderizador solo está cargando Chromium <code>http://127.0.0.1:&lt;port&gt;</code> — la misma origen que un navegador normal usaría.",
+    "The desktop app embeds the Express server in-process — no child process, no IPC":
+      "La aplicación de escritorio incorpora el servidor Express en el proceso, sin proceso hijo, sin IPC",
+    "An always-on tray icon — the macOS menu bar (a tinted template glyph) or the Windows notification area (the colored <code>icon.ico</code>). A single click (left or right) opens a dropdown with a <strong>live status snapshot</strong> queried straight from SQLite at click time — server port, active sessions, working agents, events today — followed by <strong>Open Dashboard</strong>, <strong>Open in Browser</strong>, <strong>Restart Server</strong>, <strong>Show Logs</strong>, <strong>Open at Login</strong> (toggle), and <strong>Quit</strong>. The snapshot rows are clickable — they open the dashboard. The menu is rebuilt on each open so every value is current.":
+      "Un icono de bandeja siempre encendido: la barra de menú de macOS (un símbolo de plantilla con color) o el área de notificaciones de Windows (el colorido <code>icon.ico</code>). Un solo clic (izquierda o derecha) abre un menú desplegable con un <strong>Captura instantánea del estado en vivo</strong> Consultado directamente desde SQLite en el momento del clic: puerto del servidor, sesiones activas, agentes en funcionamiento, eventos de hoy, seguido de <strong>Abrir Panel de control</strong>, <strong>Abrir en el navegador</strong>, <strong>Reiniciar el servidor</strong>, <strong>Mostrar registros</strong>, <strong>Abrir en el inicio de sesión</strong> (alternar), y <strong>dejar</strong>. Las filas de instantáneas son clicables, abren el panel de control. El menú se reconstruye en cada apertura para que cada valor sea actual.",
+    "A standard native application menu — <code>About</code>, <code>Open at Login</code>, <code>File</code>, <code>Edit</code>, <code>View</code>, <code>Window</code>, <code>Help</code> — with <code>⌘R</code> / <code>Ctrl+R</code> wired to <em>View ▸ reload</em>. External links open in the system browser, never inside Electron. The <code>File ▸ Open Dashboard</code> item (<code>⌘1</code>) is macOS-only; on Windows/Linux the window-attached menu can't reopen a hidden window, so reopen from the tray's <strong>Open Dashboard</strong>.":
+      "Un menú de aplicaciones nativas estándar - <code>About</code>, <code>Open at Login</code>, <code>File</code>, <code>Edit</code>, <code>View</code>, <code>Window</code>, <code>Help</code> — con <code>⌘R</code> / <code>Ctrl+R</code> Conectado a <em>Ver ▸ volver a cargar</em>. enlaces externos se abren en el navegador del sistema, nunca dentro de Electron. el <code>File ▸ Open Dashboard</code> Artículo (<code>⌘1</code>) solo es para macOS; en Windows/Linux el menú adjunto a la ventana no puede volver a abrir una ventana oculta, así que vuelva a abrir desde la bandeja <strong>Abrir Panel de control</strong>.",
+    "Flip <em>Open at Login</em> in the tray or app menu — both platforms go through Electron's first-party <code>app.*LoginItemSettings</code> API. On macOS it registers via the modern <code>SMAppService</code> API and appears under <strong>System Settings → General → Login Items</strong>; on Windows it writes a per-user <code>HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run</code> entry, visible in <strong>Task Manager → Startup</strong>. When the app is launched at login it starts tray-only, with no window jumping into view (on Windows the login launch is detected via a <code>--ccam-hidden</code> argument).":
+      "ponche de huevo <em>Abrir en el inicio de sesión</em> en la bandeja o en el menú de la aplicación, ambas plataformas pasan por el primero de Electron <code>app.*LoginItemSettings</code> API. En macOS se registra a través del moderno <code>SMAppService</code> API y aparece debajo de <strong>Configuración del sistema → General → Elementos de inicio de sesión</strong>; en Windows escribe un por usuario <code>HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run</code> Entrada, visible en <strong>Gestor de tareas → Inicio de sesión</strong>. cuando la aplicación se lanza al iniciar sesión, solo se inicia en la bandeja, sin que ninguna ventana salte a la vista (en Windows, el inicio de sesión se detecta a través de un <code>--ccam-hidden</code> argumento).",
+    'Closing the window hides it — the embedded server keeps running, the tray icon stays, and the dock / taskbar icon stays too (a clickable "still alive" indicator). <strong>Quit</strong> (<code>⌘Q</code> / <code>Ctrl+Q</code>, app menu, or tray → Quit) pops a confirmation modal — press the Quit button or hit <code>⌘Q</code> / <code>Ctrl+Q</code> a second time to skip the prompt — and only then does the embedded server shut down, closing SQLite cleanly with a WAL checkpoint and removing this PID\'s entry from the discovery file.':
+      'Cerrar la ventana lo oculta: el servidor incorporado sigue funcionando, el icono de la bandeja permanece y el icono del dock / barra de tareas también permanece (un indicador "sigue vivo" que se puede hacer clic). <strong>dejar</strong> (<code>⌘Q</code> / <code>Ctrl+Q</code>, menú de la aplicación o bandeja → Salir) aparece una modalidad de confirmación, presiona el botón Salir o pulsa <code>⌘Q</code> / <code>Ctrl+Q</code> una segunda vez para saltar el mensaje de inicio de sesión, y solo entonces el servidor incorporado se apaga, cerrando SQLite de forma limpia con un control de punto de vista WAL y eliminando la entrada de este PID del archivo de descubrimiento.',
+    "Launch the desktop app and <code>npm run dev</code> at the same time and both stay real-time. Each server appends its <code>{port, pid, startedAt}</code> entry to <code>~/.claude/.agent-dashboard.json</code> on startup; the Claude Code hook handler reads that list and fan-outs every event to every live entry in parallel. Stale entries self-evict via a PID liveness check on read, so a crashed server can't misroute events to a dead port.":
+      "Lanzar la aplicación para escritorio y <code>npm run dev</code> Al mismo tiempo y ambos permanecen en tiempo real. Cada aplicación del servidor añade su <code>{port, pid, startedAt}</code> Entrada a <code>~/.claude/.agent-dashboard.json</code> Al arrancar; el gestor de enlaces del código Claude lee esa lista y distribuye cada evento a cada entrada en vivo de forma paralela. Las entradas obsoletas se desalojan automáticamente mediante una comprobación de vitalidad PID al leer, por lo que un servidor que se bloquee no puede redirigir los eventos a una puerto muerto.",
+    "Double-launching the app just focuses the existing window — no second server, no port collision, on every platform. The lock is acquired via <code>requestSingleInstanceLock()</code> before any server boots.":
+      "El doble lanzamiento de la aplicación solo centra la ventana existente, sin un segundo servidor, sin colisión de puertos, en todas las plataformas. El bloqueo se adquiere a través de <code>requestSingleInstanceLock()</code> Antes de que cualquier servidor arranque.",
+    "On its first owned-server boot the app auto-installs the Claude Code hooks into <code>~/.claude/settings.json</code> and starts the background services (update scheduler, config watcher, orphaned-run reconciliation) — so an install-only user (DMG or EXE) gets events flowing without ever running <code>npm run install-hooks</code> from a checkout.":
+      "En su primer arranque en un servidor propio, la aplicación instala automáticamente los ganchos del código Claude en <code>~/.claude/settings.json</code> y inicia los servicios de fondo (actualizador de programadores, observador de configuración, reconciliación de ejecución huérfana), por lo que un usuario que solo instala (DMG o EXE) recibe eventos sin nunca ejecutarse. <code>npm run install-hooks</code> Desde una caja registradora.",
+    "Two packaging realities — a read-only application bundle / install directory and (on macOS) the minimal <code>PATH</code> a Finder-launched app inherits — are handled automatically so installs survive updates and the <strong>Run Claude</strong> feature works out of the box on both macOS and Windows.":
+      "Dos realidades de empaquetado: un paquete de aplicaciones de lectura única / directorio de instalación y (en macOS) el mínimo <code>PATH</code> Una aplicación lanzada por Finder hereda - se manejan automáticamente para que las instalaciones sobrevivan a las actualizaciones y el <strong>Corra Claude</strong> La función funciona de inmediato en macOS y Windows.",
+    "<strong>Your data survives reinstalls and updates</strong>":
+      "<strong>Sus datos sobreviven a las reinstalaciones y actualizaciones</strong>",
+    "The SQLite database and VAPID keys live in a per-user app-data directory <em>outside</em> the application bundle / install dir — <code>~/Library/Application Support/Claude Code Monitor/data/</code> on macOS, <code>%APPDATA%\\Claude Code Monitor\\data\\</code> on Windows. <code>server-host.ts</code> points <code>DASHBOARD_DATA_DIR</code> at that per-user directory on boot. Because a packaged, code-signed, or app-translocated bundle is read-only, older builds that stored the database inside the bundle broke History Import; with the data directory now in app-data, your imported history and events persist across app reinstalls and updates (the Windows NSIS uninstaller keeps this data by default). After upgrading from a pre-fix build, re-run <strong>Import History → Rescan</strong> once to bridge the one-time gap.":
+      "La base de datos SQLite y las claves VAPID viven en un directorio de datos de aplicaciones por usuario <em>afuera</em> El paquete de aplicaciones / directorio de instalación — <code>~/Library/Application Support/Claude Code Monitor/data/</code> En macOS, <code>%APPDATA%\\Claude Code Monitor\\data\\</code> En Windows. <code>server-host.ts</code> Puntos <code>DASHBOARD_DATA_DIR</code> en ese directorio por usuario al arrancar. Debido a que un paquete empaquetado, firmado con código o trasladado de aplicación es de solo lectura, las versiones anteriores que almacenaban la base de datos dentro del paquete rompieron la Importación de Historial; con el directorio de datos ahora en datos de la aplicación, su historial e eventos importados persisten a través de las reinstalaciones y actualizaciones de la aplicación (el desinstalador de Windows NSIS guarda estos datos por defecto). Después de actualizar desde una versión con prefijo, vuelva a ejecutar <strong>Historial de importación → Recanso de escaneo</strong> Una vez para cerrar la brecha única.",
+    "<strong>The <code>claude</code> CLI is found automatically</strong>":
+      "<strong>el <code>claude</code> El CLI se encuentra automáticamente</strong>",
+    "A Finder- or Dock-launched macOS app inherits only launchd's minimal <code>PATH</code>, not your login shell's. At startup <code>shell-path.ts</code> recovers the user's login-shell <code>PATH</code> so the <strong>Run Claude</strong> feature can locate and spawn the <code>claude</code> CLI. (On Windows the process already inherits the user <code>PATH</code>, so no recovery step is needed.) If it still cannot be found, make sure <code>claude</code> is a real executable on your <code>PATH</code> — a shell alias or function cannot be spawned — and check the <code>user PATH resolved</code> line in the desktop log (<code>~/Library/Logs/Claude Code Monitor/desktop.log</code> on macOS, <code>%APPDATA%\\Claude Code Monitor\\logs\\desktop.log</code> on Windows).":
+      "Una aplicación macOS lanzada desde Finder o Dock hereda solo el mínimo de launchd <code>PATH</code>, no del shell de inicio de sesión. Al arrancar <code>shell-path.ts</code> Recupera la cáscara de inicio de sesión del usuario <code>PATH</code> Así que el <strong>Corra Claude</strong> La función puede localizar y generar el <code>claude</code> CLI. (En Windows, el proceso ya hereda al usuario <code>PATH</code>, por lo que no se necesita ningún paso de recuperación.) Si aún no se puede encontrar, asegúrese de <code>claude</code> Es un ejecutable real en tu <code>PATH</code> — no se puede crear un alias o función de shell — y compruebe el <code>user PATH resolved</code> Línea en el registro del escritorio (<code>~/Library/Logs/Claude Code Monitor/desktop.log</code> En macOS, <code>%APPDATA%\\Claude Code Monitor\\logs\\desktop.log</code> En Windows).",
+    "On launch the Electron main process picks a free port. If a healthy dashboard server already answers <code>/api/health</code> on port <code>4820</code> (for example, you ran <code>npm start</code> in a terminal), the app <strong>adopts</strong> that server instead of starting a second one — no double-binding, no SQLite contention. An adopted server is not owned by the app, so quitting leaves it running.":
+      "Al iniciar, el proceso principal de Electron selecciona un puerto libre. Si un servidor de panel de control saludable ya responde <code>/api/health</code> En puerto <code>4820</code> (por ejemplo, corriste <code>npm start</code> En un terminal), la aplicación <strong>Adopta</strong> Ese servidor en lugar de iniciar uno segundo, sin doble vinculación, sin competencia SQLite. Un servidor adoptado no es propiedad de la aplicación, por lo que salir lo deja ejecutándose.",
+    Step: "paso",
+    "Port choice": "Elección del puerto",
+    Adopt: "adoptar",
+    "A healthy server already on <code>4820</code> is adopted as-is":
+      "Un servidor saludable ya encendido <code>4820</code> Se adopta tal cual",
+    Preferred: "preferido",
+    "<code>4820</code> when free": "<code>4820</code> Cuando esté libre",
+    Fallback: "Alternativa de respaldo",
+    "The first free port in <code>4821</code>–<code>4829</code>":
+      "El primer puerto libre en <code>4821</code>–<code>4829</code>",
+    "Last resort": "última instancia",
+    "A random high port when all of the above are taken":
+      "Una alta de puerto aleatoria cuando se toman todos los anteriores",
+    "Three ways to obtain the desktop app — the latest GitHub Release (best for most users), a per-commit CI artifact (fresher than the latest release), or a local build.":
+      "Tres formas de obtener la aplicación para escritorio: la última versión de GitHub (la mejor para la mayoría de los usuarios), un artefacto CI por commit (más reciente que la última versión) o una compilación local.",
+    'Open <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest" target="_blank" rel="noopener noreferrer" class="dl-chip"> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Releases → latest </a> and download the asset for your platform. The macOS and Windows Desktop CI jobs auto-publish a new <code>vX.Y.Z</code> release every time the version in <code>package.json</code> is bumped on <code>master</code>, so this link always points at the current build. Releases are public — no GitHub sign-in required.':
+      'aire libre <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest" target="_blank" rel="noopener noreferrer" class="dl-chip"> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Lanzamientos → más recientes </a> y descargue el recurso para su plataforma. Los trabajos de CI de escritorio de macOS y Windows publican automáticamente un nuevo <code>vX.Y.Z</code> Lanzamiento cada vez que la versión en <code>package.json</code> Se golpea en <code>master</code>, por lo que este enlace siempre señala la versión actual. Las publicaciones son públicas, no se requiere iniciar sesión en GitHub.',
+    Platform: "plataforma",
+    Asset: "activo",
+    "macOS (Apple Silicon)": "macOS (Silicona de Apple)",
+    "<code>ClaudeCodeMonitor-&lt;ver&gt;-arm64.dmg</code>":
+      "<code>ClaudeCodeMonitor-&lt;ver&gt;-arm64.dmg</code>",
+    "Drag the <code>.app</code> into <code>/Applications</code>":
+      "Arrastra el <code>.app</code> En <code>/Applications</code>",
+    "macOS (Intel)": "macOS (Intel)",
+    "<code>ClaudeCodeMonitor-&lt;ver&gt;-x64.dmg</code>":
+      "<code>ClaudeCodeMonitor-&lt;ver&gt;-x64.dmg</code>",
+    "Windows (installer)": "Windows (instalador)",
+    "<code>ClaudeCodeMonitor-Setup-&lt;ver&gt;-x64.exe</code>":
+      "<code>ClaudeCodeMonitor-Setup-&lt;ver&gt;-x64.exe</code>",
+    "NSIS installer — per-user, no admin elevation":
+      "Instalador de NSIS: por usuario, sin elevación de administrador",
+    "Windows (portable)": "Windows (portátil)",
+    "<code>ClaudeCodeMonitor-&lt;ver&gt;-x64-portable.exe</code>":
+      "<code>ClaudeCodeMonitor-&lt;ver&gt;-x64-portable.exe</code>",
+    "Run without installing": "Ejecutar sin instalar",
+    'Want a build straight off the tip of <code>master</code>, ahead of the next tagged release? Every green run of the <code>🍎 macOS Desktop (DMG)</code> job on <code>macos-latest</code> uploads both per-arch DMGs as the <code>ClaudeCodeMonitor-dmg</code> workflow artifact, and the <code>🪟 Windows Desktop (EXE)</code> job on <code>windows-latest</code> uploads the installer + portable EXEs as the <code>ClaudeCodeMonitor-win</code> artifact. Open the <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess" target="_blank" rel="noopener noreferrer" class="dl-chip"> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg> latest passing run </a>, scroll to its Artifacts section, and download <code>ClaudeCodeMonitor-dmg</code> or <code>ClaudeCodeMonitor-win</code>. (GitHub sign-in required; 14-day retention.)':
+      'Quieres una construcción directamente desde la punta de <code>master</code>, ¿antes del próximo lanzamiento etiquetado? Cada carrera verde del <code>🍎 macOS Desktop (DMG)</code> Trabajo en curso <code>macos-latest</code> Sube tanto los DMG por archivo como el <code>ClaudeCodeMonitor-dmg</code> Artefacto del flujo de trabajo y el <code>🪟 Windows Desktop (EXE)</code> Trabajo en curso <code>windows-latest</code> Sube el instalador + los EXEs portátiles como el <code>ClaudeCodeMonitor-win</code> Artefacto. Abre el <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess" target="_blank" rel="noopener noreferrer" class="dl-chip"> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg> Última carrera de paso </a>, desplázate hasta la sección de Artifactos y descarga <code>ClaudeCodeMonitor-dmg</code> Oregón <code>ClaudeCodeMonitor-win</code>. (Se requiere iniciar sesión en GitHub; retención de 14 días).',
+    "From the project root, after <code>git clone</code>:":
+      "Desde la raíz del proyecto, después de <code>git clone</code>:",
+    "Use the arch-specific build on your own machine":
+      "Utilice la construcción específica del arco en su propia máquina",
+    "<code>desktop:dmg</code> is slower because it builds the full app tree <em>twice</em> (once per architecture) and ad-hoc-signs each — emitting two separate per-arch DMGs (<code>…-arm64.dmg</code> + <code>…-x64.dmg</code>). There is no <code>@electron/universal</code> merge; the release ships the two per-arch DMGs. For running on a single Mac, use <code>desktop:dmg:arm64</code> (Apple Silicon) or <code>desktop:dmg:x64</code> (Intel) — one architecture, finishing in roughly a minute. CI runs <code>desktop:dmg</code> and uploads both DMGs as <code>ClaudeCodeMonitor-dmg</code>, so you rarely need to build them yourself.":
+      "<code>desktop:dmg</code> Es más lento porque construye el árbol completo de la aplicación <em>dos veces</em> (una vez por arquitectura) y firmas ad hoc para cada una de ellas, emitiendo dos DMG separados por arquitectura (<code>…-arm64.dmg</code> + <code>…-x64.dmg</code>). No hay <code>@electron/universal</code> Mezclar; la versión de lanzamiento envía los dos DMG por archivo. Para ejecutar en un solo Mac, use <code>desktop:dmg:arm64</code> (Silicona de Apple) o <code>desktop:dmg:x64</code> (Intel) - una arquitectura, terminando en aproximadamente un minuto. CI se ejecuta <code>desktop:dmg</code> Y sube ambos DMG como <code>ClaudeCodeMonitor-dmg</code>, por lo que rara vez necesitas construirlos tú mismo.",
+    "Double-click the downloaded <code>.dmg</code> to mount it":
+      "Haga doble clic en el descargado <code>.dmg</code> Para montarlo",
+    "Drag <code>Claude Code Monitor.app</code> into your <code>Applications</code> folder":
+      "resistencia <code>Claude Code Monitor.app</code> En tu <code>Applications</code> carpeta",
+    "Run <code>xattr -cr</code> on the app to get past Gatekeeper (see below)":
+      "carrera <code>xattr -cr</code> En la aplicación para pasar por el Guardián de Puerta (ver a continuación)",
+    "Open the app — the tray icon appears and the dashboard window loads":
+      "Abre la aplicación, aparece el icono de bandeja y se carga la ventana del panel de control.",
+    "Gatekeeper warning on first launch":
+      "Advertencia del guardián de puertas en el primer lanzamiento",
+    'The DMG is ad-hoc signed by default — that is all the project can offer without a paid Apple Developer ID. macOS warns the first time you open it (<em>"Apple could not verify…"</em>). Strip the quarantine attribute to get past it:':
+      'El DMG se firma de forma ad hoc por defecto, eso es todo lo que el proyecto puede ofrecer sin un ID de desarrollador de Apple pagado. macOS advierte la primera vez que lo abres (<em>"Apple no pudo verificar..."</em>). Quita el atributo de cuarentena para pasarlo:',
+    "Alternatively, open <strong>System Settings → Privacy &amp; Security</strong>, find the blocked app, and click <em>Open Anyway</em>. Code signing and Apple notarization are opt-in for the maintainer — when configured, this warning goes away for everyone.":
+      "Alternativamente, abrir <strong>Configuración del sistema → Privacidad y seguridad</strong>, encuentra la aplicación bloqueada y haz clic <em>Abrir de todos modos</em>. signing y notificación de Apple son opcionales para el mantenedor — cuando se configure, este aviso desaparece para todos.",
+    "Run <code>ClaudeCodeMonitor-Setup-&lt;ver&gt;-x64.exe</code> — a per-user NSIS install (no admin), or run the <code>*-portable.exe</code> to skip installing":
+      "carrera <code>ClaudeCodeMonitor-Setup-&lt;ver&gt;-x64.exe</code> — una instalación de NSIS por usuario (sin administrador), o ejecute el <code>*-portable.exe</code> Para saltar la instalación",
+    "The EXE is unsigned by default, so SmartScreen may warn — click <em>More info → Run anyway</em>":
+      "El EXE no está firmado por defecto, por lo que SmartScreen puede advertir: haga clic <em>Más información → Corra de todos modos</em>",
+    "Open from the Start menu / desktop shortcut — the notification-area (tray) icon appears and the dashboard window loads":
+      "Abrir desde el menú Inicio / atajo de escritorio: aparece el icono de la zona de notificaciones ( bandeja) y se carga la ventana del panel de control.",
+    '<span class="caption-icon">1️⃣</span> <span>NSIS installer, step 1 — <strong>Choose Installation Options</strong>: pick per-user setup and optional shortcuts.</span>':
+      '<span class="caption-icon">1️⃣</span> <span>Instalador de NSIS, paso 1 — <strong>Elija las opciones de instalación</strong>: seleccione la configuración por usuario y las pestañas rápidas opcionales.</span>',
+    '<span class="caption-icon">2️⃣</span> <span>NSIS installer, step 2 — <strong>Choose Install Location</strong>: defaults to <code>%LOCALAPPDATA%\\Programs\\Claude Code Monitor</code>, or point it anywhere.</span>':
+      '<span class="caption-icon">2️⃣</span> <span>Instalador de NSIS, paso 2 — <strong>Elija la ubicación de instalación</strong>: por defecto es <code>%LOCALAPPDATA%\\Programs\\Claude Code Monitor</code>, o apuntarlo a cualquier lugar.</span>',
+    '<span class="caption-icon">3️⃣</span> <span>NSIS installer, step 3 — <strong>Completing Setup</strong>: click <em>Finish</em> to launch the app and drop the tray icon in the notification area.</span>':
+      '<span class="caption-icon">3️⃣</span> <span>Instalador de NSIS, paso 3 — <strong>Completando la configuración</strong>: hacer clic <em>acabado</em> Para lanzar la aplicación y dejar el icono de bandeja en la zona de notificaciones.</span>',
+    "SmartScreen warning on first launch": "Advertencia de SmartScreen en el primer lanzamiento",
+    'The installer and portable EXE are <strong>unsigned</strong> by default — that is all the project can offer without a paid code-signing certificate. Windows <strong>SmartScreen</strong> may show <em>"Windows protected your PC"</em> the first time you run it; click <strong>More info → Run anyway</strong>. The installer lays the app down <strong>per-user</strong> under <code>%LOCALAPPDATA%\\Programs\\Claude Code Monitor</code> (and lets you choose the install directory) and sets an <code>AppUserModelId</code> (<code>com.hoangsonww.ccam.desktop</code>) so native toast notifications are attributed correctly and the window groups under one taskbar entry.':
+      'El instalador y el EXE portátil son <strong>sin firmar</strong> Por defecto, eso es todo lo que el proyecto puede ofrecer sin un certificado de firma de código pagado. ventana <strong>SmartScreen</strong> Puede mostrar <em>"Windows protege tu PC"</em> La primera vez que lo ejecutes; haz clic <strong>Más información → Corra de todos modos</strong>. instala la aplicación. <strong>Por usuario</strong> bajo <code>%LOCALAPPDATA%\\Programs\\Claude Code Monitor</code> (y te permite elegir el directorio de instalación) y establece un <code>AppUserModelId</code> (<code>com.hoangsonww.ccam.desktop</code>) para que las notificaciones nativas de Toast se atribuyan correctamente y los grupos de ventanas se encuentren bajo una entrada de barra de tareas.',
+    "Bundle size": "Tamaño del paquete",
+    "The DMG is roughly 80&nbsp;MB, about 250&nbsp;MB installed on disk — the standard Electron tax; the Windows installer is comparable. The app runs natively on <strong>macOS and Windows</strong>; Linux is tracked as a follow-up. Logs live at <code>~/Library/Logs/Claude Code Monitor/desktop.log</code> on macOS or <code>%APPDATA%\\Claude Code Monitor\\logs\\desktop.log</code> on Windows (reach them from the tray menu → <em>Show Logs</em>).":
+      "El DMG tiene aproximadamente 80 MB, unos 250 MB instalados en el disco, el impuesto estándar de Electron; el instalador de Windows es comparable. La aplicación se ejecuta nativamente en <strong>macOS y Windows</strong>; Linux se rastrea como seguimiento. Los registros están disponibles en <code>~/Library/Logs/Claude Code Monitor/desktop.log</code> En macOS o <code>%APPDATA%\\Claude Code Monitor\\logs\\desktop.log</code> En Windows (accedé a ellos desde el menú de la bandeja de inicio → <em>Mostrar registros</em>).",
+    '📖 User-facing guide: <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/DESKTOP.md"><code>DESKTOP.md</code></a> · architecture &amp; contributor reference: <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/desktop/README.md"><code>desktop/README.md</code></a>':
+      '📖 Guía para el usuario: <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/DESKTOP.md"><code>DESKTOP.md</code></a> · arquitectura y referencia del colaborador: <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/blob/master/desktop/README.md"><code>desktop/README.md</code></a>',
+    '<span class="caption-icon">⚙️</span> Settings — model pricing editor, hook installation toggle, JSON data export, session cleanup, browser notification preferences, and system info panel with DB stats':
+      '<span class="caption-icon">⚙️</span> Configuración: editor de precios de modelos, interruptor de instalación de ganchos, exportación de datos JSON, limpieza de sesiones, preferencias de notificación del navegador e información del sistema con estadísticas de la base de datos.',
+    "The <code>/settings</code> route provides a comprehensive management interface with six sections:":
+      "el <code>/settings</code> Route proporciona una interfaz de gestión integral con seis secciones:",
+    "Editable table of per-model pricing rules. Each Claude model variant has its own explicit pattern (e.g., <code>claude-opus-4-6%</code>). Rates cover input, output, cache read, and cache write tokens. Each rule's editor also has a collapsible <strong>Introductory rates</strong> block — a <code>YYYY-MM-DD</code> promo cutoff plus per-category intro prices (input / output / cache-read / cache-write 5m &amp; 1h); an empty date means no promo, and any future model-launch promo needs no code change. Reset to defaults or add custom models. The section header carries an info popover (the <code>i</code> icon) that explains how rule lookup works (first matching pattern wins), the SQL-style <code>%</code> wildcard syntax with concrete examples (<code>claude-opus-4-7%</code>, <code>claude-%-haiku</code>, exact ids), and reminds the user that prices must be updated manually when Anthropic publishes new rates — already-stored sessions keep the price applied at ingest time. The CLAUDE_HOME panel and Import History flow are fully i18n-driven across en/vi/zh.":
+      "Tabla editable de las reglas de precios por modelo. Cada variante de modelo Claude tiene su propio patrón explícito (por ejemplo, <code>claude-opus-4-6%</code>). Las tarifas cubren tokens de entrada, salida, lectura de caché y escritura de caché. El editor de cada regla también tiene un colapsible <strong>Tarifas introductorias</strong> Bloqueo — un <code>YYYY-MM-DD</code> Límite de promoción más precios de introducción por categoría (entrada / salida / lectura de caché / escritura de caché 5 m y 1 h); una fecha vacía significa que no hay promoción, y cualquier promoción futura de lanzamiento de modelos no requiere ningún cambio de código. Reinicia a los valores predeterminados o agrega modelos personalizados. El encabezado de la sección contiene un popover de información (el <code>i</code> Icono) que explica cómo funciona la búsqueda de reglas (el patrón que coincida primero gana), el estilo SQL <code>%</code> Sintaxis de asterisco con ejemplos concretos (<code>claude-opus-4-7%</code>, <code>claude-%-haiku</code>, identificadores exactos), y recuerda al usuario que los precios deben actualizarse manualmente cuando Anthropic publique nuevas tarifas. Las sesiones almacenadas previamente mantienen el precio aplicado en el momento de la ingestión. El panel CLAUDE_HOME y el flujo de historial de importación están completamente impulsados por i18n en en/vi/zh.",
+    "Shows per-hook installation status (SessionStart, PreToolUse, PostToolUse, Stop, SubagentStop, Notification, SessionEnd). One-click reinstall if hooks are missing or outdated. Validates paths and permissions automatically.":
+      "Muestra el estado de instalación por gancho (SessionStart, PreToolUse, PostToolUse, Stop, SubagentStop, Notification, SessionEnd). Reinstalación con un solo clic si faltan o están desactualizados los ganchos. Valida automáticamente los rutas y permisos.",
+    "View database row counts and size. Session cleanup: abandon stale active sessions after N hours, purge old completed sessions after N days. Danger zone: clear all data with confirmation dialog to prevent accidental loss.":
+      "Ver el número de filas y el tamaño de la base de datos. Limpieza de sesiones: abandone las sesiones activas obsoletas después de N horas, purga las sesiones antiguas completadas después de N días. Zona de peligro: elimine todos los datos con el cuadro de diálogo de confirmación para evitar la pérdida accidental.",
+    "Download all sessions, agents, events, token usage, and pricing rules as a single JSON file for backup or analysis. Includes full event history, model metadata, and cost breakdowns in one portable archive.":
+      "Descargue todas las sesiones, agentes, eventos, uso de tokens y reglas de precios como un solo archivo JSON para respaldo o análisis. Incluye el historial completo de eventos, metadatos del modelo y desgloses de costos en un archivo portátil.",
+    "Dedicated Health tab on the Dashboard with a composite health score (weighted from success rate, cache hit rate, error rate, and heap usage), storage engine donut chart, tool invocation frequency bars, subagent effectiveness, model token distribution, and compaction impact — all with cursor-following tooltips and 5-second auto-refresh.":
+      "Pestaña de Salud dedicada en el Panel de Control con una puntuación de salud compuesta (pesada por la tasa de éxito, la tasa de éxito de la caché, la tasa de errores y el uso de la pila), gráfico de donut del motor de almacenamiento, barras de frecuencia de invocación de herramientas, eficacia del subagente, distribución de tokens del modelo e impacto de la compactación, todo con herramientas de ayuda que siguen el cursor y una actualización automática de 5 segundos.",
+    "Configure native browser notifications with per-event toggles for session starts, completions, errors, and subagent spawns. Automatic permission management with test-send button and graceful fallback when denied.":
+      "Configura las notificaciones del navegador nativo con interruptores por evento para el inicio, la finalización, los errores y el aparecimiento de subagentes de la sesión. Gestión automática de permisos con botón de envío de prueba y fallback elegante cuando se niega.",
+    "Per-model pricing — no catch-all grouping": "Precio por modelo: sin agrupación general",
+    "Each Claude model variant (e.g., Opus 4.6 vs Opus 4.1) has its own explicit pricing pattern because different model versions have different rates. The cost engine uses specificity sorting — longer patterns match before shorter ones.":
+      "Cada variante de modelo Claude (por ejemplo, Opus 4.6 vs Opus 4.1) tiene su propio patrón de precios explícito porque las diferentes versiones de modelos tienen diferentes tarifas. El motor de costos utiliza la clasificación por especificidad: los patrones más largos coinciden antes que los más cortos.",
+    "Turns the dashboard from passive viewing into active monitoring. A rules-based alerting engine evaluates the live event stream <strong>server-side</strong>, and fired alerts fan out to outbound <strong>webhook channels</strong>. Everything lives in one place — <strong>Settings → Alerts</strong> — behind a segmented control with three tabs: <strong>Rules</strong> (what triggers an alert), <strong>Channels</strong> (where alerts are delivered), and <strong>Activity</strong> (the live fired-alert feed with acknowledge / acknowledge-all).":
+      "Convierte el panel de instrumentos de visualización pasiva en monitoreo activo. Un motor de alertas basado en reglas evalúa el flujo de eventos en vivo <strong>Lado del servidor</strong>, y las alertas lanzadas se extienden hacia el exterior <strong>Canales webhook</strong>. todo vive en un solo lugar — <strong>Configuración → Alertas</strong> — detrás de un control segmentado con tres pestañas: <strong>Reglas</strong> (lo que desencadena una alerta), <strong>canal</strong> (donde se entregan las alertas), y <strong>actividad</strong> (el feed de alerta de disparos en vivo con reconocer / reconocer-todos).",
+    'Four condition types: <strong>event pattern</strong> (match <code>event_type</code> / <code>tool_name</code> / a summary substring, optionally requiring ≥ N matches within a rolling window — e.g. "5 errors in 2 minutes"), <strong>inactivity</strong> (an active session goes quiet for N minutes), <strong>status duration</strong> (an agent is stuck in <code>working</code> / <code>waiting</code> for N minutes), and <strong>token threshold</strong> (a session\'s cumulative tokens cross a limit). Each rule has a configurable <strong>cooldown</strong> that dedups repeat alerts per (rule, session, agent).':
+      'Cuatro tipos de condiciones: <strong>Patrón de eventos</strong> (partido <code>event_type</code> / <code>tool_name</code> / una subcadena resumida, opcionalmente que requiera ≥ N coincidencias dentro de una ventana móvil, por ejemplo "5 errores en 2 minutos"), <strong>inactividad</strong> (una sesión activa se queda en silencio durante N minutos), <strong>Duración del estado</strong> (un agente está atascado en <code>working</code> / <code>waiting</code> Durante N minutos), y <strong>Límite de tokens</strong> (los tokens acumulados de una sesión cruzan un límite). Cada regla tiene un configurable <strong>Descanso</strong> Que dedupe las alertas repetidas por (regla, sesión, agente).',
+    "Event-driven rules (<code>event_pattern</code>, <code>token_threshold</code>) run on every hook ingest — <em>after</em> the transaction commits and the response is sent, fully try/catch-guarded, so alerting can never slow or fail hook delivery. Time-based rules (<code>inactivity</code>, <code>status_duration</code>) run on an unref'd 60-second sweep. Enabled rules are cached in memory and invalidated on every edit. Fired alerts persist to <code>alert_events</code> and broadcast an <code>alert_triggered</code> WebSocket message.":
+      "Reglas basadas en eventos (<code>event_pattern</code>, <code>token_threshold</code>) se ejecuta en cada ingestión de gancho — <em>después</em> La transacción se compromete y la respuesta se envía, completamente protegida por try/catch, por lo que la alerta nunca puede ralentizar o fallar la entrega del gancho. Las reglas basadas en el tiempo (<code>inactivity</code>, <code>status_duration</code>) se ejecuta en una escaneo de 60 segundos sin refinar. Las reglas activadas se almacenan en caché en la memoria y se invalidan en cada edición. Las alertas emitidas persisten hasta <code>alert_events</code> Y transmitir un <code>alert_triggered</code> Mensaje WebSocket.",
+    "Slack, Discord, Microsoft Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, and Pipedream — plus a generic JSON endpoint. A declarative <strong>provider registry</strong> describes each one's payload formatter, URL resolution, auth headers, and credential fields, so adding a provider is a single server-side entry that surfaces in the UI with no front-end change.":
+      "Slack, Discord, Microsoft Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n y Pipedream, además de un punto final JSON genérico. Un declarativo <strong>Registro de proveedores</strong> describe el formateador de carga útil de cada uno, la resolución de la URL, los encabezados de autenticación y los campos de credenciales, por lo que agregar un proveedor es una sola entrada del lado del servidor que aparece en la interfaz de usuario sin cambios en el frontend.",
+    'Each delivery POSTs with an <code>AbortController</code> timeout and bounded retry/backoff (retries transport errors, 429, and 5xx — never other 4xx), then records the attempt-chain in <code>webhook_deliveries</code>. A provider can also veto a 2xx whose body signals failure (Splunk On-Call returns 200 with <code>result:"failure"</code>). Delivery is <strong>detached and fail-safe</strong> — it never throws into, slows, or blocks the alert path.':
+      'Cada entrega se publica con un <code>AbortController</code> Tiempo de espera y intento/retraso limitado (intentos de transporte de errores, 429 y 5xx, nunca otros 4xx), luego registra la cadena de intentos en <code>webhook_deliveries</code>. también puede vetar un 2xx cuyo cuerpo envía señales de fallo (Splunk On-Call devuelve 200 con <code>result:"failure"</code>). La entrega es <strong>Desprendido y con fallo seguro</strong> — Nunca arroja, ralentiza ni bloquea el camino de alerta.',
+    "Target URLs are masked (host + last 4 chars), and secrets / credential fields (routing keys, API keys, bot tokens) plus custom-header values are redacted in every API response — the full URL and secrets are stored server-side and never leave it. Generic endpoints support optional <strong>HMAC-SHA256</strong> body signing (<code>X-Webhook-Signature</code> + <code>X-Webhook-Timestamp</code>) so receivers can verify authenticity.":
+      "Las URL de destino están encriptadas (host + últimos 4 caracteres) y los campos de secretos / credenciales (claves de enrutamiento, claves API, tokens de bot) más los valores de encabezado personalizados están redactados en cada respuesta de la API: la URL completa y los secretos se almacenan en el lado del servidor y nunca salen de él. Los puntos finales genéricos admiten opcionales <strong>HMAC-SHA256</strong> Firma corporal (<code>X-Webhook-Signature</code> + <code>X-Webhook-Timestamp</code>) para que los destinatarios puedan verificar la autenticidad.",
+    'Every alert-rule field has a help tooltip — the event-type, tool-name, and summary-contains fields include example chips of real hook events and built-in tool names. Each webhook provider ships a collapsible step-by-step setup guide linking to the official docs. A one-click <strong>"Send test"</strong> probe fires a synthetic alert and reports the delivery result inline, and targets can be scoped to specific rules. Fully localized (en / zh / vi / ko).':
+      'Cada campo de regla de alerta tiene una pestaña de ayuda - los campos tipo de evento, nombre de la herramienta y contiene resumen incluyen ejemplos de chips de eventos de gancho reales y nombres de herramientas integrados. Cada proveedor de webhook envía una guía de configuración paso a paso colapsable que enlaza con los documentos oficiales. Un clic <strong>"Enviar prueba"</strong> probe emite una alerta sintética y informa el resultado de la entrega en línea, y los objetivos pueden estar restringidos a reglas específicas. Totalmente localizado (es / zh / vi / ko).',
+    "Provider(s)": "Proveedor(es)",
+    "Payload format": "Formato de carga útil",
+    "URL / credentials": "URL / credenciales",
+    "Block Kit (header + section + context)": "Kit de bloques (encabezado + sección + contexto)",
+    "Rich embed": "Incorporación rica",
+    "Adaptive Card in a Workflows <code>message</code> envelope":
+      "Tarjeta adaptativa en flujos de trabajo <code>message</code> sobre",
+    "Power Automate Workflows URL": "URL de los flujos de trabajo de Power Automate",
+    "Text message (basic markdown)": "Mensaje de texto (marcado básico)",
+    "Space webhook URL": "URL de webhook espacial",
+    "Slack-style legacy attachments": "Anexos heredados de estilo Slack",
+    "Bot API <code>sendMessage</code> (HTML)": "API de bots <code>sendMessage</code> (HTML)",
+    "Bot token + chat ID (URL derived)": "Token de bot + ID de chat (derivado de la URL)",
+    "Events API v2 trigger (with <code>dedup_key</code>)":
+      "Despliegue de la API de eventos v2 (con <code>dedup_key</code>)",
+    "Routing key (URL prefilled)": "Clave de enrutamiento (URL prellenada)",
+    "Alert API": "API de alerta",
+    "API key (GenieKey header) + region": "Clave API (cabecera GenieKey) + región",
+    "VictorOps REST": "REST de VictorOps",
+    "REST endpoint URL (key embedded)": "URL del punto final REST (clave incorporada)",
+    "Stable <code>{ event, alert }</code> JSON envelope":
+      "estable <code>{ event, alert }</code> Envelope JSON",
+    "Endpoint URL (+ optional HMAC &amp; headers)":
+      "URL del punto final (+ HMAC opcional y encabezados)",
+    "Additive &amp; non-blocking by design": "Aditivo y no bloqueante por diseño",
+    "Two new tables — <code>webhook_targets</code> (config; survives Clear Data like alert rules) and <code>webhook_deliveries</code> (audit log) — with no changes to existing tables, response shapes, or WebSocket message types. Webhook dispatch is fire-and-forget off the alert path, so a slow or failing endpoint can never slow or break alert firing or hook ingestion.":
+      "Dos nuevas mesas — <code>webhook_targets</code> (configuración; sobrevive a la eliminación de datos como reglas de alerta) y <code>webhook_deliveries</code> (registro de auditoría) - sin cambios en las tablas existentes, las formas de respuesta ni los tipos de mensajes WebSocket. El envío de Webhook es automático y se realiza fuera del camino de alerta, por lo que un extremo de destino lento o fallido nunca puede ralentizar o interrumpir el disparo de alertas ni la ingestión de enlaces.",
+    "Provider setup steps can drift": "Los pasos de configuración del proveedor pueden variar",
+    "Microsoft retired classic Office 365 connectors in 2025, so Teams uses an Adaptive Card delivered via Power Automate <strong>Workflows</strong>. More broadly, provider setup UIs change often — the in-app guides say so and link to each provider's official docs. Always confirm against the source.":
+      "Microsoft retiró los conectores clásicos de Office 365 en 2025, por lo que Teams utiliza una Tarjeta Adaptativa entregada a través de Power Automate <strong>Flujos de trabajo</strong>. más ampliamente, las interfaces de usuario de configuración del proveedor cambian con frecuencia, lo dicen las guías de la aplicación y enlazan con los documentos oficiales de cada proveedor. Siempre confirme con la fuente.",
+    '<span class="caption-icon">⬆</span> Update Notifier — version comparison modal with one-click copy of the update command. No automatic self-restart; you stay in control of when upgrades happen':
+      '<span class="caption-icon">⬆</span> Notificador de actualización: modal de comparación de versiones con copia del comando de actualización con un solo clic. Sin reinicio automático automático; usted permanece al control de cuándo ocurren las actualizaciones.',
+    "A detection-only subsystem that tells the user when the dashboard's git checkout is behind the canonical default branch. <strong>Branch- and fork-aware:</strong> if an <code>upstream</code> remote is configured (the standard convention for forks), it takes priority over <code>origin</code>; the chosen remote's <code>master</code> / <code>main</code> / <code>HEAD</code> is the comparison ref. The printed command adapts to the user's situation — <code>git pull --ff-only</code> only when their branch actually tracks the canonical ref, otherwise <code>git fetch</code> (with a fast-forward merge in the fork case). The server <strong>never</strong> pulls or restarts itself — the user runs the command in a terminal — so the mechanism cannot break dev sessions, pm2/systemd/launchd/Docker supervision, or leave orphaned processes.":
+      "Un subsistema de detección exclusiva que informa al usuario cuando la extracción de git del panel de control está detrás de la rama predeterminada canónica. <strong>Conocedor de ramas y ramificaciones:</strong> Si un <code>upstream</code> El mando a distancia está configurado (la convención estándar para puentes), tiene prioridad sobre <code>origin</code>; el mando a distancia elegido <code>master</code> / <code>main</code> / <code>HEAD</code> Es la referencia de la comparación. El comando impreso se adapta a la situación del usuario — <code>git pull --ff-only</code> Solo cuando su rama realmente rastrea la referencia canónica, de lo contrario <code>git fetch</code> (con una fusión de avance rápido en el caso de bifurcación). El servidor <strong>nunca</strong> Se tira o se reinicia por sí mismo: el usuario ejecuta el comando en un terminal, por lo que el mecanismo no puede romper las sesiones de desarrollo, la supervisión de pm2/systemd/launchd/Docker o dejar procesos huérfanos.",
+    "The same status is available from any terminal: <code>ccam update-check</code> asks the server for the branch- and fork-aware comparison, prints the behind-by count and the copy-paste update command, and triggers the <code>update_status</code> WebSocket broadcast so any open dashboard tab refreshes at the same time.":
+      "El mismo estado está disponible desde cualquier terminal: <code>ccam update-check</code> Pide al servidor la comparación consciente de ramas y bifurcaciones, imprime el conteo de retraso y el comando de actualización de copia y pegar, y activa el <code>update_status</code> Transmisión WebSocket, por lo que cualquier pestaña del panel de control abierta se actualiza al mismo tiempo.",
+    "A shell-less <code>git fetch</code> with a 120-second timeout, followed by a <code>rev-list</code> against the tracked upstream. Each call runs from <code>server/lib/update-check.js</code> and returns a structured payload — never throws — so a flaky remote can&apos;t stall the dashboard.":
+      "Sin cáscara <code>git fetch</code> Con un tiempo de espera de 120 segundos, seguido de un <code>rev-list</code> Contra el rastreado en el curso superior. Cada llamada se ejecuta desde <code>server/lib/update-check.js</code> y devuelve una carga útil estructurada, nunca lanza, por lo que un control remoto inestable no puede estancar el panel de instrumentos.",
+    "<code>update-scheduler.js</code> polls every five minutes with <code>.unref()</code> timers so it never blocks shutdown, de-duplicates with a fingerprint over the status payload, and announces up-to-date → behind transitions in a framed stdout block. Disable entirely with <code>DASHBOARD_UPDATE_CHECK=0</code>.":
+      "<code>update-scheduler.js</code> Encuestas cada cinco minutos con <code>.unref()</code> Timer para que nunca bloquee el apagado, desduplique con una huella digital sobre el contenido de la carga útil del estado y anuncie las transiciones → atrasadas actualizadas en un bloque de stdout enmarcado. Deshabilitar completamente con <code>DASHBOARD_UPDATE_CHECK=0</code>.",
+    "Each status payload carries a <code>manual_command</code> shaped for the user's actual situation: <code>git pull --ff-only</code> on a tracked canonical branch, <code>git fetch &amp;&amp; git merge --ff-only</code> for forks where local tracks the wrong remote, and a plain <code>git fetch</code> on a feature branch where pulling would update the wrong branch. Install / build steps are appended only when the working tree is actually being rewritten.":
+      "Cada carga útil de estado lleva un <code>manual_command</code> Diseñado para la situación actual del usuario: <code>git pull --ff-only</code> En una rama canónica rastreada, <code>git fetch &amp;&amp; git merge --ff-only</code> Para tenedores donde la pista local sigue el mando a distancia equivocado, y un plano <code>git fetch</code> En una rama de características donde la extracción actualizaría la rama equivocada. Los pasos de instalación / construcción se adjuntan solo cuando el árbol de trabajo está siendo reescrito de hecho.",
+    "A modal opens automatically when upstream is ahead; ESC or a backdrop click dismisses it. A persistent sidebar button stays in the footer — emerald when behind, amber when the last check errored — so users can always trigger a fresh check on demand.":
+      "Un modal se abre automáticamente cuando upstream está por delante; ESC o un clic en el fondo desactiva el modal. Un botón persistente en la barra lateral permanece en el pie de página: es esmeralda cuando está detrás, ámbar cuando el último control ha fallado, para que los usuarios siempre puedan activar un nuevo control a demanda.",
+    "Non-git installs, no remotes configured, offline fetches, and unresolvable upstream refs all return tagged payloads instead of throwing. The sidebar badge turns amber on fetch errors and the modal stays suppressed until a successful check arrives — no spinners, no stuck state.":
+      "Las instalaciones no git, las no configuradas remotas, las consultas fuera de línea y las referencias de origen no resolubles devuelven todos los paquetes de carga etiquetados en lugar de lanzar. El distintivo de la barra lateral se vuelve ámbar en los errores de consulta y el modal se mantiene suprimido hasta que llegue una comprobación exitosa, sin carretes giratorios ni estado atascado.",
+    "Dismissal is keyed by the upstream SHA in <code>localStorage</code>, so closing the modal silences it only for <em>that</em> commit — a newer upstream commit re-opens it automatically. Clicking the sidebar button is an explicit intent signal and clears the stored dismissal before firing a fresh check.":
+      "El rechazo está controlado por el SHA de entrada en <code>localStorage</code>, por lo que cerrar la modalidad lo silencia solo por <em>eso</em> comit — un commit más reciente de arriba abre automáticamente. Hacer clic en el botón de la barra lateral es una señal de intención explícita y borra el despido almacenado antes de lanzar una verificación nueva.",
+    "Read-only check — runs <code>git fetch</code>, compares, returns the payload.":
+      "Comprobación de lectura única - se ejecuta <code>git fetch</code>, compara, devuelve la carga útil.",
+    "Same check, and broadcasts <code>update_status</code> over WebSocket so every connected client re-syncs at once.":
+      "Mismo cheque, y transmisiones <code>update_status</code> A través de WebSocket, por lo que todos los clientes conectados se sincronizan de una vez.",
+    "<strong>Detection-only by design</strong>": "<strong>Detección solo por diseño</strong>",
+    "There is no <code>POST /api/updates/apply</code> and no in-process restart helper. A process cannot reliably replace itself without an external supervisor, and <code>npm run dev</code>, <code>npm start</code>, pm2, systemd, launchd, and Docker each need different restart logic. Detection-only keeps the mechanism portable across every supervisor and OS, and leaves the dashboard's lifecycle owned by whatever started it. The user runs the printed command in their own shell.":
+      "No hay <code>POST /api/updates/apply</code> Y no hay asistente de reinicio en proceso. Un proceso no puede reemplazarse de forma fiable sin un supervisor externo, y <code>npm run dev</code>, <code>npm start</code>, pm2, systemd, launchd y Docker necesitan cada uno una lógica de reinicio diferente. La detección solo mantiene el mecanismo portátil en todos los supervisores y sistemas operativos, y deja que el ciclo de vida del panel de control sea propiedad de quien lo inició. El usuario ejecuta el comando impreso en su propia shell.",
+    '<span class="caption-icon">◈</span> Connection Status — sidebar-launched details modal with WebSocket endpoint, connection uptime, 60-second throughput sparkline, top event-type breakdown, and recent activity list':
+      '<span class="caption-icon">◈</span> Estado de la conexión: modal de detalles lanzada desde la barra lateral con punto final WebSocket, tiempo de actividad de la conexión, gráfico de flujo de datos de 60 segundos, desglose del tipo de evento más común y lista de actividad reciente.',
+    'The <strong>Live</strong> / <strong>Disconnected</strong> pill in the sidebar footer opens a small details panel about the dashboard\'s WebSocket transport. It surfaces the active <code>ws://</code> endpoint, how long the current socket has been up, total events received, the top event types as a horizontal bar chart, a 60-second throughput sparkline, and the most recent 8 events as an activity list. Cumulative stats (totals, type breakdown, recent list) persist across reloads via <code>localStorage</code> under <code>sidebar-connection-stats</code>; the rolling sparkline and "connected since" timer are intentionally ephemeral since they only make sense relative to "now". A <strong>Reset</strong> button clears everything on demand.':
+      'el <strong>en vivo</strong> / <strong>desconectado</strong> La píldora en el pie de página de la barra lateral abre un pequeño panel de detalles sobre el transporte WebSocket del panel de control. Muestra el activo <code>ws://</code> Punto final, cuánto tiempo ha estado activo el socket actual, los eventos totales recibidos, los tipos de eventos más comunes como un gráfico de barras horizontal, una línea de chispa de rendimiento de 60 segundos y los 8 eventos más recientes como una lista de actividades. Las estadísticas acumulativas (totales, desglose por tipo, lista reciente) persisten a través de las recargas a través de <code>localStorage</code> bajo <code>sidebar-connection-stats</code>; la línea de flechas en movimiento y el temporizador "conectado desde" son intencionalmente efímeros ya que solo tienen sentido en relación con "ahora". A <strong>volver a poner</strong> El botón borra todo a pedido.',
+    "Implementation note: per-event state lives in <code>useRef</code> buffers on the sidebar so the WS firehose never re-renders the navigation tree — the modal does its own one-second tick to sample the refs while open. Writes are throttled (single-flight timer, 2 s window) and flushed on <code>pagehide</code> / <code>visibilitychange</code> so the latest events aren't lost to the throttle window. The modal itself is portalled to <code>document.body</code> so the sidebar's stacking context can't trap it.":
+      "Nota de implementación: el estado por evento vive en <code>useRef</code> Bufers en la barra lateral para que el grifo de fuego WS nunca vuelva a renderizar el árbol de navegación, el modal hace su propio tic de un segundo para muestrar las referencias mientras está abierto. Las escrituras se limitan (timer de vuelo único, ventana de 2 s) y se borran en <code>pagehide</code> / <code>visibilitychange</code> Así que los últimos eventos no se pierden en la ventana de aceleración. El modal en sí se redirige a <code>document.body</code> Así que el contexto de empalme de la barra lateral no puede atraparlo.",
+    "The entire UI ships in <strong>four languages — English, 简体中文, Tiếng Việt, and 한국어</strong> — built on <code>i18next</code> + <code>react-i18next</code> with <code>i18next-browser-languagedetector</code>. Coverage is end-to-end: every page, chart tooltip, Settings flow, Workflow narrative, Config Explorer tab, Run page, and the Alerts rule-help tooltips + webhook setup guides are translated. Switch languages from the sidebar (EN / 中文 / VI / 한국어) — the choice persists in <code>localStorage</code>.":
+      "Toda la interfaz de usuario se envía en <strong>Cuatro idiomas: inglés, chino simplificado, vietnamita y coreano</strong> — construido sobre <code>i18next</code> + <code>react-i18next</code> con <code>i18next-browser-languagedetector</code>. la cobertura es de extremo a extremo: todas las páginas, las etiquetas de herramientas de gráficos, el flujo de Configuración, la narrativa del flujo de trabajo, la pestaña Config Explorer, la página Ejecutar y las etiquetas de ayuda de las reglas de Alertas + las guías de configuración de webhook se traducen. Cambie el idioma desde la barra lateral (EN / 中文 / VI / 한국어) - la elección persiste en <code>localStorage</code>.",
+    'Translations are split into per-area JSON namespaces (<code>common</code>, <code>nav</code>, <code>dashboard</code>, <code>sessions</code>, <code>analytics</code>, <code>workflows</code>, <code>settings</code>, <code>kanban</code>, <code>run</code>, <code>ccConfig</code>, <code>alerts</code>, <code>errors</code>, <code>updates</code>) under <code>client/src/i18n/locales/&lt;lng&gt;/</code>. Components load only the namespaces they need via <code>useTranslation("…")</code>.':
+      'Las traducciones se dividen en nombrespaces JSON por área (<code>common</code>, <code>nav</code>, <code>dashboard</code>, <code>sessions</code>, <code>analytics</code>, <code>workflows</code>, <code>settings</code>, <code>kanban</code>, <code>run</code>, <code>ccConfig</code>, <code>alerts</code>, <code>errors</code>, <code>updates</code>) debajo <code>client/src/i18n/locales/&lt;lng&gt;/</code>. Los componentes cargan solo los espacios de nombres que necesitan a través de <code>useTranslation("…")</code>.',
+    "Language is detected from <code>localStorage</code> (<code>i18nextLng</code>) then the browser's <code>navigator</code> setting, and the choice is cached back to <code>localStorage</code>. <code>fallbackLng</code> is English and <code>nonExplicitSupportedLngs</code> resolves regional tags (e.g. <code>vi-VN</code> → <code>vi</code>), so any unmapped key falls back gracefully rather than rendering a raw key.":
+      "Se detecta el idioma de <code>localStorage</code> (<code>i18nextLng</code>) entonces el del navegador <code>navigator</code> Configuración, y la elección se almacena en caché de vuelta a <code>localStorage</code>. <code>fallbackLng</code> Es inglés y <code>nonExplicitSupportedLngs</code> Resuelve etiquetas regionales (por ejemplo, <code>vi-VN</code> → <code>vi</code>), por lo que cualquier clave no asignada se recupera con gracia en lugar de renderizar una clave bruta.",
+    "Numbers, costs, dates, and relative times format against the active locale via a shared <code>getCurrentLocale()</code> helper, and plurals use i18next's <code>_one</code> / <code>_other</code> suffixes. Interpolated values (<code>{{count}}</code>, <code>{{provider}}</code>, …) keep sentences natural across languages.":
+      "Los números, los costos, las fechas y los tiempos relativos se formatean contra el lugar de origen activo a través de un compartido <code>getCurrentLocale()</code> Ayudante, y los plurales usan los de i18next <code>_one</code> / <code>_other</code> Sufijos. Valores interpolados (<code>{{count}}</code>, <code>{{provider}}</code>, ...) mantenga las oraciones naturales a través de idiomas.",
+    "Domain terms that are proper nouns or code stay untranslated in every locale — <em>Agent</em>, <em>Subagent</em>, hook event names (<code>PostToolUse</code>), tool names (<code>Bash</code>), and webhook provider names (Slack, PagerDuty). Only the surrounding prose is localized, so instructions stay accurate.":
+      "Los términos de dominio que son nombres propios o códigos permanecen sin traducir en cada ubicación — <em>representante</em>, <em>Subagente</em>, conectar los nombres de los eventos (<code>PostToolUse</code>), nombres de herramientas (<code>Bash</code>), y nombres de proveedores de webhook (Slack, PagerDuty). Solo la prosa circundante se localiza, por lo que las instrucciones permanecen precisas.",
+    "<strong>Adding a language</strong>": "<strong>Añadir un idioma</strong>",
+    "Copy <code>client/src/i18n/locales/en/</code> to a new locale folder, translate the JSON values (leaving keys and technical terms intact), then register the bundle and add the tag to <code>supportedLngs</code> in <code>client/src/i18n/index.ts</code>. Missing keys fall back to English automatically, so even a partial translation ships cleanly.":
+      "copia <code>client/src/i18n/locales/en/</code> A una nueva carpeta de ubicación, traduzca los valores JSON (dejando intactas las claves y los términos técnicos), luego regístre el paquete y agregue la etiqueta a <code>supportedLngs</code> indio <code>client/src/i18n/index.ts</code>. claves faltantes se vuelven automáticamente al inglés, por lo que incluso una traducción parcial se envía sin problemas.",
+    "<strong>Tabby</strong> is a cute SVG cat companion pinned to the <strong>edges of every page</strong> of the dashboard. It is always present and turns the live session stream into glanceable, ambient feedback — calm when idle, alert when something needs attention, and celebratory when a run finishes. Tabby is built entirely on the existing <code>eventBus</code> WebSocket stream: <strong>no new backend, no API key, and no new dependencies</strong>. The component lives in <code>client/src/components/Tabby/</code> and can be toggled on or off in Settings page.":
+      "<strong>gata</strong> Es un lindo compañero de gato SVG atado al <strong>Líneas de cada página</strong> del panel de control. Siempre está presente y convierte el flujo de la sesión en vivo en un retroalimentación ambiental que se puede ver de un vistazo: tranquilo cuando está inactivo, alerta cuando algo necesita atención y festivo cuando una carrera termina. Tabby está construido enteramente sobre el existente <code>eventBus</code> Stream WebSocket: <strong>Sin nuevo backend, sin clave API y sin nuevas dependencias</strong>. componente vive en <code>client/src/components/Tabby/</code> y se puede activar o desactivar en la página de Configuración.",
+    '<span class="caption-icon">📥</span> Tabby Companion — a cute SVG cat in the edges of every page, reacting in real time to the live session stream with eight distinct moods and animations, auto-surfacing speech bubbles for notable events, and serving as the gateway to a status panel and Ask box':
+      '<span class="caption-icon">📥</span> Tabby Companion: un lindo gato SVG en los bordes de cada página, que reacciona en tiempo real al flujo de la sesión en vivo con ocho estados de ánimo y animaciones distintos, burbujas de diálogo que aparecen automáticamente para eventos notables y que sirve como puerta de entrada a un panel de estado y una caja de preguntas.',
+    "Tabby derives one of eight moods from the live session WebSocket stream, each with its own animation. The eyes track your cursor, and the active mood drives a distinct motion cue.":
+      "Tabby deriva uno de los ocho estados de ánimo del flujo WebSocket de la sesión en vivo, cada uno con su propia animación. Los ojos rastrean el cursor y el estado de ánimo activo impulsa una señal de movimiento distinta.",
+    "Notable events — session started or finished, errors, and run completed — automatically surface a speech bubble. Bubbles are <strong>throttled and coalesced</strong> so bursts of events never spam you, and they can be muted on demand. Everything reflects in real time over the existing <code>eventBus</code> WebSocket channel, with no polling and no extra services.":
+      "Los eventos notables, como el inicio o finalización de la sesión, los errores y la finalización de la ejecución, generan automáticamente una burbuja de diálogo. Las burbujas son <strong>Controlando y coalescente</strong> Así que los brotes de eventos nunca te envían spam, y puedes silenciarlos a demanda. Todo se refleja en tiempo real sobre el existente <code>eventBus</code> Canal WebSocket, sin consultas y sin servicios adicionales.",
+    "Click the cat — or press <code>⌘B</code> / <code>Ctrl+B</code> — to open Tabby's panel (<code>Esc</code> closes it). The panel groups a live status line, quick actions, and an Ask box.":
+      "Haz clic en el gato o pulsa <code>⌘B</code> / <code>Ctrl+B</code> — para abrir el panel de Tabby (<code>Esc</code> lo cierra). El panel agrupa una línea de estado en vivo, acciones rápidas y una caja de Preguntar.",
+    "<strong>Live status line:</strong> <em>N live · M errored · connection state</em>, updated from cached data.":
+      "<strong>Línea de estado en vivo:</strong> <em>N en vivo · M error · estado de conexión</em>, actualizado a partir de datos almacenados en caché.",
+    "<strong>Quick actions:</strong> jump to Run Claude, Activity, Sessions, or errored sessions; mute bubbles; clear alerts.":
+      "<strong>Acciones rápidas:</strong> Ir a Ejecutar Claude, Actividad, Sesiones o sesiones con errores; silenciar burbujas; eliminar alertas.",
+    "<strong>Ask box:</strong> answers simple status questions locally from cached data (&ldquo;what's running&rdquo;, &ldquo;any errors&rdquo;, &ldquo;status&rdquo;).":
+      "<strong>Caja de preguntas:</strong> Responde preguntas de estado simples localmente a partir de datos caché (&quot;qué está ejecutando&quot;, &quot;cuáles son los errores&quot;, &quot;estado&quot;).",
+    "The Ask box answers status questions instantly and offline from cached data. For anything beyond a simple status question, Tabby hands off to the existing <strong>Run Claude</strong> page (<code>/run?prompt=...</code>) to spawn a real Claude Code session — so there is never a separate model call, key, or service to manage.":
+      "La caja de Preguntas responde instantáneamente a las preguntas de estado y sin conexión a partir de datos caché. Para cualquier cosa más allá de una simple pregunta de estado, Tabby se entrega al existente <strong>Corra Claude</strong> Página (<code>/run?prompt=...</code>) para crear una sesión real de Claude Code, por lo que nunca hay una llamada de modelo, clave o servicio separado que administrar.",
+    "Fully keyboard operable: <code>⌘B</code> / <code>Ctrl+B</code> to open, <code>Esc</code> to close.":
+      "Totalmente operativo con teclado: <code>⌘B</code> / <code>Ctrl+B</code> Para abrir, <code>Esc</code> Cerrar.",
+    "Status and bubbles announce via <code>aria-live</code> for screen readers.":
+      "Estado y burbujas anunciadas a través de <code>aria-live</code> Para lectores de pantalla.",
+    "Respects <code>prefers-reduced-motion</code> to calm animations.":
+      "consideración <code>prefers-reduced-motion</code> Para calmar las animaciones.",
+    "Degrades gracefully to a calm, dimmed disconnected state when offline.":
+      "Se degrada con gracia a un estado tranquilo, apagado y desconectado cuando está desconectado.",
+    Endpoint: "Punto final",
+    Mood: "humor",
+    "When it appears": "Cuando aparezca",
+    Animation: "animación",
+    Idle: "andar al ralentí",
+    "Nothing notable happening": "Nada notable sucediendo",
+    "Gentle tail flick": "Pelea suave de cola",
+    Watching: "Observando",
+    "Sessions active, observing the stream": "Sesiones activas, observando el flujo",
+    "Ear perk, cursor-tracking eyes": "Apertura de los oídos, ojos que rastrean el cursor",
+    Happy: "feliz",
+    "A run completed successfully": "Una carrera completada con éxito",
+    Sparkle: "brillo",
+    Worried: "preocupado",
+    "Something looks off": "Algo no cuadra",
+    "Head bob": "Sacudir la cabeza",
+    Stuck: "atascado",
+    "A session appears blocked": "Una sesión parece estar bloqueada",
+    "Shake + alert <code>!</code>": "Sacudir + alerta <code>!</code>",
+    Thinking: "pensante",
+    "Work in progress": "Trabajo en progreso",
+    Sleeping: "sueño",
+    "Quiet for a while": "Tranquilo por un rato",
+    Zzz: "zzz",
+    Disconnected: "desconectado",
+    "WebSocket offline": "WebSocket sin conexión",
+    "Calm, dimmed state": "Estado tranquilo y apagado",
+    "Development vs production deployment topology":
+      "Topología de despliegue de desarrollo vs producción",
+    Aspect: "faceta",
+    Development: "explotación",
+    Production: "creación",
+    Processes: "Procesos",
+    "2 (Express + Vite)": "2 (Expreso + Vite)",
+    "1 (Express only)": "1 (Solo exprés)",
+    "Client URL": "URL del cliente",
+    "API proxy": "Proxy de API",
+    "Vite proxies <code>/api</code> + <code>/ws</code> to :4820":
+      "Proxies Vite <code>/api</code> + <code>/ws</code> A: 4820",
+    "Same origin, no proxy": "Misma origen, sin proxy",
+    "File watching": "Seguimiento de archivos",
+    "<code>node --watch</code> + Vite HMR": "<code>node --watch</code> + Vite HMR",
+    None: "nona",
+    "Source maps": "Mapa de fuentes",
+    Inline: "En línea",
+    "External files": "Archivos externos",
+    "<strong>A third way to run: the Desktop App (macOS &amp; Windows)</strong>":
+      "<strong>Una tercera forma de ejecutar: la aplicación de escritorio (macOS y Windows)</strong>",
+    'Beyond development and standalone production, the dashboard also ships as a native desktop app — a macOS <code>.app</code> and a Windows <code>.exe</code> — that embeds the same production server in-process, no terminal required. See the <a href="#desktop-app">Desktop App (macOS &amp; Windows)</a> section for download, build, and install instructions.':
+      'Más allá del desarrollo y la producción independiente, el panel de control también se envía como una aplicación nativa para escritorio, una macOS. <code>.app</code> Y una ventana <code>.exe</code> — que incorpora el mismo servidor de producción en el proceso, no se requiere terminal. Consulte el <a href="#desktop-app">Aplicación para escritorio (macOS y Windows)</a> Sección para descargar, construir e instalar instrucciones.',
+    "The production image is OCI-compatible and works with both Docker and Podman. The server listens on <code>4820</code>, reads legacy Claude history from a read-only mount, and persists SQLite data under <code>/app/data</code>.":
+      "La imagen de producción es compatible con OCI y funciona tanto con Docker como con Podman. El servidor escucha en <code>4820</code>, lee la historia heredada de Claude desde una unidad de lectura única y persiste los datos de SQLite bajo <code>/app/data</code>.",
+    "Container image build and runtime mounts":
+      "Construcción de la imagen del contenedor y montajes de tiempo de ejecución",
+    Mount: "monte",
+    "Read historical Claude session files for import without modifying them":
+      "Lea los archivos históricos de sesiones de Claude para su importación sin modificarlos",
+    "Persist the SQLite database across rebuilds and container restarts":
+      "Persiste la base de datos SQLite a través de las reconstrucciones y reinicios de contenedores",
+    "<strong>Hooks still run on the host</strong>":
+      "<strong>Los ganchos todavía funcionan en el host</strong>",
+    "Claude Code fires hooks from the host machine, not from inside the container. After the container is healthy on <code>http://localhost:4820</code>, run <code>npm run install-hooks</code> on the host so hook events post back to the containerized server.":
+      "Claude Code dispara ganchos desde la máquina anfitriona, no desde dentro del contenedor. Después de que el contenedor esté sano en <code>http://localhost:4820</code>, correr <code>npm run install-hooks</code> en el host, así que envía los eventos de conexión de vuelta al servidor contenedorizado.",
+    "A multi-stage <code>Dockerfile</code> and <code>docker-compose.yml</code> are included. Both <strong>Docker</strong> and <strong>Podman</strong> are fully supported — the image is OCI-compliant.":
+      "Un multiestadio <code>Dockerfile</code> y <code>docker-compose.yml</code> Están incluidos. ambos <strong>estibador</strong> y <strong>Podman</strong> Son totalmente compatibles: la imagen cumple con la normativa OCI.",
+    "Read-only access to legacy session history for automatic import on startup":
+      "Acceso de lectura única al historial de sesiones heredadas para importación automática al inicio de sesión",
+    "Persists the SQLite database across container restarts":
+      "Persiste la base de datos SQLite a través de reinicios de contenedores",
+    "The Dockerfile uses three stages to minimize the final image size:":
+      "El Dockerfile utiliza tres etapas para minimizar el tamaño final de la imagen:",
+    Stage: "etapa",
+    "Installs production <code>node_modules</code> on <code>node:22-alpine</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
+      "Instala producción <code>node_modules</code> en <code>node:22-alpine</code>. <code>better-sqlite3</code> Es opcional: si las construcciones preestablecidas no están disponibles, el servidor recurre a las construcciones integradas. <code>node:sqlite</code>",
+    "Runs <code>npm ci</code> + <code>vite build</code> to produce optimized static assets":
+      "Corre <code>npm ci</code> + <code>vite build</code> Para producir activos estáticos optimizados",
+    "Clean <code>node:22-alpine</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
+      "limpio <code>node:22-alpine</code> Con solo <code>node_modules</code>, código del servidor y <code>client/dist</code>",
+    "<strong>Hook note</strong>": "<strong>Nota de gancho</strong>",
+    "Claude Code hooks run on the host, not inside the container. The containerized server receives hook events via HTTP on <code>localhost:4820</code>. Run <code>npm run install-hooks</code> on the host after starting the container.":
+      "Los ganchos de Claude Code se ejecutan en el host, no dentro del contenedor. El servidor contenedorizado recibe eventos de gancho a través de HTTP en <code>localhost:4820</code>. carrera <code>npm run install-hooks</code> En el host después de iniciar el contenedor.",
+    Metric: "métrico",
+    "Server startup": "Inicio de sesión del servidor",
+    "SQLite opens instantly; schema migration is idempotent":
+      "SQLite se abre instantáneamente; la migración del esquema es idempotente",
+    "Hook latency": "Latencia del gancho",
+    "Transaction + broadcast, no async I/O beyond SQLite":
+      "Transacción + transmisión, sin E/S asincrónica más allá de SQLite",
+    "Client JS bundle": "Paquete JS del cliente",
+    "WebSocket latency": "Latencia de WebSocket",
+    "Local loopback, JSON serialization only": "Bucle local, solo serialización JSON",
+    "SQLite write throughput": "Trafico de escritura de SQLite",
+    "WAL mode on SSD; far exceeds any hook event rate":
+      "Modo WAL en SSD; supera ampliamente cualquier tasa de eventos de conexión.",
+    "Max events before slowdown": "Máximo número de eventos antes de la ralentización",
+    "Pagination prevents full-table scans": "La paginación evita escaneos completos de la tabla",
+    "Server memory": "Memoria del servidor",
+    "SQLite in-process, no ORM overhead": "SQLite en proceso, sin sobrecostes de ORM",
+    "Client memory": "Memoria del cliente",
+    "React + Tailwind, minimal runtime deps":
+      "React + Tailwind, dependencias mínimas de tiempo de ejecución",
+    "Input validation": "Validación de la entrada",
+    "Required fields checked before DB operations; CHECK constraints on status enums":
+      "Campos requeridos marcados antes de las operaciones de la base de datos; CONSTRAINTES DE COMPROBACIÓN en los enums de estado",
+    "Hook safety": "Seguridad del gancho",
+    "Hook handler always exits 0; 5s max lifetime; uses <code>127.0.0.1</code> not external hosts":
+      "El manipulador de ganchos siempre sale 0; vida útil máxima de 5 segundos; utiliza <code>127.0.0.1</code> No hosts externos",
+    CORS: "CORS",
+    "Restricted to loopback origins, so cross-origin pages can't read responses; no-Origin clients like curl still work":
+      "Restringido a orígenes de retroceso, por lo que las páginas de origen cruzado no pueden leer las respuestas; los clientes sin origen como curl todavía funcionan",
+    Authentication: "autentificación",
+    "Off by default since the loopback bind is the trust boundary; set <code>DASHBOARD_TOKEN</code> to require a bearer token on every <code>/api/*</code> request and the WebSocket when exposing on a LAN.":
+      "Desactivado por defecto ya que el enlace de retroceso es el límite de confianza; establecer <code>DASHBOARD_TOKEN</code> Para requerir un token portador en cada <code>/api/*</code> Solicitud y el WebSocket cuando se expone en una LAN.",
+    Secrets: "Secretos",
+    "No API keys, tokens, or credentials stored or transmitted anywhere":
+      "No se almacenan ni transmiten claves API, tokens ni credenciales en ningún lugar.",
+    "Dependency surface": "Superficie de dependencia",
+    "5 runtime server deps, 6 runtime client deps (includes D3.js for Workflows) — minimal attack surface":
+      "5 dependencias del servidor de tiempo de ejecución, 6 dependencias del cliente de tiempo de ejecución (incluye D3.js para flujos de trabajo) - superficie de ataque mínima",
+    "Hooks only apply to sessions started <em>after</em> installation. Restart Claude Code after starting the dashboard.":
+      "Los ganchos solo se aplican a las sesiones iniciadas <em>después</em> Instalación. Reinicie el código Claude después de iniciar el panel de control.",
+    "On some systems the shell environment when Claude Code fires hooks may not include the full PATH. Test with <code>node --version</code>. If not found, use the absolute path to <code>node</code> in the hook command.":
+      "En algunos sistemas, el entorno de la cáscara cuando Claude Code dispara los ganchos puede no incluir el PATH completo. Pruebe con <code>node --version</code>. Si no se encuentra, use el camino absoluto a <code>node</code> En el comando de gancho.",
+    Problem: "problema",
+    Solution: "solución",
+    "<code>better-sqlite3</code> errors during install":
+      "<code>better-sqlite3</code> Errores durante la instalación",
+    "This is non-fatal — <code>better-sqlite3</code> is an optional dependency. On Node 22+ the server automatically falls back to built-in <code>node:sqlite</code>. On older Node versions, install Python 3 + C++ build tools, then run <code>npm rebuild better-sqlite3</code>. For the desktop app, the <code>desktop:install</code> preflight prints copy-pasteable per-OS setup guidance (incl. a no-toolchain alternative) when the native build fails.":
+      "Esto no es mortal — <code>better-sqlite3</code> Es una dependencia opcional. En Node 22+ el servidor vuelve automáticamente a los incorporados. <code>node:sqlite</code>. versiones de Node más antiguas, instale las herramientas de compilación de Python 3 + C++, luego ejecute <code>npm rebuild better-sqlite3</code>. para la aplicación de escritorio, el <code>desktop:install</code> Impresiones de prevolado con instrucciones de configuración copiables y pegables por sistema operativo (incluyendo una alternativa sin cadena de herramientas) cuando la construcción nativa falla.",
+    'Dashboard shows "Disconnected"': 'El panel de control muestra "Desconectado"',
+    "Server is not running. Start it with <code>npm run dev</code>. Client auto-reconnects every 2s.":
+      "El servidor no está funcionando. Inícialo con <code>npm run dev</code>. se reconecta automáticamente el cliente cada 2 segundos.",
+    "Events Today shows 0": "Eventos de hoy muestran 0",
+    "Ensure you are on the latest version (timezone bug was fixed). Restart the server.":
+      "Asegúrese de estar en la última versión (se ha solucionado el error del huso horario). Reinicie el servidor.",
+    "Port 4820 already in use": "Puerto 4820 ya en uso",
+    "Run <code>DASHBOARD_PORT=4821 npm run dev</code>, update Vite proxy in <code>client/vite.config.ts</code>, and re-run <code>npm run install-hooks</code>.":
+      "carrera <code>DASHBOARD_PORT=4821 npm run dev</code>, actualizar el proxy Vite en <code>client/vite.config.ts</code>, y volver a ejecutar <code>npm run install-hooks</code>.",
+    "Stale seed data shown": "Se muestran datos de semillas caducas",
+    "Run <code>npm run clear-data</code> to wipe all rows, then restart.":
+      "carrera <code>npm run clear-data</code> Para borrar todas las filas, luego reinicia.",
+    "Hooks show validation error about matcher":
+      "Los ganchos muestran un error de validación sobre el coincidiente",
+    'Ensure you\'re on the latest version — the hook format was updated to use <code>matcher: "*"</code> string (not object).':
+      'Asegúrate de estar en la última versión: el formato de gancho se actualizó para usar <code>matcher: "*"</code> cadena (no objeto).',
+    '"SQLite backend not available" on startup': '"Backend SQLite no disponible" al arrancar',
+    "Neither <code>better-sqlite3</code> nor <code>node:sqlite</code> could load. Upgrade to Node.js 22+ (recommended), or install Python 3 + C++ build tools and run <code>npm rebuild better-sqlite3</code>.":
+      "ninguno <code>better-sqlite3</code> tampoco <code>node:sqlite</code> podría cargar. Actualice a Node.js 22+ (recomendado) o instale herramientas de compilación de Python 3 + C++ y ejecute <code>npm rebuild better-sqlite3</code>.",
+    "Docker container runs but no sessions appear":
+      "El contenedor Docker se ejecuta, pero no aparecen sesiones",
+    "Hooks run on the host, not inside the container. Run <code>npm run install-hooks</code> on the host after the container starts. Verify hooks in <code>~/.claude/settings.json</code> point to <code>localhost:4820</code>.":
+      "Los ganchos funcionan en el host, no dentro del contenedor. carrera <code>npm run install-hooks</code> En el host después de que el contenedor comience. Verifique los ganchos en <code>~/.claude/settings.json</code> Puntar a <code>localhost:4820</code>.",
+    Technology: "tecnología",
+    "Why This Over Alternatives": "Por qué esto sobre alternativas",
+    "Zero-config, embedded, no server process. WAL mode gives concurrent reads. Synchronous API is simpler than async for this use case. <code>better-sqlite3</code> is preferred when prebuilds are available; falls back to Node.js built-in <code>node:sqlite</code> on Node 22+ when the native module cannot be compiled.":
+      "Configuración cero, incorporado, sin proceso de servidor. El modo WAL proporciona lecturas concurrentes. La API sincrónica es más sencilla que la asincrónica para este caso de uso. <code>better-sqlite3</code> Se prefiere cuando están disponibles las precompilaciones; se recurre a la incorporación de Node.js <code>node:sqlite</code> en Node 22+ cuando el módulo nativo no se puede compilar.",
+    "Battle-tested, minimal, well-understood. Fastify would be overkill; raw <code>http</code> module would require too much boilerplate for routing.":
+      "Probado en batalla, minimalista, bien entendido. Fastify sería una exageración; crudo <code>http</code> El módulo requeriría demasiada plantilla para el enrutamiento.",
+    "Fastest, most lightweight WebSocket library for Node. No Socket.IO overhead needed — we only push typed JSON messages one-way.":
+      "La biblioteca WebSocket más rápida y ligera para Node. No se necesita sobrecarga de Socket.IO, solo enviamos mensajes JSON de tipo de forma bidireccional.",
+    "Stable, widely known, strong TypeScript support. No Server Components or RSC needed for a client-rendered local SPA.":
+      "Sostenible, ampliamente conocido, fuerte soporte para TypeScript. No se necesitan componentes de servidor ni RSC para un SPA local renderizado por el cliente.",
+    "Fast builds, native ESM, excellent dev experience. Proxy config handles the dev server split cleanly with no ejection.":
+      "Construcciones rápidas, ESM nativo, excelente experiencia de desarrollo. La configuración del proxy maneja la división del servidor de desarrollo de forma limpia sin expulsión.",
+    "Utility-first approach keeps styles colocated with markup. No CSS module boilerplate. Custom dark theme config for the dark UI.":
+      "El enfoque de priorizar la utilidad mantiene los estilos colocalizados con el marcado. Sin plantilla de módulo CSS. Configuración personalizada del tema oscuro para la interfaz de usuario oscura.",
+    "Standard routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without prop drilling.":
+      "Ruta estándar para React SPAs. Rutas de diseño con <code>&lt;Outlet&gt;</code> Dar una composición de cáscara limpia sin perforación de propósitos.",
+    "Tree-shakeable icon library — only imports what's used (~20 icons). No heavy icon font.":
+      "Biblioteca de iconos que se pueden sacudir como un árbol: solo importa lo que se utiliza (~20 iconos). Sin fuente de iconos pesada.",
+    "Catches null/undefined bugs at compile time. <code>noUncheckedIndexedAccess</code> prevents array bounds issues in analytics aggregations.":
+      "Captura errores nulos/indefinidos en el momento de la compilación. <code>noUncheckedIndexedAccess</code> previene problemas de límites de arreglo en las agregaciones analíticas.",
+    "Industry-standard data visualization library. Powers the Workflows page's 11 interactive sections — DAG layouts, Sankey diagrams, force-directed graphs, bubble charts, and swim-lane timelines. No wrapper libraries needed; direct SVG rendering keeps bundle impact minimal.":
+      "Biblioteca de visualización de datos estándar de la industria. Proporciona potencia a las 11 secciones interactivas de la página de flujos de trabajo: diseños DAG, diagramas Sankey, gráficos dirigidos por fuerza, gráficos de burbujas y cronogramas de carril de natación. No se necesitan bibliotecas de envoltorio; la renderización directa de SVG mantiene el impacto del paquete mínimo.",
+    "Available on virtually all systems. Handles ANSI and JSON natively with stdlib only. No install step required.":
+      "Disponible en prácticamente todos los sistemas. Maneja ANSI y JSON nativamente con stdlib solo. No se requiere ningún paso de instalación.",
+    "Local-first monitoring for Claude Code sessions, agents, and tool events. Built for real-time visibility with zero external dependencies.":
+      "Monitoreo local primero para sesiones de Claude Code, agentes y eventos de herramientas. Construido para visibilidad en tiempo real con cero dependencias externas.",
+    Install: "instalar",
+    Setup: "configuración",
+    "About the Creator": "Sobre el creador",
+    '<span class="caption-icon">⭐</span> <span> Enjoying the project? <a class="star-history-caption-link" href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor" target="_blank" rel="noopener noreferrer">Give it a star on GitHub</a> and help more builders discover it. </span>':
+      '<span class="caption-icon">⭐</span> <span> ¿Disfrutando del proyecto? <a class="star-history-caption-link" href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor" target="_blank" rel="noopener noreferrer">Dale una estrella en GitHub</a> Y ayudar a más constructores a descubrirlo. </span>',
+    'Clears the waiting flag and promotes the main agent to <span class="status-chip chip-working"><span class="chip-dot"></span>Working</span>. The only reliable signal that text-only assistant turns have started — they emit no <code>PreToolUse</code> before <code>Stop</code>.':
+      'Borra la bandera de espera y promueve al agente principal a <span class="status-chip chip-working"><span class="chip-dot"></span>de trabajo</span>. señal confiable de que los teléfonos con asistente de texto solo han comenzado a funcionar: no emiten ninguna <code>PreToolUse</code> antes <code>Stop</code>.',
+    'Clears the waiting flag, sets agent → <span class="status-chip chip-working"><span class="chip-dot"></span>Working</span>, <code>current_tool</code> set. If tool is <code>Agent</code>, subagent record created.':
+      'Borra la bandera de espera, establece agente → <span class="status-chip chip-working"><span class="chip-dot"></span>de trabajo</span>, <code>current_tool</code> Configurar. Si la herramienta es <code>Agent</code>, registro del subagente creado.',
+    'Clears the waiting flag (covers permission-prompt approvals mid-tool). <code>current_tool</code> cleared. Agent stays <span class="status-chip chip-working"><span class="chip-dot"></span>Working</span>.':
+      'Borra la bandera de espera (cubre las aprobaciones de la solicitud de permiso a mitad de la herramienta). <code>current_tool</code> Liberado. El agente permanece <span class="status-chip chip-working"><span class="chip-dot"></span>de trabajo</span>.',
+    'Non-error: main agent → <code>waiting</code> — UI shows <span class="status-chip chip-waiting"><span class="chip-dot"></span>Waiting</span> until the next user input. <code>stop_reason=error</code>: marks the agent and session <span class="status-chip chip-error"><span class="chip-dot"></span>Error</span>. Background subagents keep running.':
+      'Sin error: agente principal → <code>waiting</code> — Muestra de interfaz de usuario <span class="status-chip chip-waiting"><span class="chip-dot"></span>espera</span> Hasta la próxima entrada del usuario. <code>stop_reason=error</code>: marca al agente y la sesión <span class="status-chip chip-error"><span class="chip-dot"></span>error informático</span>. de los subagentes de fondo siguen funcionando.',
+    'Matched subagent → <span class="status-chip chip-completed"><span class="chip-dot"></span>Completed</span>. Deliberately does <strong>not</strong> clear the waiting flag — a backgrounded subagent finishing tells us nothing about the human. Also kicks off a fire-and-forget JSONL scan (<code>scanAndImportSubagents</code>) that walks the session\'s <code>subagents/agent-*.jsonl</code> files, pairs <code>tool_use</code> ↔ <code>tool_result</code> blocks by <code>tool_use_id</code>, and emits per-tool <code>PreToolUse</code> + <code>PostToolUse</code> events under each subagent\'s own <code>agent_id</code> — surfaces tool calls that subagents make internally and which never fire any hooks.':
+      'Subagente coincidente → <span class="status-chip chip-completed"><span class="chip-dot"></span>Completado</span>. idamente lo hace <strong>no</strong> Borrar la bandera de espera: un subagente en segundo plano que termina no nos dice nada sobre el humano. También inicia una escaneo JSONL de fuego y olvido (<code>scanAndImportSubagents</code>) que camina por la sesión <code>subagents/agent-*.jsonl</code> Archivos, pares <code>tool_use</code> ↔ <code>tool_result</code> Bloques por <code>tool_use_id</code>, y emite por herramienta <code>PreToolUse</code> + <code>PostToolUse</code> Eventos bajo los propios de cada subagente <code>agent_id</code> — las llamadas de herramientas de superficies que hacen los subagentes internamente y que nunca disparan ningún gancho.',
+    'Creates a compaction subagent → <span class="status-chip chip-completed"><span class="chip-dot"></span>Completed</span>. Detected via <code>isCompactSummary</code> entries in the transcript. Token baselines preserve pre-compaction totals. Periodic scanner (cadence ~¼ of <code>DASHBOARD_STALE_MINUTES</code>) catches compactions when no hooks fire.':
+      'Crea un subagente de compactación → <span class="status-chip chip-completed"><span class="chip-dot"></span>Completado</span>. detectado a través de <code>isCompactSummary</code> Entradas en la transcripción. Las bases de referencia de tokens conservan los totales previos a la compactación. Escáner periódico (cadencia ~¼ de <code>DASHBOARD_STALE_MINUTES</code>) atrapa compactaciones cuando no disparan los ganchos.',
+    'Drops the waiting flag. If the session is already in <span class="status-chip chip-error"><span class="chip-dot"></span>Error</span>, the error state is preserved; otherwise marks all agents and the session as <span class="status-chip chip-completed"><span class="chip-dot"></span>Completed</span>. Evicts the session\'s transcript from the shared cache.':
+      'Deja caer la bandera de espera. Si la sesión ya está en <span class="status-chip chip-error"><span class="chip-dot"></span>error informático</span>, el estado de error se preserva; de lo contrario, marca a todos los agentes y la sesión como <span class="status-chip chip-completed"><span class="chip-dot"></span>Completado</span>. la transcripción de la sesión del caché compartido.',
+    "SQLite connection, WAL/FK pragmas, schema migrations (<code>CREATE TABLE IF NOT EXISTS</code>), all prepared statements as a reusable <code>stmts</code> object. Tries <code>better-sqlite3</code> first, falls back to built-in <code>node:sqlite</code> via <code>compat-sqlite.js</code>":
+      "Conexión SQLite, pragmas WAL/FK, migraciones de esquema (<code>CREATE TABLE IF NOT EXISTS</code>), todas las declaraciones preparadas como reutilizables <code>stmts</code> Objeto. Intenta <code>better-sqlite3</code> En primer lugar, vuelve a lo incorporado <code>node:sqlite</code> a través de <code>compat-sqlite.js</code>",
+    "Each page pulls initial data from REST then subscribes to eventBus for live updates":
+      "Cada página obtiene los datos iniciales de REST y luego se suscribe a eventBus para recibir actualizaciones en vivo.",
+    "Entity Relationship Diagram — SQLite schema":
+      "Diagrama de relaciones de entidades - esquema SQLite",
+    "Working Dir": "Director de trabajo",
+    "Git Branch": "Ramificación de Git",
+    "Context Bar": "Barra de contexto",
+    "Token Counts": "Contas de tokens",
+    "Session Cost": "Costo de la sesión",
+    "Statusline rendering pipeline — invoked on each Claude Code update":
+      "Pipeline de renderizado de Statusline: invocado en cada actualización del Código Claude.",
+    "Aggregates data from multiple API endpoints to display high-signal metrics directly in the sidebar:":
+      "Agrupa datos de múltiples puntos finales de API para mostrar métricas de alto señal directamente en la barra lateral:",
+    "Zero-Config Setup": "Configuración de cero configuración",
+    "One-line mental model": "Modelo mental de una línea",
+    "Your data survives reinstalls and updates":
+      "Sus datos sobreviven a las reinstalaciones y actualizaciones",
+    "The <code>claude</code> CLI is found automatically":
+      "el <code>claude</code> El CLI se encuentra automáticamente",
+    'Open <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest" target="_blank" rel="noopener noreferrer" class="dl-chip"> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Releases → latest </a> and download the asset for your platform. The macOS and Windows Desktop CI jobs auto-publish a new <code>vX.Y.Z</code> release every time the version in <code>package.json</code> is bumped on <code>master</code>, so this link always points at the current build. Releases are public — no GitHub sign-in required.':
+      'aire libre <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/releases/latest" target="_blank" rel="noopener noreferrer" class="dl-chip"> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Lanzamientos → más recientes </a> y descargue el recurso para su plataforma. Los trabajos de CI de escritorio de macOS y Windows publican automáticamente un nuevo <code>vX.Y.Z</code> Lanzamiento cada vez que la versión en <code>package.json</code> Se golpea en <code>master</code>, por lo que este enlace siempre señala la versión actual. Las publicaciones son públicas, no se requiere iniciar sesión en GitHub.',
+    'Want a build straight off the tip of <code>master</code>, ahead of the next tagged release? Every green run of the <code>🍎 macOS Desktop (DMG)</code> job on <code>macos-latest</code> uploads both per-arch DMGs as the <code>ClaudeCodeMonitor-dmg</code> workflow artifact, and the <code>🪟 Windows Desktop (EXE)</code> job on <code>windows-latest</code> uploads the installer + portable EXEs as the <code>ClaudeCodeMonitor-win</code> artifact. Open the <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess" target="_blank" rel="noopener noreferrer" class="dl-chip"> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg> latest passing run </a>, scroll to its Artifacts section, and download <code>ClaudeCodeMonitor-dmg</code> or <code>ClaudeCodeMonitor-win</code>. (GitHub sign-in required; 14-day retention.)':
+      'Quieres una construcción directamente desde la punta de <code>master</code>, ¿antes del próximo lanzamiento etiquetado? Cada carrera verde del <code>🍎 macOS Desktop (DMG)</code> Trabajo en curso <code>macos-latest</code> Sube tanto los DMG por archivo como el <code>ClaudeCodeMonitor-dmg</code> Artefacto del flujo de trabajo y el <code>🪟 Windows Desktop (EXE)</code> Trabajo en curso <code>windows-latest</code> Sube el instalador + los EXEs portátiles como el <code>ClaudeCodeMonitor-win</code> Artefacto. Abre el <a href="https://github.com/hoangsonww/Claude-Code-Agent-Monitor/actions/workflows/ci.yml?query=branch%3Amaster+is%3Asuccess" target="_blank" rel="noopener noreferrer" class="dl-chip"> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg> Última carrera de paso </a>, desplázate hasta la sección de Artifactos y descarga <code>ClaudeCodeMonitor-dmg</code> Oregón <code>ClaudeCodeMonitor-win</code>. (Se requiere iniciar sesión en GitHub; retención de 14 días).',
+    "Incoming Webhook URL": "URL de Webhook entrante",
+    "Webhook URL": "URL de Webhook",
+    "Detection pipeline from scheduler to UI":
+      "Pipeline de detección desde el programador hasta la interfaz de usuario",
+    "A shell-less <code>git fetch</code> with a 120-second timeout, followed by a <code>rev-list</code> against the tracked upstream. Each call runs from <code>server/lib/update-check.js</code> and returns a structured payload — never throws — so a flaky remote can't stall the dashboard.":
+      "Sin cáscara <code>git fetch</code> Con un tiempo de espera de 120 segundos, seguido de un <code>rev-list</code> Contra el rastreado en el curso superior. Cada llamada se ejecuta desde <code>server/lib/update-check.js</code> y devuelve una carga útil estructurada, nunca lanza, por lo que un control remoto inestable no puede paralizar el panel de instrumentos.",
+    "Detection-only by design": "Detección solo por diseño",
+    "Adding a language": "Añadir un idioma",
+    "<strong>Ask box:</strong> answers simple status questions locally from cached data (“what's running”, “any errors”, “status”).":
+      '<strong>Caja de preguntas:</strong> Responde preguntas de estado simples localmente a partir de datos almacenados ("qué está ejecutando", "algunos errores", "estado").',
+    "A third way to run: the Desktop App (macOS &amp; Windows)":
+      "Una tercera forma de ejecutar: la aplicación de escritorio (macOS y Windows)",
+    "Hooks still run on the host": "Los ganchos todavía funcionan en el host",
+    "Hook note": "Nota de gancho",
+    "SQL injection": "Inyección SQL",
+    "All queries use prepared statements with parameterized values — no string interpolation":
+      "Todas las consultas utilizan declaraciones preparadas con valores parametrizados, sin interpolación de cadenas",
+    "Request size": "Tamaño de la solicitud",
+    "Express JSON body parser limited to 1MB":
+      "El analizador de cuerpo JSON de Express está limitado a 1 MB.",
+    "Dashboard — stats, active agents, recent events":
+      "Panel de control: estadísticas, agentes activos, eventos recientes",
+    "KanbanBoard — agent status columns": "KanbanBoard — columnas de estado del agente",
+    "Sessions — searchable, filterable table": "Sesiones: tabla buscable y filtrable",
+    "SessionDetail — agents + full event timeline":
+      "Detalles de la sesión: agentes + cronología completa del evento",
+    "ActivityFeed — real-time streaming event log":
+      "ActivityFeed: registro de eventos de transmisión en tiempo real",
+    "Analytics — token usage, heatmap (day-of-week aligned), tool charts, donut charts":
+      "Análisis: uso de tokens, mapa de calor (alineado por día de la semana), gráficos de herramientas, gráficos de rosquillas",
+    "Workflows — D3.js visualizations, cross-filtering, status filter, session drill-in":
+      "Flujos de trabajo: visualizaciones D3.js, filtrado cruzado, filtro de estado, perforación de sesión",
+    "Settings — model pricing, hook status, data export, session cleanup":
+      "Configuración: precios del modelo, estado del gancho, exportación de datos, limpieza de sesiones",
+    'Returns <code>{ "status": "ok", "timestamp": "..." }</code>':
+      'Devoluciones <code>{ "status": "ok", "timestamp": "..." }</code>',
+    "List sessions with agent counts and per-session cost. Params: <code>status</code>, <code>q</code> (case-insensitive search across <code>id</code>/<code>name</code>/<code>cwd</code>), <code>limit</code> (default 50, max 10000), <code>offset</code>. Response includes <code>total</code> for paginators.":
+      "Listar sesiones con el número de agentes y el costo por sesión. Parámetros: <code>status</code>, <code>q</code> (búsqueda insensible a mayúsculas y minúsculas en todo <code>id</code>/<code>name</code>/<code>cwd</code>), <code>limit</code> (por defecto 50, máximo 10000), <code>offset</code>. incluye <code>total</code> Para paginadores.",
+    "Session detail with agents and events": "Detalles de la sesión con agentes y eventos",
+    "Create session (idempotent on <code>id</code>)":
+      "Crear sesión (idempotente en <code>id</code>)",
+    "Update session status / metadata": "Actualizar el estado de la sesión / metadatos",
+    "List agents — params: <code>status</code>, <code>session_id</code>, <code>limit</code>, <code>offset</code>":
+      "Listar agentes - parámetros: <code>status</code>, <code>session_id</code>, <code>limit</code>, <code>offset</code>",
+    "Single agent detail": "Detalles del agente único",
+    "Create agent": "Crear agente",
+    "Update agent status / task / current_tool":
+      "Actualizar el estado del agente / tarea / herramienta actual",
+    "List events newest-first — params: <code>session_id</code>, <code>limit</code>, <code>offset</code>":
+      "Listar eventos desde el más reciente al primero - parámetros: <code>session_id</code>, <code>limit</code>, <code>offset</code>",
+    "Aggregate counts + status distributions + WS connections":
+      "Contas agregadas + distribuciones de estado + conexiones WS",
+    "Token totals, tool usage, daily trends, agent types, event types, averages":
+      "Totales de tokens, uso de herramientas, tendencias diarias, tipos de agentes, tipos de eventos, promedios",
+    "Receive and process a Claude Code hook event (called by hook-handler.js)":
+      "Recibir y procesar un evento de gancho de código Claude (llamado por hook-handler.js)",
+    "List all model pricing rules": "Lista todas las reglas de precios de los modelos",
+    "Create or update a pricing rule": "Crear o actualizar una regla de precios",
+    "Delete a pricing rule": "Eliminar una regla de precios",
+    "Total cost across all sessions": "Costo total de todas las sesiones",
+    "Cost breakdown for a specific session": "Desglose de costos para una sesión específica",
+    "System info, DB stats, hook installation status":
+      "Información del sistema, estadísticas de la base de datos, estado de instalación del gancho",
+    "Delete all sessions, agents, events, token usage":
+      "Borrar todas las sesiones, agentes, eventos, uso de tokens",
+    "Reinstall Claude Code hooks": "Reinstalar los ganchos de Claude Code",
+    "Reset pricing rules to defaults":
+      "Restablecer las reglas de precios a los valores predeterminados",
+    "Export all data as JSON download": "Exportar todos los datos como descarga JSON",
+    "Abandon stale sessions (by hours), purge old data (by days)":
+      "Abandone sesiones obsoletas (por horas), purgue datos antiguos (por días)",
+    "OS-aware paths, archive command, supported extensions, step-by-step instructions; includes live stats for the default <code>~/.claude/projects</code> folder":
+      "Rutas conscientes del sistema operativo, comando de archivo, extensiones compatibles, instrucciones paso a paso; incluye estadísticas en vivo para la predeterminada <code>~/.claude/projects</code> carpeta",
+    "Re-scan the default <code>~/.claude/projects</code> directory; safe to re-run (idempotent via session-ID dedup)":
+      "Reescanea el predeterminado <code>~/.claude/projects</code> directorio; seguro de volver a ejecutar (identidad empotrada mediante deduplicación de ID de sesión)",
+    "Scan any absolute directory (body <code>{ path }</code>); tilde (<code>~</code>) is expanded; walks subdirectories recursively and imports every <code>.jsonl</code> found":
+      "Escanea cualquier directorio absoluto (cuerpo <code>{ path }</code>); tilde (<code>~</code>) se expande; recorre subdirectorios recursivamente e importa cada <code>.jsonl</code> fundador",
+    "Multipart upload of <code>.jsonl</code>, <code>.meta.json</code>, <code>.zip</code>, <code>.tar</code>, <code>.tar.gz</code>, <code>.tgz</code>, <code>.gz</code>. Per-request staging dir, path-traversal and extraction-size guards. Returns 413 <code>EXTRACTION_LIMIT_EXCEEDED</code> on suspected bomb archives":
+      "Subida multiparticular de <code>.jsonl</code>, <code>.meta.json</code>, <code>.zip</code>, <code>.tar</code>, <code>.tar.gz</code>, <code>.tgz</code>, <code>.gz</code>. dirección de ensayo por solicitud, recorrido de rutas y guardias de tamaño de extracción. Devuelve 413 <code>EXTRACTION_LIMIT_EXCEEDED</code> En archivos sospechosos de bombas",
+    "Aggregate workflow data — orchestration graphs, tool flows, effectiveness, patterns, model delegation, error propagation, concurrency, complexity, compaction impact. Accepts <code>?status=active|completed</code> query param to filter by workflow status":
+      "Datos agregados del flujo de trabajo: gráficos de orquestación, flujos de herramientas, eficacia, patrones, delegación de modelos, propagación de errores, concurrencia, complejidad y impacto de la compactación. Acepta <code>?status=active|completed</code> Parámetro de consulta para filtrar por estado del flujo de trabajo",
+    "Per-session drill-in — agent tree, tool timeline, event details":
+      "Entrenamiento por sesión: árbol de agentes, cronología de herramientas, detalles de eventos",
+    "Fired-alert feed, newest first (<code>?unacked=true</code>, <code>limit</code>, <code>offset</code>; carries <code>total</code> and <code>unacked</code> counts)":
+      "Feed de alerta de disparos, primero los más recientes (<code>?unacked=true</code>, <code>limit</code>, <code>offset</code>; lleva <code>total</code> y <code>unacked</code> Cuenta)",
+    "Acknowledge one alert": "Reconocer una alerta",
+    "Acknowledge every unacked alert": "Reconocer cada alerta no atendida",
+    "List alert rules": "Lista de reglas de alerta",
+    "Create a rule (<code>event_pattern</code> | <code>inactivity</code> | <code>status_duration</code> | <code>token_threshold</code>)":
+      "Crear una regla (<code>event_pattern</code> | <code>inactivity</code> | <code>status_duration</code> | <code>token_threshold</code>)",
+    "Update name / config / enabled / cooldown":
+      "Actualizar nombre / configuración / habilitado / tiempo de espera",
+    "Delete a rule and its fired-alert history":
+      "Borrar una regla y su historial de alertas activadas",
+    "Supported providers + their config fields (drives the UI form)":
+      "Proveedores compatibles + sus campos de configuración (dirigen el formulario de la interfaz de usuario)",
+    "List webhook targets (URLs masked, secrets redacted)":
+      "Lista de objetivos de webhook (URLs encriptadas, secretos redactados)",
+    "Create a target — 14 first-class providers (Slack, Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream) + a generic JSON endpoint":
+      "Crea un objetivo: 14 proveedores de primera clase (Slack, Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream) + un punto final JSON genérico",
+    "Update name / url / enabled / secret / headers / config / rule scope (<code>type</code> is immutable)":
+      "Actualizar nombre / url / habilitado / secreto / encabezados / configuración / alcance de la regla (<code>type</code> Es inmutable)",
+    "Delete a target and its delivery log": "Eliminar un objetivo y su registro de entrega",
+    "Send a synthetic test alert and report the result":
+      "Envíe una alerta de prueba sintética y informe el resultado",
+    "Recent delivery log for a target": "Registro de entregas recientes para un objetivo",
+    Documentation: "documentación",
+    Architecture: "arquitectura",
+    "Relevant Links": "Enlaces relevantes",
+    "GitHub Repo": "Repositorio de GitHub",
+    '<span class="caption-icon">🔔</span> <span><strong>Settings · Alerts</strong> — rules-based alerting engine and outbound webhooks in one place: alert rules (event pattern / inactivity / stuck agent / token threshold) with per-rule cooldown, a live fired-alert feed, and 14 first-class webhook providers plus a generic JSON endpoint with optional HMAC signing</span>':
+      '<span class="caption-icon">🔔</span> <span><strong>Configuración · Alertas</strong> — motor de alertas basado en reglas y webhooks de salida en un solo lugar: reglas de alerta (patrón de eventos / inactividad / agente atascado / umbral de token) con tiempo de espera por regla, un feed de alertas lanzadas en vivo y 14 proveedores de webhooks de primera clase, además de un punto final JSON genérico con firma HMAC opcional</span>',
+    '<span class="caption-icon">📗</span> <span><strong>API Docs · ReDoc</strong> — a self-hosted, read-optimized rendering of the full OpenAPI 3.0 spec at <code>/api/redoc</code>, served entirely offline with no CDN. Complements the interactive Swagger UI at <code>/api/docs</code>; every backend route is documented with parameters, schemas, and examples</span>':
+      '<span class="caption-icon">📗</span> <span><strong>Documentación de API · ReDoc</strong> — una renderización alojada por sí misma, optimizada para la lectura, de la especificación completa de OpenAPI 3.0 en <code>/api/redoc</code>, servido completamente sin conexión a Internet sin CDN. Completa la interfaz de usuario interactiva de Swagger en <code>/api/docs</code>; cada ruta de backend está documentada con parámetros, esquemas y ejemplos</span>',
+    '<span class="caption-icon">📘</span> <span><strong>API Docs · Swagger UI</strong> — interactive OpenAPI 3.0 playground at <code>/api/docs</code>: collapsible endpoint groups, request/response schemas, auth headers, and try-it-out request execution against the live local server</span>':
+      '<span class="caption-icon">📘</span> <span><strong>Documentación de API · Interfaz de usuario Swagger</strong> — patio de recreo interactivo OpenAPI 3.0 en <code>/api/docs</code>: grupos de puntos finales plegables, esquemas de solicitud/respuesta, encabezados de autenticación y ejecución de solicitudes de prueba contra el servidor local en vivo</span>',
+    '<span class="caption-icon">📗</span> <span>ReDoc at <code>/api/redoc</code> — a self-hosted, read-optimized three-panel rendering of the same OpenAPI spec: deep-linkable sections, search, and full schema/example detail. Works entirely offline (no CDN)</span>':
+      '<span class="caption-icon">📗</span> <span>ReDoc en <code>/api/redoc</code> - una renderización de tres paneles alojada y optimizada para la lectura de la misma especificación OpenAPI: secciones vinculables a través de enlaces profundos, búsqueda y detalles completos del esquema/ejemplo. Funciona completamente sin conexión (sin CDN)</span>',
+    '<span class="caption-icon">🔔</span> Settings · Alerts — the rules-based alerting engine, a live fired-alert feed, and outbound webhook channels (14 first-class providers + a generic JSON endpoint) managed together in one place':
+      '<span class="caption-icon">🔔</span> Configuración · Alertas: el motor de alertas basado en reglas, un feed de alertas en vivo y canales webhook de salida (14 proveedores de primera clase + un punto final JSON genérico) gestionados juntos en un solo lugar.',
+    'Surfaces "dynamic workflows" — the fleets of sub-agents spawned by the <code>Workflow</code> tool and self-paced <code>/loop</code> runs. These emit no hooks, so they are reconstructed from the on-disk run journal written when a workflow finishes (<code>workflows/wf_&lt;runId&gt;.json</code>) plus the inner <code>subagents/agent-*.jsonl</code> transcripts. Each run shows its phases and a per-agent token / tool-call / duration breakdown; a running workflow is detected from its launch script before the journal exists. Runs appear in a panel on the Workflows page and as a linked subsection on each session.':
+      'Superficies "trabajos de flujo dinámicos" - las flotas de subagentes generadas por el <code>Workflow</code> Herramienta y a ritmo propio <code>/loop</code> Ejecuciones. Estas no emiten enlaces, por lo que se reconstruyen a partir del diario de ejecución en el disco escrito cuando un flujo de trabajo termina (<code>workflows/wf_&lt;runId&gt;.json</code>) más el interior <code>subagents/agent-*.jsonl</code> transcripciones. Cada ejecución muestra sus fases y una desglose por token/llamada a herramienta/duración por agente; se detecta un flujo de trabajo en ejecución desde su script de lanzamiento antes de que el diario exista. Las ejecuciones aparecen en un panel en la página de Flujos de trabajo y como una subsección vinculada en cada sesión.',
+    '<span class="caption-icon">🧬</span> <span><strong>Workflow Runs</strong> — "dynamic workflows" spawned by the Workflow tool, reconstructed from on-disk run journals: status, agent count, tokens, and tool calls, expandable into a per-agent breakdown (phase, state, tokens, tools, duration) with humanized result previews</span>':
+      '<span class="caption-icon">🧬</span> <span><strong>Ejecuciones del flujo de trabajo</strong> — "procesos de trabajo dinámicos" generados por la herramienta Workflow, reconstruidos a partir de los registros de ejecución en disco: estado, número de agentes, tokens y llamadas a herramientas, expandibles en una desglose por agente (fase, estado, tokens, herramientas, duración) con vistas preliminares de resultados humanizados</span>',
+    '<span class="caption-icon">🧬</span> <span><strong>Workflow Runs · in a session</strong> — the same fleets linked to their launching session, so a session\'s dynamic-workflow sub-agents and their folded-in token cost are visible inline</span>':
+      '<span class="caption-icon">🧬</span> <span><strong>Ejecuciones de flujo de trabajo · en una sesión</strong> — las mismas flotas vinculadas a su sesión de lanzamiento, por lo que los subagentes del flujo de trabajo dinámico de una sesión y su costo de token incorporado son visibles en línea</span>',
+    '<span class="caption-icon">🧬</span> <span><strong>Workflow Runs · expanded</strong> — a run opened up: clickable color-coded phase filters, the per-agent metrics table, and a full list of clickable result items that expand to each agent\'s complete prompt and result</span>':
+      '<span class="caption-icon">🧬</span> <span><strong>Ejecuciones de flujo de trabajo · expandido</strong> — se ha abierto una ejecución: filtros de fase codificados por color interactivos, la tabla de métricas por agente y una lista completa de elementos de resultado interactivos que se expanden a la solicitud completa y el resultado de cada agente.</span>',
+    'Live counters in Prometheus text-exposition format (v0.0.4): sessions and agents by status, total events, cumulative tokens by kind, connected WebSocket clients, configured remote sources, process uptime and RSS, and build version — so CCAM can be scraped into Prometheus / Grafana. Read-only, and — being under <code>/api</code> — behind the DNS-rebinding Host-header guard and the optional <code>DASHBOARD_TOKEN</code>: a non-loopback scraper (e.g. Prometheus in Docker via <code>host.docker.internal</code>) must be allowlisted with <code>DASHBOARD_ALLOWED_HOSTS</code> or the scrape returns <code>403 EBADHOST</code>, and must send the token when one is set. A ready-to-run Prometheus + Grafana stack with a pre-provisioned "CCAM — Overview" dashboard lives in <code>monitoring/</code> (<code>cd monitoring &amp;&amp; docker compose up -d</code>; Grafana on port 3000).':
+      'Mostradores en vivo en formato de exposición de texto de Prometheus (v0.0.4): sesiones y agentes por estado, eventos totales, tokens acumulativos por tipo, clientes WebSocket conectados, fuentes remotas configuradas, tiempo de actividad del proceso y RSS, y versión de la compilación, para que CCAM pueda ser extraído a Prometheus / Grafana. Solo de lectura, y - estando bajo <code>/api</code> — detrás de la guardia del encabezado de Host de reasignación DNS y el opcional <code>DASHBOARD_TOKEN</code>: un raspador sin retroceso (por ejemplo, Prometheus en Docker a través de <code>host.docker.internal</code>) debe estar en la lista de autorización con <code>DASHBOARD_ALLOWED_HOSTS</code> O el rasguño vuelve <code>403 EBADHOST</code>, y debe enviar el token cuando se establece uno. Una pila Prometheus + Grafana lista para ejecutarse con un panel de control "CCAM - Visión general" preprovisionado se encuentra en <code>monitoring/</code> (<code>cd monitoring &amp;&amp; docker compose up -d</code>; Grafana en el puerto 3000).',
+    "Comma-separated extra <code>Host</code>-header names allowed past the DNS-rebinding guard — needed for a non-loopback client or scraper, such as Prometheus in Docker reaching <code>/api/metrics</code> via <code>host.docker.internal</code>; an unlisted host is rejected with <code>403 EBADHOST</code>":
+      "Extra separado por coma <code>Host</code>-se permiten nombres de encabezados después de la guardia de reasignación de DNS, necesaria para un cliente o scraper no de bucle, como Prometheus en Docker alcanzando <code>/api/metrics</code> a través de <code>host.docker.internal</code>; un host no listado es rechazado con <code>403 EBADHOST</code>",
+    "The entire UI ships in <strong>five languages — English, 简体中文, Tiếng Việt, 한국어, and Español</strong> — built on <code>i18next</code> + <code>react-i18next</code> with <code>i18next-browser-languagedetector</code>. Coverage is end-to-end: every page, chart tooltip, Settings flow, Workflow narrative, Config Explorer tab, Run page, and the Alerts rule-help tooltips + webhook setup guides are translated. Switch languages from the sidebar's custom language dropdown — the choice persists in <code>localStorage</code>.":
+      "Toda la interfaz se ofrece en <strong>cinco idiomas: English, 简体中文, Tiếng Việt, 한국어 y Español</strong>, con <code>i18next</code> + <code>react-i18next</code> e <code>i18next-browser-languagedetector</code>. La cobertura es integral: se traducen todas las páginas, las ayudas de los gráficos, los flujos de Settings, la narrativa de Workflow, la pestaña Config Explorer, la página Run y las ayudas de reglas de Alerts y de configuración de webhooks. Elige el idioma en el menú desplegable personalizado de la barra lateral; la preferencia se conserva en <code>localStorage</code>.",
+    'Every alert-rule field has a help tooltip — the event-type, tool-name, and summary-contains fields include example chips of real hook events and built-in tool names. Each webhook provider ships a collapsible step-by-step setup guide linking to the official docs. A one-click <strong>"Send test"</strong> probe fires a synthetic alert and reports the delivery result inline, and targets can be scoped to specific rules. Fully localized (en / zh / vi / ko / es).':
+      'Cada campo de regla de alerta tiene una pestaña de ayuda - los campos tipo de evento, nombre de la herramienta y contiene resumen incluyen ejemplos de chips de eventos de gancho reales y nombres de herramientas integrados. Cada proveedor de webhook envía una guía de configuración paso a paso colapsable que enlaza con los documentos oficiales. Un clic <strong>"Enviar prueba"</strong> probe emite una alerta sintética y informa el resultado de la entrega en línea, y los objetivos pueden estar restringidos a reglas específicas. Totalmente localizado (es / zh / vi / ko).',
+    "<strong>Server-paginated</strong> table of every recorded session — each page fetches only its slice so cost computation stays bounded no matter how many sessions exist. Case-insensitive search across <code>id</code>, <code>name</code>, and <code>cwd</code> runs server-side with a 300 ms debounce; the status filter composes with search for precise narrowing. A searchable checkbox project picker supports selecting multiple directories; long paths remain available in full, while compact trigger text keeps the filter bar readable. Sorting uses the same custom dropdown pattern. Each row shows the session's real name (synced live from the transcript — a <code>/rename</code> or <code>claude -n</code> title, else the auto title, else the first user prompt, with a short-ID fallback), status badge, agent count, duration, model, and estimated cost. Click any row to drill into the full session detail view with conversation transcript and agent hierarchy.":
+      "Tabla <strong>paginada en el servidor</strong> de todas las sesiones registradas: cada página obtiene solo su parte, por lo que el cálculo de costes se mantiene acotado sin importar cuántas sesiones haya. La búsqueda sin distinción entre mayúsculas y minúsculas en <code>id</code>, <code>name</code> y <code>cwd</code> se ejecuta del lado del servidor con una espera de 300 ms; el filtro de estado se combina con la búsqueda para acotar con precisión. Un selector de proyectos con casillas y búsqueda permite seleccionar varios directorios; las rutas largas siguen estando disponibles completas, mientras que un texto compacto mantiene legible la barra de filtros. La ordenación usa el mismo patrón de menú desplegable personalizado. Cada fila muestra el nombre real de la sesión (sincronizado en vivo desde la transcripción: un título de <code>/rename</code> o <code>claude -n</code>, de lo contrario el título automático, luego el primer prompt de usuario, con un ID corto como alternativa), la insignia de estado, el número de agentes, la duración, el modelo y el coste estimado. Haz clic en cualquier fila para abrir la vista detallada completa de la sesión, con transcripción de la conversación y jerarquía de agentes.",
+    'A 12-tab inspector at <code>/cc-config</code> for everything Claude Code knows about: skills, subagents, slash commands, output styles, plugins, marketplaces, MCP servers, hooks, settings, memory, keybindings, and statusline scripts. The Settings tab leads with a Current configuration summary of the options <code>/config</code> controls — model, verbose, theme, output style, auto-compact, notifications — resolved across scopes. The Memory tab surfaces both the user and project <code>CLAUDE.md</code> files and the per-project file-based memory store — every auto-memory <code>*.md</code> under <code>~/.claude/projects/&lt;slug&gt;/memory/</code> (a <code>MEMORY.md</code> index plus one file per remembered fact, often 100+), grouped by project, searchable, and editable — the <code>MEMORY.md</code> index links are clickable and jump to (scroll to + highlight) the matching fact file. Create, edit, and delete the low-risk surfaces — text-file artifacts, per-project auto-memory files, and <code>keybindings.json</code> (structured inline editor) — with mandatory timestamped backups before every write. Plugins, MCP, hooks, and live settings stay read-only with explainer banners and copy-able CLI commands. See the dedicated <a href="#config-explorer">Config Explorer</a> section for the full tour. Per-plugin contribution breakdowns show author and license.':
+      'Un inspector de 12 pestañas en <code>/cc-config</code> para todo lo que Claude Code sabe: habilidades, subagentes, comandos slash, estilos de salida, plugins, mercados, servidores MCP, ganchos, configuraciones, memoria, atajos de teclas y scripts de línea de estado. La pestaña Configuración encabeza con un resumen de la configuración actual de las opciones controladas por <code>/config</code>: modelo, verbose, tema, estilo de salida, compactación automática, notificaciones, resolvidos en todos los ámbitos. La pestaña Memoria muestra tanto los archivos <code>CLAUDE.md</code> del usuario y del proyecto como el almacenamiento de memoria basado en archivos por proyecto: cada <code>.md</code> de memoria automática bajo <code>~/.claude/projects/&lt;slug&gt;/memory/</code> (un índice <code>MEMORY.md</code> más un archivo por hecho recordado, a menudo más de 100), agrupados por proyecto, buscables y editable: los enlaces del índice <code>MEMORY.md</code> son clicables y se saltan al archivo de hecho correspondiente (desplázate hacia arriba + resaltar). Crea, edita y elimina las superficies de bajo riesgo: artefactos de archivos de texto, archivos de memoria automática por proyecto y <code>keybindings.json</code> (editor inline estructurado) con copias de seguridad con hora y fecha obligatorias antes de cada escritura. Los plugins, MCP, ganchos y configuraciones en vivo permanecen de solo lectura con banners explicativos y comandos CLI copiables. Consulta la sección dedicada <a href="#config-explorer">Explorador de Configuración</a> para un recorrido completo. Los desgloses de contribuciones por plugin muestran el autor y la licencia.',
+    '<span class="caption-icon">🧩</span> <span><strong>Claude Config Explorer · Skills</strong> — the Skills tab lists every discovered skill (user, project, and plugin) with its description and source, is searchable across the whole set, and opens any skill file for a safe, timestamp-backed edit</span>':
+      '<span class="caption-icon">🧩</span> <span><strong>Claude Config Explorer · Habilidades</strong> — la pestaña Habilidades enumera todas las habilidades descubiertas (usuario, proyecto y complemento) con su descripción y fuente, se puede buscar en todo el conjunto y abre cualquier archivo de habilidad para una edición segura respaldada por una hora y fecha</span>',
+    '<span class="caption-icon">🛰️</span> <span><strong>Settings · Remote Data Sources</strong> — pull Claude Code activity from other machines over SSH: add sources by destination, test connectivity, sync manually or on a background poller, and switch the global data scope between local, all sources, or a specific machine with per-session source badges</span>':
+      '<span class="caption-icon">🛰️</span> <span><strong>Configuración · Fuentes de datos remotas</strong> — obtenga la actividad de Claude Code de otras máquinas a través de SSH: agregue fuentes por destino, pruebe la conectividad, sincronice manualmente o en un monitor de fondo y cambie el alcance global de los datos entre local, todas las fuentes o una máquina específica con insignias de fuente por sesión</span>',
+    "<code>SessionStart</code>": "<code>Inicio de sesión</code>",
+    "<code>UserPromptSubmit</code>": "<code>UserPromptSubmit</code>",
+    "<code>PreToolUse</code>": "<code>PreToolUse</code>",
+    "<code>PostToolUse</code>": "<code>PostToolUse</code>",
+    "<code>Stop</code>": "<code>Detener</code>",
+    "<code>SubagentStop</code>": "<code>SubagentStop</code>",
+    "Matched subagent → <span class=\"status-chip chip-completed\"><span class=\"chip-dot\"></span>Completed</span>. Deliberately does <strong>not</strong> clear the waiting flag — a backgrounded subagent finishing tells us nothing about the human. Also kicks off a fire-and-forget JSONL scan (<code>scanAndImportSubagents</code>) that walks the session's <code>subagents/agent-*.jsonl</code> files, pairs <code>tool_use</code> ↔ <code>tool_result</code> blocks by <code>tool_use_id</code>, and emits per-tool <code>PreToolUse</code> + <code>PostToolUse</code> events under each subagent's own <code>agent_id</code> — surfaces tool calls that subagents make internally and which never fire any hooks. The same scan also rebuilds the nested-subagent hierarchy — it repoints each subagent's <code>parent_agent_id</code> to the true spawner recovered from the transcript's Task tool result (<code>toolUseResult.agentId</code>), so subagents that spawn their own subagents nest correctly instead of flattening under main.":
+      'Subagente coincidente → <span class="status-chip chip-completed"><span class="chip-dot"></span>Completado</span>. Deliberadamente <strong>no</strong> borra la marca de espera: que un subagente en segundo plano termine no dice nada sobre la persona. También inicia un análisis JSONL sin bloqueo (<code>scanAndImportSubagents</code>) que recorre los archivos <code>subagents/agent-*.jsonl</code> de la sesión, empareja los bloques <code>tool_use</code> ↔ <code>tool_result</code> por <code>tool_use_id</code> y emite eventos por herramienta <code>PreToolUse</code> + <code>PostToolUse</code> con el <code>agent_id</code> de cada subagente. Esto muestra las llamadas de herramientas internas que nunca activan hooks. El mismo análisis también reconstruye la jerarquía de subagentes anidados: vuelve a apuntar el <code>parent_agent_id</code> de cada subagente al generador real recuperado del resultado de la herramienta Task del transcrito (<code>toolUseResult.agentId</code>), para que los subagentes que generan sus propios subagentes se aniden correctamente en vez de quedar al mismo nivel que el principal.',
+    "<code>Notification</code>": "<code>Notificación</code>",
+    "<code>Compaction</code>": "<code>Compactación</code>",
+    "<code>APIError</code>": "<code>Error API</code>",
+    "<code>Interrupted</code>": "<code>Interrumpido</code>",
+    "<code>TurnDuration</code>": "<code>Duración de la vuelta</code>",
+    "<code>SessionEnd</code>": "<code>SessionEnd</code>",
+    "<code>DASHBOARD_PORT</code>": "<code>DASHBOARD_PORT</code>",
+    "<code>4820</code>": "<code>4820</code>",
+    "<code>CLAUDE_DASHBOARD_PORT</code>": "<code>CLAUDE_DASHBOARD_PORT</code>",
+    "<code>MCP_DASHBOARD_BASE_URL</code>": "<code>MCP_DASHBOARD_BASE_URL</code>",
+    "<code>http://127.0.0.1:4820</code>": "<code>http://127.0.0.1:4820</code>",
+    "<code>MCP_TRANSPORT</code>": "<code>MCP_TRANSPORT</code>",
+    "<code>stdio</code>": "<code>stdio</code>",
+    "<code>MCP_HTTP_PORT</code>": "<code>MCP_HTTP_PORT</code>",
+    "<code>8819</code>": "<code>8819</code>",
+    "<code>MCP_HTTP_HOST</code>": "<code>MCP_HTTP_HOST</code>",
+    "<code>127.0.0.1</code>": "<code>127.0.0.1</code>",
+    "<code>DASHBOARD_DB_PATH</code>": "<code>DASHBOARD_DB_PATH</code>",
+    "<code>data/dashboard.db</code>": "<code>data/dashboard.db</code>",
+    "<code>DASHBOARD_ALLOWED_HOSTS</code>": "<code>DASHBOARD_ALLOWED_HOSTS</code>",
+    "<code>(empty)</code>": "<code>(vacío)</code>",
+    "<code>DASHBOARD_WORKING_IDLE_SECONDS</code>": "<code>DASHBOARD_WORKING_IDLE_SECONDS</code>",
+    "<code>120</code>": "<code>120</code>",
+    "<code>DASHBOARD_LIVENESS_PROBE</code>": "<code>DASHBOARD_LIVENESS_PROBE</code>",
+    "<code>1</code>": "<code>1</code>",
+    "<code>DASHBOARD_LIVENESS_IDLE_SECONDS</code>": "<code>DASHBOARD_LIVENESS_IDLE_SECONDS</code>",
+    "<code>60</code>": "<code>60</code>",
+    "<code>DASHBOARD_SESSION_SYNC_MS</code>": "<code>DASHBOARD_SESSION_SYNC_MS</code>",
+    "<code>30000</code>": "<code>30000</code>",
+    "<code>NODE_ENV</code>": "<code>NODE_ENV</code>",
+    "<code>development</code>": "<code>desarrollo</code>",
+    "<code>setup</code>": "<code>configuración</code>",
+    "<code>npm run setup</code>": "<code>npm run setup</code>",
+    "<code>dev</code>": "<code>dev</code>",
+    "<code>npm run dev</code>": "<code>npm run dev</code>",
+    "<code>dev:server</code>": "<code>dev:server</code>",
+    "<code>npm run dev:server</code>": "<code>npm run dev:server</code>",
+    "<code>dev:client</code>": "<code>dev:client</code>",
+    "<code>npm run dev:client</code>": "<code>npm run dev:client</code>",
+    "<code>build</code>": "<code>construir</code>",
+    "<code>npm run build</code>": "<code>npm run build</code>",
+    "<code>start</code>": "<code>start</code>",
+    "<code>npm start</code>": "<code>npm start</code>",
+    "<code>install-hooks</code>": "<code>instalar-hooks</code>",
+    "<code>npm run install-hooks</code>": "<code>npm run install-hooks</code>",
+    "<code>seed</code>": "<code>semilla</code>",
+    "<code>npm run seed</code>": "<code>npm run seed</code>",
+    "<code>import-history</code>": "<code>import-historia</code>",
+    "<code>npm run import-history</code>": "<code>npm run import-history</code>",
+    "<code>clear-data</code>": "<code>limpiar-datos</code>",
+    "<code>npm run clear-data</code>": "<code>npm run clear-data</code>",
+    "<code>test</code>": "<code>prueba</code>",
+    "<code>npm test</code>": "<code>npm test</code>",
+    "<code>test:server</code>": "<code>test:server</code>",
+    "<code>npm run test:server</code>": "<code>npm run test:server</code>",
+    "<code>test:client</code>": "<code>test:client</code>",
+    "<code>npm run test:client</code>": "<code>npm run test:client</code>",
+    "<code>mcp:install</code>": "<code>mcp:instalar</code>",
+    "<code>npm run mcp:install</code>": "<code>npm run mcp:install</code>",
+    "<code>mcp:typecheck</code>": "<code>mcp:typecheck</code>",
+    "<code>npm run mcp:typecheck</code>": "<code>npm run mcp:typecheck</code>",
+    "<code>mcp:build</code>": "<code>mcp:build</code>",
+    "<code>npm run mcp:build</code>": "<code>npm run mcp:build</code>",
+    "<code>mcp:start</code>": "<code>mcp:start</code>",
+    "<code>npm run mcp:start</code>": "<code>npm run mcp:start</code>",
+    "<code>mcp:start:http</code>": "<code>mcp:start:http</code>",
+    "<code>npm run mcp:start:http</code>": "<code>npm run mcp:start:http</code>",
+    "<code>mcp:start:repl</code>": "<code>mcp:start:repl</code>",
+    "<code>npm run mcp:start:repl</code>": "<code>npm run mcp:start:repl</code>",
+    "<code>mcp:dev</code>": "<code>mcp:dev</code>",
+    "<code>npm run mcp:dev</code>": "<code>npm run mcp:dev</code>",
+    "<code>mcp:dev:http</code>": "<code>mcp:dev:http</code>",
+    "<code>npm run mcp:dev:http</code>": "<code>npm run mcp:dev:http</code>",
+    "<code>mcp:dev:repl</code>": "<code>mcp:dev:repl</code>",
+    "<code>npm run mcp:dev:repl</code>": "<code>npm run mcp:dev:repl</code>",
+    "<code>mcp:docker:build</code>": "<code>mcp:docker:build</code>",
+    "<code>npm run mcp:docker:build</code>": "<code>npm run mcp:docker:build</code>",
+    "<code>mcp:podman:build</code>": "<code>mcp:podman:build</code>",
+    "<code>npm run mcp:podman:build</code>": "<code>npm run mcp:podman:build</code>",
+    "<code>test:mcp</code>": "<code>test:mcp</code>",
+    "<code>npm run test:mcp</code>": "<code>npm run test:mcp</code>",
+    "<code>desktop:install</code>": "<code>desktop:install</code>",
+    "<code>npm run desktop:install</code>": "<code>npm run desktop:install</code>",
+    "<code>desktop:build</code>": "<code>desktop:build</code>",
+    "<code>npm run desktop:build</code>": "<code>npm run desktop:build</code>",
+    "<code>desktop:dev</code>": "<code>desktop:dev</code>",
+    "<code>npm run desktop:dev</code>": "<code>npm run desktop:dev</code>",
+    "<code>desktop:test</code>": "<code>desktop:test</code>",
+    "<code>npm run desktop:test</code>": "<code>npm run desktop:test</code>",
+    "<code>desktop:dmg</code>": "<code>desktop:dmg</code>",
+    "<code>npm run desktop:dmg</code>": "<code>npm run desktop:dmg</code>",
+    "<code>desktop:dmg:arm64</code>": "<code>desktop:dmg:arm64</code>",
+    "<code>npm run desktop:dmg:arm64</code>": "<code>npm run desktop:dmg:arm64</code>",
+    "<code>desktop:dmg:x64</code>": "<code>desktop:dmg:x64</code>",
+    "<code>npm run desktop:dmg:x64</code>": "<code>npm run desktop:dmg:x64</code>",
+    "<code>desktop:dmg:universal</code>": "<code>desktop:dmg:universal</code>",
+    "<code>npm run desktop:dmg:universal</code>": "<code>npm run desktop:dmg:universal</code>",
+    "<code>desktop:win</code>": "<code>desktop:win</code>",
+    "<code>npm run desktop:win</code>": "<code>npm run desktop:win</code>",
+    "<code>desktop:win:portable</code>": "<code>desktop:win:portable</code>",
+    "<code>npm run desktop:win:portable</code>": "<code>npm run desktop:win:portable</code>",
+    "<code>build:win-icon</code>": "<code>build:win-icon</code>",
+    "<code>npm run build:win-icon</code>": "<code>npm run build:win-icon</code>",
+    "<code>format</code>": "<code>format</code>",
+    "<code>npm run format</code>": "<code>npm run format</code>",
+    "<code>format:check</code>": "<code>formato:verificar</code>",
+    "<code>npm run format:check</code>": "<code>npm run formato:check</code>",
+    Server: "servidor",
+    "<code>status</code> · <code>start</code> · <code>repl</code>":
+      "<code>estado</code> · <code>inicio</code> · <code>repl</code>",
+    "<code>health</code> · <code>stats</code> · <code>kanban</code> · <code>tail</code>":
+      "<code>salud</code> · <code>estadísticas</code> · <code>kanban</code> · <code>cola</code>",
+    "<code>sessions</code> · <code>session &lt;id&gt;</code> · <code>agents</code> · <code>events</code>":
+      "<code>sessions</code> · <code>session &lt;id&gt;</code> · <code>agents</code> · <code>events</code>",
+    "<code>analytics</code> · <code>workflows</code> · <code>runs</code> · <code>cost</code>":
+      "<code>análisis</code> · <code>flujos de trabajo</code> · <code>ejecuciones</code> · <code>costo</code>",
+    "<code>alerts</code> · <code>alerts ack</code> · <code>rules</code> · <code>webhooks</code> · <code>webhooks test</code>":
+      "<code>alertas</code> · <code>alertas ack</code> · <code>reglas</code> · <code>webhooks</code> · <code>test de webhooks</code>",
+    "<code>pricing</code> · <code>pricing set / delete / reset</code>":
+      "<code>precios</code> · <code>establecer precios / eliminar / restablecer</code>",
+    "<code>import rescan</code> · <code>import path &lt;dir&gt;</code>":
+      "<code>import rescan</code> · <code>import path &lt;dir&gt;</code>",
+    "<code>remote-sources list</code> · <code>remote-sources add</code> · <code>remote-sources test &lt;id&gt;</code> · <code>remote-sources sync [id]</code> · <code>remote-sources rm &lt;id&gt; [--purge]</code>":
+      "<code>remote-sources list</code> · <code>remote-sources add</code> · <code>remote-sources test &lt;id&gt;</code> · <code>remote-sources sync [id]</code> · <code>remote-sources rm &lt;id&gt; [--purge]</code>",
+    "<code>doctor</code> · <code>info</code> · <code>export</code> · <code>cleanup</code> · <code>reinstall-hooks</code> · <code>update-check</code> · <code>clear-data --yes</code> · <code>open</code>":
+      "<code>doctor</code> · <code>info</code> · <code>exportar</code> · <code>limpiar</code> · <code>reinstalar-ganchos</code> · <code>actualizar-verificar</code> · <code>limpiar-datos --sí</code> · <code>abrir</code>",
+    "<code>server/index.js</code>": "<code>server/index.js</code>",
+    "<code>server/db.js</code>": "<code>server/db.js</code>",
+    "<code>server/compat-sqlite.js</code>": "<code>server/compat-sqlite.js</code>",
+    "<code>server/websocket.js</code>": "<code>server/websocket.js</code>",
+    "<code>routes/hooks.js</code>": "<code>rutas/hooks.js</code>",
+    "<code>routes/sessions.js</code>": "<code>rutas/sesiones.js</code>",
+    "<code>routes/agents.js</code>": "<code>rutas/agentes.js</code>",
+    "<code>routes/events.js</code>": "<code>rutas/eventos.js</code>",
+    "<code>routes/stats.js</code>": "<code>rutas/stats.js</code>",
+    "<code>routes/analytics.js</code>": "<code>rutas/analytics.js</code>",
+    "<code>routes/pricing.js</code>": "<code>rutas/pricing.js</code>",
+    "<code>routes/settings.js</code>": "<code>rutas/settings.js</code>",
+    "System info (DB size, row counts, hook status, server uptime). Data export as one versioned JSON bundle and matching import/restore (<code>POST /api/settings/import</code> via <code>server/lib/data-transfer.js</code> — idempotent, session-atomic, non-destructive; consolidate machines). Session cleanup (abandon stale active sessions, purge old completed sessions). Clear all data. Reset pricing to defaults. Reinstall hooks.":
+      "Información del sistema (tamaño de la base de datos, número de filas, estado del gancho, tiempo de actividad del servidor). Exportación de datos como un paquete JSON con versión y importación/restauración correspondientes (<code>POST /api/settings/import</code> a través de <code>server/lib/data-transfer.js</code> - idempotente, atómico de sesión, no destructivo; consolidar máquinas). Limpieza de sesiones (abandonar sesiones activas obsoletas, purgar sesiones antiguas completadas). Borrar todos los datos. Restablecer los precios a los valores predeterminados. Reinstalar los ganchos.",
+    "<code>routes/workflows.js</code>": "<code>rutas/workflows.js</code>",
+    "<code>idx_agents_session</code>": "<code>idx_agents_session</code>",
+    agents: "Agentes",
+    "<code>session_id</code>": "<code>session_id</code>",
+    "<code>idx_agents_status</code>": "<code>idx_agents_status</code>",
+    "<code>status</code>": "<code>estado</code>",
+    "<code>idx_events_session</code>": "<code>idx_events_session</code>",
+    events: "Eventos",
+    "<code>idx_events_type</code>": "<code>idx_events_type</code>",
+    "<code>event_type</code>": "<code>tipo de evento</code>",
+    "<code>idx_events_created</code>": "<code>idx_events_created</code>",
+    "<code>created_at DESC</code>": "<code>created_at DESC</code>",
+    "<code>idx_sessions_status</code>": "<code>idx_sessions_status</code>",
+    sessions: "sesión",
+    "<code>idx_sessions_started</code>": "<code>idx_sessions_started</code>",
+    "<code>started_at DESC</code>": "<code>start_at DESC</code>",
+    "<code>journal_mode</code>": "<code>journal_mode</code>",
+    "<code>WAL</code>": "<code>WAL</code>",
+    "<code>foreign_keys</code>": "<code>clave_externa</code>",
+    "<code>ON</code>": "<code>EN</code>",
+    "<code>busy_timeout</code>": "<code>tiempo_de_espera_ocupado</code>",
+    "<code>5000</code>": "<code>5000</code>",
+    "Export all data (sessions, agents, events, tokens, workflows, runs, alert rules, pricing) as one versioned JSON download":
+      "Exporta todos los datos (sesiones, agentes, eventos, tokens, flujos de trabajo, ejecuciones, reglas de alerta, precios) como una descarga JSON versificada",
+    "Restore an export bundle (multipart <code>file</code> or JSON <code>{ path }</code>) — idempotent, non-destructive; consolidate machines":
+      "Restaurar un paquete de exportación (archivo <code>file</code> multipart o JSON <code>{ path }</code>) - idempotente, no destructivo; consolidar máquinas",
+    "<code>ws://localhost:4820/ws</code>": "<code>ws://localhost:4820/ws</code>",
+    "<code>&lt;proj&gt;/&lt;sid&gt;.jsonl</code>": "<code>&lt;proj&gt;/&lt;sid&gt;.jsonl</code>",
+    "<code>&lt;proj&gt;/&lt;sid&gt;/subagents/agent-*.jsonl</code>":
+      "<code>&lt;proj&gt;/&lt;sid&gt;/subagents/agent-*.jsonl</code>",
+    "<code>&lt;proj&gt;/subagents/&lt;sid&gt;/agent-*.jsonl</code>":
+      "<code>&lt;proj&gt;/subagents/&lt;sid&gt;/agent-*.jsonl</code>",
+    "<code>&lt;root&gt;/&lt;sid&gt;.jsonl</code>": "<code>&lt;root&gt;/&lt;sid&gt;.jsonl</code>",
+    "<code>.zip</code>, <code>.tar</code>, <code>.tar.gz</code>, <code>.tgz</code>":
+      "<code>.zip</code>, <code>.tar</code>, <code>.tar.gz</code>, <code>.tgz</code>",
+    "<code>any.jsonl.gz</code>": "<code>any.jsonl.gz</code>",
+    "<code>CCAM_IMPORT_MAX_BYTES</code>": "<code>CCAM_IMPORT_MAX_BYTES</code>",
+    "1 GB": "1 GB",
+    "<code>CCAM_IMPORT_MAX_FILES</code>": "<code>CCAM_IMPORT_MAX_FILES</code>",
+    "<code>CCAM_IMPORT_MAX_EXTRACT_BYTES</code>": "<code>CCAM_IMPORT_MAX_EXTRACT_BYTES</code>",
+    "4 GB": "4 GB",
+    '<span class="caption-icon">🛰️</span> <span>Settings → Remote Data Sources — add machines by SSH destination, test connectivity, sync on demand or on a background schedule, and narrow the whole app with the global data-scope selector</span>':
+      '<span class="caption-icon">🛰️</span> <span>Configuración → Fuentes de datos remotas — agrega máquinas por destino SSH, prueba la conectividad, sincroniza bajo demanda o en un horario en segundo plano, y reduce toda la aplicación con el selector de alcance de datos global</span>',
+    "<code>DASHBOARD_REMOTE_SYNC_MS</code>": "<code>DASHBOARD_REMOTE_SYNC_MS</code>",
+    "<code>15000</code>": "<code>15000</code>",
+    "<code>DASHBOARD_REMOTE_SYNC_TIMEOUT_MS</code>":
+      "<code>DASHBOARD_REMOTE_SYNC_TIMEOUT_MS</code>",
+    "<code>600000</code>": "<code>600000</code>",
+    "<code>DASHBOARD_REMOTE_TEST_TIMEOUT_MS</code>":
+      "<code>DASHBOARD_REMOTE_TEST_TIMEOUT_MS</code>",
+    "<code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code>":
+      "<code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code>",
+    "<code>mcp/src/</code>": "<code>mcp/src/</code>",
+    "<code>mcp/build/</code>": "<code>mcp/build/</code>",
+    "<code>mcp/README.md</code>": "<code>mcp/README.md</code>",
+    "<code>mcp/src/transports/</code>": "<code>mcp/src/transports/</code>",
+    "<code>mcp/src/ui/</code>": "<code>mcp/src/ui/</code>",
+    "<code>npm run mcp:start|start:http|start:repl|dev|dev:http|dev:repl</code>":
+      "<code>npm run mcp:start|start:http|start:repl|dev|dev:http|dev:repl</code>",
+    "<code>CLAUDE.md</code>, <code>.claude/rules/</code>":
+      "<code>CLAUDE.md</code>, <code>.claude/rules/</code>",
+    "<code>.claude/skills/</code>": "<code>.claude/habilidades/</code>",
+    "<code>.claude/agents/</code>": "<code>.claude/agents/</code>",
+    "<code>AGENTS.md</code>, <code>.codex/rules/default.rules</code>":
+      "<code>AGENTES.md</code>, <code>.codex/rules/default.rules</code>",
+    "<code>.codex/skills/</code>": "<code>.codex/habilidades/</code>",
+    "<code>.codex/agents/</code>": "<code>.codex/agents/</code>",
+    "<code>scripts/hook-handler.js</code>": "<code>scripts/hook-handler.js</code>",
+    "<code>scripts/install-hooks.js</code>": "<code>scripts/install-hooks.js</code>",
+    "<code>scripts/import-history.js</code>": "<code>scripts/import-history.js</code>",
+    "<code>server/routes/import.js</code>": "<code>server/routes/import.js</code>",
+    "<code>server/lib/archive.js</code>": "<code>server/lib/archive.js</code>",
+    "<code>scripts/seed.js</code>": "<code>scripts/seed.js</code>",
+    "<code>scripts/clear-data.js</code>": "<code>scripts/clear-data.js</code>",
+    "<strong>ccam-analytics</strong>": "<strong>ccam-analytics</strong>",
+    "session-report, cost-breakdown, usage-trends, productivity-score":
+      "Reporte de sesión, desglose de costos, tendencias de uso, puntuación de productividad",
+    "analytics-advisor": "Asesor de análisis",
+    "<code>ccam-stats</code>": "<code>ccam-stats</code>",
+    "<strong>ccam-cost-guard</strong>": "<strong>ccam-cost-guard</strong>",
+    "budget-set, spend-forecast, cost-alert, model-savings, daily-budget-check":
+      "Establecer presupuesto, pronosticar gastos, alertas de costos, ahorros de modelos, verificación diaria del presupuesto",
+    "budget-sentinel": "Sentinela del presupuesto",
+    "<strong>ccam-productivity</strong>": "<strong>ccam-productividad</strong>",
+    "daily-standup, weekly-report, sprint-summary, workflow-optimizer":
+      "Standup diario, informe semanal, resumen de sprint, optimizador de flujo de trabajo",
+    "productivity-coach": "Entrenador de productividad",
+    "<strong>ccam-devtools</strong>": "<strong>ccam-devtools</strong>",
+    "session-debug, hook-diagnostics, data-export, health-check":
+      "Depuración de sesiones, diagnóstico de enlaces, exportación de datos, verificación de salud",
+    "issue-triager": "Triagista de problemas",
+    "<code>ccam-doctor</code>, <code>ccam-export</code>":
+      "<code>ccam-doctor</code>, <code>ccam-export</code>",
+    "<strong>ccam-insights</strong>": "<strong>insights de ccam</strong>",
+    "pattern-detect, anomaly-alert, optimization-suggest, session-compare":
+      "Detección de patrones, alerta de anomalías, sugerencias de optimización, comparación de sesiones",
+    "insights-advisor": "Asesor de conocimientos",
+    "<strong>ccam-sessions</strong>": "<strong>sesiones ccam</strong>",
+    "session-search, session-timeline, transcript-replay, cwd-rollup, session-cleanup":
+      "Búsqueda de sesiones, cronología de sesiones, reproducción de transcripciones, acumulación de directorio actual, limpieza de sesiones",
+    "session-investigator": "Investigador de sesión",
+    "<strong>ccam-workflows</strong>": "<strong>ccam-workflows</strong>",
+    "dag-map, delegation-audit, concurrency-report, error-propagation, fleet-runs":
+      "Mapa dag, auditoría de delegación, informe de concurrencia, propagación de errores, ejecuciones de flota",
+    "orchestration-analyst": "Analista de orquestación",
+    "<strong>ccam-quality</strong>": "<strong>Calidad ccam</strong>",
+    "error-scan, api-error-report, hook-failure-audit, slo-check, regression-alert":
+      "Escaneo de errores, informe de errores API, auditoría de fallos de enlaces, verificación de SLA, alerta de regresión",
+    "reliability-engineer": "Ingeniero de fiabilidad",
+    "<strong>ccam-config</strong>": "<strong>ccam-config</strong>",
+    "config-audit, memory-review, skill-inventory, mcp-audit, hook-inventory":
+      "Auditoría de configuración, revisión de memoria, inventario de habilidades, auditoría de mcp, inventario de ganchos",
+    "config-auditor": "Auditor de configuración",
+    "<strong>ccam-dashboard</strong>": "<strong>Panel de control ccam</strong>",
+    "dashboard-status, quick-stats": "Estado del panel de control, estadísticas rápidas",
+    "<code>thinking_blocks</code>, <code>turn_count</code>, <code>total_turn_duration_ms</code>, <code>usage_extras</code> (service_tier, speed, inference_geo)":
+      "<code>thinking_blocks</code>, <code>turn_count</code>, <code>total_turn_duration_ms</code>, <code>usage_extras</code> (tier_de_servicio, velocidad, inference_geo)",
+    "PreToolUse, PostToolUse, Stop, SubagentStop, SessionStart, SessionEnd, Notification, Compaction, APIError, TurnDuration":
+      "PreToolUse, PostToolUse, Stop, SubagentStop, SessionStart, SessionEnd, Notification, Compaction, APIError, TurnDuration",
+    Model: "modelo",
+    "<code>data.model.display_name</code>": "<code>data.model.display_name</code>",
+    User: "usuario",
+    "<code>$USERNAME</code> / <code>$USER</code>": "<code>$USERNAME</code> / <code>$USER</code>",
+    "<code>data.workspace.current_dir</code>": "<code>data.workspace.current_dir</code>",
+    "<code>git symbolic-ref --short HEAD</code>": "<code>git symbolic-ref --short HEAD</code>",
+    "<code>data.context_window.used_percentage</code>":
+      "<code>data.context_window.used_percentage</code>",
+    "<code>data.context_window.current_usage</code>":
+      "<code>data.context_window.current_usage</code>",
+    "<code>data.cost.total_cost_usd</code>": "<code>data.cost.total_cost_usd</code>",
+    '<span class="caption-icon">🧰</span> <span><strong>Claude Config Explorer</strong> — the <code>/cc-config</code> page: 12 tabs (skills, subagents, slash commands, output styles, plugins, marketplaces, MCP servers, hooks, keybindings, settings, memory), a scope filter (user / project / all), search, and safe edit affordances on the low-risk surfaces</span>':
+      '<span class="caption-icon">🧰</span> <span><strong>Claude Config Explorer</strong> — la página <code>/cc-config</code>: 12 pestañas (habilidades, subagentes, comandos de guión, estilos de salida, complementos, mercados, servidores MCP, ganchos, asociaciones de teclas, configuraciones, memoria), un filtro de alcance (usuario / proyecto / todo), búsqueda y posibilidades de edición segura en superficies de bajo riesgo</span>',
+    '<span class="caption-icon">🧩</span> <span><strong>Claude Config Explorer · Skills</strong> — the Skills tab lists every discovered skill (user, project, and plugin) with description and source, is searchable, and opens any <code>SKILL.md</code> for a timestamp-backed edit via the shared editor modal</span>':
+      '<span class="caption-icon">🧩</span> <span><strong>Claude Config Explorer · Habilidades</strong> — la pestaña Habilidades enumera todas las habilidades descubiertas (usuario, proyecto y complemento) con descripción y fuente, es buscable y abre cualquier <code>SKILL.md</code> para una edición respaldada por una hora y fecha a través del modal del editor compartido</span>',
+    "A first-class <strong>configuration inspector</strong> at <code>/cc-config</code> that reads every surface Claude Code knows about — skills, subagents, slash commands, output styles, plugins, marketplaces, MCP servers, hooks, settings, memory, keybindings, and statusline scripts — from the same on-disk layout the CLI uses. The Overview tab summarizes counts and filesystem roots; every other tab drills into one surface with search, scope filtering (<b>user</b> / <b>project</b> / <b>all</b>), and — where safe — create / edit / delete with <strong>mandatory timestamped backups</strong> before every mutation. A <code>cc-watcher</code> on <code>CLAUDE_HOME</code> plus <code>cc_config_changed</code> WebSocket messages keep the page live when files change outside the dashboard.":
+      "Un <strong>inspector de configuración</strong> de primera clase en <code>/cc-config</code> que lee todas las superficies sobre las que Claude Code tiene conocimiento, como habilidades, subagentes, comandos de guión, estilos de salida, plugins, mercados, servidores MCP, ganchos, configuraciones, memoria, asociaciones de teclas y scripts de línea de estado, desde el mismo diseño en disco que utiliza la CLI. La pestaña Resumen resume los conteos y las raíces del sistema de archivos; cada otra pestaña profundiza en una superficie con búsqueda, filtrado de alcance (<b>usuario</b> / <b>proyecto</b> / <b>todo</b>) y, cuando sea seguro, crea / edita / elimina con <strong>copias de seguridad obligatorias con hora y fecha</strong> antes de cada mutación. Un <code>cc-watcher</code> en <code>CLAUDE_HOME</code> más mensajes WebSocket de <code>cc_config_changed</code> mantienen la página activa cuando los archivos cambian fuera del panel de control.",
+    "<strong>Skills</strong>, <strong>Subagents</strong>, <strong>Slash commands</strong>, <strong>Output styles</strong>, <strong>Plugins</strong> (with per-plugin <code>contributes</code> counts and <code>plugin.json</code> metadata), <strong>Marketplaces</strong>, <strong>MCP servers</strong>, <strong>Hooks</strong> (plus <code>~/.claude/hooks/</code> script listing), <strong>Keybindings</strong>, <strong>Settings</strong> (Current configuration summary + per-file JSON), and <strong>Memory</strong> (user/project <code>CLAUDE.md</code> + per-project auto-memory). Statusline config and script previews live under Settings.":
+      "<strong>Habilidades</strong>, <strong>Subagentes</strong>, <strong>Comandos de corte</strong>, <strong>Estilos de salida</strong>, <strong>Complementos</strong> (con contadores de <code>contributes</code> por complemento y metadatos de <code>plugin.json</code>), <strong>Mercados</strong>, <strong>Servidores MCP</strong>, <strong>Ganchos</strong> (además de la lista de scripts <code>~/.claude/hooks/</code>), <strong>Asignaciones de teclas</strong>, <strong>Configuración</strong> (resumen de la configuración actual + JSON por archivo) y <strong>Memoria</strong> (<code>CLAUDE.md</code> del usuario/proyecto + memoria automática por proyecto). La configuración de la línea de estado y las vistas previas de los scripts están disponibles en Configuración.",
+    '<code>PUT</code> / <code>DELETE /api/cc-config/file</code> handles skills, agents, commands, output-styles, <code>CLAUDE.md</code>, and per-project auto-memory (<code>scope: "auto-memory"</code>). Writes are <strong>atomic</strong> (temp file + rename), names are validated against a strict regex, resolved paths are containment-checked, and content is capped at 256&nbsp;KiB. Every overwrite or delete creates a backup under <code>cc-config-backups/</code> — outside the directories Claude Code scans — so deleted artifacts cannot reappear as ghost entries.':
+      '<code>PUT</code> / <code>DELETE /api/cc-config/file</code> maneja habilidades, agentes, comandos, estilos de salida, <code>CLAUDE.md</code> y memoria automática por proyecto (<code>scope: "auto-memory"</code>). Las escrituras son <strong>atómicas</strong> (archivo temporal + renombrar), los nombres se validan contra una regla de expresión regular estricta, los rutas resueltas se verifican contra el contenedor y el contenido se limita a 256&nbsp;KiB. Cada sobrescritura o eliminación crea una copia de seguridad en <code>cc-config-backups/</code> — fuera de los directorios que Claude Code escanea — por lo que los artefactos eliminados no pueden reaparecer como entradas fantasma.',
+    "The Keybindings tab includes a structured inline editor for <code>~/.claude/keybindings.json</code>. Add or remove contexts and bindings, edit keys and actions in place, and save via <code>PUT /api/cc-config/keybindings</code>. The server read-modify-writes the file: top-level metadata (<code>$schema</code>, <code>$docs</code>) is preserved, duplicate contexts/keys are rejected, and the file is backed up first. Unlike <code>settings.json</code>, the live CLI does not rewrite keybindings mid-session, so dashboard edits are safe.":
+      "La pestaña de Asignaciones de teclas incluye un editor estructurado inline para <code>~/.claude/keybindings.json</code>. Agregue o elimine contextos y asignaciones, edite teclas y acciones en el lugar, y guarde a través de <code>PUT /api/cc-config/keybindings</code>. El servidor lee, modifica y escribe el archivo: se preservan los metadatos de nivel superior (<code>$schema</code>, <code>$docs</code>), se rechazan los contextos/teclas duplicados y el archivo se copia de seguridad primero. A diferencia de <code>settings.json</code>, la CLI en vivo no reescribe las asignaciones de teclas en medio de la sesión, por lo que las ediciones del panel de control son seguras.",
+    "The Memory tab surfaces user + project <code>CLAUDE.md</code> and the per-project file-based memory store — every <code>*.md</code> under <code>~/.claude/projects/&lt;slug&gt;/memory/</code> (a <code>MEMORY.md</code> index plus one file per remembered fact, often 100+). Files are grouped by project in collapsible sections, searchable, and editable. Clickable index links in <code>MEMORY.md</code> jump to (scroll + highlight) the matching fact file.":
+      "La pestaña Memoria muestra el usuario + proyecto <code>CLAUDE.md</code> y el almacenamiento de memoria basado en archivos por proyecto, todos los <code>*.md</code> bajo <code>~/.claude/projects/&lt;slug&gt;/memory/</code> (un índice <code>MEMORY.md</code> más un archivo por hecho recordado, a menudo más de 100). Los archivos se agrupan por proyecto en secciones colapsables, buscables y editable. Los enlaces de índice clicables en <code>MEMORY.md</code> saltan al archivo de hecho correspondiente (desplazamiento + resaltado) para buscar.",
+    "<strong>Plugins</strong>, <strong>MCP servers</strong>, <strong>hooks-in-settings</strong>, and live <strong>settings.json</strong> files are intentionally not writable from the dashboard — they race with the running <code>claude</code> CLI. Those tabs show explainer banners with copy-able <code>claude plugin …</code>, <code>claude mcp …</code>, and <code>claude config …</code> commands instead of edit buttons. Secret-like settings keys are redacted server-side.":
+      "Los <strong>complementos</strong>, los <strong>servidores MCP</strong>, los <strong>ganchos configurados</strong> y los archivos <strong>settings.json</strong> en vivo no se pueden editar intencionadamente desde el panel de control; compiten con la CLI <code>claude</code> en ejecución. Esas pestañas muestran banners explicativos con comandos <code>claude plugin …</code>, <code>claude mcp …</code> y <code>claude config …</code> que se pueden copiar en lugar de botones de edición. Las claves de configuración similares a secretos se ocultan en el servidor.",
+    "Successful mutations broadcast <code>cc_config_changed</code> over the WebSocket so every open <code>/cc-config</code> tab refetches without polling. A filesystem watcher on <code>CLAUDE_HOME</code> (<code>cc-watcher.js</code>) detects external edits (e.g. you changed a skill in your editor) and triggers the same refresh path. The Backups modal lists every timestamped copy and builds <code>mv</code> restore commands.":
+      "Las mutaciones exitosas transmiten <code>cc_config_changed</code> a través de WebSocket, por lo que cada pestaña <code>/cc-config</code> abierta se actualiza de nuevo sin consultar. Un observador de sistema de archivos en <code>CLAUDE_HOME</code> (<code>cc-watcher.js</code>) detecta ediciones externas (por ejemplo, has cambiado una habilidad en tu editor) y activa el mismo camino de actualización. La modalidad Copias de seguridad enumera todas las copias con fecha y hora y construye comandos de restauración <code>mv</code>.",
+    "How to change (if read-only)": "Cómo cambiar (si es de solo lectura)",
+    "Skills · Subagents · Commands · Output styles":
+      "Habilidades · Subagentes · Comandos · Estilos de salida",
+    "Create / edit / delete (<code>PUT</code>/<code>DELETE /file</code>)":
+      "Crear / editar / eliminar (<code>PUT</code>/<code>DELETE /file</code>)",
+    "<code>CLAUDE.md</code> · auto-memory <code>*.md</code>":
+      "<code>CLAUDE.md</code> · memoria automática <code>*.md</code>",
+    "<code>keybindings.json</code>": "<code>keybindings.json</code>",
+    "Structured inline editor (<code>PUT /keybindings</code>)":
+      "Editor inline estructurado (<code>PUT /keybindings</code>)",
+    "Plugins · marketplaces": "Plugins · mercados",
+    "Read-only inventory": "Inventario de lectura única",
+    "<code>claude plugin install|uninstall …</code>":
+      "<code>instalar o desinstalar el complemento claudie...</code>",
+    "MCP servers": "Servidores MCP",
+    "<code>claude mcp add|remove …</code>": "<code>claude mcp agregar|eliminar ...</code>",
+    "Hooks · settings.json": "Ganchos · settings.json",
+    "Read-only (redacted secrets)": "Solo de lectura (secretos redactados)",
+    "<code>claude config</code> · <code>/config</code> · <code>$EDITOR</code>":
+      "<code>claude config</code> · <code>/config</code> · <code>$EDITOR</code>",
+    "Filesystem roots + aggregate counts across every surface":
+      "Raíces del sistema de archivos + contadores agregados en todas las superficies",
+    "Per-tab discovery lists; most accept <code>?scope=user|project|all</code>":
+      "Listas de descubrimiento por tabla; la mayoría acepta <code>?scope=user|project|all</code>",
+    "Single-file viewer (path-contained to allowed roots)":
+      "Visualizador de archivo único (ruta contenida en las raíces permitidas)",
+    "Create/overwrite a text artifact — backs up first, atomic write":
+      "Crear/sobreescribir un artefacto de texto: haga una copia de seguridad primero, escritura atómica",
+    "Backup-then-delete (skill dirs backed up whole)":
+      "Hacer una copia de seguridad y luego eliminar (copias de seguridad completas de las carpetas de habilidades)",
+    "Structured overwrite of <code>keybindings.json</code> — preserves metadata, backs up first":
+      "Sobrascritura estructurada de <code>keybindings.json</code> — preserva los metadatos, hace una copia de seguridad primero",
+    "Timestamped backup listing for the recovery modal":
+      "Lista de copias de seguridad con hora y fecha para la modalidad de recuperación",
+    "Backups live outside Claude Code's scan paths":
+      "Las copias de seguridad están en vivo fuera de los caminos de escaneo de Claude Code",
+    "Every mutation writes a timestamped copy under <code>&lt;root&gt;/cc-config-backups/&lt;type&gt;/</code> (or <code>&lt;memory-dir&gt;/.cc-config-backups/auto-memory/</code> for per-project memory files) <em>before</em> touching the original. Skill folders are copied whole so bundled assets survive in the backup. The UI's Backups modal shows every copy and prints a one-line <code>mv</code> restore command.":
+      "Cada mutación escribe una copia con fecha y hora bajo <code>&lt;root&gt;/cc-config-backups/&lt;type&gt;/</code> (o <code>&lt;memory-dir&gt;/.cc-config-backups/auto-memory/</code> para archivos de memoria por proyecto) <em>antes</em> de tocar el original. Las carpetas de habilidades se copian enteras, por lo que los activos empaquetados sobreviven en la copia de seguridad. La modalidad Copias de seguridad de la interfaz de usuario muestra cada copia e imprime un comando de restauración <code>mv</code> de una línea.",
+    "Do not edit settings.json from here": "No edites settings.json desde aquí",
+    "The live <code>claude</code> process rewrites <code>settings.json</code> and <code>~/.claude.json</code> constantly (model changes, plugin toggles, MCP registration). A dashboard write would race and lose state — or worse, break hook ingestion. Use <code>claude config set …</code>, <code>/config</code>, or hand-edit only when no <code>claude</code> process is running.":
+      "El proceso <code>claude</code> en vivo reescribe constantemente <code>settings.json</code> y <code>~/.claude.json</code> (cambios de modelo, activación y desactivación de complementos, registro de MCP). Una escritura en el panel de control podría competir y perder el estado, o peor aún, romper la ingestión de ganchos. Utilice <code>claude config set …</code>, <code>/config</code> o edite manualmente solo cuando no esté ejecutando ningún proceso <code>claude</code>.",
+    Slack: "ausencia de tensión",
+    Discord: "discordancia",
+    "Microsoft Teams": "Microsoft Teams",
+    "Google Chat": "Chat de Google",
+    "Mattermost · Rocket.Chat": "Mattermost · Rocket.Chat",
+    Telegram: "telegrama",
+    PagerDuty: "PagerDuty",
+    Opsgenie: "Opsgenie",
+    "Splunk On-Call": "Splunk en servicio de emergencia",
+    "Zapier · Make · n8n · Pipedream · generic": "Zapier · Hacer · n8n · Pipedream · genérico",
+    "<code>GET /api/updates/status</code>": "<code>GET /api/updates/status</code>",
+    "<code>POST /api/updates/check</code>": "<code>POST /api/updates/check</code>",
+    "<code>http://localhost:5173</code>": "<code>http://localhost:5173</code>",
+    "<code>http://localhost:4820</code>": "<code>http://localhost:4820</code>",
+    "<code>~/.claude:/root/.claude:ro</code>": "<code>~/.claude:/root/.claude:ro</code>",
+    "<code>agent-monitor-data:/app/data</code>": "<code>agent-monitor-data:/app/data</code>",
+    "<strong>server-deps</strong>": "<strong>dependencias del servidor</strong>",
+    "<strong>client-build</strong>": "<strong>construcción del cliente</strong>",
+    "<strong>runtime</strong>": "<strong>tiempo de ejecución</strong>",
+    "&lt; 200ms": "< 200 ms",
+    "&lt; 50ms": "< 50 ms",
+    "200 KB / 63 KB gzip": "200 KB / 63 KB gzip",
+    "CSS: 17 KB / 4 KB gzip": "CSS: 17 KB / 4 KB gzip",
+    "&lt; 5ms": "&lt; 5 ms",
+    "~50,000 inserts/sec": "~50.000 inserciones/seg.",
+    "~1M rows": "~1M filas",
+    "~30 MB": "~30 MB",
+    "~15 MB": "~15 MB",
+    Area: "área",
+    Approach: "planteamiento",
+    "<strong>SQLite</strong> (better-sqlite3 / node:sqlite)":
+      "<strong>SQLite</strong> (better-sqlite3 / node:sqlite)",
+    "<strong>Express</strong>": "<strong>Expresar</strong>",
+    "<strong>ws</strong>": "<strong>ws</strong>",
+    "<strong>React 18</strong>": "<strong>React 18</strong>",
+    "<strong>Vite 6</strong>": "<strong>Vite 6</strong>",
+    "<strong>Tailwind CSS</strong>": "<strong>Tailwind CSS</strong>",
+    "<strong>React Router 6</strong>": "<strong>React Router 6</strong>",
+    "<strong>Lucide React</strong>": "<strong>Lucide React</strong>",
+    "<strong>TypeScript Strict</strong>": "<strong>TypeScript estricto</strong>",
+    "<strong>D3.js + d3-sankey</strong>": "<strong>D3.js + d3-sankey</strong>",
+    "<strong>Python (statusline)</strong>": "<strong>Python (statusline)</strong>",
+    README: "LICENCIA DE USO",
+  },
   plain: {
+    es: {
+      "ccam CLI": "CLI de ccam",
+      "12 discovery tabs": "12 pestañas de descubrimiento",
+      "Safe mutations": "Modificaciones seguras",
+      "Keybindings editor": "Editor de combinaciones de teclas",
+      "Memory store": "Almacén de memoria",
+      "Read-only by design": "Solo lectura por diseño",
+      "Live refresh": "Actualización en tiempo real",
+      "Editable vs read-only": "Editable frente a solo lectura",
+      "API endpoints": "Puntos finales de la API",
+      "Four Grafana boards": "Cuatro paneles de Grafana",
+      "Prometheus console": "Consola de Prometheus",
+      "Recording rules": "Reglas de registro",
+      "Scrape & auth guard": "Extracción y protección de autenticación",
+      "Remote Data Sources": "Fuentes de datos remotas",
+      "How It Works": "Cómo funciona",
+      Setup: "configuración",
+      "Data Scope": "Ámbito de datos",
+      "Live Status": "Estado en vivo",
+      "Security Model": "Modelo de seguridad",
+      "API Endpoints": "Puntos finales de API",
+      Metrics: "métrica",
+      "WebSocket Events": "Eventos WebSocket",
+      CLI: "CLI",
+      "System Overview": "Visión general del sistema",
+      "What's Included": "Qué está incluido",
+      "Live Dashboard": "Panel de control en vivo",
+      "Kanban Board": "Tablero Kanban",
+      "Sessions Table": "Tabla de sesiones",
+      "Session Detail": "Detalles de la sesión",
+      "Alerts & Webhooks": "Alertas y Webhooks",
+      "Desktop App (macOS & Windows)": "Aplicación para escritorio (macOS y Windows)",
+      "Activity Feed": "Feed de actividad",
+      Analytics: "análisis",
+      "WebSocket Push": "Push WebSocket",
+      Statusline: "Línea de estado",
+      "History Import": "Importación de historial",
+      "Transcript Cache": "Cache de transcripciones",
+      "Bounded Cache Memory": "Memoria de caché limitada",
+      "Constant-Time Sweep": "Recorrido de tiempo constante",
+      "Subagent Hierarchy": "Jerarquía de subagentes",
+      "Cost Tracking": "Seguimiento de costos",
+      "Settings & Management": "Configuración y gestión",
+      "Local MCP Server": "Servidor MCP local",
+      "Claude + Codex Extensions": "Extensión de Claude + Codex",
+      "Workflow Graphs": "Gráficos de flujo de trabajo",
+      "Workflow Analytics": "Análisis de flujo de trabajo",
+      "Session Drill-In": "Entrenamiento de la sesión",
+      "Browser Notifications": "Notificaciones del navegador",
+      "Docker Deployment": "Implementación de Docker",
+      "Plugin Marketplace": "Mercado de complementos",
+      "Run Claude": "Corra Claude",
+      "Claude Config Explorer": "Explorador de configuración de Claude",
+      "Responsive Design": "Diseño Responsivo",
+      "Concurrency Timeline": "Cronología de concurrencia",
+      "VS Code Extension": "Extensión de VS Code",
+      "Error Propagation Map": "Mapa de propagación de errores",
+      "Progressive Web App": "Aplicación web progresiva",
+      "Fresh-by-Default Caching": "Caching fresco por defecto",
+      "Auto-Reload on Update": "Recarga automática en la actualización",
+      Screenshots: "Capturas de pantalla",
+      "GitHub Star History": "Historial de estrellas de GitHub",
+      "Hook Events Captured": "Eventos de captura de gancho",
+      "Quick Start": "Inicio rápido",
+      Clone: "clon",
+      Install: "instalar",
+      Start: "inicio",
+      "Use Claude": "Utiliza Claude",
+      "Alternative: Docker / Podman": "Alternativa: Docker / Podman",
+      "Optional: Enable MCP and Agent Extensions":
+        "Opcional: Habilitar las extensiones MCP y Agent",
+      Verification: "constatación",
+      Configuration: "configuración",
+      "Environment Variables": "Variables del entorno",
+      "Hook Configuration": "Configuración del gancho",
+      "Scripts Reference": "Referencia de scripts",
+      "System Architecture": "Arquitectura del sistema",
+      "Agent State Machine": "Máquina de Estado del Agente",
+      "Session State Machine": "Máquina de estado de sesión",
+      "Data Flow": "Flujo de datos",
+      "Event Ingestion Pipeline": "Pipeline de ingestión de eventos",
+      "Client Data Loading Pattern": "Patrón de carga de datos del cliente",
+      "Server Architecture": "Arquitectura del servidor",
+      "Server Modules": "Módulos del servidor",
+      "Client Architecture": "Arquitectura del cliente",
+      "Client Routes": "Rutas del cliente",
+      "Key Client Modules": "Módulos clave del cliente",
+      "PWA & Service Worker": "PWA y trabajador de servicio",
+      "State Management": "Gestión estatal",
+      "Database Design": "Diseño de bases de datos",
+      Indexes: "Índices",
+      "SQLite Configuration": "Configuración de SQLite",
+      "API Reference": "Referencia de API",
+      Health: "bienestar",
+      Sessions: "sesión",
+      Agents: "Agentes",
+      "Events, Stats, Analytics": "Eventos, estadísticas, análisis",
+      "Hooks Ingestion": "Ingestión de ganchos",
+      Pricing: "fijación de precios",
+      Settings: "Configuración",
+      "Import History": "Historial de importaciones",
+      Workflows: "Flujos de trabajo",
+      Alerts: "Alertas",
+      Webhooks: "Webhooks",
+      "WebSocket Protocol": "Protocolo WebSocket",
+      "Message Envelope": "Envelope de mensaje",
+      "Hook Integration": "Integración de ganchos",
+      "Hook Handler Design": "Diseño del manipulador de ganchos",
+      "Hook Installation Flow": "Flujo de instalación del gancho",
+      "Import Pipeline": "Pipeline de importación",
+      "Three Modes, One Pipeline": "Tres modos, un oleoducto",
+      "Upload Request Sequence": "Secuencia de solicitud de carga de archivos",
+      "Idempotence & Cost Accuracy": "Idempotencia y precisión de costos",
+      "Supported Source Layouts": "Diseños de fuentes compatibles",
+      "Safety Model": "Modelo de seguridad",
+      "WebSocket Progress Events": "Eventos de progreso de WebSocket",
+      "MCP & Agent Extensions": "Extensión de MCP y agente",
+      "Local MCP Server Runtime": "Tiempo de ejecución del servidor MCP local",
+      "Agent Extension Layout": "Diseño de extensión del agente",
+      "Root Helper Scripts": "Scripts de ayuda para root",
+      Installation: "instalación",
+      "Available Plugins": "Plugins disponibles",
+      "Skill Usage Examples": "Ejemplos de uso de habilidades",
+      "CLI Tools": "Herramientas CLI",
+      "Plugin Architecture": "Arquitectura de plugins",
+      "Data Model Reference": "Referencia del modelo de datos",
+      "Statusline Utility": "Herramienta de línea de estado",
+      "Detailed Components": "Componentes detallados",
+      "In-Process Architecture": "Arquitectura en proceso",
+      "What It Adds": "Lo que agrega",
+      "Menu-Bar / Notification-Area (Tray) Icon":
+        "Icono de Barra de Menú / Área de Notificaciones ( bandeja)",
+      "Native Application Menu": "Menú de aplicaciones nativas",
+      "Auto-Start at Login": "Inicio automático al iniciar sesión",
+      "Close Hides, Server Stays Up": "Cerrar Oculta, el Servidor Se Mantiene Activado",
+      "Runs Alongside the Web Dashboard": "Funciona junto al panel de control web",
+      "Single-Instance Lock": "Bloqueo de instancia única",
+      "First-Boot Bootstrap": "Bootstrap de arranque inicial",
+      "Data Persistence & CLI Reliability": "Persistencia de datos y fiabilidad de la CLI",
+      "Port Discovery": "Descubrimiento del puerto",
+      "How to Get It": "Cómo conseguirlo",
+      "Option A — download the latest GitHub Release (recommended)":
+        "Opción A: descargar la última versión de GitHub (recomendada)",
+      "Option B — per-commit CI artifact": "Opción B: artefacto CI por compromiso",
+      "Option C — build locally": "Opción C: construir localmente",
+      macOS: "macOS",
+      "Open the DMG": "Abrir el DMG",
+      "Drag to Applications": "Arrastrar a Aplicaciones",
+      "Clear Quarantine": "Liberación de cuarentena",
+      Launch: "lanzamiento",
+      Windows: "ventana",
+      "Run the Installer": "Ejecutar el instalador",
+      "Clear SmartScreen": "Borrar SmartScreen",
+      "Settings Page": "Página de ajustes",
+      "Model Pricing": "Precio del modelo",
+      "Data Management": "gestión de datos",
+      "Data Export": "Exportación de datos",
+      "System Health": "Estado de salud del sistema",
+      "Notification Preferences": "Preferencias de notificaciones",
+      "Rule types": "Tipos de reglas",
+      "Evaluation engine": "Motor de evaluación",
+      "14 first-class providers": "14 proveedores de primera clase",
+      "Delivery engine": "Motor de entrega",
+      Security: "seguridad",
+      "Guided setup": "Configuración guiada",
+      "Provider payloads": "Carga útil del proveedor",
+      "Update Notifier": "Notificador de actualización",
+      "Non-Blocking Detection": "Detección no bloqueante",
+      "5-min Scheduler": "Programador de 5 minutos",
+      "Situation-Aware Command": "Comando con conciencia de la situación",
+      "Two UI Surfaces": "Dos superficies de interfaz de usuario",
+      "Soft Failure Semantics": "Semántica de fallos suaves",
+      "Dismissal Memory": "Memoria de despido",
+      "API Surface": "Superficie de la API",
+      "Connection Status": "Estado de la conexión",
+      "Internationalization (i18n)": "Internacionalización (i18n)",
+      "Namespaced resources": "Recursos con espacio de nombres",
+      "Detection & fallback": "Detección y fallback",
+      "Locale-aware formatting": "Formato con conciencia del lugar",
+      "Technical terms preserved": "Términos técnicos preservados",
+      "🐾 Tabby — Reactive Cat Companion": "🐾 Tabby — Compañero de gato reactivo",
+      "Reactive Mascot — Eight Moods": "Mascota Reactiva — Ocho Ámbitos de Estilo",
+      "Auto-Surface Speech Bubbles": "Bolas de diálogo de voz automáticas en la superficie",
+      "The ⌘B Panel": "El panel ⌘B",
+      "Ask → Run Claude Handoff": "Pregunta → Ejecuta Claude Handoff",
+      "Accessibility & Resilience": "Accesibilidad y resiliencia",
+      "Deployment Modes": "Modos de despliegue",
+      "Container Runtime (Docker / Podman)": "Tiempo de ejecución del contenedor (Docker / Podman)",
+      "Docker / Podman": "Docker / Podman",
+      "Plain Docker / Podman (no Compose)": "Docker / Podman simple (sin Compose)",
+      "Volume Mounts": "Montajes de volumen",
+      "Multi-Stage Build": "Construcción de múltiples etapas",
+      "Performance Characteristics": "Características del rendimiento",
+      Troubleshooting: "localización y corrección de fallos",
+      "No sessions appearing after starting Claude Code":
+        "No aparecen sesiones después de iniciar Claude Code",
+      "Check 1 — Is the server running?": "Verificación 1: ¿Está funcionando el servidor?",
+      "Check 2 — Are hooks installed?": "Verificación 2: ¿Se han instalado los ganchos?",
+      "Check 3 — Start a new Claude Code session":
+        "Verificar 3 - Iniciar una nueva sesión de Claude Code",
+      "Check 4 — Is Node.js in PATH?": "Verificar 4: ¿Está Node.js en PATH?",
+      "Common Issues": "Problemas comunes",
+      "Technology Choices": "Opciones tecnológicas",
+      "Workflow Runs": "Ejecuciones del flujo de trabajo",
+    },
     zh: {
       "Remote Data Sources": "远程数据源",
       "How It Works": "工作原理",
