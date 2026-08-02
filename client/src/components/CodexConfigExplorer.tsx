@@ -726,6 +726,7 @@ function CodexTab({
                     </p>
                   </div>
                   <FileActions
+                    path={item.path}
                     editable
                     deletable
                     openingEditor={openingEditor === item.path}
@@ -1167,6 +1168,7 @@ function FileRow({
           </p>
         </button>
         <FileActions
+          path={path}
           editable={editable}
           deletable={deletable}
           openingEditor={openingEditor}
@@ -1181,6 +1183,7 @@ function FileRow({
 }
 
 function FileActions({
+  path,
   editable,
   deletable,
   openingEditor,
@@ -1189,6 +1192,7 @@ function FileActions({
   onDelete,
   t,
 }: {
+  path: string;
   editable: boolean;
   deletable: boolean;
   openingEditor: boolean;
@@ -1197,6 +1201,18 @@ function FileActions({
   onDelete: () => void;
   t: TFunction;
 }) {
+  const [copied, setCopied] = useState(false);
+
+  const copyPath = async () => {
+    try {
+      await navigator.clipboard.writeText(path);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard access can be unavailable in non-secure browser contexts.
+    }
+  };
+
   return (
     <div className="flex w-32 flex-shrink-0 flex-col gap-1.5 sm:w-36">
       <button
@@ -1205,6 +1221,17 @@ function FileActions({
       >
         <ExternalLink className="h-3 w-3" />
         {t("common.viewSource", "View source")}
+      </button>
+      <button
+        type="button"
+        onClick={() => void copyPath()}
+        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-1 px-2 py-1 text-[11px] font-medium text-gray-300 transition-colors hover:bg-surface-3 hover:text-gray-100"
+        title={path}
+      >
+        {copied ? <Check className="h-3 w-3 text-emerald-300" /> : <Copy className="h-3 w-3" />}
+        <span aria-live="polite">
+          {copied ? t("common.copied", "Copied") : t("common.copyPath", "Copy path")}
+        </span>
       </button>
       {editable && (
         <button
