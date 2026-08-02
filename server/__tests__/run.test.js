@@ -198,15 +198,19 @@ describe("/api/run", () => {
     if (body.found) assert.equal(typeof body.path, "string");
   });
 
-  it("GET /models returns Claude's observed models and supported aliases", async () => {
+  it("GET /models returns Claude's curated CLI aliases instead of stale observed models", async () => {
     const { status, body } = await fetchJson("/api/run/models?provider=claude");
     assert.equal(status, 200);
     assert.equal(body.provider, "claude");
     assert.equal(body.dynamic, false);
-    assert.equal(body.source, "observed-and-aliases");
+    assert.equal(body.source, "claude-cli-curated-aliases");
     assert.ok(Array.isArray(body.items));
-    assert.ok(body.items.some((item) => item.id === "opus"));
-    assert.ok(body.items.some((item) => item.id === "sonnet"));
+    assert.deepEqual(
+      body.items.map((item) => item.id),
+      ["", "opus", "fable", "sonnet", "haiku"]
+    );
+    assert.equal(body.items.find((item) => item.id === "opus")?.label, "Opus 5 (1M context)");
+    assert.equal(body.items.find((item) => item.id === "")?.isDefault, true);
   });
 
   // ── Resume validation ─────────────────────────────────────────────

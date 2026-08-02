@@ -1097,14 +1097,14 @@
                   <div class="feature-icon ic-emerald">🔄</div>
                   <h3>History Import</h3>
                   <p>
-                    Import existing Claude Code sessions from three sources — rescan the default
-                    <code>~/.claude/projects</code> folder, scan any absolute path on disk, or
+                    Import existing Claude Code or Codex sessions from three sources — rescan the selected
+                    default <code>~/.claude/projects</code> or <code>~/.codex/sessions</code> folder, scan any
+                    absolute path on disk, or
                     drag-drop <code>.jsonl</code>, <code>.zip</code>, <code>.tar.gz</code>, and
                     <code>.gz</code> archives through <b>Settings → Import History</b>. All paths
-                    funnel into the same ingestion pipeline the server uses for live hooks, so
-                    imported tokens and per-model cost match real-time capture exactly. Re-imports
-                    are idempotent via session-ID dedup, and archive extraction is guarded against
-                    path traversal and zip-bomb expansion.
+                    use each provider's live ingestion pipeline, so imported tokens, per-model cost,
+                    and tool data match real-time capture exactly. Codex uploads are snapshotted before
+                    temporary files are cleaned up, and re-imports are idempotent.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1571,7 +1571,7 @@
             </div>
             <div class="screenshot-card" id="ss-config">
               <img src="../images/config.png" alt="Agent Config — Claude Code and Codex explorers" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Agent Config</strong> — switch between the editable Claude Code explorer and a live, read-only Codex explorer for defaults, models, profiles, MCP, projects, skills, rules, hooks, plugins, and instructions. Secret-like values are redacted.</span></div>
+              <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Agent Config</strong> — switch between the editable Claude Code explorer and a live Codex workspace for defaults, models, profiles, MCP, projects, skills, rules, hooks, plugins, and instructions. Previews redact secret-like values; user-maintained files receive backup-backed edits.</span></div>
             </div>
             <div class="screenshot-card" id="ss-config-skills">
               <img src="../images/config-skills.png" alt="Claude Config Explorer — Skills tab" width="100%" loading="lazy" decoding="async" />
@@ -5388,11 +5388,14 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
             outside the dashboard.
           </p>
           <p>
-            The same page also has a <strong>Codex</strong> switch. Its safe, read-only explorer
-            shows defaults, the model cache, profiles, MCP servers, projects, skills, rules, hooks,
-            plugins, and instruction files from <code>CODEX_HOME</code>. Secret-like TOML and JSON
-            values are redacted, and <code>codex_config_changed</code> refreshes the view when those
-            files change.
+            The same page also has a <strong>Codex</strong> switch. Its workspace shows defaults,
+            the model cache, profiles, MCP servers, projects, skills, rules, hooks, installed
+            plugins, and instruction files from <code>CODEX_HOME</code>. Plugin cards use
+            <code>codex plugin list</code> rather than exposing cache folders. Secret-like TOML and
+            JSON values are redacted in previews; an explicit local editor supports
+            <code>config.toml</code>, <code>hooks.json</code>, user rules, skills, and instruction
+            files with atomic saves and timestamped backups. It warns that syntax is not validated,
+            and <code>codex_config_changed</code> refreshes the view when those files change.
           </p>
 
           <div class="feature-grid">
@@ -6950,7 +6953,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=48" defer></script>
+    <script src="i18n-content.js?v=50" defer></script>
     <script src="script.js?v=42" defer></script>
     <script>
       (function () {

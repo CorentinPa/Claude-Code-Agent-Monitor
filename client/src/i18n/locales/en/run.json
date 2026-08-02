@@ -7,6 +7,7 @@
     "chooseTitle": "Which agent would you like to run?",
     "chooseDescription": "Choose an interactive local agent. You can switch before starting a new run.",
     "choose": "Choose",
+    "cancel": "Cancel",
     "beta": "BETA",
     "claude": {
       "label": "Claude Code",
@@ -41,7 +42,7 @@
     },
     "cwdNoMatches": "No matches. Type an absolute path to use it directly.",
     "model": "Model",
-    "modelInheritLabel": "Inherit from settings",
+    "modelInheritLabel": "Default (recommended)",
     "modelCustom": "Custom…",
     "modelCustomPlaceholder": "model id (e.g. claude-opus-4-7-20260101)",
     "permissionMode": "Permission mode",
@@ -57,7 +58,8 @@
     "sandboxWorkspaceWrite": "Workspace write",
     "sandboxDanger": "Danger full access",
     "modelLiveCatalog": "Live catalog from your signed-in Codex CLI",
-    "modelObservedCatalog": "Observed locally; Claude Code does not publish an account model list",
+    "modelCuratedCatalog": "Claude Code does not publish an account model list; choose its stable aliases or enter another model ID.",
+    "modelCustomClaudeHint": "For a previous or account-specific Claude model, enter its exact --model value.",
     "effort": "Thinking effort",
     "effortHint": "Drives how much the model reasons before answering. Higher = more thinking tokens, slower, deeper. Empty inherits the model's default."
   },

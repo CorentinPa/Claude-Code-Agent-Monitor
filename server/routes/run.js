@@ -276,10 +276,32 @@ router.get("/binary", (req, res) => {
 });
 
 const CLAUDE_FALLBACK_MODELS = [
-  { id: "", label: "Inherit from Claude settings", hint: "Use Claude Code's configured default" },
-  { id: "opus", label: "Opus", hint: "Claude Code model alias" },
-  { id: "sonnet", label: "Sonnet", hint: "Claude Code model alias" },
-  { id: "haiku", label: "Haiku", hint: "Claude Code model alias" },
+  {
+    id: "",
+    label: "Default (recommended)",
+    hint: "Use the default model configured in Claude Code",
+    isDefault: true,
+  },
+  {
+    id: "opus",
+    label: "Opus 5 (1M context)",
+    hint: "Best for everyday, complex tasks · $5/$25 per Mtok",
+  },
+  {
+    id: "fable",
+    label: "Fable 5",
+    hint: "Most capable for your hardest and longest-running tasks",
+  },
+  {
+    id: "sonnet",
+    label: "Sonnet 5",
+    hint: "Efficient for routine tasks · $3/$15 per Mtok",
+  },
+  {
+    id: "haiku",
+    label: "Haiku 4.5",
+    hint: "Fastest for quick answers · $1/$5 per Mtok",
+  },
 ];
 
 async function discoverCodexModels() {
@@ -328,30 +350,16 @@ router.get("/models", async (req, res) => {
       });
     }
   }
-  // Claude Code intentionally does not provide a model-list CLI command. Use
-  // models observed in the local history plus durable aliases instead of
-  // pretending a static list is account availability.
-  const seen = [];
-  try {
-    const { db } = require("../db");
-    for (const row of db
-      .prepare(
-        "SELECT DISTINCT model FROM sessions WHERE provider = 'claude' AND model IS NOT NULL AND model <> '' ORDER BY model"
-      )
-      .all()) {
-      if (typeof row.model === "string") seen.push(row.model);
-    }
-  } catch {
-    /* database may be unavailable in isolated route tests */
-  }
-  const fallbackIds = new Set(CLAUDE_FALLBACK_MODELS.map((model) => model.id));
-  const items = [
-    ...CLAUDE_FALLBACK_MODELS,
-    ...seen
-      .filter((id) => !fallbackIds.has(id))
-      .map((id) => ({ id, label: id, hint: "Observed in local Claude sessions" })),
-  ];
-  return res.json({ provider, dynamic: false, source: "observed-and-aliases", items });
+  // Claude Code intentionally does not expose an account model-list command.
+  // Do not infer availability from old transcript model strings: those can be
+  // stale, unavailable to this account, or difficult to understand. Mirror
+  // the CLI's stable chooser and leave uncommon/legacy IDs to Custom model.
+  return res.json({
+    provider,
+    dynamic: false,
+    source: "claude-cli-curated-aliases",
+    items: CLAUDE_FALLBACK_MODELS,
+  });
 });
 
 router.post("/", (req, res) => {

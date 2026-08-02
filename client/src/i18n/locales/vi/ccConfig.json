@@ -10,12 +10,12 @@
     },
     "codex": {
       "label": "Codex",
-      "subtitle": "Đọc cấu hình Codex cục bộ, model, profile, máy chủ MCP, skill, hook và rule."
+      "subtitle": "Quản lý cấu hình Codex cục bộ, model, profile, máy chủ MCP, skill, hook và rule."
     }
   },
   "codex": {
     "title": "Cấu hình Codex",
-    "readOnly": "Chỉ đọc; bí mật được che trước khi hiển thị.",
+    "description": "Cài đặt, model, công cụ và hướng dẫn cục bộ.",
     "home": "Thư mục Codex",
     "defaultModel": "Model",
     "defaultEffort": "Suy luận",
@@ -24,7 +24,21 @@
     "disabled": "Đã tắt",
     "envNames": "Tên biến môi trường",
     "empty": "Chưa có cấu hình ở đây.",
-    "viewFile": "Xem tệp",
+    "viewFile": "Xem",
+    "editFile": "Chỉnh sửa",
+    "editTitle": "Chỉnh sửa tệp cấu hình",
+    "save": "Lưu thay đổi",
+    "saving": "Đang lưu…",
+    "cancel": "Hủy",
+    "saved": "Đã lưu.",
+    "savedBackup": "Đã lưu. Bản sao lưu có dấu thời gian đã được tạo trước khi cập nhật.",
+    "syntaxWarning": "Codex đọc trực tiếp tệp này. Dashboard không thể kiểm tra cú pháp TOML, JSON, hook, rule, skill hoặc hướng dẫn — hãy kiểm tra kỹ mọi chỉnh sửa trước khi lưu. Bản sao lưu có dấu thời gian sẽ được tạo trước.",
+    "redactedPreview": "Giá trị xem trước được che khi cần thiết.",
+    "overviewTitle": "Tổng quan cấu hình",
+    "hidden": "Đã ẩn",
+    "noDescription": "Không có mô tả.",
+    "scrollLeft": "Cuộn các tab cấu hình sang trái",
+    "scrollRight": "Cuộn các tab cấu hình sang phải",
     "fileError": "Không thể mở tệp cấu hình",
     "tabs": {
       "overview": "Tổng quan",

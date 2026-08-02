@@ -10,12 +10,12 @@
     },
     "codex": {
       "label": "Codex",
-      "subtitle": "로컬 Codex 설정, 모델, 프로필, MCP 서버, 스킬, hooks, 규칙을 읽습니다."
+      "subtitle": "로컬 Codex 설정, 모델, 프로필, MCP 서버, 스킬, hooks, 규칙을 관리합니다."
     }
   },
   "codex": {
     "title": "Codex 설정",
-    "readOnly": "읽기 전용이며 표시 전에 비밀 값이 가려집니다.",
+    "description": "로컬 설정, 모델, 도구 및 지침입니다.",
     "home": "Codex 홈",
     "defaultModel": "모델",
     "defaultEffort": "추론",
@@ -24,7 +24,21 @@
     "disabled": "사용 안 함",
     "envNames": "환경 변수 이름",
     "empty": "아직 구성된 항목이 없습니다.",
-    "viewFile": "파일 보기",
+    "viewFile": "보기",
+    "editFile": "편집",
+    "editTitle": "구성 파일 편집",
+    "save": "변경 사항 저장",
+    "saving": "저장 중…",
+    "cancel": "취소",
+    "saved": "저장되었습니다.",
+    "savedBackup": "저장되었습니다. 업데이트 전에 타임스탬프 백업을 만들었습니다.",
+    "syntaxWarning": "Codex가 이 파일을 직접 읽습니다. 대시보드는 TOML, JSON, hook, 규칙, 스킬 또는 지침 구문을 검증할 수 없으므로 저장 전에 모든 편집을 신중하게 검토하세요. 먼저 타임스탬프 백업이 생성됩니다.",
+    "redactedPreview": "미리보기 값은 필요에 따라 가려집니다.",
+    "overviewTitle": "구성 개요",
+    "hidden": "숨김",
+    "noDescription": "설명이 제공되지 않았습니다.",
+    "scrollLeft": "구성 탭을 왼쪽으로 스크롤",
+    "scrollRight": "구성 탭을 오른쪽으로 스크롤",
     "fileError": "구성 파일을 열 수 없습니다",
     "tabs": {
       "overview": "개요",

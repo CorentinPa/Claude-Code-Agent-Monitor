@@ -1,7 +1,7 @@
 /**
- * @file OpenAPI fragments for the safe, read-only Codex configuration
- * explorer at `/api/codex-config`. The feature reports only metadata and
- * redacted file contents from CODEX_HOME; it never edits live Codex files.
+ * @file OpenAPI fragments for the Codex configuration explorer at
+ * `/api/codex-config`. It exposes redacted inspection plus a small, explicit
+ * local text-file editor with automatic backups.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -9,7 +9,7 @@ const tags = [
   {
     name: "CodexConfig",
     description:
-      "Read-only Codex CLI configuration discovery: defaults, model cache, profiles, MCP servers, projects, skills, rules, hooks, plugins, and instruction files.",
+      "Codex CLI configuration discovery plus guarded editing for config.toml, hooks, user rules, skills, and instruction files.",
   },
 ];
 
@@ -82,6 +82,30 @@ const schemas = {
       truncated: { type: "boolean" },
     },
   },
+  CodexConfigEditableFile: {
+    type: "object",
+    description:
+      "Unredacted local text from the narrowly editable Codex file allowlist. This is intentionally separate from redacted previews so saving never replaces real secret values with placeholders.",
+    required: ["path", "text", "size", "mtime", "truncated", "exists"],
+    properties: {
+      path: { type: "string" },
+      text: { type: "string", description: "Unredacted local file contents, capped at 256 KiB." },
+      size: { type: "integer" },
+      mtime: { type: "number", nullable: true },
+      truncated: { type: "boolean" },
+      exists: { type: "boolean" },
+    },
+  },
+  CodexConfigWriteResult: {
+    type: "object",
+    required: ["ok", "file", "backupPath", "created"],
+    properties: {
+      ok: { type: "boolean", example: true },
+      file: { type: "string" },
+      backupPath: { type: "string", nullable: true },
+      created: { type: "boolean" },
+    },
+  },
 };
 
 const paths = {
@@ -132,6 +156,64 @@ const paths = {
             "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } },
           },
         },
+      },
+    },
+    put: {
+      tags: ["CodexConfig"],
+      summary: "Save one editable Codex configuration file",
+      description:
+        "Atomically saves config.toml, hooks.json, user rules, user skill SKILL.md files, or Codex/project AGENTS.md only. A timestamped backup is created before every overwrite. The dashboard does not validate TOML, JSON, hook, or instruction syntax.",
+      operationId: "codexConfigWriteFile",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["path", "content"],
+              properties: { path: { type: "string" }, content: { type: "string" } },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: "The file was saved atomically.",
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/CodexConfigWriteResult" } },
+          },
+        },
+        400: { description: "The path is not in the editable allowlist or content is invalid." },
+        413: { description: "The file content exceeds the 256 KiB editor limit." },
+      },
+    },
+  },
+  "/api/codex-config/edit-file": {
+    get: {
+      tags: ["CodexConfig"],
+      summary: "Read one editable Codex file for local editing",
+      description:
+        "Returns unredacted content only for the editable allowlist. Use the normal /file endpoint for redacted read-only previews.",
+      operationId: "codexConfigEditableFile",
+      parameters: [
+        {
+          name: "path",
+          in: "query",
+          required: true,
+          schema: { type: "string" },
+          description: "An allowlisted config, hooks, rule, skill, or instruction file path.",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Unredacted editable content.",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CodexConfigEditableFile" },
+            },
+          },
+        },
+        400: { description: "The path is not editable from the dashboard." },
       },
     },
   },

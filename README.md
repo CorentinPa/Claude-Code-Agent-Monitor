@@ -230,7 +230,7 @@ Comes with a sleek dark theme, responsive design, and intuitive navigation to ex
 <p align="center">
   <img src="images/config.png" alt="Agent Config — Claude Code and Codex explorers" width="100%">
   <br>
-  <em>🧰 <strong>Agent Config</strong> — switch between the full Claude Code explorer and a live, read-only Codex explorer for defaults, models, profiles, MCP, projects, skills, rules, hooks, plugins, and instructions. Codex values are secret-redacted and refresh when its config changes.</em>
+  <em>🧰 <strong>Agent Config</strong> — switch between the full Claude Code explorer and a live Codex workspace for defaults, models, profiles, MCP, projects, skills, rules, hooks, plugins, and instructions. Codex previews redact secrets; its user-maintained config, hooks, rules, skills, and instructions can be edited safely with backups.</em>
 </p>
 
 <p align="center">
@@ -289,7 +289,7 @@ The dashboard offers a comprehensive set of features to monitor and analyze your
 | **Analytics**                      | Token usage, tool frequency, activity heatmap (centered, day-of-week aligned starting Sunday, day-name tooltips), session trends, live/offline connection indicator. While the analytics payload loads, the chart region (not just the stat tiles) shows **pulsing skeleton placeholders** that mirror the chart layout, so the page never flashes empty/zero charts |
 | **Live Updates**                   | WebSocket push -- no polling, instant UI updates                                                                                                                                                                                                                             |
 | **Auto-Discovery**                 | Sessions and agents are created automatically from hook events                                                                                                                                                                                                               |
-| **History Import**                 | Imports sessions from `~/.claude/` on startup. Enhanced JSONL extraction: API errors (quota/rate/invalid_request), turn durations, entrypoint (cli/sdk-ts), permission modes, thinking block counts, usage extras (service_tier, speed, inference_geo), tool result errors, and subagent JSONL files (`subagents/agent-*.jsonl` with `.meta.json`). Backfills existing sessions on re-import. Recent JSONL files (< 10 min) are imported as "active" |
+| **History Import**                 | Provider-aware Import History brings in Claude Code transcripts from `~/.claude/` and Codex rollout JSONL from `~/.codex/sessions`. Each tab has its own default path, instructions, folder scan, and upload flow; both reuse their live ingestion logic, preserve token/cost/tool accounting, and are idempotent. External Codex rollouts are snapshotted into dashboard storage so their conversation remains available after the archive or source folder is removed. |
 | **Subagent Hierarchy**             | Collapsible parent-child agent tree on Dashboard and Session Detail. Agents with subagents show expand/collapse chevrons; leaf agents show a dot indicator. Auto-expands when subagents are active                                                                           |
 | **Background Agents**              | Correctly tracks backgrounded subagents without premature completion                                                                                                                                                                                                         |
 | **Subagent Tool Attribution**      | Subagent-internal tool calls (Read, Bash, Edit, Grep, …) live only in per-subagent JSONL files — Claude Code emits no hooks for them. On every `SubagentStop` the dashboard fires a fire-and-forget `scanAndImportSubagents` pass that parses each `subagents/agent-*.jsonl`, pairs `tool_use` blocks with their matching `tool_result` by `tool_use_id`, and emits `PreToolUse` + `PostToolUse` events under the subagent's own `agent_id`. Idempotent (`data LIKE '%"tool_use_id":"X"%'` dedup) and merges into a live hook-created subagent row when one matches by type + start-time within 30 s, so no parallel `<sid>-jsonl-*` rows are created. The same path runs on `npm run setup` startup import for full historical backfill — sessions that pre-date the dashboard get full per-subagent tool timelines. Activity Feed and Session Detail render the parent chain as `main › coder › explorer` for nested subagents. That chain is reconstructed authoritatively by `reconcileSubagentParents`: a subagent row is first inserted flat under the main agent (a single hook event or JSONL file carries no spawner identity), then the spawner is recovered from each subagent transcript's Task tool result (`toolUseResult.agentId`, captured as `spawnedChildren`) so a subagent that spawns its own subagents nests under its **true** spawner instead of collapsing to one level under main. Idempotent and additive — it only repoints `parent_agent_id`, never inserts or deletes rows — and runs on the same `SubagentStop` scan, which returns a `reparented` count so the dashboard refetches even when re-parenting alone changed the tree shape |
@@ -301,7 +301,7 @@ The dashboard offers a comprehensive set of features to monitor and analyze your
 | **Settings**                       | System info, hook status, model pricing management, notification preferences, data export **and restore** (the Import History panel's **Restore backup** mode re-imports a full export `.json` — idempotent and non-destructive, so you can consolidate several machines' history into one dashboard), session cleanup. The Model Pricing section separates **Anthropic Claude Model Pricing** from **OpenAI GPT Model Pricing** and exposes an info popover (the `i` icon next to the title) explaining rule lookup (first matching pattern wins), SQL-style `%` wildcard syntax, and manual price updates; the GPT editor displays published USD-per-million-token short, long, and Fast tiers, with unavailable tiers clearly unpriced. The **Dashboard Data** control immediately re-fetches sessions, agents, events, tokens, workflows, analytics, and costs for Claude Code, Codex, or both. Separate Claude Code and Codex home inputs are fully i18n-driven and save at runtime; a Codex save re-arms live rollout watching and scans its new tree. |
 > **Provider scope and homes:** Settings keeps the Claude Code / Codex / Both choice globally consistent, and lets you change either session-data home without restarting the dashboard.
 
-| **Run Agent + Agent Config**       | `/run` begins with a Claude Code / Codex choice and keeps the provider toggle beside its Live status. Claude runs retain their headless and stream-json conversation modes; Codex runs use the CLI's local `app-server` protocol for a real interactive thread, native approval/sandbox policy, resume, stop, live output, and re-attach. Codex model choices come directly from the signed-in CLI, so model releases need no dashboard update; Claude shows its durable aliases plus locally observed models because its CLI has no model-list command. `/cc-config` pairs the established editable Claude Code explorer with a secret-redacted, read-only Codex explorer for config defaults, model cache, profiles, MCP, projects, skills, rules, hooks, plugins, and instruction files. Both explorers refresh through their provider-specific filesystem watcher. |
+| **Run Agent + Agent Config**       | `/run` begins with a Claude Code / Codex choice and keeps the provider toggle beside its Live status. Claude runs retain their headless and stream-json conversation modes; Codex runs use the CLI's local `app-server` protocol for a real interactive thread, native approval/sandbox policy, resume, stop, live output, and re-attach. Codex model choices come directly from the signed-in CLI, so model releases need no dashboard update; Claude shows its durable aliases plus locally observed models because its CLI has no model-list command. `/cc-config` pairs the established editable Claude Code explorer with a Codex workspace for config defaults, model cache, profiles, MCP, projects, skills, rules, hooks, installed plugins, and instruction files. Its normal previews redact secrets; the explicit local editor supports `config.toml`, `hooks.json`, user rules, skills, and instructions with atomic saves and mandatory timestamped backups, while warning that it cannot validate syntax. Plugin cards use Codex's installed-plugin registry rather than showing cache folders. Both explorers refresh through their provider-specific filesystem watcher. |
 
 | **MCP Server (Local)**             | Enterprise-grade local MCP server in `mcp/` with three transport modes (stdio, HTTP+SSE, interactive REPL), 25 typed tools across 6 domains, strict input schemas, retry/backoff, localhost-only API enforcement, and tiered mutation/destructive safety gates. HTTP mode serves Streamable HTTP (2025-11-25) and legacy SSE (2024-11-05) on configurable port. REPL mode provides tab-completed interactive tool invocation with colored output |
 | **Workflows**                      | D3.js-powered visualization page with 11 interactive sections: agent orchestration DAG, tool execution Sankey diagram, collaboration network, subagent effectiveness (day-of-week sparklines with portal-rendered tooltips that escape the card's `overflow:hidden` and clamp to the viewport so they never get clipped), detected workflow patterns, model delegation flow, error propagation map (horizontal bars with rate badges, agent type breakdown, API/session error cards), concurrency timeline, session complexity scatter, compaction impact analysis (redesigned as a clear "sessions by compaction count" histogram with axis titles, stat tiles — total / sessions affected / avg / peak — an explanatory help line, and per-bar hover tooltips), and per-session drill-in. Each section's right-aligned subtitle clamps to a single line (ellipsis + hover title) so a long translation never wraps the header. **Rich, i18n-aware tooltips throughout:** every chart's section title carries an `i` icon that opens a structured "What this shows / How to read it / Why it matters" popover; hovering nodes, edges, bars, and bubbles surfaces multi-section tooltips with deterministic, value-dependent interpretations (e.g. share-of-source / share-of-target percentages, success-rate health buckets, family descriptions for Opus / Sonnet / Haiku, timing patterns like front-loaded / mid-session / back-loaded). Each of the six headline stat cards has a bottom-right info popover explaining how the metric is calculated and what its current value means in plain language. Tooltips are DOM-mutated through a single ref per chart with container-level `mouseleave` fallbacks, so they never lag behind the cursor or stick after re-render. Clicking a row in **Detected Workflow Patterns** expands an in-place detail panel with the full step sequence, stats grid, a deterministic narrative (loop detection, frequency bucket), and a practical suggestion. Status filter tabs (Active Only / Completed / All) filter all 11 sections. Cross-filtering, JSON export, and real-time WebSocket auto-refresh with 3-second debounce. A **Workflow Runs** panel surfaces "dynamic workflows" — the fleets of sub-agents spawned by the `Workflow` tool (and self-paced `/loop`) — which emit no hooks and are instead reconstructed from on-disk run journals (`workflows/wf_<runId>.json`): each run shows its phases and a per-agent token / tool-call / duration breakdown, with live `running` detection before the journal is written and a linked subsection on each Session Detail page |
@@ -1217,13 +1217,16 @@ Output streams over the existing dashboard WebSocket as three message types: `ru
 
 ### Import History
 
-Bring existing Claude Code sessions into the dashboard from three
-different sources, all funneled through the same parser the server uses
-for live ingestion so imported tokens, per-model cost, compactions,
-subagents, tool use, and turn durations match real-time capture
-bit-for-bit. Re-imports are idempotent: sessions are keyed by ID and
-compaction baselines preserve pre-compaction token totals, so running
-the importer twice never double-counts usage or cost.
+Import existing **Claude Code** or **Codex** history through the provider
+tabs in **Settings → Import History**. Claude Code uses its shared JSONL
+parser for `~/.claude/projects`; Codex uses the same append-only rollout
+ingestor as real-time monitoring for `~/.codex/sessions`, including token
+snapshots, response-item tool calls, lifecycle state, and native `/rename`
+titles when `session_index.jsonl` is included. Re-imports are idempotent:
+Claude preserves compaction baselines and Codex retains byte cursors, so
+neither provider double-counts usage or cost. Folder and browser-uploaded
+Codex history is copied into dashboard-owned storage before temporary files
+are cleaned up, keeping the conversation view available later.
 
 A fourth mode — **Restore backup** — imports a full dashboard export
 `.json` (produced by the **Export data** button, `ccam export`, or
@@ -1271,10 +1274,10 @@ flowchart LR
 
 | Method | Path                    | Description                                                              |
 | ------ | ----------------------- | ------------------------------------------------------------------------ |
-| `GET`  | `/api/import/guide`     | OS-aware paths, archive command, supported extensions, step instructions |
-| `POST` | `/api/import/rescan`    | Rescan the default `~/.claude/projects` directory                        |
-| `POST` | `/api/import/scan-path` | Scan an absolute directory (body `{ path }`); walks recursively          |
-| `POST` | `/api/import/upload`    | Multipart upload of `.jsonl`, `.meta.json`, `.zip`, `.tar(.gz)`, `.gz`   |
+| `GET`  | `/api/import/guide`     | Provider-aware OS paths, archive command, extensions, and instructions (`?provider=claude\|codex`) |
+| `POST` | `/api/import/rescan`    | Rescan the selected default: `~/.claude/projects` or `~/.codex/sessions` (`{ provider }`) |
+| `POST` | `/api/import/scan-path` | Scan an absolute directory with `{ path, provider }`; walks recursively |
+| `POST` | `/api/import/upload`    | Multipart upload of `.jsonl`, `.meta.json`, `.zip`, `.tar(.gz)`, `.gz` with `provider` |
 
 **Supported inputs.** Loose JSONL (`.jsonl`) session transcripts, their
 companion `.meta.json` sidecars, and archives (`.zip`, `.tar`,
@@ -1282,6 +1285,9 @@ companion `.meta.json` sidecars, and archives (`.zip`, `.tar`,
 Both canonical Claude Code layouts are recognized automatically:
 `<project>/<sessionId>/subagents/agent-*.jsonl` (default) and
 `<project>/subagents/<sessionId>/agent-*.jsonl` (alternative).
+For Codex, the importer recognises recursive `rollout-*.jsonl` session files
+(including loose JSONL files with `session_meta`) and an optional
+`session_index.jsonl` for native session names.
 
 **Accuracy guarantees.** Sessions are deduplicated by UUID; re-running
 the importer is always safe. The compaction `baseline_input` /

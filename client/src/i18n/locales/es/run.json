@@ -7,6 +7,7 @@
     "chooseTitle": "¿Qué agente quieres ejecutar?",
     "chooseDescription": "Elige un agente local interactivo. Puedes cambiarlo antes de iniciar una ejecución nueva.",
     "choose": "Elegir",
+    "cancel": "Cancelar",
     "beta": "BETA",
     "claude": {
       "label": "Claude Code",
@@ -41,7 +42,7 @@
     },
     "cwdNoMatches": "Sin coincidencias. Escribe una ruta absoluta para usarla directamente.",
     "model": "Modelo",
-    "modelInheritLabel": "Heredar de configuración",
+    "modelInheritLabel": "Predeterminado (recomendado)",
     "modelCustom": "Personalizado…",
     "modelCustomPlaceholder": "id del modelo (p. ej., claude-opus-4-7-20260101)",
     "permissionMode": "Modo de permiso",
@@ -57,7 +58,8 @@
     "sandboxWorkspaceWrite": "Escritura en el espacio de trabajo",
     "sandboxDanger": "Acceso total peligroso",
     "modelLiveCatalog": "Catálogo en vivo de tu CLI de Codex con sesión iniciada",
-    "modelObservedCatalog": "Observado localmente; Claude Code no publica una lista de modelos de la cuenta",
+    "modelCuratedCatalog": "Claude Code no publica una lista de modelos de la cuenta; elige sus alias estables o introduce otro ID de modelo.",
+    "modelCustomClaudeHint": "Para un modelo de Claude anterior o específico de tu cuenta, introduce su valor exacto de --model.",
     "effort": "Esfuerzo de razonamiento",
     "effortHint": "Controla cuánto razona el modelo antes de responder. Mayor = más tokens de pensamiento, más lento, más profundo. Vacío hereda el valor predeterminado del modelo."
   },

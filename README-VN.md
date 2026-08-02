@@ -230,7 +230,7 @@ flowchart LR
 <p align="center">
   <img src="images/config.png" alt="Cấu hình Agent — trình khám phá Claude Code và Codex" width="100%">
   <br>
-  <em>🧰 <strong>Cấu hình Agent</strong> — chuyển giữa trình khám phá Claude Code đầy đủ và trình khám phá Codex chỉ đọc, cập nhật trực tiếp cho mặc định, model, profile, MCP, dự án, skill, rule, hook, plugin và hướng dẫn. Giá trị bí mật của Codex được che đi.</em>
+  <em>🧰 <strong>Cấu hình Agent</strong> — chuyển giữa trình khám phá Claude Code đầy đủ và không gian làm việc Codex trực tiếp cho mặc định, model, profile, MCP, dự án, skill, rule, hook, plugin và hướng dẫn. Bản xem trước Codex che bí mật; config, hook, rule, skill và hướng dẫn do người dùng quản lý có thể được chỉnh sửa an toàn kèm sao lưu.</em>
 </p>
 
 <p align="center">
@@ -289,7 +289,7 @@ Bảng điều khiển cung cấp một bộ tính năng toàn diện để giá
 | **Phân tích**                      | Mức sử dụng mã thông báo, tần suất công cụ, bản đồ nhiệt hoạt động (trung tâm, căn chỉnh ngày trong tuần bắt đầu từ Chủ nhật, chú thích công cụ tên ngày), xu hướng phiên, chỉ báo kết nối trực tiếp/ngoại tuyến. Khi đang tải, vùng biểu đồ hiển thị các khung xương (skeleton) nhấp nháy chứ không chỉ các ô thống kê đầu trang |
 | **Cập nhật trực tiếp**                   | Đẩy WebSocket -- không bỏ phiếu, cập nhật giao diện người dùng tức thì                                                                                                                                                                                                                             |
 | **Tự động khám phá**                 | Phiên và tác nhân được tạo tự động từ các sự kiện hook                                                                                                                                                                                                               |
-| **Nhập lịch sử**                 | Nhập phiên từ `~/.claude/` khi khởi động. Trích xuất JSONL nâng cao: Lỗi API (hạn ngạch/tỷ lệ/không hợp lệ_request), thời lượng lượt, điểm truy cập (cli/sdk-ts), chế độ cấp phép, số khối suy nghĩ, tính năng bổ sung sử dụng (service_tier, tốc độ, inference_geo), lỗi kết quả công cụ và tệp JSONL tác nhân phụ (`subagents/agent-*.jsonl` với `.meta.json`). Chèn lấp các phiên hiện có khi nhập lại. Các tệp JSONL gần đây (< 10 phút) được nhập dưới dạng "hoạt động" |
+| **Nhập lịch sử**                 | Import History theo nhà cung cấp nhập transcript Claude Code từ `~/.claude/` và rollout JSONL Codex từ `~/.codex/sessions`. Mỗi tab có đường dẫn mặc định, hướng dẫn, quét thư mục và tải lên riêng; cả hai dùng lại logic ingest thời gian thực, giữ đúng token/chi phí/tool và bảo đảm bất biến. Rollout Codex từ bên ngoài được snapshot vào bộ nhớ dashboard để hội thoại vẫn mở được sau khi archive hoặc thư mục nguồn bị xóa. |
 | **Phân cấp Subagent**             | Cây tác nhân cha-con có thể thu gọn trên Bảng điều khiển và Chi tiết phiên. Các Agent có các Subagent hiển thị các chữ V mở rộng/thu gọn; tác nhân lá hiển thị một chỉ báo dấu chấm. Tự động mở rộng khi các tác nhân phụ đang hoạt động                                                                           |
 | **Agent nền**              | Theo dõi chính xác các tác nhân phụ có nền mà không cần hoàn thành sớm                                                                                                                                                                                                         |
 | **Quy kết tool của Subagent** | Các tool call nội bộ của subagent (Read, Bash, Edit, Grep, …) chỉ tồn tại trong các tệp JSONL riêng của từng subagent — Claude Code không phát hook cho chúng. Mỗi lần `SubagentStop`, dashboard chạy fire-and-forget `scanAndImportSubagents`: phân tích từng `subagents/agent-*.jsonl`, ghép cặp khối `tool_use` với `tool_result` tương ứng theo `tool_use_id`, và phát các sự kiện `PreToolUse` + `PostToolUse` dưới `agent_id` của chính subagent đó. Có cơ chế idempotent (kiểm tra trùng bằng `data LIKE '%"tool_use_id":"X"%'`) và hợp nhất với row live do hook tạo trước đó khi khớp loại + thời điểm bắt đầu trong vòng 30 giây, nên không sinh row trùng `<sid>-jsonl-*`. Cùng đường này chạy trên import khởi động `npm run setup` để backfill toàn bộ — các phiên cũ trước khi cài dashboard đều có timeline tool đầy đủ cho từng subagent. Activity Feed và Chi tiết phiên hiển thị chuỗi cha-con dạng `main › coder › explorer` cho subagent lồng nhau. Chuỗi cha-con đó được dựng lại chính xác bởi `reconcileSubagentParents`: mỗi row subagent ban đầu được chèn phẳng dưới main agent (một hook đơn lẻ hay tệp JSONL không mang danh tính của agent đã spawn), sau đó agent spawn được khôi phục từ kết quả tool Task trong transcript của từng subagent (`toolUseResult.agentId`, thu thập dưới dạng `spawnedChildren`), nên subagent tự spawn subagent con sẽ lồng dưới **đúng** agent cha thay vì dồn phẳng về một cấp dưới main. Idempotent và chỉ bổ sung — chỉ trỏ lại `parent_agent_id`, không chèn hay xóa row — và chạy trong cùng lần quét `SubagentStop`, vốn trả về số đếm `reparented` để dashboard fetch lại ngay cả khi chỉ có thay đổi cấu trúc cây do reparent |
@@ -1137,14 +1137,15 @@ Xem [docs/API.md → Metrics](./docs/API.md#metrics) để biết danh sách ch�
 
 ### Nhập lịch sử (Import History)
 
-Đưa các phiên Claude Code hiện có vào dashboard từ ba nguồn khác nhau,
-tất cả đều đi qua cùng một bộ phân tích mà máy chủ sử dụng để thu nhận
-thời gian thực — nhờ đó, số token, chi phí theo mô hình, compactions,
-subagents, lần dùng công cụ và thời lượng lượt được tính giống hệt với
-dữ liệu được bắt trực tiếp. Nhập lại là bất biến: phiên được khóa theo
-UUID và các cột `baseline_*` ở bảng `token_usage` giữ nguyên tổng token
-trước khi compact, nên chạy lại trình nhập không bao giờ nhân đôi token
-hay chi phí.
+Nhập lịch sử **Claude Code** hoặc **Codex** qua các tab nhà cung cấp trong
+**Settings → Import History**. Claude Code dùng parser JSONL chung cho
+`~/.claude/projects`; Codex dùng chính bộ ingest rollout append-only của
+theo dõi thời gian thực cho `~/.codex/sessions`, gồm snapshot token, tool
+response-item, trạng thái vòng đời và tiêu đề `/rename` khi có
+`session_index.jsonl`. Nhập lại là bất biến: Claude giữ baseline compaction
+còn Codex giữ byte cursor, nên không nhà cung cấp nào tính đôi mức dùng hoặc
+chi phí. Lịch sử Codex từ thư mục hay upload được sao chép vào vùng lưu trữ
+của dashboard trước khi tệp tạm bị dọn dẹp.
 
 ```mermaid
 flowchart LR
@@ -1181,10 +1182,10 @@ flowchart LR
 
 | Phương pháp | Đường dẫn               | Mô tả                                                                            |
 | ----------- | ----------------------- | -------------------------------------------------------------------------------- |
-| `GET`       | `/api/import/guide`     | Đường dẫn theo hệ điều hành, lệnh tạo archive, phần mở rộng hỗ trợ, hướng dẫn    |
-| `POST`      | `/api/import/rescan`    | Quét lại thư mục mặc định `~/.claude/projects`                                   |
-| `POST`      | `/api/import/scan-path` | Quét một thư mục tuyệt đối bất kỳ (body `{ path }`); đi đệ quy                   |
-| `POST`      | `/api/import/upload`    | Tải lên đa phần `.jsonl`, `.meta.json`, `.zip`, `.tar(.gz)`, `.gz`               |
+| `GET`       | `/api/import/guide`     | Đường dẫn, lệnh archive và hướng dẫn theo nhà cung cấp (`?provider=claude\|codex`) |
+| `POST`      | `/api/import/rescan`    | Quét lại đường dẫn mặc định đã chọn (`{ provider }`) |
+| `POST`      | `/api/import/scan-path` | Quét thư mục tuyệt đối với `{ path, provider }`; đi đệ quy |
+| `POST`      | `/api/import/upload`    | Tải multipart với trường `provider`; tệp Codex được snapshot |
 
 **Đầu vào hỗ trợ.** Tệp JSONL rời (`.jsonl`), tệp phụ `.meta.json`, và
 các archive (`.zip`, `.tar`, `.tar.gz`/`.tgz`, `.gz`) chứa bất kỳ cấu

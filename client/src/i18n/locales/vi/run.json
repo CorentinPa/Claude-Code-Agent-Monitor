@@ -7,6 +7,7 @@
     "chooseTitle": "Bạn muốn chạy Agent nào?",
     "chooseDescription": "Chọn một Agent cục bộ tương tác. Bạn có thể đổi trước khi bắt đầu lượt chạy mới.",
     "choose": "Chọn",
+    "cancel": "Hủy",
     "beta": "BETA",
     "claude": {
       "label": "Claude Code",
@@ -41,7 +42,7 @@
     },
     "cwdNoMatches": "Không khớp. Gõ đường dẫn tuyệt đối để dùng trực tiếp.",
     "model": "Model",
-    "modelInheritLabel": "Kế thừa từ settings",
+    "modelInheritLabel": "Mặc định (khuyến nghị)",
     "modelCustom": "Tuỳ chỉnh…",
     "modelCustomPlaceholder": "model id (vd: claude-opus-4-7-20260101)",
     "permissionMode": "Permission mode",
@@ -57,7 +58,8 @@
     "sandboxWorkspaceWrite": "Ghi workspace",
     "sandboxDanger": "Toàn quyền nguy hiểm",
     "modelLiveCatalog": "Danh mục trực tiếp từ Codex CLI đã đăng nhập",
-    "modelObservedCatalog": "Đã quan sát cục bộ; Claude Code không công bố danh sách model tài khoản",
+    "modelCuratedCatalog": "Claude Code không công bố danh sách model theo tài khoản; hãy chọn alias ổn định hoặc nhập ID model khác.",
+    "modelCustomClaudeHint": "Đối với model Claude cũ hoặc dành riêng cho tài khoản, hãy nhập chính xác giá trị --model.",
     "effort": "Mức độ suy nghĩ",
     "effortHint": "Điều chỉnh mức suy luận của model trước khi trả lời. Cao hơn = nhiều token suy nghĩ hơn, chậm hơn, sâu hơn. Để trống để dùng mặc định của model."
   },

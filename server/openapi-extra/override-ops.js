@@ -296,6 +296,7 @@ const CLEANUP_EXAMPLE = {
 };
 
 const IMPORT_GUIDE_EXAMPLE = {
+  provider: "claude",
   platform: "darwin",
   default_projects_dir: "/Users/son/.claude/projects",
   default_projects_dir_display: "~/.claude/projects",
@@ -331,6 +332,7 @@ const IMPORT_GUIDE_EXAMPLE = {
 
 const IMPORT_RESCAN_EXAMPLE = {
   ok: true,
+  provider: "claude",
   source: "default",
   imported: 14,
   skipped: 298,
@@ -342,6 +344,7 @@ const IMPORT_RESCAN_EXAMPLE = {
 
 const IMPORT_SCAN_PATH_EXAMPLE = {
   ok: true,
+  provider: "claude",
   source: "path",
   path: "/Users/son/Downloads/claude-history/projects",
   imported: 9,
@@ -354,6 +357,7 @@ const IMPORT_SCAN_PATH_EXAMPLE = {
 
 const IMPORT_UPLOAD_EXAMPLE = {
   ok: true,
+  provider: "claude",
   source: "upload",
   files_received: 3,
   rejected_files: ["notes.txt"],
@@ -1244,10 +1248,19 @@ const paths = {
   "/api/import/guide": {
     get: {
       tags: ["Import"],
-      summary: "Import guide with OS-aware defaults and step-by-step instructions",
+      summary: "Provider-aware import guide with OS-aware defaults and step-by-step instructions",
       description:
-        "Returns the OS-aware import guide the Import page renders verbatim: the detected `platform`, the default `~/.claude/projects` directory (raw + display form), whether it exists and how many projects/JSONL files it holds, an OS-specific `archive_command` for bundling history off another machine, the supported file extensions, the upload size/count limits, and four ordered `steps` (locate → archive → choose mode → verify). Read-only; performs no import.",
+        "Returns the OS-aware guide for the selected `provider` (`claude` or `codex`): its default transcript directory, existence and folder/file counts, an archive command, supported extensions, upload limits, and four ordered steps. Read-only; performs no import.",
       operationId: "importGuide",
+      parameters: [
+        {
+          name: "provider",
+          in: "query",
+          required: false,
+          schema: { type: "string", enum: ["claude", "codex"], default: "claude" },
+          description: "History provider to describe.",
+        },
+      ],
       responses: {
         200: {
           description: "Guide payload",
@@ -1265,10 +1278,23 @@ const paths = {
   "/api/import/rescan": {
     post: {
       tags: ["Import"],
-      summary: "Rescan the default ~/.claude/projects directory",
+      summary: "Rescan the selected provider's default transcript directory",
       description:
-        'Re-scans the default `~/.claude/projects` directory and imports anything new through the live ingestion pipeline. IDEMPOTENT and ADDITIVE — re-running is always safe, already-imported sessions are deduplicated (`skipped`), and token/compaction baselines are preserved so cost never double-counts. Progress is broadcast over the WebSocket as `import.progress` frames while it runs. The response reports `imported` / `skipped` / `backfilled` / `errors` plus `sessions_seen` and `files_scanned`, with `source: "default"`.',
+        "Re-scans the selected provider’s default transcript directory (`~/.claude/projects` or `~/.codex/sessions`) through its live ingestion pipeline. IDEMPOTENT and ADDITIVE — re-running is safe, previously processed entries are skipped, and provider-specific accounting prevents duplicate costs. Progress is broadcast as `import.progress` with the selected provider.",
       operationId: "importRescan",
+      requestBody: {
+        required: false,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                provider: { type: "string", enum: ["claude", "codex"], default: "claude" },
+              },
+            },
+          },
+        },
+      },
       responses: {
         200: {
           description: "Import result",
@@ -1299,7 +1325,7 @@ const paths = {
       tags: ["Import"],
       summary: "Import transcripts from an arbitrary absolute directory",
       description:
-        'Imports transcripts from an arbitrary directory you point the dashboard at (e.g. history extracted from another machine). The `path` must resolve to an existing directory: a leading `~` is expanded to the home directory, the result must be absolute, and subdirectories are walked recursively for `.jsonl` files. Same idempotent, baseline-preserving pipeline as the default rescan; progress is broadcast as `import.progress`. The response echoes the resolved `path` and the per-run counters with `source: "path"`.',
+        "Imports Claude Code transcripts or Codex rollout files from an arbitrary directory (for example, history extracted from another machine). The `path` must resolve to an existing directory; a leading `~` is expanded and subdirectories are walked recursively. External Codex inputs are snapshotted into dashboard-owned storage so their Conversation view remains available after the source folder is removed. Progress is broadcast as provider-tagged `import.progress` frames.",
       operationId: "importScanPath",
       requestBody: {
         required: true,
@@ -1314,16 +1340,22 @@ const paths = {
                   description:
                     "Absolute directory path. Tilde (~) is expanded. Walks subdirectories recursively.",
                 },
+                provider: {
+                  type: "string",
+                  enum: ["claude", "codex"],
+                  default: "claude",
+                  description: "Transcript format and ingestion pipeline to use.",
+                },
               },
             },
             examples: {
               absolute: {
                 summary: "Absolute directory",
-                value: { path: "/Users/son/Downloads/claude-history/projects" },
+                value: { path: "/Users/son/Downloads/claude-history/projects", provider: "claude" },
               },
               tilde: {
                 summary: "Tilde expanded to home directory",
-                value: { path: "~/Downloads/claude-history/projects" },
+                value: { path: "~/Downloads/codex-history", provider: "codex" },
               },
             },
           },
@@ -1394,7 +1426,7 @@ const paths = {
       tags: ["Import"],
       summary: "Upload JSONL files or archives (.zip, .tar, .tar.gz, .tgz, .gz)",
       description:
-        'Imports history uploaded directly from the browser as `multipart/form-data` under the `files` field. Accepts raw `.jsonl` / `.meta.json` transcripts and/or archives (`.zip`, `.tar`, `.tar.gz`, `.tgz`, `.gz`), which are extracted into a temp dir and walked for JSONL content. Unsupported extensions are silently rejected and reported in `rejected_files`. Extraction is bounded to defend against zip bombs — exceeding the limit returns 413. Same idempotent import pipeline; progress is broadcast as `import.progress`. On success the response carries `source: "upload"` plus `files_received`, `rejected_files`, `entries_extracted`, `entries_skipped`, and the standard import counters. (Requires the optional `multer` dependency; a missing install yields a 500.)',
+        "Imports selected Claude Code transcripts or Codex rollout files uploaded as `multipart/form-data` under `files`, with a `provider` field. Raw JSONL files and archives are extracted into a temporary directory; Codex uploads are copied to dashboard-owned storage before the temporary files are reclaimed. Unsupported extensions are reported in `rejected_files`; bounded extraction protects against archive bombs. Progress is broadcast as provider-tagged `import.progress` frames.",
       operationId: "importUpload",
       requestBody: {
         required: true,
@@ -1409,9 +1441,18 @@ const paths = {
                   description:
                     "Files to import. Supports .jsonl, .meta.json, .zip, .tar, .tar.gz, .tgz, .gz.",
                 },
+                provider: {
+                  type: "string",
+                  enum: ["claude", "codex"],
+                  default: "claude",
+                  description: "Transcript provider for the uploaded files.",
+                },
               },
             },
-            example: { files: ["claude-history.tar.gz", "session-extra.jsonl"] },
+            example: {
+              provider: "codex",
+              files: ["codex-history.tar.gz", "rollout-session.jsonl"],
+            },
           },
         },
       },

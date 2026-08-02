@@ -80,7 +80,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Play,
@@ -678,6 +678,7 @@ function useTypewriterEnvelopes(envelopes: Envelope[]): Envelope[] {
 
 export function Run() {
   const { t } = useTranslation("run");
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const wsConnected = useSyncExternalStore(eventBus.onConnection, () => eventBus.connected);
   // The choice dialog is intentionally shown on every page mount. The header
@@ -1249,7 +1250,14 @@ export function Run() {
       {provider && binaryStatus && !binaryStatus.found && (
         <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200 flex items-center gap-2">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{t("binary.missing")}</span>
+          <span>
+            {provider === "codex"
+              ? t(
+                  "binary.missingCodex",
+                  "The `codex` CLI isn't on your PATH. Install Codex CLI or set PATH so the dashboard can spawn it."
+                )
+              : t("binary.missing")}
+          </span>
         </div>
       )}
 
@@ -1266,7 +1274,19 @@ export function Run() {
         </div>
       )}
 
-      {!provider && <ProviderChooser onChoose={setProvider} />}
+      {!provider && (
+        <ProviderChooser
+          onChoose={setProvider}
+          onCancel={() => {
+            // A direct deep-link to /run still has the browser's initial
+            // about:blank entry. React Router records an `idx` only for
+            // actual app navigation, so do not send a first-time visitor
+            // back to that blank entry.
+            if (Number(window.history.state?.idx) > 0) navigate(-1);
+            else navigate("/", { replace: true });
+          }}
+        />
+      )}
 
       {provider && !handle && <LimitationsBanner />}
 
@@ -2214,7 +2234,7 @@ function RunProviderToggle({
           key={option}
           disabled={disabled}
           onClick={() => onChange(option)}
-          className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-55 ${value === option ? "bg-accent/20 text-accent" : "text-gray-400 hover:text-gray-200"}`}
+          className={`rounded-full px-2 py-px text-[10px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-55 ${value === option ? "bg-accent/20 text-accent" : "text-gray-400 hover:text-gray-200"}`}
         >
           {t(`provider.${option}.label`)}
           {option === "codex" && (
@@ -2226,7 +2246,13 @@ function RunProviderToggle({
   );
 }
 
-function ProviderChooser({ onChoose }: { onChoose: (provider: RunProvider) => void }) {
+function ProviderChooser({
+  onChoose,
+  onCancel,
+}: {
+  onChoose: (provider: RunProvider) => void;
+  onCancel: () => void;
+}) {
   const { t } = useTranslation("run");
   return (
     <div
@@ -2276,6 +2302,15 @@ function ProviderChooser({ onChoose }: { onChoose: (provider: RunProvider) => vo
               </span>
             </button>
           ))}
+        </div>
+        <div className="mt-5 flex justify-center border-t border-border pt-4">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-lg border border-border bg-surface-2 px-4 py-2 text-xs font-medium text-gray-300 transition-colors hover:bg-surface-3 hover:text-gray-100"
+          >
+            {t("provider.cancel", "Cancel")}
+          </button>
         </div>
       </div>
     </div>
@@ -2826,6 +2861,10 @@ interface ConfigCardProps {
 
 function ConfigCard(props: ConfigCardProps) {
   const { t } = useTranslation("run");
+  const providerLabel = t(
+    `provider.${props.provider}.label`,
+    props.provider === "codex" ? "Codex" : "Claude Code"
+  );
   const atCap =
     props.activeRuns != null && props.activeRuns.activeCount >= props.activeRuns.maxConcurrent;
   const isResume = !!props.resumeSession;
@@ -2911,7 +2950,9 @@ function ConfigCard(props: ConfigCardProps) {
             <ModeOption
               active={!resumePicked}
               label={t("resume.freshOption")}
-              hint={t("resume.freshHint")}
+              hint={t("resume.freshHintWithProvider", "Start a fresh {{agent}} session.", {
+                agent: providerLabel,
+              })}
               onClick={() => {
                 setResumePicked(false);
                 props.onResumeSessionChange(null);
@@ -2949,7 +2990,9 @@ function ConfigCard(props: ConfigCardProps) {
           value={props.prompt}
           onChange={props.onPromptChange}
           onSubmit={props.onStart}
-          placeholder={t("fields.promptPlaceholder")}
+          placeholder={t("fields.promptPlaceholderWithProvider", "Ask {{agent}} anything…", {
+            agent: providerLabel,
+          })}
           rows={5}
           slashCommands={props.slashCommands}
           fileCwd={props.resumeSession?.cwd || props.cwd}
@@ -2969,6 +3012,7 @@ function ConfigCard(props: ConfigCardProps) {
             </div>
           ) : (
             <CwdAutocomplete
+              provider={props.provider}
               value={props.cwd}
               onChange={props.onCwdChange}
               suggestions={props.cwdSuggestions}
@@ -2980,6 +3024,7 @@ function ConfigCard(props: ConfigCardProps) {
         </Field>
         <Field label={t("fields.model")}>
           <ModelPicker
+            provider={props.provider}
             value={props.model}
             onChange={props.onModelChange}
             models={props.models}
@@ -2990,8 +3035,8 @@ function ConfigCard(props: ConfigCardProps) {
               {props.provider === "codex"
                 ? t("fields.modelLiveCatalog", "Live catalog from your signed-in Codex CLI")
                 : t(
-                    "fields.modelObservedCatalog",
-                    "Observed locally; Claude Code does not publish an account model list"
+                    "fields.modelCuratedCatalog",
+                    "Claude Code does not publish an account model list; choose its stable aliases or enter another model ID."
                   )}
             </p>
           )}
@@ -3143,10 +3188,12 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 // ── CWD autocomplete ──────────────────────────────────────────────────
 
 function CwdAutocomplete({
+  provider,
   value,
   onChange,
   suggestions,
 }: {
+  provider: RunProvider;
   value: string;
   onChange: (s: string) => void;
   suggestions: CwdSuggestion[];
@@ -3257,7 +3304,14 @@ function CwdAutocomplete({
                   ) : (
                     <HistoryIcon className="w-3 h-3" />
                   )}
-                  {t(`fields.cwdGroups.${g.kind}`)}
+                  {g.kind === "recent"
+                    ? t("fields.cwdGroups.recentWithProvider", "Recent - used by {{agent}}", {
+                        agent: t(
+                          `provider.${provider}.label`,
+                          provider === "codex" ? "Codex" : "Claude Code"
+                        ),
+                      })
+                    : t(`fields.cwdGroups.${g.kind}`)}
                 </div>
                 {g.items.map((s) => {
                   const idx = flat.indexOf(s);
@@ -3447,11 +3501,13 @@ function SessionPicker({
 const MODEL_CUSTOM = "__custom__";
 
 function ModelPicker({
+  provider,
   value,
   onChange,
   models,
   loading,
 }: {
+  provider: RunProvider;
   value: string;
   onChange: (s: string) => void;
   models: ModelChoice[];
@@ -3471,11 +3527,13 @@ function ModelPicker({
   const options = useMemo(
     () => [
       ...models.map((c) => ({
-        value: c.id === "" ? "" : c.id,
-        label: c.id === "" ? t("fields.modelInheritLabel") : c.label,
+        value: c.id,
+        // The empty model ID intentionally omits --model and therefore
+        // matches Claude's own "Default (recommended)" behavior.
+        label: c.id === "" ? t("fields.modelInheritLabel", "Default (recommended)") : c.label,
         hint: c.hint,
       })),
-      { value: MODEL_CUSTOM, label: t("fields.modelCustom") },
+      { value: MODEL_CUSTOM, label: t("fields.modelCustom"), hint: undefined },
     ],
     [models, t]
   );
@@ -3490,6 +3548,7 @@ function ModelPicker({
   };
 
   const selectValue = showCustom || isCustom ? MODEL_CUSTOM : value;
+  const selected = options.find((option) => option.value === selectValue);
 
   return (
     <div className="space-y-1.5">
@@ -3509,6 +3568,17 @@ function ModelPicker({
           spellCheck={false}
           className="w-full bg-surface-2 border border-border rounded-md px-3 py-1.5 text-[11px] font-mono text-gray-100 placeholder:text-gray-500 focus:outline-none focus:border-accent/50"
         />
+      )}
+      {selected?.hint && !(showCustom || isCustom) && (
+        <p className="text-[10px] leading-relaxed text-gray-500">{selected.hint}</p>
+      )}
+      {(showCustom || isCustom) && provider === "claude" && (
+        <p className="text-[10px] leading-relaxed text-gray-500">
+          {t(
+            "fields.modelCustomClaudeHint",
+            "For a previous or account-specific Claude model, enter its exact --model value."
+          )}
+        </p>
       )}
     </div>
   );
@@ -3533,6 +3603,10 @@ interface RunSessionProps {
 
 function RunSession(props: RunSessionProps) {
   const { t } = useTranslation("run");
+  const providerLabel = t(
+    `provider.${props.handle.provider}.label`,
+    props.handle.provider === "codex" ? "Codex" : "Claude Code"
+  );
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [pinnedToBottom, setPinnedToBottom] = useState(true);
 
@@ -3638,7 +3712,9 @@ function RunSession(props: RunSessionProps) {
             value={props.followUp}
             onChange={props.onFollowUpChange}
             onSubmit={props.onSend}
-            placeholder={t("fields.promptPlaceholder")}
+            placeholder={t("fields.promptPlaceholderWithProvider", "Ask {{agent}} anything…", {
+              agent: providerLabel,
+            })}
             rows={2}
             slashCommands={props.slashCommands}
             fileCwd={props.handle.cwd}

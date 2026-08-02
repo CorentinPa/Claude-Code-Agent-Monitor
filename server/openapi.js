@@ -1249,6 +1249,7 @@ function createOpenApiSpec() {
         ImportGuideResponse: {
           type: "object",
           properties: {
+            provider: { type: "string", enum: ["claude", "codex"] },
             platform: { type: "string" },
             default_projects_dir: { type: "string" },
             default_projects_dir_display: { type: "string" },
@@ -1282,6 +1283,7 @@ function createOpenApiSpec() {
           required: ["ok", "source", "imported", "skipped", "errors"],
           properties: {
             ok: { type: "boolean", enum: [true] },
+            provider: { type: "string", enum: ["claude", "codex"] },
             source: { type: "string", enum: ["default", "path", "upload"] },
             path: { type: "string", nullable: true },
             imported: { type: "integer" },

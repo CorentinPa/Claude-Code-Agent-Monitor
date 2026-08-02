@@ -1193,9 +1193,11 @@ export interface ImportProgressMessage {
    *  start → scan → extract → parse → complete. */
   phase: "start" | "scan" | "extract" | "parse" | "complete" | "error" | "extract_error";
   /** Which import flow triggered this run. "default" scans the standard Claude
-   *  Code projects dir; "path" scans a user-supplied path; "upload" ingests an
+   *  provider's default transcript directory; "path" scans a user-supplied path; "upload" ingests an
    *  uploaded file; "remote" is a background SSH pull from a Remote Data Source. */
   source?: "default" | "path" | "upload" | "remote";
+  /** Provider whose import emitted this update. */
+  provider?: "claude" | "codex";
   /** Items processed so far, for a determinate progress bar. Numerator of
    *  `processed / total`. */
   processed?: number;

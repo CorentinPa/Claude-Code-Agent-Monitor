@@ -14,6 +14,7 @@ const {
   getCodexSessionTitle,
   getCodexSessionTitles,
 } = require("./codex-home");
+const { getDataDir } = require("./claude-home");
 
 const MAX_EVENT_SUMMARY = 500;
 const CONTEXT_SHORT_LIMIT = 272000;
@@ -57,14 +58,14 @@ function rememberTranscriptPath(transcriptPath) {
   return sessionId;
 }
 
-function isCodexTranscript(transcriptPath) {
+function isCodexTranscript(transcriptPath, options = {}) {
   if (typeof transcriptPath !== "string" || !transcriptPath.endsWith(".jsonl")) return false;
-  const root = path.resolve(getCodexSessionsDir());
+  const root = path.resolve(options.root || getCodexSessionsDir());
   const candidate = path.resolve(transcriptPath);
   return candidate.startsWith(`${root}${path.sep}`);
 }
 
-function findCodexTranscripts(root = getCodexSessionsDir()) {
+function findCodexTranscripts(root = getCodexSessionsDir(), options = {}) {
   const files = [];
   const pending = [root];
   while (pending.length) {
@@ -80,8 +81,8 @@ function findCodexTranscripts(root = getCodexSessionsDir()) {
       if (entry.isDirectory()) pending.push(fullPath);
       else if (
         entry.isFile() &&
-        entry.name.startsWith("rollout-") &&
-        entry.name.endsWith(".jsonl")
+        entry.name.endsWith(".jsonl") &&
+        (entry.name.startsWith("rollout-") || options.includeAllJsonl)
       ) {
         rememberTranscriptPath(fullPath);
         files.push(fullPath);
@@ -437,8 +438,8 @@ function applyTokenSnapshot(sessionId, model, speed, tokenInfo, previous) {
  * the Workflows tool-flow view. Their own cursor lets existing histories be
  * backfilled once without replaying token counters or lifecycle state.
  */
-function ingestCodexToolEvents(transcriptPath) {
-  if (!isCodexTranscript(transcriptPath)) return { changed: false, events: [] };
+function ingestCodexToolEvents(transcriptPath, options = {}) {
+  if (!isCodexTranscript(transcriptPath, options)) return { changed: false, events: [] };
   rememberTranscriptPath(transcriptPath);
   let stat;
   try {
@@ -507,7 +508,7 @@ function ingestCodexToolEvents(transcriptPath) {
  * report the same change.
  */
 function ingestCodexTranscript(transcriptPath, options = {}) {
-  if (!isCodexTranscript(transcriptPath)) return { changed: false, events: [] };
+  if (!isCodexTranscript(transcriptPath, options)) return { changed: false, events: [] };
   rememberTranscriptPath(transcriptPath);
   let stat;
   try {
@@ -550,6 +551,46 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
   let meta = records.find((record) => record.type === "session_meta")?.payload;
   const resolvedSessionId = state?.session_id || meta?.id || sessionIdFromPath(transcriptPath);
   const knownSession = resolvedSessionId ? stmts.getSession.get(resolvedSessionId) : null;
+  // Imported rollouts live in a dashboard-owned snapshot so uploads remain
+  // readable after their temporary extraction directory is removed. When the
+  // same session later appears under the active CODEX_HOME, carry its byte
+  // cursors forward before switching to that live file. Re-reading the whole
+  // rollout with a fresh cursor would otherwise add every token delta twice.
+  if (
+    knownSession?.provider === "codex" &&
+    knownSession.transcript_path &&
+    path.resolve(knownSession.transcript_path) !== path.resolve(transcriptPath) &&
+    path
+      .resolve(knownSession.transcript_path)
+      .startsWith(`${path.resolve(getDataDir(), "codex-transcripts")}${path.sep}`) &&
+    path.resolve(transcriptPath).startsWith(`${path.resolve(getCodexSessionsDir())}${path.sep}`) &&
+    !stmts.getCodexIngestState.get(transcriptPath)
+  ) {
+    const previousState = stmts.getCodexIngestState.get(knownSession.transcript_path);
+    const previousToolState = stmts.getCodexToolIngestState.get(knownSession.transcript_path);
+    if (previousState) {
+      stmts.upsertCodexIngestState.run(
+        transcriptPath,
+        knownSession.id,
+        previousState.byte_offset,
+        previousState.remainder,
+        previousState.input_tokens,
+        previousState.cached_input_tokens,
+        previousState.cache_write_input_tokens,
+        previousState.output_tokens,
+        previousState.reasoning_output_tokens
+      );
+    }
+    if (previousToolState) {
+      stmts.upsertCodexToolIngestState.run(
+        transcriptPath,
+        knownSession.id,
+        previousToolState.byte_offset
+      );
+    }
+    stmts.replaceSessionTranscriptPath.run(transcriptPath, knownSession.id);
+    return ingestCodexTranscript(transcriptPath, options);
+  }
   const created = !knownSession;
   let session = knownSession || createCodexSession(meta, transcriptPath);
   if (!session && meta?.id) session = createCodexSession(meta, transcriptPath);
@@ -625,7 +666,7 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
   // Tool invocations are stored through an independent cursor so initial
   // rollout imports and all subsequent real-time appends preserve their exact
   // order without double-counting lifecycle/token records.
-  const toolResult = ingestCodexToolEvents(transcriptPath);
+  const toolResult = ingestCodexToolEvents(transcriptPath, options);
   events.push(...(toolResult.events || []));
   stmts.touchSession.run(session.id);
   // A native `/rename` lives outside the rollout, so it wins over the first

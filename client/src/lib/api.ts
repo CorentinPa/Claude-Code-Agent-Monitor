@@ -1317,7 +1317,7 @@ export const api = {
    *  shape and stream progress via the `import.progress` WS message. */
   import: {
     /**
-     * GET /api/import/guide - platform-specific instructions and constraints
+     * GET /api/import/guide - provider-specific instructions and constraints
      * (default projects dir, supported extensions, upload limits) shown on
      * first run / in the Import wizard.
      *
@@ -1330,8 +1330,9 @@ export const api = {
      *
      * @returns The import-guide payload described above.
      */
-    guide: () =>
+    guide: (provider: RunProvider = "claude") =>
       request<{
+        provider: RunProvider;
         platform: string;
         default_projects_dir: string;
         default_projects_dir_display: string;
@@ -1342,7 +1343,7 @@ export const api = {
         max_upload_bytes: number;
         max_upload_files: number;
         steps: { id: string; title: string; body: string }[];
-      }>("/import/guide"),
+      }>(`/import/guide?provider=${encodeURIComponent(provider)}`),
     /**
      * POST /api/import/rescan - re-scan the default projects directory.
      *
@@ -1352,7 +1353,11 @@ export const api = {
      *
      * @returns {@link ImportResult} — the completed-scan summary.
      */
-    rescan: () => request<ImportResult>("/import/rescan", { method: "POST" }),
+    rescan: (provider: RunProvider = "claude") =>
+      request<ImportResult>("/import/rescan", {
+        method: "POST",
+        body: JSON.stringify({ provider }),
+      }),
     /**
      * POST /api/import/scan-path - scan an arbitrary directory for
      * Claude Code project transcripts.
@@ -1363,10 +1368,10 @@ export const api = {
      * @param path Absolute directory to scan for transcripts.
      * @returns {@link ImportResult} — the completed-scan summary for that path.
      */
-    scanPath: (path: string) =>
+    scanPath: (path: string, provider: RunProvider = "claude") =>
       request<ImportResult>("/import/scan-path", {
         method: "POST",
-        body: JSON.stringify({ path }),
+        body: JSON.stringify({ path, provider }),
       }),
     /**
      * POST /api/import/upload (multipart) - import a set of user-selected
@@ -1387,10 +1392,11 @@ export const api = {
      * @throws {Error} On a non-2xx response, mirroring {@link request}: the
      *   server's `error.message` if present, else `HTTP <status>`.
      */
-    upload: async (files: File[]): Promise<ImportResult> => {
+    upload: async (files: File[], provider: RunProvider = "claude"): Promise<ImportResult> => {
       const form = new FormData();
       // Append each file under the repeated "files" field, keeping its filename.
       for (const f of files) form.append("files", f, f.name);
+      form.append("provider", provider);
       // Do NOT set Content-Type manually: the browser adds the multipart boundary.
       const res = await fetch(`${BASE}/import/upload`, { method: "POST", body: form });
       if (!res.ok) {
@@ -1565,13 +1571,23 @@ export const api = {
       requestBackupsHelper(params),
   },
 
-  /** Read-only local Codex configuration discovery. Codex owns these TOML /
-   * JSON files, so the dashboard exposes safe metadata and redacted file
-   * inspection rather than concurrent editing. */
+  /** Local Codex configuration discovery. Normal inspection is redacted;
+   * the separate editor read is limited to a small text-file allowlist so a
+   * user can safely maintain their own configuration without clobbering
+   * redacted secret values. */
   codexConfig: {
     overview: () => request<CodexConfigOverview>("/codex-config/overview"),
     file: (absPath: string) =>
       request<CodexConfigFile>(`/codex-config/file?path=${encodeURIComponent(absPath)}`),
+    editFile: (absPath: string) =>
+      request<CodexConfigEditableFile>(
+        `/codex-config/edit-file?path=${encodeURIComponent(absPath)}`
+      ),
+    writeFile: (args: CodexConfigWriteArgs) =>
+      request<CodexConfigWriteResult>("/codex-config/file", {
+        method: "PUT",
+        body: JSON.stringify(args),
+      }),
   },
 
   // ────────────────────────────────── Run API ─────────────────────────────────
@@ -2355,14 +2371,38 @@ export interface CcHookScripts {
   items: { name: string; file: string; size: number; mtime: number }[];
 }
 
-/** Safe, read-only view of one local Codex configuration file. Sensitive TOML
- * and JSON values are redacted server-side before this reaches the browser. */
+/** Safe preview of one local Codex configuration file. Sensitive TOML and JSON
+ * values are redacted server-side before this reaches the browser. */
 export interface CodexConfigFile {
   path: string;
   text: string;
   size: number;
   mtime: number;
   truncated: boolean;
+}
+
+/** Full local-only content returned only for the narrowly editable Codex file
+ * allowlist. This is separate from {@link CodexConfigFile} so a redacted
+ * preview can never accidentally overwrite user secrets. */
+export interface CodexConfigEditableFile {
+  path: string;
+  text: string;
+  size: number;
+  exists: boolean;
+  mtime: number | null;
+  truncated: boolean;
+}
+
+export interface CodexConfigWriteArgs {
+  path: string;
+  content: string;
+}
+
+export interface CodexConfigWriteResult {
+  ok: true;
+  file: string;
+  backupPath: string | null;
+  created: boolean;
 }
 
 export interface CodexConfigOverview {
@@ -2395,7 +2435,16 @@ export interface CodexConfigOverview {
   skills: Array<{ name: string; file: string; preview: string; mtime: number }>;
   hooks: { file: string; items: Array<{ event: string; groups: number }> };
   rules: Array<{ name: string; file: string; preview: string; mtime: number | null }>;
-  plugins: Array<{ name: string; path: string }>;
+  plugins: Array<{
+    id: string;
+    name: string;
+    displayName: string;
+    description: string | null;
+    marketplace: string;
+    marketplaceLabel: string;
+    version: string | null;
+    enabled: boolean;
+  }>;
   instructions: Array<{ path: string; name: string; preview: string; mtime: number }>;
 }
 
@@ -2577,6 +2626,8 @@ export const RUN_EFFORT_CHOICES: EffortChoice[] = [
  *  telemetry populated depending on which import flow produced the result. */
 export interface ImportResult {
   ok: boolean;
+  /** Provider whose transcripts were processed. */
+  provider: RunProvider;
   /** Which import flow produced this result. */
   source: "default" | "path" | "upload";
   /** Directory that was scanned; present for `source === "path"`. */

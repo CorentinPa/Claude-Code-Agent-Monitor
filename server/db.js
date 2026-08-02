@@ -1237,6 +1237,10 @@ const stmts = {
   setSessionTranscriptPath: db.prepare(
     "UPDATE sessions SET transcript_path = ? WHERE id = ? AND (transcript_path IS NULL OR transcript_path = '')"
   ),
+  // Used only when an imported Codex snapshot is promoted to its matching live
+  // rollout. The byte cursors move with it in codex-ingest before this pointer
+  // changes, so a later watcher pass continues from the accounted offset.
+  replaceSessionTranscriptPath: db.prepare("UPDATE sessions SET transcript_path = ? WHERE id = ?"),
   // Tag a session with the machine it was collected from (see remote-sync.js).
   // Remote-pulled sessions are stamped after the shared importer runs over the
   // per-source staging dir; local sessions keep the 'local' default.

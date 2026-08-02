@@ -230,7 +230,7 @@ flowchart LR
 <p align="center">
   <img src="images/config.png" alt="에이전트 구성 — Claude Code 및 Codex 탐색기" width="100%">
   <br>
-  <em>🧰 <strong>에이전트 구성</strong> — 전체 Claude Code 탐색기와 기본값, 모델, 프로필, MCP, 프로젝트, 스킬, 규칙, 훅, 플러그인, 지침을 보여 주는 실시간 읽기 전용 Codex 탐색기 사이를 전환합니다. Codex 비밀 값은 마스킹되고 변경 사항은 즉시 새로고침됩니다.</em>
+  <em>🧰 <strong>에이전트 구성</strong> — 전체 Claude Code 탐색기와 기본값, 모델, 프로필, MCP, 프로젝트, 스킬, 규칙, 훅, 플러그인, 지침을 위한 실시간 Codex 작업 공간 사이를 전환합니다. Codex 미리보기는 비밀 값을 마스킹하며, 사용자가 관리하는 구성, 훅, 규칙, 스킬, 지침은 백업과 함께 안전하게 편집할 수 있습니다.</em>
 </p>
 
 <p align="center">
@@ -1198,13 +1198,16 @@ Claude Code의 모든 설정 표면을 읽기 전용으로 검사할 수 있으�
 
 ### 히스토리 가져오기
 
-기존 Claude Code 세션을 세 가지 서로 다른 소스에서 대시보드로
-가져올 수 있으며, 모두 서버가 실시간 수집에 사용하는 것과 동일한
-파서를 거치므로 가져온 토큰, 모델별 비용, 컴팩션, 서브에이전트,
-도구 사용, 턴 소요 시간이 실시간 캡처와 비트 단위로 일치합니다.
-재가져오기는 멱등합니다. 세션은 ID로 키가 지정되고 컴팩션 기준선이
-컴팩션 이전의 토큰 합계를 보존하므로, 가져오기를 두 번 실행해도
-사용량이나 비용이 이중으로 계산되지 않습니다.
+**Settings → Import History**의 공급자 탭으로 기존 **Claude Code** 또는
+**Codex** 기록을 가져옵니다. Claude Code는 `~/.claude/projects`의
+공유 JSONL 파서를 사용하고, Codex는 `~/.codex/sessions`에서 실시간
+모니터링과 같은 append-only rollout 수집기를 사용합니다. 여기에는 토큰
+스냅샷, response-item 도구, 수명 주기 상태 및 `session_index.jsonl`이
+포함될 때의 네이티브 `/rename` 제목이 포함됩니다. 재가져오기는
+멱등적입니다. Claude는 compaction 기준선을, Codex는 바이트 커서를
+보존하므로 어느 공급자도 사용량이나 비용을 이중 계산하지 않습니다.
+폴더 또는 브라우저 업로드 Codex 기록은 임시 파일을 정리하기 전에
+대시보드 전용 저장소로 복사됩니다.
 
 ```mermaid
 flowchart LR
@@ -1241,10 +1244,10 @@ flowchart LR
 
 | 메서드 | 경로                    | 설명                                                                     |
 | ------ | ----------------------- | ------------------------------------------------------------------------ |
-| `GET`  | `/api/import/guide`     | OS에 맞춘 경로, 아카이브 명령, 지원 확장자, 단계별 안내                  |
-| `POST` | `/api/import/rescan`    | 기본 `~/.claude/projects` 디렉터리 재스캔                                |
-| `POST` | `/api/import/scan-path` | 절대 경로 디렉터리 스캔(본문 `{ path }`); 재귀적으로 순회                |
-| `POST` | `/api/import/upload`    | `.jsonl`, `.meta.json`, `.zip`, `.tar(.gz)`, `.gz`의 멀티파트 업로드     |
+| `GET`  | `/api/import/guide`     | 공급자별 경로, 아카이브 명령 및 안내(`?provider=claude\|codex`) |
+| `POST` | `/api/import/rescan`    | 선택한 기본 경로 재스캔(`{ provider }`) |
+| `POST` | `/api/import/scan-path` | `{ path, provider }`로 절대 경로 스캔; 재귀 순회 |
+| `POST` | `/api/import/upload`    | `provider` 필드가 있는 멀티파트 업로드; Codex 파일은 스냅샷 저장 |
 
 **지원되는 입력.** 개별 JSONL(`.jsonl`) 세션 트랜스크립트, 이에
 동반되는 `.meta.json` 사이드카 파일, 그리고 어떤 중첩 디렉터리

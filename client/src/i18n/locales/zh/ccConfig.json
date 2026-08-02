@@ -10,12 +10,12 @@
     },
     "codex": {
       "label": "Codex",
-      "subtitle": "读取本地 Codex 配置、模型、配置文件、MCP 服务器、技能、Hook 与规则。"
+      "subtitle": "管理本地 Codex 配置、模型、配置文件、MCP 服务器、技能、Hook 与规则。"
     }
   },
   "codex": {
     "title": "Codex 配置",
-    "readOnly": "只读；显示前会隐藏机密。",
+    "description": "本地设置、模型、工具与指令。",
     "home": "Codex 主目录",
     "defaultModel": "模型",
     "defaultEffort": "推理",
@@ -24,7 +24,21 @@
     "disabled": "已禁用",
     "envNames": "环境变量名称",
     "empty": "这里还没有配置。",
-    "viewFile": "查看文件",
+    "viewFile": "查看",
+    "editFile": "编辑",
+    "editTitle": "编辑配置文件",
+    "save": "保存更改",
+    "saving": "正在保存…",
+    "cancel": "取消",
+    "saved": "已保存。",
+    "savedBackup": "已保存。更新前已创建带时间戳的备份。",
+    "syntaxWarning": "Codex 会直接读取此文件。仪表盘无法验证 TOML、JSON、Hook、规则、技能或指令的语法；保存前请仔细检查每项编辑。系统会先创建带时间戳的备份。",
+    "redactedPreview": "预览会在必要时隐藏值。",
+    "overviewTitle": "配置概览",
+    "hidden": "隐藏",
+    "noDescription": "未提供说明。",
+    "scrollLeft": "向左滚动配置标签",
+    "scrollRight": "向右滚动配置标签",
     "fileError": "无法打开配置文件",
     "tabs": {
       "overview": "概览",

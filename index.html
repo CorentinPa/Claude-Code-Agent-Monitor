@@ -2674,6 +2674,11 @@
               auto-compact, notifications) resolved across scopes. Edit text-file artifacts -
               including the auto-memory files - with timestamped backups.
             </p>
+            <p>
+              Agent Config also includes a Codex workspace with live configuration stats, real
+              installed-plugin discovery, redacted previews, and backup-backed local editing for
+              the user-maintained config, hooks, rules, skills, and instruction files.
+            </p>
           </div>
           <div class="feature-card">
             <div class="feature-icon cyan">📊</div>
@@ -2816,7 +2821,8 @@
             <div class="feature-icon emerald">📥</div>
             <h3>History import &amp; backfill</h3>
             <p>
-              Rescan <code>~/.claude/projects/</code>, point at any directory, or drag-drop a
+              Pick Claude Code or Codex, then rescan <code>~/.claude/projects/</code> or
+              <code>~/.codex/sessions/</code>, point at any directory, or drag-drop a
               <code>.tar.gz</code> archive of transcripts. Imports are <strong>idempotent</strong>
               — per-event-type high-water marks dedupe re-runs — with WebSocket progress, archive
               extraction limits, and full subagent JSONL parsing. Sessions are named from their

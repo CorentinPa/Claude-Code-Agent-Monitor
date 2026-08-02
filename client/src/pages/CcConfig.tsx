@@ -1,7 +1,7 @@
 /**
  * @file CcConfig.tsx
  * @description Agent configuration explorer. Switches between the complete
- * Claude Code configuration workspace and a safe, read-only Codex explorer.
+ * Claude Code configuration workspace and a backup-backed editable Codex explorer.
  * The Claude workspace surfaces every plugin,
  * skill, subagent, slash command, MCP server, hook, settings file, memory
  * file, marketplace, keybinding, and statusline script Claude Code knows
@@ -554,6 +554,7 @@ export function CcConfig() {
                 tab={tab}
                 data={data}
                 search={search}
+                onTabChange={setTab}
                 onOpenFile={openViewer}
                 onEdit={openEdit}
                 onDelete={openDelete}
@@ -657,16 +658,18 @@ function Header({
               {t("backups.openButton")}
             </button>
           )}
-          <button
-            onClick={onRefresh}
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium text-gray-200 hover:bg-surface-3 disabled:opacity-60 transition-colors"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            {loading ? t("refreshing") : t("refresh")}
-          </button>
+          {provider === "claude" && (
+            <button
+              onClick={onRefresh}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium text-gray-200 hover:bg-surface-3 disabled:opacity-60 transition-colors"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+              {loading ? t("refreshing") : t("refresh")}
+            </button>
+          )}
         </div>
-        {lastUpdated && (
+        {provider === "claude" && lastUpdated && (
           <span className="text-[11px] text-gray-500 self-end">
             {t("lastUpdated", { time: formatted })}
           </span>
@@ -693,7 +696,7 @@ function ProviderToggle({
         <button
           key={option}
           onClick={() => onChange(option)}
-          className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${value === option ? "bg-accent/20 text-accent" : "text-gray-400 hover:text-gray-200"}`}
+          className={`rounded-full px-2 py-px text-[10px] font-medium transition-colors ${value === option ? "bg-accent/20 text-accent" : "text-gray-400 hover:text-gray-200"}`}
         >
           {t(`provider.${option}.label`)}
           {option === "codex" && (
@@ -895,6 +898,7 @@ interface TabPanelProps {
   tab: TabKey;
   data: PageState;
   search: string;
+  onTabChange: (tab: TabKey) => void;
   onOpenFile: (path: string) => void;
   onEdit: (
     type: CcArtifactType,
@@ -918,6 +922,7 @@ function TabPanel({
   tab,
   data,
   search,
+  onTabChange,
   onOpenFile,
   onEdit,
   onDelete,
@@ -930,7 +935,7 @@ function TabPanel({
 }: TabPanelProps) {
   switch (tab) {
     case "overview":
-      return <OverviewPanel overview={data.overview} />;
+      return <OverviewPanel overview={data.overview} onTabChange={onTabChange} />;
     case "skills":
       return (
         <MdItemList
@@ -1039,83 +1044,105 @@ type Tone =
   | "teal"
   | "slate"
   | "rose";
-const TONES: Record<Tone, { iconBg: string; iconText: string; bar: string; ring: string }> = {
+const TONES: Record<
+  Tone,
+  { iconBg: string; iconText: string; bar: string; ring: string; hoverBorder: string }
+> = {
   sky: {
     iconBg: "bg-sky-500/10",
     iconText: "text-sky-300",
     bar: "bg-sky-500/40",
     ring: "ring-sky-500/20",
+    hoverBorder: "hover:border-sky-500/35",
   },
   emerald: {
     iconBg: "bg-emerald-500/10",
     iconText: "text-emerald-300",
     bar: "bg-emerald-500/40",
     ring: "ring-emerald-500/20",
+    hoverBorder: "hover:border-emerald-500/35",
   },
   violet: {
     iconBg: "bg-violet-500/10",
     iconText: "text-violet-300",
     bar: "bg-violet-500/40",
     ring: "ring-violet-500/20",
+    hoverBorder: "hover:border-violet-500/35",
   },
   amber: {
     iconBg: "bg-amber-500/10",
     iconText: "text-amber-300",
     bar: "bg-amber-500/40",
     ring: "ring-amber-500/20",
+    hoverBorder: "hover:border-amber-500/35",
   },
   fuchsia: {
     iconBg: "bg-fuchsia-500/10",
     iconText: "text-fuchsia-300",
     bar: "bg-fuchsia-500/40",
     ring: "ring-fuchsia-500/20",
+    hoverBorder: "hover:border-fuchsia-500/35",
   },
   cyan: {
     iconBg: "bg-cyan-500/10",
     iconText: "text-cyan-300",
     bar: "bg-cyan-500/40",
     ring: "ring-cyan-500/20",
+    hoverBorder: "hover:border-cyan-500/35",
   },
   pink: {
     iconBg: "bg-pink-500/10",
     iconText: "text-pink-300",
     bar: "bg-pink-500/40",
     ring: "ring-pink-500/20",
+    hoverBorder: "hover:border-pink-500/35",
   },
   indigo: {
     iconBg: "bg-indigo-500/10",
     iconText: "text-indigo-300",
     bar: "bg-indigo-500/40",
     ring: "ring-indigo-500/20",
+    hoverBorder: "hover:border-indigo-500/35",
   },
   orange: {
     iconBg: "bg-orange-500/10",
     iconText: "text-orange-300",
     bar: "bg-orange-500/40",
     ring: "ring-orange-500/20",
+    hoverBorder: "hover:border-orange-500/35",
   },
   teal: {
     iconBg: "bg-teal-500/10",
     iconText: "text-teal-300",
     bar: "bg-teal-500/40",
     ring: "ring-teal-500/20",
+    hoverBorder: "hover:border-teal-500/35",
   },
   slate: {
     iconBg: "bg-slate-500/10",
     iconText: "text-slate-300",
     bar: "bg-slate-500/40",
     ring: "ring-slate-500/20",
+    hoverBorder: "hover:border-slate-500/35",
   },
   rose: {
     iconBg: "bg-rose-500/10",
     iconText: "text-rose-300",
     bar: "bg-rose-500/40",
     ring: "ring-rose-500/20",
+    hoverBorder: "hover:border-rose-500/35",
   },
 };
 
-function OverviewPanel({ overview }: { overview: CcOverview | null }) {
+function OverviewPanel({
+  overview,
+  onTabChange,
+}: {
+  overview: CcOverview | null;
+  onTabChange: (tab: TabKey) => void;
+}) {
   const { t } = useTranslation("ccConfig");
+  const gotoTab = useCallback((nextTab: TabKey) => onTabChange(nextTab), [onTabChange]);
   if (!overview) return <SkeletonRows n={4} />;
   const { roots, counts } = overview;
   return (
@@ -1161,6 +1188,7 @@ function OverviewPanel({ overview }: { overview: CcOverview | null }) {
             tone="fuchsia"
             icon={Sparkles}
             label={t("tabs.skills")}
+            onClick={() => gotoTab("skills")}
             user={counts.skills.user}
             project={counts.skills.project}
           />
@@ -1168,6 +1196,7 @@ function OverviewPanel({ overview }: { overview: CcOverview | null }) {
             tone="sky"
             icon={UserRound}
             label={t("tabs.agents")}
+            onClick={() => gotoTab("agents")}
             user={counts.agents.user}
             project={counts.agents.project}
           />
@@ -1175,6 +1204,7 @@ function OverviewPanel({ overview }: { overview: CcOverview | null }) {
             tone="cyan"
             icon={Slash}
             label={t("tabs.commands")}
+            onClick={() => gotoTab("commands")}
             user={counts.commands.user}
             project={counts.commands.project}
           />
@@ -1182,6 +1212,7 @@ function OverviewPanel({ overview }: { overview: CcOverview | null }) {
             tone="pink"
             icon={Palette}
             label={t("tabs.outputStyles")}
+            onClick={() => gotoTab("outputStyles")}
             user={counts.outputStyles.user}
             project={counts.outputStyles.project}
           />
@@ -1189,6 +1220,7 @@ function OverviewPanel({ overview }: { overview: CcOverview | null }) {
             tone="indigo"
             icon={Server}
             label={t("tabs.mcp")}
+            onClick={() => gotoTab("mcp")}
             user={counts.mcpServers.user}
             project={counts.mcpServers.project}
           />
@@ -1196,33 +1228,44 @@ function OverviewPanel({ overview }: { overview: CcOverview | null }) {
             tone="emerald"
             icon={PlugZap}
             label={t("tabs.plugins")}
+            onClick={() => gotoTab("plugins")}
             value={counts.plugins}
           />
           <SummaryStat
             tone="amber"
             icon={Store}
             label={t("tabs.marketplaces")}
+            onClick={() => gotoTab("marketplaces")}
             value={counts.marketplaces}
           />
           <SummaryStat
             tone="orange"
             icon={Webhook}
             label={t("tabs.hooks")}
+            onClick={() => gotoTab("hooks")}
             value={Object.values(counts.hooks).reduce((a, b) => a + b, 0)}
           />
           <SummaryStat
             tone="rose"
             icon={Keyboard}
             label={t("tabs.keybindings")}
+            onClick={() => gotoTab("keybindings")}
             value={counts.keybindings}
           />
           <SummaryStat
             tone="slate"
             icon={SettingsIcon}
             label={t("tabs.settings")}
+            onClick={() => gotoTab("settings")}
             value={counts.settingsFiles}
           />
-          <SummaryStat tone="teal" icon={BookOpen} label={t("tabs.memory")} value={counts.memory} />
+          <SummaryStat
+            tone="teal"
+            icon={BookOpen}
+            label={t("tabs.memory")}
+            onClick={() => gotoTab("memory")}
+            value={counts.memory}
+          />
         </div>
       </section>
     </div>
@@ -1233,25 +1276,36 @@ interface SummaryStatProps {
   tone: Tone;
   icon: typeof Sparkles;
   label: string;
+  onClick?: () => void;
   // Either a single value, OR a user/project pair (which is summed for the headline number).
   value?: number;
   user?: number;
   project?: number;
 }
 
-function SummaryStat({ tone, icon: Icon, label, value, user, project }: SummaryStatProps) {
+function SummaryStat({ tone, icon: Icon, label, onClick, value, user, project }: SummaryStatProps) {
   const { t } = useTranslation("ccConfig");
   const T = TONES[tone];
   const total = value !== undefined ? value : (user ?? 0) + (project ?? 0);
   const showBreakdown = user !== undefined && project !== undefined;
   return (
-    <div className={`relative rounded-lg border border-border bg-surface-2 overflow-hidden`}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group relative w-full text-left rounded-lg border border-border bg-surface-2 overflow-hidden transition-all ${
+        onClick
+          ? `cursor-pointer ${T.hoverBorder} hover:bg-surface-3 focus:outline-none focus-visible:ring-2 ${T.ring}`
+          : "cursor-default"
+      }`}
+    >
       {/* Left accent bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-1 ${T.bar}`} aria-hidden />
       <div className="pl-3.5 pr-3 py-2.5">
         <div className="flex items-center gap-2">
           <span
-            className={`w-6 h-6 rounded-md ${T.iconBg} flex items-center justify-center flex-shrink-0`}
+            className={`w-6 h-6 rounded-md ${T.iconBg} flex items-center justify-center flex-shrink-0 transition-transform ${
+              onClick ? "group-hover:scale-105" : ""
+            }`}
           >
             <Icon className={`w-3.5 h-3.5 ${T.iconText}`} />
           </span>
@@ -1268,7 +1322,7 @@ function SummaryStat({ tone, icon: Icon, label, value, user, project }: SummaryS
           )}
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 

@@ -17,6 +17,7 @@ Complete REST API and WebSocket documentation for Agent Dashboard.
   - [Pricing](#pricing)
   - [Workflows](#workflows)
   - [Settings](#settings)
+  - [Import History](#import-history)
   - [Notifications](#notifications)
   - [Remote Data Sources](#remote-data-sources)
 - [WebSocket API](#websocket-api)
@@ -1040,14 +1041,52 @@ Backup paths look like `<root>/cc-config-backups/<type>/<base>.<ISO>.bak[.dir]` 
 
 ### Codex Config Explorer
 
-The Codex half of Agent Config is deliberately read-only. It safely discovers configuration defaults, cached models, profiles, MCP servers, projects, skills, rules, hooks, plugins, and instruction files beneath the configured Codex home. Values with secret-like TOML or JSON keys are redacted server-side.
+The Codex half of Agent Config discovers configuration defaults, cached models, profiles, MCP servers, projects, skills, rules, hooks, installed plugins, and instruction files beneath the configured Codex home. Normal inspection is redacted server-side for secret-like TOML or JSON values. Installed plugins come from `codex plugin list`, then use manifest metadata for names and descriptions—cache directories are never reported as plugins.
 
 ```http
 GET /api/codex-config/overview
 GET /api/codex-config/file?path=<absolute-path-under-codex-home>
+GET /api/codex-config/edit-file?path=<allowlisted-configuration-path>
+PUT /api/codex-config/file
+Content-Type: application/json
+
+{ "path": "<allowlisted-configuration-path>", "content": "..." }
 ```
 
-The file endpoint also accepts this repository's `AGENTS.md`, rejects every other path, and caps returned bodies at 256 KiB. `codex_config_changed` is emitted over WebSocket when relevant configuration, skill, rule, or plugin files change.
+The normal file endpoint also accepts this repository's `AGENTS.md`, rejects every other path, and caps returned bodies at 256 KiB. The editor endpoint is stricter: only `config.toml`, `hooks.json`, user `*.rules`, user `skills/**/SKILL.md`, and the Codex or current-project `AGENTS.md` are editable. It returns unredacted local text so a user can edit without turning secret placeholders into real file contents. The dashboard does **not** validate TOML, JSON, hook, rule, skill, or instruction syntax. Every overwrite is capped at 256 KiB, takes a timestamped backup first, and is written atomically. `codex_config_changed` is emitted over WebSocket when relevant configuration, skill, rule, or plugin files change.
+
+### Import History
+
+The Import History endpoints accept a `provider` of `"claude"` (default) or
+`"codex"`. Claude Code reads project transcripts; Codex reads rollout JSONL
+through its live incremental ingestor, retaining token cursors, response-item
+tools, lifecycle events, and an optional native title from `session_index.jsonl`.
+External and browser-uploaded Codex files are copied into dashboard-owned
+storage before temporary extraction directories are removed.
+
+```http
+GET  /api/import/guide?provider=codex
+POST /api/import/rescan
+Content-Type: application/json
+
+{ "provider": "codex" }
+
+POST /api/import/scan-path
+Content-Type: application/json
+
+{ "path": "/absolute/path/to/codex-history", "provider": "codex" }
+
+POST /api/import/upload
+Content-Type: multipart/form-data
+
+files=@rollout-…jsonl&provider=codex
+```
+
+Every success response includes `{ ok, provider, source, imported, skipped,
+backfilled, errors }`; path scans also return the resolved `path` and scan
+counts. Provider-tagged `import.progress` WebSocket messages report live
+`start`, `scan`, `extract`, `parse`, `complete`, and `error` phases. Invalid
+providers return `400 INVALID_PROVIDER`.
 
 ### Run Agent
 

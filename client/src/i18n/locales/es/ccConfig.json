@@ -10,12 +10,12 @@
     },
     "codex": {
       "label": "Codex",
-      "subtitle": "Lee la configuración local de Codex, modelos, perfiles, servidores MCP, habilidades, ganchos y reglas."
+      "subtitle": "Administra la configuración local de Codex, modelos, perfiles, servidores MCP, habilidades, ganchos y reglas."
     }
   },
   "codex": {
     "title": "Configuración de Codex",
-    "readOnly": "Solo lectura; los secretos se ocultan antes de mostrarse.",
+    "description": "Ajustes, modelos, herramientas e instrucciones locales.",
     "home": "Directorio de Codex",
     "defaultModel": "Modelo",
     "defaultEffort": "Razonamiento",
@@ -24,7 +24,21 @@
     "disabled": "Deshabilitado",
     "envNames": "Nombres de variables de entorno",
     "empty": "Aún no hay nada configurado aquí.",
-    "viewFile": "Ver archivo",
+    "viewFile": "Ver",
+    "editFile": "Editar",
+    "editTitle": "Editar archivo de configuración",
+    "save": "Guardar cambios",
+    "saving": "Guardando…",
+    "cancel": "Cancelar",
+    "saved": "Guardado.",
+    "savedBackup": "Guardado. Se creó una copia de seguridad con marca de tiempo antes de actualizar.",
+    "syntaxWarning": "Codex lee este archivo directamente. El panel no puede validar la sintaxis de TOML, JSON, hooks, reglas, habilidades ni instrucciones; revisa cuidadosamente cada cambio antes de guardar. Primero se crea una copia de seguridad con marca de tiempo.",
+    "redactedPreview": "Los valores de la vista previa se ocultan cuando es necesario.",
+    "overviewTitle": "Resumen de configuración",
+    "hidden": "Oculto",
+    "noDescription": "No se proporcionó descripción.",
+    "scrollLeft": "Desplazar las pestañas de configuración a la izquierda",
+    "scrollRight": "Desplazar las pestañas de configuración a la derecha",
     "fileError": "No se pudo abrir el archivo de configuración",
     "tabs": {
       "overview": "Resumen",

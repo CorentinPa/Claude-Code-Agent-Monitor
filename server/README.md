@@ -611,12 +611,14 @@ Reads — and carefully gated mutations for low-risk text-file artifacts — for
 
 ### Codex Config Explorer (`/api/codex-config`)
 
-The Agent Config page also includes a **read-only Codex explorer**. It discovers only safe metadata under the configured Codex home: defaults, the model cache, profiles, MCP servers, projects, skills, rules, hooks, plugins, and instruction files. Secret-like TOML and JSON values are redacted before any response; no Codex files are mutated. `lib/codex-config-watcher.js` broadcasts `codex_config_changed` on relevant config, skill, rule, or plugin changes so the page refreshes immediately.
+The Agent Config page also includes a **Codex configuration workspace**. It discovers defaults, the model cache, profiles, MCP servers, projects, skills, rules, hooks, installed plugins, and instruction files. Plugin cards use `codex plugin list` as the source of truth and enrich those entries from their manifests; cache directories are never presented as plugins. Normal TOML and JSON previews redact secret-like values. A separate, unredacted local editor is limited to `config.toml`, `hooks.json`, user rule files, user `SKILL.md` files, and Codex/project `AGENTS.md`; it is explicitly necessary so a redacted preview cannot overwrite real secret values. Every allowed save is capped at 256 KiB, backed up first, and atomically renamed. The dashboard does not validate Codex syntax. `lib/codex-config-watcher.js` broadcasts `codex_config_changed` on relevant config, skill, rule, or plugin changes so the page refreshes immediately.
 
 | Method | Path | Description |
 | --- | --- | --- |
 | `GET` | `/api/codex-config/overview` | Redacted metadata for every Codex config surface used by Agent Config |
 | `GET` | `/api/codex-config/file?path=…` | Redacted, size-capped file view for a file under Codex home or this project's `AGENTS.md` |
+| `GET` | `/api/codex-config/edit-file?path=…` | Unredacted content only for the narrow editable-file allowlist |
+| `PUT` | `/api/codex-config/file` | Atomically save `{ path, content }` to an allowlisted Codex file; timestamped backup before overwrite |
 
 ### Run Agent (`/api/run`)
 
@@ -634,16 +636,17 @@ Provider-aware HTTP surface for spawning and supervising Claude Code processes a
 | `GET`    | `/api/run/:id`                | Handle state. `?envelopes=1` includes the in-memory envelope log for re-attach |
 | `DELETE` | `/api/run/:id`                | Stop (SIGTERM → SIGKILL after 5 s) |
 
-WebSocket message types added: `run_stream` (Claude stream-json envelopes or normalized Codex app-server events), `run_status` (status transitions), `run_input_ack` (follow-up accepted), `cc_config_changed`, and `codex_config_changed` (the read-only Codex explorer's filesystem refresh signal).
+WebSocket message types added: `run_stream` (Claude stream-json envelopes or normalized Codex app-server events), `run_status` (status transitions), `run_input_ack` (follow-up accepted), `cc_config_changed`, and `codex_config_changed` (the Codex workspace's filesystem/dashboard refresh signal).
 
 ### Import History
 
-Bring existing Claude Code sessions into the dashboard. All four entry
-points share the same JSONL parser (`parseSessionFile` +
-`importSession`) used by live ingestion, so imported tokens and cost
-calculations match real-time captured sessions exactly. Re-imports are
-idempotent (dedupe by session ID; compaction `baseline_*` columns
-prevent token double-counting).
+Import History is provider-aware. Claude Code continues through the shared
+`parseSessionFile` + `importSession` pipeline, while Codex rollouts use the
+same incremental ingestor as live monitoring. The selected `provider` chooses
+`~/.claude/projects` or `~/.codex/sessions`; Codex imports preserve token
+cursors, response-item tools, lifecycle state, and archived `/rename` titles.
+External Codex files are snapshotted before temporary upload/extraction paths
+are reclaimed, so session transcripts remain readable.
 
 Imported and live-scanned subagents also get their **nested hierarchy**
 rebuilt: rows are inserted flat under the main agent, then
@@ -656,16 +659,17 @@ rewrites `parent_agent_id`) and runs in `importSession` and the live
 
 | Method | Path                      | Description                                                              |
 | ------ | ------------------------- | ------------------------------------------------------------------------ |
-| `GET`  | `/api/import/guide`       | OS-aware paths, archive command, supported extensions, step instructions |
-| `POST` | `/api/import/rescan`      | Rescan the default `~/.claude/projects` directory                        |
-| `POST` | `/api/import/scan-path`   | Scan any absolute directory path (body: `{ path }`); walks recursively   |
-| `POST` | `/api/import/upload`      | Multipart upload of `.jsonl`, `.meta.json`, `.zip`, `.tar(.gz)`, `.gz`   |
+| `GET`  | `/api/import/guide`       | Provider-aware OS paths, archive command, extensions, and instructions (`?provider=claude\|codex`) |
+| `POST` | `/api/import/rescan`      | Rescan the selected default path (`{ provider }`)                        |
+| `POST` | `/api/import/scan-path`   | Scan any absolute directory with `{ path, provider }`; walks recursively |
+| `POST` | `/api/import/upload`      | Multipart upload with a `provider` field; Codex files are snapshotted    |
 
 **Source files**
 
 | File                           | Role                                                                                                   |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------ |
 | `server/routes/import.js`      | Express router, request validation, temp-dir lifecycle, progress broadcasts                            |
+| `server/lib/codex-import.js`   | Historical Codex rollout importer; snapshots external files and delegates parsing/accounting to `codex-ingest.js` |
 | `server/lib/archive.js`        | Safe archive extractors (`.zip` / `.tar(.gz)` / `.gz`) with path-traversal and size-cap enforcement    |
 | `scripts/import-history.js`    | Generalized directory walker (`importFromDirectory`) + shared `parseSessionFile` / `importSession`. Re-import is fully incremental: per-event-type high-water mark (`MAX(created_at) GROUP BY event_type` per session) drives `ts > cutoff[type]` dedup for Stop / PostToolUse / TurnDuration / ToolError, and `sessions.ended_at` is rolled forward when the JSONL has progressed past the stored value. After each batch imports, it calls `ingestWorkflowsForSession` (`server/lib/workflow-ingest.js`) per session — outside the SQLite transaction — so an offline/headless/CI/cluster **Workflow-tool** run (whose journal never reached a live server) has its inner agents linked to their `run_id` on a plain rescan / path import, not left orphaned (`workflow_run_id = NULL`) |
 | `server/lib/transcript-cache.js` | Chunked 4 MiB sync byte-stream reader for JSONL transcripts — never materializes the whole file as a JS string, so files larger than V8's max string length (~512 MiB on 64-bit Node 20) parse without aborting Node with `FATAL ERROR: v8::ToLocalChecked Empty MaybeLocal` |

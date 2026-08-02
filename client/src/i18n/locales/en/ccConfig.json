@@ -10,12 +10,12 @@
     },
     "codex": {
       "label": "Codex",
-      "subtitle": "Read your local Codex configuration, models, profiles, MCP servers, skills, hooks, and rules."
+      "subtitle": "Manage your local Codex configuration, models, profiles, MCP servers, skills, hooks, and rules."
     }
   },
   "codex": {
     "title": "Codex configuration",
-    "readOnly": "Read-only, with secrets redacted before display.",
+    "description": "Local settings, models, tools, and instructions.",
     "home": "Codex home",
     "defaultModel": "Model",
     "defaultEffort": "Reasoning",
@@ -24,7 +24,21 @@
     "disabled": "Disabled",
     "envNames": "Environment names",
     "empty": "Nothing configured here yet.",
-    "viewFile": "View file",
+    "viewFile": "View",
+    "editFile": "Edit",
+    "editTitle": "Edit configuration file",
+    "save": "Save changes",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "saved": "Saved.",
+    "savedBackup": "Saved. A timestamped backup was created before the update.",
+    "syntaxWarning": "Codex reads this file directly. The dashboard cannot validate TOML, JSON, hook, rule, skill, or instruction syntax—review every edit carefully before saving. A timestamped backup is created first.",
+    "redactedPreview": "Preview values are redacted where needed.",
+    "overviewTitle": "Configuration overview",
+    "hidden": "Hidden",
+    "noDescription": "No description provided.",
+    "scrollLeft": "Scroll configuration tabs left",
+    "scrollRight": "Scroll configuration tabs right",
     "fileError": "Unable to open configuration file",
     "tabs": {
       "overview": "Overview",

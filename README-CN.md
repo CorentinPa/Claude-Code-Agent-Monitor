@@ -232,7 +232,7 @@ flowchart LR
 <p align="center">
   <img src="images/config.png" alt="Agent 配置 — Claude Code 和 Codex 浏览器" width="100%">
   <br>
-  <em>🧰 <strong>Agent 配置</strong> — 在完整 Claude Code 浏览器和实时只读 Codex 浏览器之间切换，查看默认值、模型、配置文件、MCP、项目、技能、规则、Hook、插件和指令。Codex 密钥会脱敏，配置变更会实时刷新。</em>
+  <em>🧰 <strong>Agent 配置</strong> — 在完整 Claude Code 浏览器与实时 Codex 工作区之间切换，查看默认值、模型、配置文件、MCP、项目、技能、规则、Hook、插件和指令。Codex 预览会脱敏；用户维护的配置、Hook、规则、技能和指令可安全编辑并自动备份。</em>
 </p>
 
 <p align="center">
@@ -291,7 +291,7 @@ Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Ag
 | **分析** | Token 使用量、工具频率、活动热力图（居中显示、按周排列从周日开始、日期名称提示）、会话趋势、在线/离线连接指示器。加载时图表区域显示带**脉冲动画的骨架占位符**（不仅是顶部统计卡），数据到达后再渲染真实图表 |
 | **实时更新** | WebSocket 推送 — 无轮询，即时 UI 更新 |
 | **自动发现** | 会话和 Agent 从 Hook 事件中自动创建 |
-| **历史导入** | 启动时从 `~/.claude/` 导入会话。增强的 JSONL 提取：API 错误（配额/速率/无效请求）、回合耗时、入口点（cli/sdk-ts）、权限模式、思考块计数、用量附加信息（service_tier、speed、inference_geo）、工具结果错误，以及子 Agent JSONL 文件（`subagents/agent-*.jsonl` 含 `.meta.json`）。重新导入时回填已有会话。近期 JSONL 文件（< 10 分钟）以"活跃"状态导入 |
+| **历史导入** | 面向提供方的 Import History 可从 `~/.claude/` 导入 Claude Code 转录记录，并从 `~/.codex/sessions` 导入 Codex rollout JSONL。每个标签都有自己的默认路径、说明、文件夹扫描和上传流程；两者都复用实时摄取逻辑，保留正确的 Token/成本/工具统计并保持幂等。外部 Codex rollout 会快照到仪表板存储，因此归档或源文件夹删除后仍可查看会话。 |
 | **子 Agent 层级** | Dashboard 和会话详情页可折叠的父子 Agent 树。有子 Agent 的 Agent 显示展开/折叠箭头；叶子 Agent 显示圆点指示器。子 Agent 活跃时自动展开 |
 | **后台 Agent** | 正确追踪后台子 Agent，不会提前标记为完成 |
 | **子 Agent 工具归属** | 子 Agent 内部的工具调用(Read、Bash、Edit、Grep 等)只存在于每个子 Agent 自己的 JSONL 文件中 — Claude Code 不会为其触发任何 Hook。每次 `SubagentStop` 后,dashboard 触发 fire-and-forget 的 `scanAndImportSubagents`:解析每个 `subagents/agent-*.jsonl`,根据 `tool_use_id` 配对 `tool_use` 与 `tool_result` 块,并在子 Agent 自己的 `agent_id` 下发出 `PreToolUse` + `PostToolUse` 事件。具备幂等性(通过 `data LIKE '%"tool_use_id":"X"%'` 去重),并在按类型 + 启动时间在 30 秒内匹配到 hook 创建的 live 行时合并进去,因此不会创建并行的 `<sid>-jsonl-*` 行。同一路径在 `npm run setup` 启动导入时也会运行,实现完整的历史回填 — 早于 dashboard 安装的会话也能获得完整的每子 Agent 工具时间线。Activity Feed 和会话详情页将父链以 `main › coder › explorer` 形式渲染嵌套子 Agent。该父链由 `reconcileSubagentParents` 权威重建:子 Agent 行最初被平铺插入到 main agent 之下(单个 hook 事件或 JSONL 文件不携带 spawn 方身份),随后从每个子 Agent transcript 的 Task 工具结果(`toolUseResult.agentId`,以 `spawnedChildren` 形式采集)恢复其 spawn 方,因此自己再 spawn 子 Agent 的子 Agent 会嵌套到其**真正的** spawn 方之下,而不会塌陷为 main 之下的单一层级。该过程幂等且仅追加 — 只重新指向 `parent_agent_id`,不插入或删除行 — 并在同一次 `SubagentStop` 扫描中运行,该扫描返回 `reparented` 计数,因此即使仅是 reparent 改变了树形结构,dashboard 也会重新拉取 |
@@ -1139,12 +1139,15 @@ npm run monitoring:docker:up
 
 ### 导入历史（Import History）
 
-将已有的 Claude Code 会话从三种不同来源导入到仪表盘。三条路径都汇入
-服务器用于实时采集的同一套解析管线（`parseSessionFile` +
-`importSession`），因此导入后的 Token 数量、按模型计费、compactions、
-子 Agent、工具调用以及回合耗时与实时捕获的结果**完全一致**。重复导入
-是幂等的：会话以 UUID 去重，compaction `baseline_*` 列保留压缩前的
-Token 总量，所以多次运行导入也绝不会重复计算用量或成本。
+通过 **Settings → Import History** 中的提供方标签导入已有的
+**Claude Code** 或 **Codex** 历史。Claude Code 使用
+`~/.claude/projects` 的共享 JSONL 解析器；Codex 对
+`~/.codex/sessions` 使用与实时监控相同的追加式 rollout 摄取器，
+其中包含 Token 快照、response-item 工具、生命周期状态，以及提供
+`session_index.jsonl` 时的原生 `/rename` 标题。重复导入是幂等的：
+Claude 保留 compaction baseline，Codex 保留字节游标，因此两者都不会
+重复计算用量或成本。文件夹和浏览器上传的 Codex 历史会在临时文件清理
+之前复制到仪表板自有存储中。
 
 ```mermaid
 flowchart LR
@@ -1181,10 +1184,10 @@ flowchart LR
 
 | 方法   | 路径                    | 描述                                                             |
 | ------ | ----------------------- | ---------------------------------------------------------------- |
-| `GET`  | `/api/import/guide`     | 按操作系统返回路径、打包命令、支持扩展名与分步说明               |
-| `POST` | `/api/import/rescan`    | 重新扫描默认目录 `~/.claude/projects`                            |
-| `POST` | `/api/import/scan-path` | 扫描任意绝对路径的目录（body `{ path }`）；递归遍历子目录         |
-| `POST` | `/api/import/upload`    | 多部分上传 `.jsonl`、`.meta.json`、`.zip`、`.tar(.gz)`、`.gz`    |
+| `GET`  | `/api/import/guide`     | 按提供方返回路径、打包命令和说明（`?provider=claude\|codex`） |
+| `POST` | `/api/import/rescan`    | 重新扫描所选默认路径（`{ provider }`） |
+| `POST` | `/api/import/scan-path` | 使用 `{ path, provider }` 扫描任意绝对路径；递归遍历 |
+| `POST` | `/api/import/upload`    | 带 `provider` 字段的多部分上传；Codex 文件会被快照 |
 
 **支持的输入。** 独立的 `.jsonl` 会话转录、配套的 `.meta.json`
 元数据文件，以及包含任意嵌套目录结构的归档文件（`.zip`、`.tar`、
