@@ -478,6 +478,8 @@ The OpenAPI spec is generated from `server/openapi.js` (`createOpenApiSpec()`), 
 
 **Transcript stream** (`GET /api/sessions/:id/transcript`) returns `user` / `assistant` messages plus: synthetic `session_event` rename markers (from `custom-title`), local slash-command I/O surfaced from `system`/`local_command` lines (the `<command-name>` pill + `<local-command-stdout>`/`stderr` output, e.g. `/color`, `/rename`, custom commands), and **mid-turn queued user messages** surfaced from `attachment`/`queued_command` lines — a message typed while Claude was still working is journaled as `queue-operation` bookkeeping plus a `queued_command` attachment (never as a `user` line), so the attachment is rendered as a user message at the point the model actually received it. Codex sessions map their human turns, legacy `function_call` records, and primary `custom_tool_call` records (including `exec` source and paired output) into that same DTO, so the Conversation tab does not collapse into a wait-only stream. Codex `/rename` titles are read from the native `session_index.jsonl` and published as real-time `session_updated` frames even when no rollout byte changes. The queue is shared with harness injections, so queued lines are only attributed to the human when they aren't harness traffic: `<task-notification>`/`[SYSTEM NOTIFICATION` payloads and any non-`human` `origin.kind` render as `system` (harness notification attachments carry no `origin` field at all; typed messages carry `origin.kind = "human"`). Content-less `local_command` lines, other `system` subtypes, `queue-operation` lines, and every other attachment subtype are dropped.
 
+**Codex lifecycle and discovery.** A Codex hook may identify a rollout by path or by its session/thread id; the latter resolves against the configured rollout tree and is ingested immediately. The continuous synchronizer reads newest rollouts first, yields between bounded batches, and leaves a failed historical file eligible for retry so it cannot delay a fresh session. Rollout records are authoritative: `user_message` / `task_started` make the main agent `working`, `task_complete` keeps the session `active` while showing **Waiting** (`awaiting_reason = stop`), and `turn_aborted` shows interrupted **Waiting**. A later rollout turn reactivates a prematurely completed session; restart reconciliation repairs the latest persisted state and only changes a silent Codex `working` turn to interrupted Waiting after 90 seconds.
+
 ### Hook Ingestion
 
 | Method | Path               | Description                                    |
@@ -991,8 +993,9 @@ const DEFAULT_PRICING = [
 stateDiagram-v2
     [*] --> waiting: SessionStart startup/resume/clear (status=active + flag)
     active --> active: SessionStart compact (mid-turn — state preserved, no flag)
-    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse
-    active --> waiting: Stop (non-error, flag re-stamped)
+    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse / Codex task_started / user_message
+    active --> waiting: Stop (non-error) / Codex task_complete (flag re-stamped)
+    active --> waiting: Codex turn_aborted (interrupted)
     active --> waiting: Permission Notification (agent → waiting)
     active --> waiting: Esc cancel (watchdog marker or idle timeout)
     active --> error: Stop (stop_reason=error)
@@ -1019,9 +1022,10 @@ stateDiagram-v2
 ```mermaid
 stateDiagram-v2
     [*] --> waiting: ensureSession (first hook)
-    waiting --> working: PreToolUse / UserPromptSubmit
+    waiting --> working: PreToolUse / UserPromptSubmit / Codex task_started / user_message
     working --> working: PostToolUse (tool completed)
-    working --> waiting: Stop (non-error)
+    working --> waiting: Stop (non-error) / Codex task_complete
+    working --> waiting: Codex turn_aborted (interrupted)
     working --> waiting: Notification (input prompt)
     working --> waiting: Esc cancel (watchdog marker or idle timeout)
     waiting --> error: Stop with error
@@ -1178,15 +1182,15 @@ Both paths move the session to **Waiting** (main agent → `waiting`, `awaiting_
 
 ### Dead-Session Liveness Reap
 
-`SessionEnd` is the **only** signal that a session closed, and hooks are fire-and-forget — if the dashboard was down when the user quit (Ctrl+C, terminal closed), the event is lost forever and the session previously sat in **Waiting** until the stale sweep (3 h by default). The same 15 s watchdog now supplies the missing ground truth with a **process-liveness probe** (`server/lib/session-liveness.js`): it lists running `claude` CLI processes (`ps -Ao pid=,args=` + `lsof -d cwd` on macOS, `/proc/<pid>/cwd` on Linux) and completes any `active` session whose `cwd` has no live claude process — the same terminal state a real `SessionEnd` produces (agents → `completed`, `ended_at` stamped, `awaiting_input_since` and its paired `awaiting_reason` cleared to NULL together, a synthetic `SessionEnd` event with `data.source = "liveness-probe"`, broadcasts for live UI updates).
+`SessionEnd` is the **only** signal that a session closed, and hooks are fire-and-forget — if the dashboard was down when the user quit (Ctrl+C, terminal closed), the event is lost forever and the session previously sat in **Waiting** until the stale sweep (3 h by default). The same 15 s watchdog now supplies the missing ground truth with a **process-liveness probe** (`server/lib/session-liveness.js`): it lists matching running `claude` or `codex` CLI processes (`ps -Ao pid=,args=` + `lsof -d cwd` on macOS, `/proc/<pid>/cwd` on Linux) and completes an `active` local-provider session only when its matching CLI has no live process — the same terminal state a real `SessionEnd` produces (agents → `completed`, `ended_at` stamped, `awaiting_input_since` and its paired `awaiting_reason` cleared to NULL together, a synthetic `SessionEnd` event with `data.source = "liveness-probe"`, broadcasts for live UI updates).
 
 Fail-safe guards, in order:
 
 - The probe must be **trustworthy**: it reports "no answer" (and the reap changes nothing) on Windows, inside containers (host processes are invisible), when `ps`/`lsof` fail, or when explicitly disabled via `DASHBOARD_LIVENESS_PROBE=0` — the escape hatch for setups where hooks arrive from another machine, where local processes prove nothing.
 - The session must have a `cwd` to match on.
 - The `cwd` must be **POSIX-absolute** (`path.isAbsolute`). A session forwarded from another machine via household hooks reports the origin's own path syntax (e.g. a Windows `D:\Git\ai-deck`), which this host's `/proc`/`lsof` scan can never produce — so its absence from the probe is not a death signal. Such sessions are skipped (never reaped by this probe), while genuinely-local POSIX sessions are still reaped on real crashes. This keeps a **mixed** deployment (local *and* household-forwarded sessions on one instance) correct without sacrificing local crash detection via `DASHBOARD_LIVENESS_PROBE=0`.
-- **Remote Data Source sessions** (`sessions.source` ≠ `local`) are excluded outright — the reap query, the watchdog's transcript error/interrupt scan, the startup 1 h cleanup, and the periodic abandon sweep are all gated on `source = 'local' OR source IS NULL`. A remote session's `cwd` is legitimately POSIX-absolute on *another* machine (e.g. `/home/ubuntu/matroid`), so the POSIX-cwd guard above can't catch it, and this host's process probe / clock say nothing about a box reached over SSH. Their active/completed lifecycle is owned solely by `remote-sync.js`'s mirror reconciliation (see the Remote source sync section above). Without this guard a busy remote session was wrongly completed the moment no local `claude` matched its cwd.
-- On **watchdog ticks only** (both startup passes skip this gate — at boot the probe alone decides, so a session quit moments before launch clears immediately): the session's **transcript mtime** must be older than `DASHBOARD_LIVENESS_IDLE_SECONDS` (default `60`) — the transcript is the ground-truth activity clock (Claude Code appends to it every turn and it stops moving the instant the process dies); `updated_at` is only the fallback for sessions with no transcript on disk. Keying on `updated_at` would leave a freshly imported dead session in Waiting for a full extra gate period after every boot, since import/backfill passes bump it at startup. A mid-turn session with a mismatched cwd (e.g. `claude --resume` run from a different directory) keeps its transcript mtime fresh and is spared.
+- **Remote Data Source sessions** (`sessions.source` ≠ `local`) are excluded outright — the reap query, the watchdog's transcript error/interrupt scan, the startup 1 h cleanup, and the periodic abandon sweep are all gated on `source = 'local' OR source IS NULL`. A remote session's `cwd` is legitimately POSIX-absolute on *another* machine (e.g. `/home/ubuntu/matroid`), so the POSIX-cwd guard above can't catch it, and this host's process probe / clock say nothing about a box reached over SSH. Their active/completed lifecycle is owned solely by `remote-sync.js`'s mirror reconciliation (see the Remote source sync section above). Without this guard a busy remote session was wrongly completed the moment no local provider CLI matched its cwd.
+- On **watchdog ticks only** (both startup passes skip this gate — at boot the probe alone decides, so a session quit moments before launch clears immediately): the session's **transcript mtime** must be older than `DASHBOARD_LIVENESS_IDLE_SECONDS` (default `60`) — the transcript is the ground-truth activity clock (Claude Code and Codex append to it as their turns progress and it stops moving when the process dies); `updated_at` is only the fallback for sessions with no transcript on disk. Keying on `updated_at` would leave a freshly imported dead session in Waiting for a full extra gate period after every boot, since import/backfill passes bump it at startup. A mid-turn session with a mismatched cwd (e.g. `claude --resume` run from a different directory) keeps its transcript mtime fresh and is spared.
 - A false completion self-heals: the next hook event reactivates the session via the existing reactivation path.
 - Only `status = 'active'` rows are considered; `error` sessions keep their existing recovery paths.
 
@@ -1440,7 +1444,7 @@ DASHBOARD_DB_PATH=./data/dashboard.db  # SQLite database path
 DASHBOARD_SESSION_SYNC_MS=30000    # Continuous project-sync poll interval (ms); 0 disables the poll (watcher stays)
 DASHBOARD_CODEX_HOME=              # Optional Codex home; Settings saves this dashboard-only override and immediately re-arms live watching
 DASHBOARD_CODEX_SYNC_MS=4000       # Codex rollout safety-net poll (ms); 0 disables poll (watcher stays)
-DASHBOARD_LIVENESS_PROBE=1         # 0 disables the dead-session liveness reap (use when hooks arrive from another machine)
+DASHBOARD_LIVENESS_PROBE=1         # 0 disables the local Claude Code/Codex dead-session liveness reap (use when hooks arrive from another machine)
 DASHBOARD_LIVENESS_IDLE_SECONDS=60 # Idle gate before the liveness reap may complete a process-less session
 
 # Remote Data Sources (SSH pull; see the Remote Data Sources section)

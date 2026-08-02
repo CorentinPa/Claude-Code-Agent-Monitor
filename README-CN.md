@@ -351,7 +351,9 @@ npm run install-hooks
 
 首次进入仪表板时，请选择数据来源，应用会打开与所选提供方对应的实时监控设置引导。您可在其中直接安装所选 Hook，查看覆盖警告和命令输出；如果已经安装，也可明确确认后进入仪表板。
 
-`~/.codex/sessions` 中的 Codex rollout 也会持续被发现。Dashboard 会增量读取其仅追加 JSONL，因此即使漏掉某个 Hook 通知，会话、Token、成本、会话记录和 WebSocket 更新仍会保持最新。
+`~/.codex/sessions` 中的 Codex rollout 也会持续被发现。Dashboard 会增量读取其仅追加 JSONL，优先处理最新 rollout，并将损坏的历史文件隔离后重试，因此即使漏掉某个 Hook 通知，会话、Token、成本、会话记录和 WebSocket 更新仍会保持最新。
+
+Codex rollout 生命周期记录驱动与 Claude Code 相同的实时卡片状态：`user_message` 和 `task_started` 将主 Agent 标记为**工作中**；`task_complete` 会保持会话 active，但显示为**等待中**；`turn_aborted` 会显示带有中断原因的**等待中**。新的 rollout 记录会自行修复被错误标为 completed 的会话，而进程存活回收仅在匹配的本地 Codex CLI 已退出后才完成该会话。
 
 Codex 的 `/rename` 标题会从原生会话索引读取，并实时更新会话和 agent 卡片。对话回放包含用户回合以及 `exec` 自定义工具调用和输出，并通过 cursor 分页在 transcript 顶部加载更早的消息。
 
@@ -539,9 +541,10 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
     [*] --> waiting: ensureSession(首个 hook)
-    waiting --> working: PreToolUse / UserPromptSubmit
+    waiting --> working: PreToolUse / UserPromptSubmit / Codex task_started / user_message
     working --> working: PostToolUse(工具完成)
-    working --> waiting: Stop，非错误
+    working --> waiting: Stop，非错误 / Codex task_complete
+    working --> waiting: Codex turn_aborted（中断）
     working --> waiting: Notification（输入提示）
     working --> waiting: Esc 取消（看门狗：标记或空闲超时）
     waiting --> error: Stop 有错误
@@ -567,8 +570,9 @@ stateDiagram-v2
 stateDiagram-v2
     [*] --> waiting: SessionStart startup/resume/clear(status=active + 标志)
     active --> active: SessionStart compact(回合中 — 保留状态,无标志)
-    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse
-    active --> waiting: Stop，非错误（标志重新盖上）
+    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse / Codex task_started / user_message
+    active --> waiting: Stop，非错误 / Codex task_complete（标志重新盖上）
+    active --> waiting: Codex turn_aborted（中断）
     active --> waiting: 权限 Notification（Agent → waiting）
     active --> waiting: Esc 取消（看门狗：标记或空闲超时）
     active --> error: Stop, stop_reason=error
@@ -616,7 +620,7 @@ flowchart LR
 | `CLAUDE_DASHBOARD_PORT` | `4820` | Hook Handler 连接服务器使用的端口 |
 | `DASHBOARD_STALE_MINUTES` | `180`（3 小时） | 一个仍为 `active` 的会话（包括正在**等待中**用户输入的会话——"等待中"是 `active` 行上的 UI 覆盖层,而非存储状态）在被自动标记为 **abandoned** 并从活跃列表中移除之前的无活动分钟数。由 15 秒看门狗和周期性维护清理（每 ¼ 该值运行一次,夹在 60 秒–5 分钟之间）执行。调低（例如 `60`）可获得更短的空闲超时 |
 | `DASHBOARD_WORKING_IDLE_SECONDS` | `120` | 用于恢复**在任何输出之前**以 `Esc` 取消（不会留下 Transcript 标记）回合的空闲工作超时。当主 Agent 处于 `working`、没有进行中的工具，且在此时长内既无 Hook 事件也无 Transcript 推进时，看门狗将会话转入**等待中**。调低可获得更迅捷的恢复，但代价是长时间静默思考的回合上偶尔出现误判（会自愈） |
-| `DASHBOARD_LIVENESS_PROBE` | `1`（开启） | 设为 `0` 可禁用看门狗的**死亡会话存活性回收**（基于 `ps`/`lsof` 的探测，将 `claude` 进程已不存在的 `active` 会话标记为完成——恢复仪表盘停机期间丢失的 `SessionEnd`）。从**另一台机器**（家庭 Hook）转发来的会话会报告非 POSIX 的 `cwd`，会被回收自动跳过，因此混合的本地 + 转发部署不再需要关闭此项；仅在纯远程部署（本地进程无法证明任何事情）时才禁用它。在 Windows 和容器内自动禁用 |
+| `DASHBOARD_LIVENESS_PROBE` | `1`（开启） | 设为 `0` 可禁用看门狗的**死亡会话存活性回收**（基于 `ps`/`lsof` 的探测，将匹配的本地 Claude Code 或 Codex CLI 进程已不存在的 `active` 会话标记为完成——恢复仪表盘停机期间丢失的 `SessionEnd`）。从**另一台机器**（家庭 Hook）转发来的会话会报告非 POSIX 的 `cwd`，会被回收自动跳过，因此混合的本地 + 转发部署不再需要关闭此项；仅在纯远程部署（本地进程无法证明任何事情）时才禁用它。在 Windows 和容器内自动禁用 |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | **看门狗节拍**存活性回收的空闲门槛：只有当会话的 Transcript 至少有这么长时间未被写入时（磁盘上没有 Transcript 时以最后一次 Hook 写入为后备时钟），才会将其标记为完成，因此回合中或刚 resume 的会话绝不会因一次瞬时的探测偏差而消失。启动时的回收跳过该门槛——boot 时由探测单独决定，因此启动前一刻退出的会话会立即清除 |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | 持续 `~/.claude/projects` 后台同步的轮询间隔（毫秒），用于显示启动后才加入、其会话从不经过 Hook 流入的项目。无论如何 `fs.watch` 监听器都会近乎即时触发；该轮询是安全兜底（监听器可能错过事件 / 在网络文件系统上不触发）。设为 `0` 可禁用轮询，同时让监听器保持运行 |
 | `DASHBOARD_CODEX_HOME` | `CODEX_HOME` 或 `~/.codex` | 可选的本地 Codex 状态目录。在设置中保存新位置会持久化此仪表盘专用覆盖、重新启用实时监视，并立即扫描新的 `sessions/` 树。 |

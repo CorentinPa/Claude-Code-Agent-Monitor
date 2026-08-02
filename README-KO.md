@@ -349,7 +349,9 @@ npm run install-hooks
 
 대시보드를 처음 열면 데이터 제공자를 선택한 뒤 제공자별 실시간 모니터링 설정 화면이 열립니다. 여기에서 덮어쓰기 경고와 명령 출력을 확인하며 선택한 Hook을 설치하거나, 이미 설치했다는 사실을 명시적으로 확인한 뒤 대시보드로 이동할 수 있습니다.
 
-`~/.codex/sessions`의 Codex rollout도 지속적으로 검색됩니다. 대시보드는 append-only JSONL을 증분으로 읽으므로 Hook 알림 하나를 놓쳐도 세션, 토큰, 비용, 대화 행, WebSocket 업데이트가 최신 상태로 유지됩니다.
+`~/.codex/sessions`의 Codex rollout도 지속적으로 검색됩니다. 대시보드는 append-only JSONL을 증분으로 읽고 최신 rollout을 우선 처리하며 손상된 과거 파일은 따로 재시도하므로 Hook 알림 하나를 놓쳐도 세션, 토큰, 비용, 대화 행, WebSocket 업데이트가 최신 상태로 유지됩니다.
+
+Codex rollout 수명 주기 레코드는 Claude Code와 같은 실시간 카드 상태를 구동합니다. `user_message`와 `task_started`는 메인 에이전트를 **작업 중**으로 표시하고, `task_complete`는 세션을 active로 유지한 채 **대기 중**으로 표시하며, `turn_aborted`는 중단 사유와 함께 **대기 중**으로 표시합니다. 새 rollout 레코드는 잘못 completed 처리된 세션을 자동 복구하고, 프로세스 활성 상태 회수는 일치하는 로컬 Codex CLI가 사라진 뒤에만 세션을 완료합니다.
 
 Codex의 `/rename` 제목은 네이티브 세션 인덱스에서 읽어 세션과 agent 카드에 실시간으로 반영됩니다. 대화 재생에는 사용자 턴과 `exec` custom-tool 호출 및 출력이 포함되며, cursor 페이지네이션으로 transcript 상단에서 이전 메시지를 불러옵니다.
 
@@ -535,9 +537,10 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
     [*] --> waiting: ensureSession (first hook)
-    waiting --> working: PreToolUse / UserPromptSubmit
+    waiting --> working: PreToolUse / UserPromptSubmit / Codex task_started / user_message
     working --> working: PostToolUse (tool completed)
-    working --> waiting: Stop, non-error
+    working --> waiting: Stop, non-error / Codex task_complete
+    working --> waiting: Codex turn_aborted (interrupted)
     working --> waiting: Notification (input prompt)
     working --> waiting: Esc cancel (watchdog marker or idle timeout)
     waiting --> error: Stop with error
@@ -564,8 +567,9 @@ stateDiagram-v2
 stateDiagram-v2
     [*] --> waiting: SessionStart startup/resume/clear (status=active + flag)
     active --> active: SessionStart compact (턴 도중 — 상태 유지, 플래그 없음)
-    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse
-    active --> waiting: Stop, non-error (flag re-stamped)
+    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse / Codex task_started / user_message
+    active --> waiting: Stop, non-error / Codex task_complete (flag re-stamped)
+    active --> waiting: Codex turn_aborted (interrupted)
     active --> waiting: Permission Notification (agent → waiting)
     active --> waiting: Esc cancel (watchdog marker or idle timeout)
     active --> error: Stop, stop_reason=error
@@ -616,7 +620,7 @@ flowchart LR
 | `DASHBOARD_UPDATE_CHECK_INTERVAL_MS` | `300000` (5분) | 자동 확인 사이의 간격; 하한 60 000 ms. 사용자는 업데이트 모달이나 사이드바에서 **지금 확인**을 클릭하여 온디맨드로 한 번 실행할 수도 있습니다. |
 | `DASHBOARD_STALE_MINUTES` | `180` (3시간) | 여전히 `active`인 세션(사용자 입력을 기다리며 **Waiting**에 앉아 있는 세션 포함 — "Waiting"은 저장된 상태가 아니라 `active` 행 위의 UI 오버레이)이 자동으로 **abandoned**로 표시되어 활성 목록에서 빠지기까지의 비활동 시간(분). 15초 워치독과 주기적 유지 관리 스윕(이 값의 ¼마다 실행되며 60초 – 5분으로 제한)에 의해 적용됩니다. 더 짧은 유휴 타임아웃을 원하면 낮추십시오(예: `60`) |
 | `DASHBOARD_WORKING_IDLE_SECONDS` | `120` | **어떤 출력도 나오기 전에** `Esc`로 취소된 턴(트랜스크립트 마커를 남기지 않음)을 복구하기 위한 유휴 working 타임아웃. 메인 에이전트가 진행 중인 도구 없이 `working` 상태이고 Hook 이벤트도 트랜스크립트도 이 시간 동안 진전이 없으면, 워치독이 세션을 **Waiting**으로 이동시킵니다. 더 빠른 복구를 원하면 낮추십시오. 다만 긴 무음 사고 턴에서 간혹 잘못된 전환이 발생할 수 있습니다(자가 복구됨) |
-| `DASHBOARD_LIVENESS_PROBE` | `1` (켜짐) | 워치독의 **죽은 세션 활성 상태 회수**(`claude` 프로세스가 더 이상 존재하지 않는 `active` 세션을 완료 처리하는 `ps`/`lsof` 기반 프로브 — 대시보드가 꺼져 있는 동안 유실된 `SessionEnd`를 복구)를 비활성화하려면 `0`으로 설정. **다른 머신**(household Hook)에서 전달된 세션은 비-POSIX `cwd`를 보고하여 회수가 자동으로 건너뛰므로, 혼합 로컬 + 전달 배포에서는 더 이상 이것을 끌 필요가 없습니다; 로컬 프로세스가 아무것도 증명하지 못하는 순수 원격 설정에서만 비활성화하십시오. Windows 및 컨테이너 내부에서는 자동으로 비활성화됩니다 |
+| `DASHBOARD_LIVENESS_PROBE` | `1` (켜짐) | 워치독의 **죽은 세션 활성 상태 회수**(일치하는 로컬 Claude Code 또는 Codex CLI 프로세스가 더 이상 존재하지 않는 `active` 세션을 완료 처리하는 `ps`/`lsof` 기반 프로브 — 대시보드가 꺼져 있는 동안 유실된 `SessionEnd`를 복구)를 비활성화하려면 `0`으로 설정. **다른 머신**(household Hook)에서 전달된 세션은 비-POSIX `cwd`를 보고하여 회수가 자동으로 건너뛰므로, 혼합 로컬 + 전달 배포에서는 더 이상 이것을 끌 필요가 없습니다; 로컬 프로세스가 아무것도 증명하지 못하는 순수 원격 설정에서만 비활성화하십시오. Windows 및 컨테이너 내부에서는 자동으로 비활성화됩니다 |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | **워치독 틱** 활성 상태 회수를 위한 유휴 게이트: 세션의 트랜스크립트가 최소 이 시간 동안 기록되지 않았을 때에만 완료 처리되므로(디스크에 트랜스크립트가 없을 때는 마지막 Hook 기록이 폴백 시계), 턴 진행 중이거나 방금 재개된 세션이 일시적인 프로브 실패로 깜빡이며 사라지는 일이 없습니다. 시작 패스는 이 게이트를 무시합니다 — 부팅 시에는 프로브 단독으로 결정하므로, 실행 직전에 종료된 세션은 즉시 정리됩니다 |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | 시작 후 추가되어 세션이 Hook을 통해 흐르지 않는 프로젝트를 표면화하는 지속적 `~/.claude/projects` 백그라운드 동기화의 폴링 간격(ms). `fs.watch` 워처는 이와 무관하게 거의 즉시 발동합니다; 이 폴링은 안전망입니다(워처는 이벤트를 놓치거나 네트워크 파일시스템에서 발동하지 않을 수 있음). 워처는 계속 실행하면서 폴링만 비활성화하려면 `0`으로 설정하십시오 |
 | `DASHBOARD_CODEX_HOME` | `CODEX_HOME` 또는 `~/.codex` | 선택적 로컬 Codex 상태 디렉터리입니다. 설정에서 새 위치를 저장하면 이 대시보드 전용 재정의를 유지하고 실시간 감시를 다시 시작하며 새 `sessions/` 트리를 즉시 스캔합니다. |

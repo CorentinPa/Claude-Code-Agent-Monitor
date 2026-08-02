@@ -351,7 +351,9 @@ The installer opens an interactive multi-select: use arrow keys, <kbd>Space</kbd
 
 On first dashboard entry, choose the data source and the app opens a provider-aware live-monitoring setup gate. It can install the selected hooks in place with overwrite warnings and command output, or you can explicitly confirm they are already installed before entering the dashboard.
 
-Codex rollouts in `~/.codex/sessions` are also discovered continuously. The dashboard reads their append-only JSONL incrementally, so sessions, tokens, costs, conversation rows, and WebSocket updates stay current even if a hook notification is missed.
+Codex rollouts in `~/.codex/sessions` are also discovered continuously. The dashboard reads their append-only JSONL incrementally, prioritizes the newest rollouts, and isolates a bad historical file for retry, so sessions, tokens, costs, conversation rows, and WebSocket updates stay current even if a hook notification is missed.
+
+Codex rollout lifecycle records drive the same live card states as Claude Code: `user_message` and `task_started` mark the main agent **Working**; `task_complete` leaves the session active but shows **Waiting**; and `turn_aborted` shows **Waiting** with an interrupted reason. A new rollout record self-heals an erroneously completed session, while the process-liveness reap only completes a local Codex session after its matching CLI has gone away.
 
 Codex `/rename` titles are read from its native session index and update session and agent cards in real time. Its conversation replay includes human turns plus `exec` custom-tool calls and outputs, with cursor pagination that loads older messages at the top of the transcript.
 
@@ -540,9 +542,10 @@ real persisted status.
 ```mermaid
 stateDiagram-v2
     [*] --> waiting: ensureSession (first hook)
-    waiting --> working: PreToolUse / UserPromptSubmit
+    waiting --> working: PreToolUse / UserPromptSubmit / Codex task_started / user_message
     working --> working: PostToolUse (tool completed)
-    working --> waiting: Stop, non-error
+    working --> waiting: Stop, non-error / Codex task_complete
+    working --> waiting: Codex turn_aborted (interrupted)
     working --> waiting: Notification (input prompt)
     working --> waiting: Esc cancel (watchdog marker or idle timeout)
     waiting --> error: Stop with error
@@ -569,8 +572,9 @@ Persisted statuses: `active | completed | error | abandoned`. The
 stateDiagram-v2
     [*] --> waiting: SessionStart startup/resume/clear (status=active + flag)
     active --> active: SessionStart compact (mid-turn — state preserved, no flag)
-    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse
-    active --> waiting: Stop, non-error (flag re-stamped)
+    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse / Codex task_started / user_message
+    active --> waiting: Stop, non-error / Codex task_complete (flag re-stamped)
+    active --> waiting: Codex turn_aborted (interrupted)
     active --> waiting: Permission Notification (agent → waiting)
     active --> waiting: Esc cancel (watchdog marker or idle timeout)
     active --> error: Stop, stop_reason=error
@@ -621,7 +625,7 @@ flowchart LR
 | `DASHBOARD_UPDATE_CHECK_INTERVAL_MS` | `300000` (5 min) | Interval between automatic checks; floor 60 000 ms. Users can also click **Check now** in the update modal or in the sidebar to run one on demand. |
 | `DASHBOARD_STALE_MINUTES` | `180` (3 h) | Minutes of inactivity before a still-`active` session (including one sitting in **Waiting** on user input — "Waiting" is a UI overlay on an `active` row, not a stored status) is auto-marked **abandoned** and drops off the active list. Enforced by the 15 s watchdog and the periodic maintenance sweep (which runs every ¼ of this value, clamped to 60 s – 5 min). Lower it (e.g. `60`) for a shorter idle timeout |
 | `DASHBOARD_WORKING_IDLE_SECONDS` | `120` | Idle-working timeout for recovering a turn cancelled with `Esc` **before any output** (which leaves no transcript marker). When the main agent has been `working` with no tool in flight and neither a hook event nor the transcript has advanced for this long, the watchdog moves the session to **Waiting**. Lower it for snappier recovery at the cost of occasional false flips on long silent-thinking turns (which self-heal) |
-| `DASHBOARD_LIVENESS_PROBE` | `1` (on) | Set to `0` to disable the watchdog's **dead-session liveness reap** (the `ps`/`lsof`-based probe that completes `active` sessions whose `claude` process no longer exists — recovering a `SessionEnd` lost while the dashboard was down). Sessions forwarded from **another machine** (household hooks) report a non-POSIX `cwd` and are auto-skipped by the reap, so a mixed local + forwarded deployment no longer needs this off; disable it only for a purely-remote setup where local processes prove nothing. Auto-disabled on Windows and inside containers |
+| `DASHBOARD_LIVENESS_PROBE` | `1` (on) | Set to `0` to disable the watchdog's **dead-session liveness reap** (the `ps`/`lsof`-based probe that completes `active` local Claude Code or Codex sessions whose matching CLI process no longer exists — recovering a `SessionEnd` lost while the dashboard was down). Sessions forwarded from **another machine** (household hooks) report a non-POSIX `cwd` and are auto-skipped by the reap, so a mixed local + forwarded deployment no longer needs this off; disable it only for a purely-remote setup where local processes prove nothing. Auto-disabled on Windows and inside containers |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | Idle gate for the **watchdog-tick** liveness reap: a session is only completed when its transcript hasn't been written for at least this long (the last hook write is the fallback clock when no transcript exists on disk), so a mid-turn or just-resumed session never flickers out on a transient probe miss. The startup passes ignore this gate — at boot the probe alone decides, so sessions quit moments before launch clear immediately |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | Poll interval (ms) for the continuous `~/.claude/projects` background sync that surfaces projects added after startup whose sessions never flow through hooks. The `fs.watch` watcher fires near-instantly regardless; this poll is the safety net (watchers can miss events / not fire on network filesystems). Set to `0` to disable the poll while leaving the watcher running |
 | `DASHBOARD_CODEX_HOME` | `CODEX_HOME` or `~/.codex` | Optional local Codex state directory. Rollouts are read only from its `sessions/` tree; saving a new location in Settings persists this dashboard-only override, re-arms live watching, and immediately scans the new tree. |

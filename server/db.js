@@ -1346,6 +1346,14 @@ const stmts = {
   listEventsBySession: db.prepare(
     "SELECT * FROM events WHERE session_id = ? ORDER BY created_at DESC, id DESC"
   ),
+  // Codex rollout lifecycle reconciliation reads only the terminal/current
+  // turn markers, never the high-volume tool/result records.
+  getLatestCodexLifecycleEvent: db.prepare(
+    `SELECT event_type FROM events
+     WHERE session_id = ? AND event_type IN ('codex_task_complete', 'codex_turn_aborted',
+       'codex_task_started', 'codex_user_message')
+     ORDER BY id DESC LIMIT 1`
+  ),
   countEvents: db.prepare("SELECT COUNT(*) as count FROM events"),
   countEventsSince: db.prepare("SELECT COUNT(*) as count FROM events WHERE created_at >= ?"),
   // Accepts tz modifier (e.g. '-420 minutes') to compute local midnight in UTC.

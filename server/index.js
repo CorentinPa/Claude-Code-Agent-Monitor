@@ -321,7 +321,9 @@ function startBackgroundServices() {
   {
     const bootReap = (label) => {
       try {
-        require("./routes/hooks").livenessReap({ ignoreIdleGate: true });
+        const { livenessReap } = require("./routes/hooks");
+        livenessReap({ ignoreIdleGate: true });
+        livenessReap({ ignoreIdleGate: true, provider: "codex" });
       } catch (err) {
         console.warn(`${label} liveness reap failed:`, err?.message || err);
       }
@@ -528,6 +530,8 @@ function startWorkflowPoll(broadcast) {
  * plus a small safety-net poll. Codex hooks call the same incremental ingestor,
  * so repeated notifications are harmless: its durable byte cursor means an
  * unchanged file performs no token/event writes and emits no websocket frames.
+ * Fresh files are prioritized and the sweep yields cooperatively, which keeps
+ * a large historical rollout tree from delaying an active session's first card.
  */
 function startCodexSessionSync(broadcast) {
   const fs = require("fs");
@@ -535,6 +539,7 @@ function startCodexSessionSync(broadcast) {
   const {
     findCodexTranscripts,
     ingestCodexTranscript,
+    reconcileCodexSessionLiveness,
     refreshCodexSessionTitles,
   } = require("./lib/codex-ingest");
   const fingerprints = new Map();
@@ -552,7 +557,7 @@ function startCodexSessionSync(broadcast) {
     for (const event of result.events || []) broadcast("new_event", event);
   }
 
-  function runSweep() {
+  async function runSweep() {
     if (running) {
       queued = true;
       return;
@@ -569,7 +574,9 @@ function startCodexSessionSync(broadcast) {
       // rollout line. Refresh those titles before evaluating transcript bytes
       // so cards change in real time even for an otherwise idle session.
       for (const result of refreshCodexSessionTitles()) publish(result);
-      for (const transcriptPath of findCodexTranscripts(sessionsDir)) {
+      const transcripts = findCodexTranscripts(sessionsDir);
+      for (let index = 0; index < transcripts.length; index++) {
+        const transcriptPath = transcripts[index];
         let stat;
         try {
           stat = fs.statSync(transcriptPath);
@@ -578,28 +585,45 @@ function startCodexSessionSync(broadcast) {
         }
         const fingerprint = `${stat.size}:${stat.mtimeMs}`;
         if (fingerprints.get(transcriptPath) === fingerprint) continue;
-        fingerprints.set(transcriptPath, fingerprint);
-        publish(ingestCodexTranscript(transcriptPath));
+        try {
+          // Only retain a successful fingerprint. A temporarily unreadable or
+          // malformed rollout must retry on the next sweep rather than being
+          // silently skipped until another byte happens to arrive.
+          publish(ingestCodexTranscript(transcriptPath));
+          fingerprints.set(transcriptPath, fingerprint);
+        } catch (err) {
+          console.warn(
+            `[CODEX SYNC] Failed to ingest ${path.basename(transcriptPath)}:`,
+            err.message
+          );
+        }
+        // Cold history can contain hundreds of large JSONL files. Yielding in
+        // modest batches lets fs.watch/hook callbacks and WebSocket delivery
+        // run between imports while preserving the single-sweep cursor guard.
+        if (index > 0 && index % 12 === 0) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
       }
+      for (const result of reconcileCodexSessionLiveness()) publish(result);
     } catch {
       // Codex is optional; an unreadable/missing home must not affect startup.
     } finally {
       running = false;
       if (queued) {
         queued = false;
-        setImmediate(runSweep);
+        setImmediate(() => void runSweep());
       }
     }
   }
 
-  const initial = setTimeout(runSweep, 300);
+  const initial = setTimeout(() => void runSweep(), 300);
   if (initial.unref) initial.unref();
 
   const pollMs = process.env.DASHBOARD_CODEX_SYNC_MS
     ? Number(process.env.DASHBOARD_CODEX_SYNC_MS)
     : 4_000;
   if (Number.isFinite(pollMs) && pollMs > 0) {
-    const timer = setInterval(runSweep, pollMs);
+    const timer = setInterval(() => void runSweep(), pollMs);
     if (timer.unref) timer.unref();
   }
 
@@ -608,7 +632,7 @@ function startCodexSessionSync(broadcast) {
     if (debounce) return;
     debounce = setTimeout(() => {
       debounce = null;
-      runSweep();
+      void runSweep();
     }, 150);
     if (debounce.unref) debounce.unref();
   };
@@ -687,7 +711,7 @@ function startCodexSessionSync(broadcast) {
     fingerprints.clear();
     watchSessionsDir();
     watchCodexHome();
-    setImmediate(runSweep);
+    setImmediate(() => void runSweep());
   });
 }
 

@@ -1,6 +1,7 @@
 /**
  * @file Verifies incremental Codex rollout ingestion: session metadata, token
- * deltas, context bands, duplicate safety, and lifecycle hook finalization.
+ * deltas, context bands, duplicate safety, and transcript-driven card
+ * lifecycle transitions.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -15,9 +16,12 @@ process.env.DASHBOARD_DB_PATH = path.join(TMP, "dashboard.db");
 process.env.DASHBOARD_CODEX_HOME = path.join(TMP, "codex");
 
 const { db, stmts } = require("../db");
+const hooksRouter = require("../routes/hooks");
 const {
+  findCodexTranscriptForSession,
   ingestCodexHook,
   ingestCodexTranscript,
+  reconcileCodexSessionLiveness,
   refreshCodexSessionTitles,
 } = require("../lib/codex-ingest");
 
@@ -89,6 +93,13 @@ describe("Codex rollout ingestor", () => {
     assert.equal(first.session.provider, "codex");
     assert.equal(first.session.transcript_path, ROLLOUT);
     assert.equal(first.session.name, "Track my Codex session");
+    assert.equal(stmts.getAgent.get(`codex:${SESSION_ID}`).status, "working");
+    assert.equal(findCodexTranscriptForSession(SESSION_ID), ROLLOUT);
+    assert.equal(
+      hooksRouter.codexTranscriptPath({ thread_id: SESSION_ID }),
+      ROLLOUT,
+      "a hook can resolve a thread id even when its payload omits transcript_path"
+    );
 
     const long = stmts.getTokensBySession
       .all(SESSION_ID)
@@ -122,11 +133,76 @@ describe("Codex rollout ingestor", () => {
     assert.equal(short.output_tokens, 20);
   });
 
+  it("maps task completion, resumed work, and interrupted work to Claude-equivalent card states", () => {
+    append(record("event_msg", { type: "task_complete" }));
+    ingestCodexTranscript(ROLLOUT);
+    let session = stmts.getSession.get(SESSION_ID);
+    let agent = stmts.getAgent.get(`codex:${SESSION_ID}`);
+    assert.equal(session.status, "active", "a finished turn keeps the session resumable");
+    assert.equal(session.awaiting_reason, "stop");
+    assert.equal(agent.status, "waiting");
+    assert.equal(agent.awaiting_reason, "stop");
+
+    append(record("event_msg", { type: "user_message", message: "Continue the session" }));
+    append(record("event_msg", { type: "task_started" }));
+    ingestCodexTranscript(ROLLOUT);
+    session = stmts.getSession.get(SESSION_ID);
+    agent = stmts.getAgent.get(`codex:${SESSION_ID}`);
+    assert.equal(session.awaiting_input_since, null);
+    assert.equal(agent.status, "working");
+    assert.equal(agent.awaiting_input_since, null);
+
+    append(record("event_msg", { type: "turn_aborted" }));
+    ingestCodexTranscript(ROLLOUT);
+    session = stmts.getSession.get(SESSION_ID);
+    agent = stmts.getAgent.get(`codex:${SESSION_ID}`);
+    assert.equal(session.status, "active");
+    assert.equal(session.awaiting_reason, "interrupted");
+    assert.equal(agent.status, "waiting");
+    assert.equal(agent.awaiting_reason, "interrupted");
+
+    // Simulate a dashboard restart from a pre-fix cursor: the terminal event
+    // is already recorded, but its old card state lacks awaiting markers.
+    stmts.clearSessionAwaitingInput.run(SESSION_ID);
+    stmts.clearAgentAwaitingInput.run(`codex:${SESSION_ID}`);
+    stmts.updateAgent.run(null, "working", null, null, null, null, `codex:${SESSION_ID}`);
+    const repaired = reconcileCodexSessionLiveness();
+    assert.equal(repaired.length, 1);
+    assert.equal(stmts.getSession.get(SESSION_ID).awaiting_reason, "interrupted");
+    assert.equal(stmts.getAgent.get(`codex:${SESSION_ID}`).status, "waiting");
+
+    // A silent working turn has no completed-turn record to reconcile. The
+    // short test threshold models the production 90-second conservative
+    // fallback and ensures cards cannot remain Active forever after Codex
+    // stops writing.
+    append(record("event_msg", { type: "task_started" }));
+    ingestCodexTranscript(ROLLOUT);
+    const staleAt = new Date(Date.now() - 1_000);
+    db.prepare("UPDATE sessions SET updated_at = ? WHERE id = ?").run(
+      staleAt.toISOString(),
+      SESSION_ID
+    );
+    fs.utimesSync(ROLLOUT, staleAt, staleAt);
+    const idleRepaired = reconcileCodexSessionLiveness({ workingIdleMs: 1 });
+    assert.equal(idleRepaired.length, 1);
+    assert.equal(stmts.getSession.get(SESSION_ID).awaiting_reason, "interrupted");
+    assert.equal(stmts.getAgent.get(`codex:${SESSION_ID}`).status, "waiting");
+  });
+
   it("applies SessionEnd immediately even when no additional rollout line exists", () => {
     const result = ingestCodexHook(ROLLOUT, "SessionEnd");
     assert.equal(result.changed, true);
     assert.equal(stmts.getSession.get(SESSION_ID).status, "completed");
     assert.equal(stmts.getAgent.get(`codex:${SESSION_ID}`).status, "completed");
+  });
+
+  it("self-heals a completed Codex session when its rollout receives a new turn", () => {
+    append(record("event_msg", { type: "task_started" }));
+    const result = ingestCodexTranscript(ROLLOUT);
+    assert.equal(result.changed, true);
+    assert.equal(stmts.getSession.get(SESSION_ID).status, "active");
+    assert.equal(stmts.getSession.get(SESSION_ID).ended_at, null);
+    assert.equal(stmts.getAgent.get(`codex:${SESSION_ID}`).status, "working");
   });
 
   it("uses and live-syncs Codex's native /rename title from session_index.jsonl", () => {

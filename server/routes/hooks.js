@@ -1031,7 +1031,32 @@ function codexTranscriptPath(data) {
     data?.session?.transcript_path,
     data?.context?.transcript_path,
   ];
-  return candidates.find((candidate) => typeof candidate === "string") || null;
+  const supplied = candidates.find((candidate) => typeof candidate === "string");
+  if (supplied) return supplied;
+
+  // Codex hook payloads are version-dependent: many include a session/thread
+  // id but omit the rollout path. Resolve that id through the same guarded
+  // discovery index as the background synchronizer so a fresh turn is ingested
+  // immediately instead of waiting for its next polling pass.
+  const sessionIdCandidates = [
+    data?.session_id,
+    data?.sessionId,
+    data?.thread_id,
+    data?.threadId,
+    data?.session?.id,
+    data?.thread?.id,
+    data?.context?.session_id,
+    data?.context?.thread_id,
+  ];
+  const sessionId = sessionIdCandidates.find(
+    (candidate) => typeof candidate === "string" && candidate.length > 0
+  );
+  if (!sessionId) return null;
+  try {
+    return require("../lib/codex-ingest").findCodexTranscriptForSession(sessionId);
+  } catch {
+    return null;
+  }
 }
 
 // Codex hooks intentionally acknowledge before parsing. The companion handler
@@ -1410,14 +1435,13 @@ function watchdogCheck() {
       }
     }
 
-    // ── Liveness reap: complete sessions whose claude process is gone ──────
+    // ── Liveness reap: complete sessions whose provider CLI is gone ───────
     // SessionEnd is the ONLY signal that a session closed, and the hook that
     // carries it is fire-and-forget — if the dashboard was down when the user
     // quit (Ctrl+C, terminal closed), the event is lost forever and the
     // session sits in Waiting until the 3 h stale sweep. The probe supplies
-    // the missing ground truth: when NO running `claude` CLI process has the
-    // session's cwd as its working directory, the session cannot be alive —
-    // land it in the same `completed` state a real SessionEnd produces.
+    // the missing ground truth: when no matching provider CLI process has the
+    // session's cwd as its working directory, the session cannot be alive.
     //
     // Guards, in order:
     //   - probe must be trustworthy (`available` — false on Windows, in
@@ -1430,6 +1454,7 @@ function watchdogCheck() {
     //     completion self-heals anyway: the next hook event reactivates the
     //     session via the existing needsReactivation path.
     livenessReap();
+    livenessReap({ provider: "codex" });
   } catch (err) {
     // Watchdog is best-effort — log but never crash the server
     console.warn("[WATCHDOG] Error during check:", err?.message || err);
@@ -1437,7 +1462,9 @@ function watchdogCheck() {
 }
 
 /**
- * Complete every `active` session whose cwd has no live `claude` process.
+ * Complete every `active` provider session whose cwd has no matching live CLI
+ * process. Claude is the default for backward compatibility; Codex follows
+ * the same conservative process + idle-age guard.
  *
  * `ignoreIdleGate` (boot passes only): skip the idle-age check entirely. At
  * boot the gate is pure harm — the user's most common flow is "quit the
@@ -1450,9 +1477,10 @@ function watchdogCheck() {
  * existing reactivation path. Watchdog ticks keep the gate, where it still
  * guards long-running steady-state work against transient probe misses.
  */
-function livenessReap({ ignoreIdleGate = false } = {}) {
+function livenessReap({ ignoreIdleGate = false, provider = "claude" } = {}) {
   const fs = require("fs");
   const path = require("path");
+  const cli = provider === "codex" ? "codex" : "claude";
 
   // `source = 'local'` guard: sessions pulled from a remote machine over SSH
   // (Remote Data Sources — sessions.source = a remote source id) can NEVER be
@@ -1466,12 +1494,12 @@ function livenessReap({ ignoreIdleGate = false } = {}) {
       `SELECT id, name, cwd, transcript_path, updated_at FROM sessions
        WHERE status = 'active' AND cwd IS NOT NULL AND cwd <> ''
          AND (source = 'local' OR source IS NULL)
-         AND COALESCE(provider, 'claude') = 'claude'`
+         AND COALESCE(provider, 'claude') = ?`
     )
-    .all();
+    .all(provider);
   if (activeSessions.length === 0) return; // nothing to check — skip the ps/lsof cost
 
-  const probe = liveness.probeLiveCwds();
+  const probe = liveness.probeLiveCwds(cli);
   if (!probe.available) return;
   const now = Date.now();
   for (const sess of activeSessions) {
@@ -1537,15 +1565,15 @@ function livenessReap({ ignoreIdleGate = false } = {}) {
     stmts.updateSession.run(null, "completed", ts, null, sess.id);
 
     const label = sess.name || `Session ${sess.id.slice(0, 8)}`;
-    const summary = `Session closed: ${label} (no running claude process)`;
-    const mainAgentId = `${sess.id}-main`;
+    const summary = `Session closed: ${label} (no running ${cli} process)`;
+    const mainAgentId = provider === "codex" ? `codex:${sess.id}` : `${sess.id}-main`;
     stmts.insertEvent.run(
       sess.id,
       stmts.getAgent.get(mainAgentId) ? mainAgentId : null,
       "SessionEnd",
       null,
       summary,
-      JSON.stringify({ session_id: sess.id, source: "liveness-probe" })
+      JSON.stringify({ session_id: sess.id, provider, source: "liveness-probe" })
     );
 
     broadcast("session_updated", stmts.getSession.get(sess.id));
@@ -1562,7 +1590,9 @@ function livenessReap({ ignoreIdleGate = false } = {}) {
       summary,
       created_at: ts,
     });
-    console.log(`[WATCHDOG] Liveness reap: completed dead session ${sess.id} (${label})`);
+    console.log(
+      `[WATCHDOG] Liveness reap: completed dead ${provider} session ${sess.id} (${label})`
+    );
   }
 }
 
@@ -1573,4 +1603,6 @@ if (watchdogTimer.unref) watchdogTimer.unref();
 router.transcriptCache = transcriptCache;
 router.watchdogCheck = watchdogCheck;
 router.livenessReap = livenessReap;
+// Exposed as a narrow test seam for version-variant Codex hook payloads.
+router.codexTranscriptPath = codexTranscriptPath;
 module.exports = router;

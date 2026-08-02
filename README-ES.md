@@ -349,7 +349,9 @@ El instalador abre un selector múltiple interactivo: usa las teclas de flecha, 
 
 Al entrar al panel por primera vez, elige la fuente de datos y la aplicación abrirá una puerta de configuración de monitorización en vivo para el proveedor elegido. Puede instalar los hooks seleccionados directamente, con avisos de reemplazo y salida de comandos, o puedes confirmar explícitamente que ya están instalados antes de entrar al panel.
 
-Los rollouts de Codex en `~/.codex/sessions` también se detectan de forma continua. El panel lee su JSONL de solo anexado de manera incremental, por lo que las sesiones, los tokens, los costos, las filas de conversación y las actualizaciones de WebSocket se mantienen al día aunque se pierda una notificación de hook.
+Los rollouts de Codex en `~/.codex/sessions` también se detectan de forma continua. El panel lee su JSONL de solo anexado de manera incremental, prioriza los rollouts más recientes y aísla para reintento un archivo histórico defectuoso, por lo que las sesiones, los tokens, los costos, las filas de conversación y las actualizaciones de WebSocket se mantienen al día aunque se pierda una notificación de hook.
+
+Los registros de ciclo de vida de los rollouts de Codex impulsan los mismos estados en vivo de las tarjetas que Claude Code: `user_message` y `task_started` marcan al agente principal como **Trabajando**; `task_complete` mantiene activa la sesión, pero muestra **Esperando**; y `turn_aborted` muestra **Esperando** con el motivo de interrupción. Un nuevo registro de rollout corrige automáticamente una sesión completada por error, mientras que el reap de actividad de procesos solo completa una sesión local de Codex cuando su CLI correspondiente ya no existe.
 
 Los títulos de `/rename` de Codex se leen desde su índice de sesiones nativo y actualizan las tarjetas de sesión y agente en tiempo real. La repetición de conversaciones incluye turnos humanos, llamadas y salidas de herramientas personalizadas `exec`, con paginación por cursor que carga mensajes anteriores al llegar a la parte superior de la transcripción.
 
@@ -538,9 +540,10 @@ Estado real persistente.
 ```mermaid
 stateDiagram-v2
     [*] --> waiting: ensureSession (first hook)
-    waiting --> working: PreToolUse / UserPromptSubmit
+    waiting --> working: PreToolUse / UserPromptSubmit / Codex task_started / user_message
     working --> working: PostToolUse (tool completed)
-    working --> waiting: Stop, non-error
+    working --> waiting: Stop, non-error / Codex task_complete
+    working --> waiting: Codex turn_aborted (interrupted)
     working --> waiting: Notification (input prompt)
     working --> waiting: Esc cancel (watchdog marker or idle timeout)
     waiting --> error: Stop with error
@@ -567,8 +570,9 @@ El estado de la sesión **esperando** es una superposición de interfaz de usuar
 stateDiagram-v2
     [*] --> waiting: SessionStart startup/resume/clear (status=active + flag)
     active --> active: SessionStart compact (mid-turn — state preserved, no flag)
-    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse
-    active --> waiting: Stop, non-error (flag re-stamped)
+    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse / Codex task_started / user_message
+    active --> waiting: Stop, non-error / Codex task_complete (flag re-stamped)
+    active --> waiting: Codex turn_aborted (interrupted)
     active --> waiting: Permission Notification (agent → waiting)
     active --> waiting: Esc cancel (watchdog marker or idle timeout)
     active --> error: Stop, stop_reason=error
@@ -619,7 +623,7 @@ flowchart LR
 | `DASHBOARD_UPDATE_CHECK_INTERVAL_MS` | `300000` (5 min) | Intervalo entre las comprobaciones automáticas; piso 60 000 ms. Los usuarios también pueden hacer clic en **Comprobar ahora** en la modalidad de actualización o en la barra lateral para ejecutarla a demanda. |
 | `DASHBOARD_STALE_MINUTES` | `180` (3 h) | Minutos de inactividad antes de una sesión aún `activa` (incluyendo una sesión en **Esperando** la entrada del usuario — "Esperando" es una superposición de interfaz de usuario en una fila `activa`, no un estado almacenado) se marca automáticamente como **abandonada** y se elimina de la lista activa. Impulsado por el rastreador de 15 s y la limpieza periódica de mantenimiento (que se ejecuta cada ¼ de este valor, restringido a 60 s - 5 min). Baja el valor (por ejemplo, `60`) para un tiempo de espera de inactividad más corto |
 | `DASHBOARD_WORKING_IDLE_SECONDS` | `120` | Tiempo de espera de inactividad para recuperar un turno cancelado con `Esc` **antes de cualquier salida** (lo que no deja ningún marcador de transcripción). Cuando el agente principal ha estado `trabajando` sin herramienta en vuelo y ni un evento de gancho ni la transcripción han avanzado tanto tiempo, el vigilante mueve la sesión a **Esperando**. Baja el tiempo para una recuperación más rápida a costa de ocasionales vuelcos falsos en giros largos de pensamiento silencioso (que se auto-curan) |
-| `DASHBOARD_LIVENESS_PROBE` | `1` (activado) | Ajustado a `0` para desactivar el **reap de vitalidad de sesiones muertas** del vigilante (la sonda basada en `ps`/`lsof` que completa las sesiones `activas` cuyo proceso `claude` ya no existe, recuperando un `SessionEnd` perdido mientras el panel estaba inactivo). Las sesiones enviadas desde **otra máquina** (enlaces domésticos) informan de un `cwd` no POSIX y son omitidas automáticamente por el reap, por lo que una implementación local + enviada mixta ya no necesita esto desactivado; desactívalo solo para una configuración puramente remota donde los procesos locales no demuestren nada. Desactivado automáticamente en Windows y dentro de contenedores |
+| `DASHBOARD_LIVENESS_PROBE` | `1` (activado) | Ajustado a `0` para desactivar el **reap de vitalidad de sesiones muertas** del vigilante (la sonda basada en `ps`/`lsof` que completa las sesiones locales `activas` de Claude Code o Codex cuyo proceso CLI correspondiente ya no existe, recuperando un `SessionEnd` perdido mientras el panel estaba inactivo). Las sesiones enviadas desde **otra máquina** (enlaces domésticos) informan de un `cwd` no POSIX y son omitidas automáticamente por el reap, por lo que una implementación local + enviada mixta ya no necesita esto desactivado; desactívalo solo para una configuración puramente remota donde los procesos locales no demuestren nada. Desactivado automáticamente en Windows y dentro de contenedores |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | Puerta de inactividad para la cosecha de vitalidad del **tiempo de muestreo del vigilante**: una sesión solo se completa cuando su transcripción no se ha escrito durante al menos este tiempo (la última escritura del gancho es el reloj de respaldo cuando no existe una transcripción en el disco), por lo que una sesión a mitad de turno o recién reanudada nunca se apaga en una falta de prueba transitoria. El arranque pasa por alto esta puerta: al arrancar, la prueba sola decide, por lo que las sesiones se cierran momentos antes del lanzamiento, se limpia inmediatamente |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | Intervalo de encuesta (ms) para la sincronización continua de fondo `~/.claude/projects` que muestra los proyectos añadidos después del inicio que nunca pasan por los ganchos. El observador `fs.watch` dispara casi instantáneamente independientemente; esta encuesta es la red de seguridad (los observadores pueden perder eventos / no disparar en los sistemas de archivos de red). Ajustado a `0` para desactivar la encuesta mientras deja que el observador funcione |
 | `DASHBOARD_CODEX_HOME` | `CODEX_HOME` o `~/.codex` | Directorio de estado local de Codex opcional. En Configuración, guardar una nueva ubicación persiste esta anulación exclusiva del panel, reactiva la supervisión en vivo y analiza inmediatamente el nuevo árbol `sessions/`. |

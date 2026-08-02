@@ -198,7 +198,7 @@ CREATE TABLE sessions (
 |--------|------|----------|-------------|
 | `id` | TEXT | NO | Session UUID (assigned by Claude Code) |
 | `name` | TEXT | YES | Human-readable label. Synced from the transcript title by `routes/hooks.js` (and the 15 s watchdog) on every event: the `custom-title` line (`/rename`, `claude -n`, picker `Ctrl+R`) always wins, otherwise the auto-generated `ai-title` fills a placeholder/auto name, otherwise the session's first user prompt (60-char label) fills it. Falls back to `Session <id8>` |
-| `status` | TEXT | NO | `active`, `completed`, `error`, or `abandoned` (CHECK-constrained). Besides the `SessionEnd` hook, the 15 s watchdog's **liveness reap** also lands `active` → `completed` when no running `claude` process has the session's `cwd` (a `SessionEnd` lost while the dashboard was down); gated by `DASHBOARD_LIVENESS_IDLE_SECONDS`, disabled via `DASHBOARD_LIVENESS_PROBE=0`. Sessions with a non-`local` `source` (Remote Data Sources) are exempt from the reap and both stale sweeps — their status is reconciled from the SSH mirror by `remote-sync.js` instead |
+| `status` | TEXT | NO | `active`, `completed`, `error`, or `abandoned` (CHECK-constrained). Besides the `SessionEnd` hook, the 15 s watchdog's **liveness reap** also lands `active` → `completed` when no running matching local `claude` or `codex` process has the session's `cwd` (a `SessionEnd` lost while the dashboard was down); gated by `DASHBOARD_LIVENESS_IDLE_SECONDS`, disabled via `DASHBOARD_LIVENESS_PROBE=0`. Sessions with a non-`local` `source` (Remote Data Sources) are exempt from the reap and both stale sweeps — their status is reconciled from the SSH mirror by `remote-sync.js` instead |
 | `cwd` | TEXT | YES | Working directory the CLI was launched from |
 | `model` | TEXT | YES | Claude model ID (e.g. `claude-opus-4-7`) |
 | `provider` | TEXT | NO | Product that produced the session: `claude` (default) or `codex`. Powers the composable `providers` API scope and lets shared token buckets use the correct rate card. |
@@ -206,8 +206,8 @@ CREATE TABLE sessions (
 | `ended_at` | TEXT | YES | ISO 8601 timestamp on terminal transition |
 | `metadata` | TEXT | YES | JSON blob for extras (turn duration totals, thinking blocks, …) |
 | `updated_at` | TEXT | NO | Bumped on every event for staleness detection |
-| `awaiting_input_since` | TEXT | YES | ISO 8601 stamp set when the session is **Waiting** (Stop, SessionStart with source `startup`/`resume`/`clear`, permission Notification, or watchdog user-interrupt/Esc recovery). NULL otherwise. A SessionStart with source `compact` (auto-compaction fires mid-turn while Claude is working) leaves this column untouched, so a genuinely-active session is not mislabeled Waiting |
-| `awaiting_reason` | TEXT | YES | Why the row is waiting: `notification`, `stop`, `session_start`, or `interrupted`. Set/cleared in lock-step with `awaiting_input_since` (SessionStart→`session_start`, Stop→`stop`, permission/input Notification→`notification`, watchdog/Esc recovery→`interrupted`). NULL otherwise. Exception: a `compact`-source SessionStart preserves the existing value (neither stamps `session_start` nor clears it) |
+| `awaiting_input_since` | TEXT | YES | ISO 8601 stamp set when the session is **Waiting** (Claude Stop, SessionStart with source `startup`/`resume`/`clear`, permission Notification, watchdog user-interrupt/Esc recovery, or Codex `task_complete` / `turn_aborted`). NULL otherwise. A Claude SessionStart with source `compact` (auto-compaction fires mid-turn while Claude is working) leaves this column untouched, so a genuinely-active session is not mislabeled Waiting |
+| `awaiting_reason` | TEXT | YES | Why the row is waiting: `notification`, `stop`, `session_start`, or `interrupted`. Set/cleared in lock-step with `awaiting_input_since` (Claude SessionStart→`session_start`, Claude Stop and Codex `task_complete`→`stop`, permission/input Notification→`notification`, watchdog/Esc recovery and Codex `turn_aborted`→`interrupted`). NULL otherwise. Exception: a Claude `compact`-source SessionStart preserves the existing value (neither stamps `session_start` nor clears it) |
 | `transcript_path` | TEXT | YES | Absolute path to the session's JSONL transcript. Written by `routes/hooks.js` on the first event that carries it (subsequent events no-op via a SQL guard) and read by the periodic compaction sweep — so the sweep touches only active session rows instead of scanning the entire `events` table for `json_extract(data,'$.transcript_path')`. Backfilled once from `events` by the `db.js` migration |
 | `source` | TEXT | NO | Data source this session was captured from. `'local'` for this machine's own Claude Code history (the default); otherwise the `remote_sources.id` of the remote SSH machine it was pulled from. Powers the `sources` query filter on `/api/sessions`, `/api/events`, `/api/agents`, `/api/stats`, and `/api/analytics`, and the `sources` facet on `/api/sessions/facets`. Indexed by `idx_sessions_source` |
 
@@ -221,8 +221,9 @@ CREATE TABLE sessions (
 stateDiagram-v2
     [*] --> waiting: SessionStart startup/resume/clear (status=active + awaiting_input_since)
     active --> active: SessionStart compact (mid-turn — state preserved)
-    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse
-    active --> waiting: Stop (non-error) / Permission Notification
+    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse / Codex task_started / user_message
+    active --> waiting: Stop (non-error) / Permission Notification / Codex task_complete
+    active --> waiting: Codex turn_aborted (interrupted)
     active --> waiting: Esc cancel (watchdog marker or idle timeout)
     active --> error: Stop (stop_reason=error)
     waiting --> completed: SessionEnd
@@ -280,17 +281,20 @@ CREATE TABLE agents (
 | `current_tool` | TEXT | YES | Tool currently running (cleared on `PostToolUse`) |
 | `parent_agent_id` | TEXT | YES | FK to the spawning agent for nested subagent trees (`ON DELETE SET NULL`). Set to the main agent at insert, then repointed to the true spawner by `reconcileSubagentParents` from each subagent transcript's Task tool result (`toolUseResult.agentId`), so subagents-of-subagents nest correctly instead of flattening under main |
 | `metadata` | TEXT | YES | JSON blob for extras. For subagents it carries `model` (the subagent's own model, issue #185) and `tokens` — an array of per-agent token buckets parsed from the subagent's transcript. The agent-list endpoints price `tokens` at the current rates to attach a per-agent `cost` (so a subagent card shows its OWN cost, not the session total). Empty `[]` means the subagent did no billable work; absent means its transcript wasn't available to parse |
-| `awaiting_input_since` | TEXT | YES | Mirrors the parent session's flag for the main agent. NULL on subagents |
-| `awaiting_reason` | TEXT | YES | Why the row is waiting: `notification`, `stop`, `session_start`, or `interrupted`. Set/cleared in lock-step with `awaiting_input_since`; explains why the main agent is waiting. NULL on subagents |
+| `awaiting_input_since` | TEXT | YES | Mirrors the parent session's flag for the main agent, including Codex `task_complete` / `turn_aborted` waiting state. NULL on subagents |
+| `awaiting_reason` | TEXT | YES | Why the row is waiting: `notification`, `stop`, `session_start`, or `interrupted`. Set/cleared in lock-step with `awaiting_input_since`; for Codex, `task_complete` uses `stop` and `turn_aborted` uses `interrupted`. NULL on subagents |
 
 **Lifecycle:**
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Running: Agent created (SessionStart/PreToolUse)
+    [*] --> Running: Agent created (SessionStart/PreToolUse/Codex task_started)
+    Waiting --> Running: UserPromptSubmit / PreToolUse / Codex task_started / user_message
     Running --> Running: PreToolUse (set current_tool)
     Running --> Running: PostToolUse (increment tokens, cost)
-    Running --> Completed: Stop/SubagentStop hook
+    Running --> Waiting: Stop (non-error) / Codex task_complete
+    Running --> Waiting: Codex turn_aborted (interrupted)
+    Running --> Completed: SessionEnd/SubagentStop hook
     Running --> Failed: Error during processing
     Completed --> [*]
     Failed --> [*]
@@ -467,7 +471,7 @@ Standard Codex usage whose request input is `<= 272000` tokens uses the `short_*
 
 ### codex_ingest_state
 
-Durable append cursor for every Codex `rollout-*.jsonl`. It stores the byte offset, incomplete-line remainder, owning session id, and latest cumulative token snapshot. This makes simultaneous hook, `fs.watch`, and 4-second poll notifications idempotent: only newly appended complete JSONL records become events or token deltas.
+Durable append cursor for every Codex `rollout-*.jsonl`. It stores the byte offset, incomplete-line remainder, owning session id, and latest cumulative token snapshot. This makes simultaneous hook, `fs.watch`, and 4-second poll notifications idempotent: only newly appended complete JSONL records become events or token deltas. The latest persisted `codex_user_message`, `codex_task_started`, `codex_task_complete`, or `codex_turn_aborted` event also lets restart reconciliation restore the correct Working or Waiting card state without replaying the full rollout history.
 
 ---
 

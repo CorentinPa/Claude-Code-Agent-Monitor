@@ -1996,7 +1996,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                   <td><code>DASHBOARD_LIVENESS_PROBE</code></td>
                   <td><code>1</code></td>
                   <td>
-                    Set to <code>0</code> to disable the dead-session liveness reap — the watchdog completes active sessions with no running <code>claude</code> process; auto-disabled on Windows and in containers. Sessions forwarded from another machine (household hooks) report a non-POSIX <code>cwd</code> and are auto-skipped, so a mixed local + forwarded deployment no longer needs this off.
+                    Set to <code>0</code> to disable the dead-session liveness reap — the watchdog completes active local sessions only when their matching <code>claude</code> or <code>codex</code> process is gone; auto-disabled on Windows and in containers. Sessions forwarded from another machine (household hooks) report a non-POSIX <code>cwd</code> and are auto-skipped, so a mixed local + forwarded deployment no longer needs this off.
                   </td>
                 </tr>
                 <tr>
@@ -2516,9 +2516,10 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <div class="mermaid">
               stateDiagram-v2
                 [*] --> waiting: ensureSession (first hook)
-                waiting --> working: PreToolUse / UserPromptSubmit
+                waiting --> working: PreToolUse / UserPromptSubmit / Codex task_started / user_message
                 working --> working: PostToolUse (tool completed)
-                working --> waiting: Stop (non-error)
+                working --> waiting: Stop (non-error) / Codex task_complete
+                working --> waiting: Codex turn_aborted (interrupted)
                 working --> waiting: Notification (input prompt)
                 working --> waiting: Esc cancel (watchdog marker or idle timeout)
                 waiting --> error: Stop with error
@@ -2546,8 +2547,9 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
               stateDiagram-v2
                 [*] --> waiting: SessionStart startup/resume/clear (status=active + flag)
                 active --> active: SessionStart compact (mid-turn — state preserved, no flag)
-                waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse
-                active --> waiting: Stop (non-error, flag re-stamped)
+                waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse / Codex task_started / user_message
+                active --> waiting: Stop (non-error) / Codex task_complete (flag re-stamped)
+                active --> waiting: Codex turn_aborted (interrupted)
                 active --> waiting: Permission Notification (agent → waiting)
                 active --> waiting: Esc cancel (watchdog marker or idle timeout)
                 active --> error: Stop (stop_reason=error)
@@ -3647,6 +3649,13 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
           <p>
             <code>scripts/hook-handler.js</code> is a minimal, fail-safe forwarder. It always exits
             0 so it can never block Claude Code regardless of server state.
+          </p>
+          <p>
+            Codex rollout records are the source of truth for live cards: <code>user_message</code>
+            and <code>task_started</code> mark the main agent working; <code>task_complete</code>
+            keeps the session active while showing Waiting; and <code>turn_aborted</code> shows
+            interrupted Waiting. Newest rollouts are processed first, and an unreadable historical
+            file is retried without delaying the rest.
           </p>
 
           <div class="diagram-wrap">
@@ -6934,8 +6943,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=46" defer></script>
-    <script src="script.js?v=40" defer></script>
+    <script src="i18n-content.js?v=47" defer></script>
+    <script src="script.js?v=41" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

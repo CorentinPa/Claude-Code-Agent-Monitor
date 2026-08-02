@@ -1,8 +1,8 @@
 /**
  * @file Incrementally ingests Codex rollout JSONL transcripts into dashboard
- * sessions, events, costs, and native `/rename` titles. The byte cursor and
- * cumulative counter snapshot make watcher and hook notifications idempotent
- * and real-time safe.
+ * sessions, events, costs, native `/rename` titles, and the active/waiting
+ * lifecycle shown on dashboard cards. The byte cursor and cumulative counter
+ * snapshot make watcher and hook notifications idempotent and real-time safe.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -27,6 +27,18 @@ const EVENT_TYPES = new Set([
   "turn_aborted",
   "context_compacted",
 ]);
+const LIFECYCLE_EVENT_TYPES = new Set([
+  "user_message",
+  "task_started",
+  "task_complete",
+  "turn_aborted",
+]);
+const DEFAULT_WORKING_IDLE_MS = 90_000;
+
+// Hooks generally identify a Codex thread but do not consistently include its
+// rollout path. Keep this small, disposable index so a hook can ingest the
+// right file immediately instead of waiting for the polling safety net.
+const transcriptPathBySessionId = new Map();
 
 function asNumber(value) {
   const number = Number(value);
@@ -36,6 +48,12 @@ function asNumber(value) {
 function sessionIdFromPath(transcriptPath) {
   const match = path.basename(transcriptPath).match(/([0-9a-f]{8}-[0-9a-f-]{27,})\.jsonl$/i);
   return match ? match[1] : null;
+}
+
+function rememberTranscriptPath(transcriptPath) {
+  const sessionId = sessionIdFromPath(transcriptPath);
+  if (sessionId) transcriptPathBySessionId.set(sessionId, transcriptPath);
+  return sessionId;
 }
 
 function isCodexTranscript(transcriptPath) {
@@ -64,11 +82,36 @@ function findCodexTranscripts(root = getCodexSessionsDir()) {
         entry.name.startsWith("rollout-") &&
         entry.name.endsWith(".jsonl")
       ) {
+        rememberTranscriptPath(fullPath);
         files.push(fullPath);
       }
     }
   }
-  return files;
+  // New/active rollouts must win over a large historical backlog. The syncer
+  // yields between files, but this ordering ensures a just-created session is
+  // visible on the first cooperative slice rather than after every old file.
+  return files.sort((a, b) => {
+    try {
+      return fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs;
+    } catch {
+      return 0;
+    }
+  });
+}
+
+/**
+ * Resolve a hook's session/thread id to its rollout file. A cache hit is O(1);
+ * a cache miss safely falls back to the same recursive discovery used by the
+ * background synchronizer so fresh sessions arrive in real time too.
+ */
+function findCodexTranscriptForSession(sessionId, root = getCodexSessionsDir()) {
+  if (typeof sessionId !== "string" || !sessionId) return null;
+  const cached = transcriptPathBySessionId.get(sessionId);
+  if (cached && isCodexTranscript(cached) && fs.existsSync(cached)) return cached;
+  for (const transcriptPath of findCodexTranscripts(root)) {
+    if (sessionIdFromPath(transcriptPath) === sessionId) return transcriptPath;
+  }
+  return null;
 }
 
 function extractText(value) {
@@ -202,6 +245,70 @@ function createCodexSession(meta, transcriptPath) {
   return session;
 }
 
+/**
+ * Codex writes its lifecycle directly into append-only rollout records. Keep
+ * the same invariant the Claude Stop hook owns: a completed turn is still an
+ * active session, but its cards are Waiting until the next human prompt.
+ */
+function setCodexWorking(sessionId) {
+  const agentId = `codex:${sessionId}`;
+  let changed = false;
+  const session = stmts.getSession.get(sessionId);
+  if (!session) return false;
+  if (session.status !== "active" || session.ended_at) {
+    changed = stmts.reactivateSession.run(sessionId).changes > 0 || changed;
+  }
+  if (session.awaiting_input_since) {
+    changed = stmts.clearSessionAwaitingInput.run(sessionId).changes > 0 || changed;
+  }
+  const agent = stmts.getAgent.get(agentId);
+  // A new rollout turn is authoritative evidence that a session previously
+  // completed by a lost/mis-timed hook was resumed. Match Claude's existing
+  // self-heal behavior and restore the main agent to working.
+  if (agent && agent.status !== "working") {
+    changed = stmts.reactivateAgent.run(agentId).changes > 0 || changed;
+  }
+  if (agent?.awaiting_input_since) {
+    changed = stmts.clearAgentAwaitingInput.run(agentId).changes > 0 || changed;
+  }
+  return changed;
+}
+
+function setCodexWaiting(sessionId, reason = "stop") {
+  const agentId = `codex:${sessionId}`;
+  let changed = false;
+  const session = stmts.getSession.get(sessionId);
+  if (!session) return false;
+  if (session.status !== "active" || session.ended_at) {
+    changed = stmts.reactivateSession.run(sessionId).changes > 0 || changed;
+  }
+  const now = new Date().toISOString();
+  if (!session.awaiting_input_since || session.awaiting_reason !== reason) {
+    changed = stmts.setSessionAwaitingInput.run(now, reason, sessionId).changes > 0 || changed;
+  }
+  const agent = stmts.getAgent.get(agentId);
+  if (agent && (agent.status === "completed" || agent.status === "error")) {
+    changed = stmts.reactivateAgent.run(agentId).changes > 0 || changed;
+  }
+  if (agent && agent.status !== "waiting") {
+    changed =
+      stmts.updateAgent.run(null, "waiting", null, null, null, null, agentId).changes > 0 ||
+      changed;
+  }
+  if (agent && (!agent.awaiting_input_since || agent.awaiting_reason !== reason)) {
+    changed = stmts.setAgentAwaitingInput.run(now, reason, agentId).changes > 0 || changed;
+  }
+  return changed;
+}
+
+function applyCodexTranscriptLifecycle(sessionId, record) {
+  const type = record?.type === "event_msg" ? record.payload?.type : null;
+  if (!LIFECYCLE_EVENT_TYPES.has(type)) return false;
+  if (type === "task_complete") return setCodexWaiting(sessionId, "stop");
+  if (type === "turn_aborted") return setCodexWaiting(sessionId, "interrupted");
+  return setCodexWorking(sessionId);
+}
+
 function applyTokenSnapshot(sessionId, model, speed, tokenInfo, previous) {
   const total = tokenInfo.total_token_usage;
   if (!total) return previous;
@@ -248,6 +355,7 @@ function applyTokenSnapshot(sessionId, model, speed, tokenInfo, previous) {
  */
 function ingestCodexTranscript(transcriptPath, options = {}) {
   if (!isCodexTranscript(transcriptPath)) return { changed: false, events: [] };
+  rememberTranscriptPath(transcriptPath);
   let stat;
   try {
     stat = fs.statSync(transcriptPath);
@@ -308,6 +416,7 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
     reasoning_output_tokens: asNumber(state?.reasoning_output_tokens),
   };
   const events = [];
+  let latestLifecycleRecord = null;
 
   for (const record of records) {
     if (record.type === "session_meta") {
@@ -335,6 +444,9 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
         stmts.updateSessionName.run(title, session.id, title);
       }
     }
+    if (record.type === "event_msg" && LIFECYCLE_EVENT_TYPES.has(record.payload?.type)) {
+      latestLifecycleRecord = record;
+    }
     const event = persistEvent(session.id, agentId, record);
     if (event) events.push(event);
   }
@@ -350,6 +462,10 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
     counters.output_tokens,
     counters.reasoning_output_tokens
   );
+  // Process only the final lifecycle record in this byte batch. A cold import
+  // can contain hundreds of historic turns; replaying every intermediate
+  // Working/Waiting mutation is wasteful and can briefly broadcast stale state.
+  applyCodexTranscriptLifecycle(session.id, latestLifecycleRecord);
   stmts.touchSession.run(session.id);
   // A native `/rename` lives outside the rollout, so it wins over the first
   // user prompt even when both files changed around the same time.
@@ -372,16 +488,22 @@ function applyCodexHookLifecycle(result, hookType) {
   const agentId = `codex:${sessionId}`;
   let changed = false;
   if (normalized === "sessionend") {
+    changed = stmts.clearSessionAwaitingInput.run(sessionId).changes > 0 || changed;
+    changed = stmts.clearAgentAwaitingInput.run(agentId).changes > 0 || changed;
     const endedAt = new Date().toISOString();
     changed = stmts.updateSession.run(null, "completed", endedAt, null, sessionId).changes > 0;
     changed =
       stmts.updateAgent.run(null, "completed", null, null, endedAt, null, agentId).changes > 0 ||
       changed;
-  } else if (
-    ["sessionstart", "userpromptsubmit", "pretooluse", "posttooluse", "stop"].includes(normalized)
-  ) {
-    changed = stmts.reactivateSession.run(sessionId).changes > 0;
-    changed = stmts.reactivateAgent.run(agentId).changes > 0 || changed;
+  } else if (normalized === "sessionstart" && !result.changed) {
+    // A Codex SessionStart/Stop hook is emitted at an interactive prompt, not
+    // a process exit. Match Claude's SessionStart/Stop semantics: retain the
+    // active session while surfacing it as Waiting for another user turn.
+    changed = setCodexWaiting(sessionId, "session_start");
+  } else if (normalized === "stop") {
+    changed = setCodexWaiting(sessionId, "stop");
+  } else if (["userpromptsubmit", "pretooluse", "posttooluse"].includes(normalized)) {
+    changed = setCodexWorking(sessionId);
   }
   return {
     ...result,
@@ -389,6 +511,55 @@ function applyCodexHookLifecycle(result, hookType) {
     session: stmts.getSession.get(sessionId),
     agent: stmts.getAgent.get(agentId),
   };
+}
+
+/**
+ * Self-heal active Codex cards after a dashboard restart or an interrupted
+ * write. Normal task completion is immediate above; this only covers a batch
+ * that was already cursor-consumed and a working turn that went silent before
+ * Codex could write its terminal record.
+ */
+function reconcileCodexSessionLiveness({ workingIdleMs = DEFAULT_WORKING_IDLE_MS } = {}) {
+  const activeSessions = db
+    .prepare(
+      `SELECT id, transcript_path, updated_at, awaiting_input_since
+       FROM sessions WHERE provider = 'codex' AND status = 'active'`
+    )
+    .all();
+  const changed = [];
+  for (const session of activeSessions) {
+    const agent = stmts.getAgent.get(`codex:${session.id}`);
+    if (!agent) continue;
+    const latest = stmts.getLatestCodexLifecycleEvent.get(session.id);
+    let didChange = false;
+    if (latest?.event_type === "codex_task_complete") {
+      didChange = setCodexWaiting(session.id, "stop");
+    } else if (latest?.event_type === "codex_turn_aborted") {
+      didChange = setCodexWaiting(session.id, "interrupted");
+    } else if (!session.awaiting_input_since && agent.status === "working") {
+      let lastActivityMs = Date.parse(session.updated_at) || 0;
+      if (session.transcript_path) {
+        try {
+          lastActivityMs = Math.max(lastActivityMs, fs.statSync(session.transcript_path).mtimeMs);
+        } catch {
+          // The session remains eligible through its persisted timestamp.
+        }
+      }
+      if (Date.now() - lastActivityMs >= workingIdleMs) {
+        didChange = setCodexWaiting(session.id, "interrupted");
+      }
+    }
+    if (didChange) {
+      changed.push({
+        changed: true,
+        created: false,
+        session: stmts.getSession.get(session.id),
+        agent: stmts.getAgent.get(`codex:${session.id}`),
+        events: [],
+      });
+    }
+  }
+  return changed;
 }
 
 /**
@@ -414,9 +585,12 @@ function ingestCodexHook(transcriptPath, hookType) {
 module.exports = {
   CONTEXT_SHORT_LIMIT,
   findCodexTranscripts,
+  findCodexTranscriptForSession,
   ingestCodexTranscript,
   ingestCodexHook,
   applyCodexHookLifecycle,
+  applyCodexTranscriptLifecycle,
+  reconcileCodexSessionLiveness,
   refreshCodexSessionTitles,
   isCodexTranscript,
 };

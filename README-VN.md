@@ -349,7 +349,9 @@ Trình cài đặt mở bộ chọn đa lựa chọn tương tác: dùng phím m
 
 Khi vào dashboard lần đầu, hãy chọn nguồn dữ liệu; ứng dụng sẽ mở cổng thiết lập giám sát trực tiếp theo nguồn đã chọn. Bạn có thể cài hook ngay tại đó với cảnh báo ghi đè và kết quả lệnh, hoặc xác nhận rõ rằng hook đã được cài trước khi vào dashboard.
 
-Các rollout Codex trong `~/.codex/sessions` cũng được phát hiện liên tục. Dashboard đọc JSONL chỉ-ghi-nối thêm theo kiểu tăng dần, vì vậy phiên, token, chi phí, hàng hội thoại và cập nhật WebSocket luôn mới ngay cả khi bỏ lỡ một thông báo hook.
+Các rollout Codex trong `~/.codex/sessions` cũng được phát hiện liên tục. Dashboard đọc JSONL chỉ-ghi-nối thêm theo kiểu tăng dần, ưu tiên rollout mới nhất và cô lập tệp lịch sử lỗi để thử lại, vì vậy phiên, token, chi phí, hàng hội thoại và cập nhật WebSocket luôn mới ngay cả khi bỏ lỡ một thông báo hook.
+
+Bản ghi vòng đời rollout Codex điều khiển các trạng thái thẻ trực tiếp giống Claude Code: `user_message` và `task_started` đánh dấu agent chính là **Đang làm việc**; `task_complete` giữ phiên ở trạng thái active nhưng hiển thị **Đang chờ**; và `turn_aborted` hiển thị **Đang chờ** với lý do bị gián đoạn. Một bản ghi rollout mới sẽ tự khôi phục phiên bị đánh dấu completed sai, trong khi cơ chế kiểm tra tiến trình chỉ hoàn tất phiên Codex cục bộ sau khi CLI tương ứng đã kết thúc.
 
 Tiêu đề `/rename` của Codex được đọc từ chỉ mục phiên gốc và cập nhật thẻ phiên cùng agent theo thời gian thực. Chế độ xem lại hội thoại gồm các lượt của người dùng, lời gọi và đầu ra custom tool `exec`, với phân trang bằng cursor để tải các tin nhắn cũ hơn ở đầu transcript.
 
@@ -536,9 +538,10 @@ lưu trữ thực sự.
 ```mermaid
 stateDiagram-v2
     [*] --> waiting: ensureSession (hook đầu tiên)
-    waiting --> working: PreToolUse / UserPromptSubmit
+    waiting --> working: PreToolUse / UserPromptSubmit / Codex task_started / user_message
     working --> working: PostToolUse (tool hoàn tất)
-    working --> waiting: Stop, không lỗi
+    working --> waiting: Stop, không lỗi / Codex task_complete
+    working --> waiting: Codex turn_aborted (interrupted)
     working --> waiting: Notification (yêu cầu input)
     working --> waiting: Esc cancel (watchdog marker hoặc idle timeout)
     waiting --> error: Stop có lỗi
@@ -565,8 +568,9 @@ Trạng thái lưu trữ: `active | completed | error | abandoned`. Trạng thá
 stateDiagram-v2
     [*] --> waiting: SessionStart startup/resume/clear (status=active + cờ)
     active --> active: SessionStart compact (giữa lượt — giữ nguyên trạng thái, không cờ)
-    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse
-    active --> waiting: Stop, không lỗi (cờ được đóng dấu lại)
+    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse / Codex task_started / user_message
+    active --> waiting: Stop, không lỗi / Codex task_complete (cờ được đóng dấu lại)
+    active --> waiting: Codex turn_aborted (interrupted)
     active --> waiting: Notification xin quyền (agent → waiting)
     active --> waiting: Esc cancel (watchdog marker hoặc idle timeout)
     active --> error: Stop, stop_reason=error
@@ -615,7 +619,7 @@ flowchart LR
 | `NODE_ENV`              | `development` | Đặt thành `production` để phục vụ ứng dụng khách đã xây dựng |
 | `DASHBOARD_STALE_MINUTES` | `180` (3 giờ) | Số phút không hoạt động trước khi một phiên vẫn `active` (kể cả phiên đang **Đang chờ** người dùng — "Đang chờ" là lớp phủ UI trên một hàng `active`, không phải trạng thái lưu trữ) bị tự động đánh dấu **abandoned** và rời khỏi danh sách hoạt động. Được thực thi bởi watchdog 15 giây và lượt quét bảo trì định kỳ (chạy mỗi ¼ giá trị này, kẹp giữa 60s – 5 phút). Giảm giá trị (ví dụ `60`) để có idle timeout ngắn hơn |
 | `DASHBOARD_WORKING_IDLE_SECONDS` | `120` | Idle-working timeout để khôi phục một lượt bị hủy bằng `Esc` **trước khi có bất kỳ output nào** (việc này không để lại dấu nào trong transcript). Khi Agent chính đã ở `working` mà không có tool nào đang chạy và cả sự kiện hook lẫn transcript đều không tiến triển trong khoảng thời gian này, watchdog chuyển phiên sang **Đang chờ**. Giảm giá trị để khôi phục nhanh hơn, đổi lại đôi khi có lần lật cờ sai trên các lượt suy nghĩ im lặng kéo dài (sẽ tự phục hồi) |
-| `DASHBOARD_LIVENESS_PROBE` | `1` (bật) | Đặt `0` để tắt **cơ chế thu dọn phiên đã chết** của watchdog (probe dựa trên `ps`/`lsof` hoàn tất các phiên `active` mà tiến trình `claude` không còn tồn tại — khôi phục một `SessionEnd` bị mất khi dashboard không chạy). Các phiên được chuyển tiếp từ **máy khác** (household hooks) báo cáo `cwd` không phải POSIX và được cơ chế thu dọn tự động bỏ qua, nên một triển khai hỗn hợp cục bộ + chuyển tiếp không còn cần tắt tùy chọn này; chỉ tắt nó cho cấu hình thuần từ xa nơi tiến trình cục bộ không chứng minh được gì. Tự động tắt trên Windows và trong container |
+| `DASHBOARD_LIVENESS_PROBE` | `1` (bật) | Đặt `0` để tắt **cơ chế thu dọn phiên đã chết** của watchdog (probe dựa trên `ps`/`lsof` hoàn tất các phiên local `active` của Claude Code hoặc Codex khi tiến trình CLI tương ứng không còn tồn tại — khôi phục một `SessionEnd` bị mất khi dashboard không chạy). Các phiên được chuyển tiếp từ **máy khác** (household hooks) báo cáo `cwd` không phải POSIX và được cơ chế thu dọn tự động bỏ qua, nên một triển khai hỗn hợp cục bộ + chuyển tiếp không còn cần tắt tùy chọn này; chỉ tắt nó cho cấu hình thuần từ xa nơi tiến trình cục bộ không chứng minh được gì. Tự động tắt trên Windows và trong container |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | Ngưỡng nhàn rỗi cho cơ chế thu dọn **ở nhịp watchdog**: phiên chỉ bị hoàn tất khi transcript của nó không được ghi trong ít nhất khoảng này (lần ghi hook cuối là đồng hồ dự phòng khi không có transcript trên đĩa), nên phiên đang giữa lượt hoặc vừa resume không bao giờ biến mất do một lần probe trượt thoáng qua. Các lượt thu dọn lúc khởi động bỏ qua ngưỡng này — lúc boot chỉ probe quyết định, nên phiên thoát ngay trước khi mở app được dọn tức thì |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | Khoảng poll (ms) cho tiến trình đồng bộ nền `~/.claude/projects` liên tục, làm hiện ra các dự án được thêm sau khi khởi động mà các phiên của chúng không bao giờ đi qua hook. Watcher `fs.watch` vẫn kích hoạt gần như tức thì bất kể giá trị này; lần poll này là lưới an toàn (watcher có thể bỏ lỡ sự kiện / không kích hoạt trên hệ thống tệp mạng). Đặt thành `0` để tắt poll mà vẫn giữ watcher chạy |
 | `DASHBOARD_CODEX_HOME` | `CODEX_HOME` hoặc `~/.codex` | Thư mục trạng thái Codex cục bộ tùy chọn. Lưu vị trí mới trong Cài đặt sẽ duy trì override chỉ dành cho dashboard này, kích hoạt lại theo dõi trực tiếp và quét ngay cây `sessions/` mới. |
