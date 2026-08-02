@@ -1653,13 +1653,15 @@ export function Settings() {
                   }`}
                 >
                   <span className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium text-gray-200">{title}</span>
-                    {provider === "codex" && (
-                      <span className="rounded bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-amber-300">
-                        {t("display.beta")}
-                      </span>
-                    )}
-                    {selected && <Check className="h-4 w-4 text-accent" />}
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <span className="text-sm font-medium text-gray-200">{title}</span>
+                      {provider === "codex" && (
+                        <span className="rounded bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-amber-300">
+                          {t("display.beta")}
+                        </span>
+                      )}
+                    </span>
+                    {selected && <Check className="h-4 w-4 flex-none text-accent" />}
                   </span>
                   <span className="mt-1 block text-xs leading-relaxed text-gray-500">
                     {t(`display.${provider}Description`)}

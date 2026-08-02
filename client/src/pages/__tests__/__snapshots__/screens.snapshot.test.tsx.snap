@@ -7754,12 +7754,16 @@ exports[`screen snapshots > Settings 1`] = `
               class="flex items-center justify-between gap-2"
             >
               <span
-                class="text-sm font-medium text-gray-200"
+                class="flex min-w-0 items-center gap-1.5"
               >
-                Claude Code
+                <span
+                  class="text-sm font-medium text-gray-200"
+                >
+                  Claude Code
+                </span>
               </span>
               <svg
-                class="lucide lucide-check h-4 w-4 text-accent"
+                class="lucide lucide-check h-4 w-4 flex-none text-accent"
                 fill="none"
                 height="24"
                 stroke="currentColor"
@@ -7791,14 +7795,18 @@ exports[`screen snapshots > Settings 1`] = `
               class="flex items-center justify-between gap-2"
             >
               <span
-                class="text-sm font-medium text-gray-200"
+                class="flex min-w-0 items-center gap-1.5"
               >
-                Codex
-              </span>
-              <span
-                class="rounded bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-amber-300"
-              >
-                Beta
+                <span
+                  class="text-sm font-medium text-gray-200"
+                >
+                  Codex
+                </span>
+                <span
+                  class="rounded bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-amber-300"
+                >
+                  Beta
+                </span>
               </span>
             </span>
             <span
@@ -7817,9 +7825,13 @@ exports[`screen snapshots > Settings 1`] = `
               class="flex items-center justify-between gap-2"
             >
               <span
-                class="text-sm font-medium text-gray-200"
+                class="flex min-w-0 items-center gap-1.5"
               >
-                Both
+                <span
+                  class="text-sm font-medium text-gray-200"
+                >
+                  Both
+                </span>
               </span>
             </span>
             <span
