@@ -88,6 +88,7 @@ import {
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
+import { useDataScope } from "../lib/dataScope";
 import { AgentCard } from "../components/AgentCard";
 import { SessionOverview } from "../components/SessionOverview";
 import { ConversationView } from "../components/conversation/ConversationView";
@@ -148,6 +149,7 @@ export function SessionDetail() {
   const navigate = useNavigate();
   const { t } = useTranslation("sessions");
   const { t: wfT } = useTranslation("workflows");
+  const [scope] = useDataScope();
   const [session, setSession] = useState<Session | null>(null);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [workflows, setWorkflows] = useState<WorkflowRun[]>([]);
@@ -260,7 +262,7 @@ export function SessionDetail() {
     } finally {
       setLoading(false);
     }
-  }, [id, t]);
+  }, [id, scope, t]);
 
   useEffect(() => {
     load();
@@ -279,7 +281,7 @@ export function SessionDetail() {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, scope]);
 
   // Navigate to Conversation tab and select the matching transcript when clicking an agent
   const navigateToAgentConversation = useCallback(

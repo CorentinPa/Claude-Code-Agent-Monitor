@@ -523,12 +523,13 @@ function startWorkflowPoll(broadcast) {
  */
 function startCodexSessionSync(broadcast) {
   const fs = require("fs");
-  const { getCodexSessionsDir } = require("./lib/codex-home");
+  const { getCodexSessionsDir, onCodexHomeChanged } = require("./lib/codex-home");
   const { findCodexTranscripts, ingestCodexTranscript } = require("./lib/codex-ingest");
-  const sessionsDir = getCodexSessionsDir();
   const fingerprints = new Map();
   let running = false;
   let queued = false;
+  let watcher = null;
+  let watchedSessionsDir = null;
 
   function publish(result) {
     if (!result?.changed || !result.session) return;
@@ -544,6 +545,11 @@ function startCodexSessionSync(broadcast) {
     }
     running = true;
     try {
+      const sessionsDir = getCodexSessionsDir();
+      // A newly selected Codex home may not contain `sessions/` yet. Retry
+      // watcher attachment on each safety-net sweep so it becomes event-driven
+      // as soon as Codex creates the directory instead of polling forever.
+      watchSessionsDir();
       for (const transcriptPath of findCodexTranscripts(sessionsDir)) {
         let stat;
         try {
@@ -587,16 +593,50 @@ function startCodexSessionSync(broadcast) {
     }, 150);
     if (debounce.unref) debounce.unref();
   };
-  try {
-    if (fs.existsSync(sessionsDir)) {
-      const recursive = process.platform === "darwin" || process.platform === "win32";
-      const watcher = fs.watch(sessionsDir, { recursive }, schedule);
-      watcher.on("error", () => {});
-      if (watcher.unref) watcher.unref();
+  function watchSessionsDir() {
+    const sessionsDir = getCodexSessionsDir();
+    if (sessionsDir !== watchedSessionsDir) {
+      try {
+        watcher?.close();
+      } catch {
+        // A stale watcher is optional; polling remains the real-time safety net.
+      }
+      watcher = null;
+      watchedSessionsDir = sessionsDir;
     }
-  } catch {
-    // The poll remains the fallback on filesystems without watcher support.
+    if (watcher) return;
+    try {
+      if (fs.existsSync(sessionsDir)) {
+        const recursive = process.platform === "darwin" || process.platform === "win32";
+        const nextWatcher = fs.watch(sessionsDir, { recursive }, schedule);
+        watcher = nextWatcher;
+        nextWatcher.on("error", () => {
+          // Only retire this watcher: an error from a recently closed previous
+          // directory must not detach a newer watch after a home change.
+          if (watcher !== nextWatcher) return;
+          try {
+            nextWatcher.close();
+          } catch {
+            // The next polling sweep retries attachment either way.
+          }
+          watcher = null;
+        });
+        if (nextWatcher.unref) nextWatcher.unref();
+      }
+    } catch {
+      // The poll remains the fallback on filesystems without watcher support.
+    }
   }
+  watchSessionsDir();
+
+  // Settings can repoint Codex while the dashboard is running. Clear old-file
+  // fingerprints, re-arm the watcher, and schedule a fresh sweep after the
+  // response has been sent so a large history never delays the UI action.
+  onCodexHomeChanged(() => {
+    fingerprints.clear();
+    watchSessionsDir();
+    setImmediate(runSweep);
+  });
 }
 
 /**

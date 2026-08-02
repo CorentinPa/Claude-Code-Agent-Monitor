@@ -11,8 +11,10 @@
     "enableDesc": "Display the corner companion across the dashboard (⌘B to open)"
   },
   "pricing": {
-    "title": "Model Pricing",
-    "description": "Rates per million tokens (USD). Use % as wildcard in patterns. Some models have a time-limited introductory rate (shown in violet); usage on or before its cutoff date is billed at that rate, and usage after it at the standard rate.",
+    "title": "Anthropic Claude Model Pricing",
+    "navClaude": "Claude Pricing",
+    "navGpt": "Codex Pricing",
+    "description": "Anthropic API rates per million tokens (USD). Use % as wildcard in patterns. Some models have a time-limited introductory rate (shown in violet); usage on or before its cutoff date is billed at that rate, and usage after it at the standard rate.",
     "introNote": "Intro ${{input}}/${{output}} through {{until}}",
     "introRatesTitle": "Introductory rates",
     "introRatesHint": "Leave the date empty for no promo",
@@ -43,8 +45,10 @@
     "fastInput": "Fast Input",
     "fastOutput": "Fast Output",
     "gpt": {
-      "title": "OpenAI / Codex Pricing",
-      "description": "USD per 1M tokens. Standard requests use Short rates at or below 272K input tokens and Long rates above 272K; Fast mode uses its own published rate card.",
+      "title": "OpenAI GPT Model Pricing",
+      "description": "Published OpenAI API rates for Codex usage. Standard requests use Short rates at or below 272K input tokens and Long rates above 272K; Fast mode uses its own rate card.",
+      "unit": "USD per 1M tokens",
+      "unavailableNote": "Every amount is USD per 1M tokens. An em dash means OpenAI does not publish that context or Fast-mode rate, so the dashboard marks matching usage as unpriced instead of guessing.",
       "name": "Name",
       "short": "Standard · Short ≤272K",
       "long": "Standard · Long >272K",
@@ -57,13 +61,37 @@
     }
   },
   "claudeHome": {
-    "title": "CLAUDE_HOME",
-    "description": "Root directory for Claude Code session data. Changing this updates the scan path for transcripts and imports immediately.",
+    "title": "Claude Code home",
+    "description": "The root directory for Claude Code transcripts, imports, and configuration. Changing it updates subsequent file reads immediately.",
     "save": "Save",
     "saving": "Saving...",
     "current": "Current:",
     "placeholder": "/path/to/claude-home",
     "saveFailed": "Failed to update CLAUDE_HOME"
+  },
+  "codexHome": {
+    "title": "Codex home",
+    "description": "The root directory for Codex rollout sessions and hooks. Saving a new location re-arms live monitoring and scans its sessions immediately.",
+    "save": "Save",
+    "saving": "Saving...",
+    "current": "Current:",
+    "placeholder": "/path/to/codex-home",
+    "saveFailed": "Failed to update the Codex home"
+  },
+  "homes": {
+    "title": "Session Data Locations",
+    "description": "Configure the local Claude Code and Codex directories the dashboard reads. Each saved location is applied without restarting the app."
+  },
+  "display": {
+    "title": "Dashboard Data",
+    "description": "Choose which product’s sessions, tokens, costs, and activity appear across the app. The change takes effect immediately and remains independent from the machine data-source filter.",
+    "claude": "Claude Code",
+    "codex": "Codex",
+    "both": "Both",
+    "claudeDescription": "Show only Claude Code data.",
+    "codexDescription": "Show only Codex data.",
+    "bothDescription": "Combine Claude Code and Codex data.",
+    "beta": "Beta"
   },
   "hooks": {
     "title": "Hook Configuration",

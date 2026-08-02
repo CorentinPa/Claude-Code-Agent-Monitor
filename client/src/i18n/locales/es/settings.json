@@ -11,8 +11,10 @@
     "enableDesc": "Mostrar el compañero de esquina en todo el panel (⌘B para abrir)"
   },
   "pricing": {
-    "title": "Precios de Modelos",
-    "description": "Tarifas por millón de tokens (USD). Usa % como comodín en los patrones. Algunos modelos tienen una tarifa introductoria por tiempo limitado (mostrada en violeta); el uso en o antes de su fecha de corte se factura a esa tarifa, y el uso posterior a la tarifa estándar.",
+    "title": "Precios de modelos Claude de Anthropic",
+    "navClaude": "Precios de Claude",
+    "navGpt": "Precios de Codex",
+    "description": "Tarifas de API de Anthropic por millón de tokens (USD). Usa % como comodín en los patrones. Algunos modelos tienen una tarifa introductoria por tiempo limitado (mostrada en violeta); el uso en o antes de su fecha de corte se factura a esa tarifa, y el uso posterior a la tarifa estándar.",
     "introNote": "Intro ${{input}}/${{output}} hasta {{until}}",
     "introRatesTitle": "Tarifas introductorias",
     "introRatesHint": "Deja la fecha vacía para sin promoción",
@@ -41,16 +43,55 @@
     "cacheWrite5m": "Escritura de Caché (5m)",
     "cacheWrite1h": "Escritura de Caché (1h)",
     "fastInput": "Entrada Rápida",
-    "fastOutput": "Salida Rápida"
+    "fastOutput": "Salida Rápida",
+    "gpt": {
+      "title": "Precios de modelos GPT de OpenAI",
+      "description": "Tarifas de API de OpenAI publicadas para el uso de Codex. Las solicitudes estándar usan tarifas cortas con 272K tokens de entrada o menos y largas por encima de 272K; el modo rápido tiene su propia tabla de tarifas.",
+      "unit": "USD por 1M de tokens",
+      "unavailableNote": "Cada importe está en USD por 1M de tokens. Un guion largo significa que OpenAI no publica esa tarifa de contexto o del modo rápido, por lo que el panel marca el uso coincidente como sin precio en lugar de adivinar.",
+      "name": "Nombre",
+      "short": "Estándar · Corto ≤272K",
+      "long": "Estándar · Largo >272K",
+      "fast": "Modo rápido",
+      "input": "Entrada",
+      "cached": "En caché",
+      "write": "Escritura de caché",
+      "output": "Salida",
+      "deleteConfirm": "¿Eliminar esta regla de precios de GPT?"
+    }
   },
   "claudeHome": {
-    "title": "CLAUDE_HOME",
-    "description": "Directorio raíz para los datos de sesión de Claude Code. Cambiar esto actualiza la ruta de escaneo para transcripciones e importaciones de forma inmediata.",
+    "title": "Inicio de Claude Code",
+    "description": "El directorio raíz para transcripciones, importaciones y configuración de Claude Code. Cambiarlo actualiza de inmediato las lecturas de archivos posteriores.",
     "save": "Guardar",
     "saving": "Guardando...",
     "current": "Actual:",
     "placeholder": "/ruta/a/claude-home",
     "saveFailed": "No se pudo actualizar CLAUDE_HOME"
+  },
+  "codexHome": {
+    "title": "Inicio de Codex",
+    "description": "El directorio raíz para las sesiones rollout y los hooks de Codex. Guardar una nueva ubicación reactiva la supervisión en vivo y analiza sus sesiones de inmediato.",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "current": "Actual:",
+    "placeholder": "/ruta/a/codex-home",
+    "saveFailed": "No se pudo actualizar el inicio de Codex"
+  },
+  "homes": {
+    "title": "Ubicaciones de datos de sesión",
+    "description": "Configura los directorios locales de Claude Code y Codex que lee el panel. Cada ubicación guardada se aplica sin reiniciar la aplicación."
+  },
+  "display": {
+    "title": "Datos del panel",
+    "description": "Elige qué sesiones, tokens, costes y actividad de producto se muestran en toda la aplicación. El cambio se aplica de inmediato y es independiente del filtro de fuentes de datos de las máquinas.",
+    "claude": "Claude Code",
+    "codex": "Codex",
+    "both": "Ambos",
+    "claudeDescription": "Mostrar solo datos de Claude Code.",
+    "codexDescription": "Mostrar solo datos de Codex.",
+    "bothDescription": "Combinar datos de Claude Code y Codex.",
+    "beta": "Beta"
   },
   "hooks": {
     "title": "Configuración de ganchos",

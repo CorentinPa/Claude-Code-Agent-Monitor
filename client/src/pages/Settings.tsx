@@ -1,6 +1,6 @@
 /**
  * @file Settings.tsx
- * @description Provides a settings page for managing model pricing rules, notification preferences, and system information with real-time updates and actionable controls for data management and hook configuration.
+ * @description Provides product-scoped dashboard display controls, Claude and GPT pricing editors, live hook setup, session storage locations, notification preferences, and system management actions.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -132,9 +132,11 @@ const SETTINGS_SECTIONS: {
   fallback?: string;
   Icon: typeof DollarSign;
 }[] = [
-  { id: "pricing", labelKey: "pricing.title", Icon: DollarSign },
+  { id: "data-display", labelKey: "display.title", Icon: Layers },
+  { id: "claude-pricing", labelKey: "pricing.navClaude", Icon: DollarSign },
+  { id: "gpt-pricing", labelKey: "pricing.navGpt", Icon: DollarSign },
   { id: "hooks", labelKey: "hooks.title", Icon: Plug },
-  { id: "claude-home", labelKey: "claudeHome.title", Icon: FolderOpen },
+  { id: "session-homes", labelKey: "homes.title", Icon: FolderOpen },
   { id: "import", labelKey: "import.title", fallback: "Import", Icon: History },
   {
     id: "remote-sources",
@@ -274,6 +276,17 @@ function formatUptime(seconds: number): string {
   if (d > 0) return `${d}d ${h}h ${m}m`;
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
+}
+
+/** Format a published USD-per-million-token rate without exposing float noise. */
+function formatUsdRate(rate: number): string {
+  if (!Number.isFinite(rate) || rate <= 0) return "—";
+  return new Intl.NumberFormat(getCurrentLocale(), {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4,
+  }).format(rate);
 }
 
 function useCountUp(end: number | null, durationMs = 1000) {
@@ -482,6 +495,7 @@ function GptPricingTable() {
   const [adding, setAdding] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const addRowRef = useRef<HTMLTableRowElement>(null);
   const reload = useCallback(() => {
     // Older embedded/test API facades can predate the Codex endpoint. Keep the
     // rest of Settings usable during a rolling upgrade; production API always
@@ -495,6 +509,17 @@ function GptPricingTable() {
       setError(err instanceof Error ? err.message : t("messages.failedLoad"))
     );
   }, [reload, t]);
+
+  // Match the Claude pricing editor: adding a model takes the operator straight
+  // to the new row instead of leaving it below a long, horizontally-scrollable
+  // rate card. The first field retains autoFocus for immediate typing.
+  useEffect(() => {
+    if (!adding) return;
+    const frame = requestAnimationFrame(() => {
+      addRowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [adding]);
 
   const edit = (rule: GptModelPricing) => {
     const next = emptyGptDraft();
@@ -543,25 +568,39 @@ function GptPricingTable() {
       setError(err instanceof Error ? err.message : t("messages.failedDelete"));
     }
   };
-  const input = (field: keyof GptDraft, className = "") => (
-    <input
-      value={draft[field]}
-      onChange={(event) => setDraft((current) => ({ ...current, [field]: event.target.value }))}
-      className={`w-full min-w-[5rem] rounded border border-border bg-surface-1 px-2 py-1 text-xs text-gray-200 ${className}`}
-      type={field.endsWith("_mtok") ? "number" : "text"}
-      min={field.endsWith("_mtok") ? 0 : undefined}
-      step={field.endsWith("_mtok") ? "any" : undefined}
-    />
-  );
+  const input = (field: keyof GptDraft, className = "") => {
+    const isRate = field.endsWith("_mtok");
+    return (
+      <div className={isRate ? "relative min-w-[5.5rem]" : undefined}>
+        {isRate && (
+          <span className="pointer-events-none absolute inset-y-0 left-2 flex items-center text-xs text-gray-500">
+            $
+          </span>
+        )}
+        <input
+          value={draft[field]}
+          onChange={(event) => setDraft((current) => ({ ...current, [field]: event.target.value }))}
+          className={`w-full rounded border border-border bg-surface-1 px-2 py-1 text-xs text-gray-200 ${isRate ? "pl-5 text-right font-mono" : ""} ${className}`}
+          type={isRate ? "number" : "text"}
+          min={isRate ? 0 : undefined}
+          step={isRate ? "any" : undefined}
+          autoFocus={adding && field === "model_pattern"}
+        />
+      </div>
+    );
+  };
   const editingRow = adding || !!editing;
 
   return (
-    <div className="mt-7 border-t border-border pt-6">
-      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h4 className="text-sm font-medium text-gray-200">{t("pricing.gpt.title")}</h4>
           <p className="mt-1 max-w-3xl text-xs leading-relaxed text-gray-500">
             {t("pricing.gpt.description")}
+          </p>
+          <p className="mt-1 text-[11px] font-medium uppercase tracking-wider text-emerald-300/80">
+            {t("pricing.gpt.unit")}
           </p>
         </div>
         <button
@@ -578,8 +617,12 @@ function GptPricingTable() {
         </button>
       </div>
       {error && <p className="mb-3 rounded bg-red-500/10 p-2 text-xs text-red-300">{error}</p>}
-      <div className="overflow-x-auto rounded-lg border border-border">
-        <table className="w-full min-w-[1180px] text-left text-xs">
+      <div className="mb-3 flex gap-2 rounded-lg border border-sky-500/20 bg-sky-500/[0.05] px-3 py-2.5 text-xs leading-relaxed text-gray-400">
+        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-300" />
+        <span>{t("pricing.gpt.unavailableNote")}</span>
+      </div>
+      <div className="card overflow-x-auto">
+        <table className="w-full min-w-[1260px] text-left text-xs">
           <thead className="bg-surface-3 text-[10px] uppercase tracking-wide text-gray-500">
             <tr>
               <th rowSpan={2} className="px-3 py-2">
@@ -653,7 +696,7 @@ function GptPricingTable() {
                       key={field}
                       className="border-l border-border/50 px-2 py-2 text-right font-mono"
                     >
-                      {rule[field]}
+                      {formatUsdRate(rule[field])}
                     </td>
                   ))}
                   <td className="px-2 py-2 whitespace-nowrap">
@@ -678,7 +721,7 @@ function GptPricingTable() {
               )
             )}
             {adding && (
-              <tr className="bg-surface-2">
+              <tr ref={addRowRef} className="bg-surface-2">
                 <td className="px-2 py-2">{input("model_pattern")}</td>
                 <td className="px-2 py-2">{input("display_name")}</td>
                 {GPT_RATE_FIELDS.map((field) => (
@@ -912,8 +955,12 @@ export function Settings() {
   const [claudeHomeInput, setClaudeHomeInput] = useState("");
   const [claudeHomeSaving, setClaudeHomeSaving] = useState(false);
   const [claudeHomeError, setClaudeHomeError] = useState<string | null>(null);
+  const [codexHome, setCodexHomeState] = useState("");
+  const [codexHomeInput, setCodexHomeInput] = useState("");
+  const [codexHomeSaving, setCodexHomeSaving] = useState(false);
+  const [codexHomeError, setCodexHomeError] = useState<string | null>(null);
   const [hookModalOpen, setHookModalOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>("pricing");
+  const [activeSection, setActiveSection] = useState<string>("data-display");
   const tocRef = useRef<HTMLDivElement | null>(null);
   const [tocOverflow, setTocOverflow] = useState({ left: false, right: false });
 
@@ -968,23 +1015,37 @@ export function Settings() {
     };
   }, [loading, recomputeTocOverflow]);
 
+  // Scroll the active chip into the horizontal TOC viewport too. Without this,
+  // scrolling the long Settings page can correctly update the highlight while
+  // leaving the highlighted section hidden behind the overflow affordance.
+  useEffect(() => {
+    const nav = tocRef.current;
+    const active = nav?.querySelector<HTMLButtonElement>(
+      `[data-settings-section="${activeSection}"]`
+    );
+    active?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [activeSection]);
+
   const scrollTocBy = useCallback((delta: number) => {
     tocRef.current?.scrollBy({ left: delta, behavior: "smooth" });
   }, []);
 
   const load = useCallback(async () => {
     try {
-      const [pricingRes, costRes, infoRes, claudeHomeRes] = await Promise.all([
+      const [pricingRes, costRes, infoRes, claudeHomeRes, codexHomeRes] = await Promise.all([
         api.pricing.list(),
         api.pricing.totalCost(),
         api.settings.info(),
         api.settings.claudeHome.get(),
+        api.settings.codexHome.get(),
       ]);
       setPricing(pricingRes.pricing);
       setTotalCost(costRes.total_cost);
       setSysInfo(infoRes);
       setClaudeHomeState(claudeHomeRes.claude_home);
       setClaudeHomeInput(claudeHomeRes.claude_home);
+      setCodexHomeState(codexHomeRes.codex_home);
+      setCodexHomeInput(codexHomeRes.codex_home);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("messages.failedLoad"));
@@ -1198,6 +1259,25 @@ export function Settings() {
       setClaudeHomeError(err instanceof Error ? err.message : t("claudeHome.saveFailed"));
     } finally {
       setClaudeHomeSaving(false);
+    }
+  };
+
+  const handleSaveCodexHome = async () => {
+    if (codexHomeInput === codexHome) return;
+    setCodexHomeSaving(true);
+    setCodexHomeError(null);
+    try {
+      const res = await api.settings.codexHome.set(codexHomeInput);
+      setCodexHomeState(res.codex_home);
+      setCodexHomeInput(res.codex_home);
+      // Refresh hook paths/status immediately — they follow the active Codex
+      // home, and the backend has simultaneously triggered a fresh rollout scan.
+      const info = await api.settings.info();
+      setSysInfo(info);
+    } catch (err) {
+      setCodexHomeError(err instanceof Error ? err.message : t("codexHome.saveFailed"));
+    } finally {
+      setCodexHomeSaving(false);
     }
   };
 
@@ -1477,6 +1557,7 @@ export function Settings() {
               <button
                 key={id}
                 type="button"
+                data-settings-section={id}
                 onClick={() =>
                   document
                     .getElementById(id)
@@ -1535,8 +1616,63 @@ export function Settings() {
         </div>
       </div>
 
-      {/* ─── MODEL PRICING ─── */}
-      <section id="pricing" className="scroll-mt-24">
+      {/* ─── PRODUCT DATA DISPLAY ─── */}
+      <section id="data-display" className="scroll-mt-24">
+        <div className="mb-4">
+          <h3 className="flex items-center gap-2 text-sm font-medium text-gray-300">
+            <Layers className="h-4 w-4 text-gray-500" />
+            {t("display.title")}
+          </h3>
+          <p className="mt-0.5 text-xs text-gray-500">{t("display.description")}</p>
+        </div>
+        <div className="card p-4">
+          <div
+            className="grid grid-cols-1 gap-2 sm:grid-cols-3"
+            role="radiogroup"
+            aria-label={t("display.title")}
+          >
+            {(["claude", "codex", "both"] as ProviderScope[]).map((provider) => {
+              const selected = (dataScope.provider || "claude") === provider;
+              const title =
+                provider === "claude"
+                  ? "Claude Code"
+                  : provider === "codex"
+                    ? "Codex"
+                    : t("display.both");
+              return (
+                <button
+                  key={provider}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setDataScope({ ...dataScope, provider })}
+                  className={`rounded-lg border p-3 text-left transition-colors ${
+                    selected
+                      ? "border-accent bg-accent/10 shadow-[0_0_0_1px_rgba(129,140,248,0.14)]"
+                      : "border-border bg-surface-2 hover:border-gray-600"
+                  }`}
+                >
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium text-gray-200">{title}</span>
+                    {provider === "codex" && (
+                      <span className="rounded bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-amber-300">
+                        {t("display.beta")}
+                      </span>
+                    )}
+                    {selected && <Check className="h-4 w-4 text-accent" />}
+                  </span>
+                  <span className="mt-1 block text-xs leading-relaxed text-gray-500">
+                    {t(`display.${provider}Description`)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CLAUDE PRICING ─── */}
+      <section id="claude-pricing" className="scroll-mt-24">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
@@ -1732,6 +1868,10 @@ export function Settings() {
             {formatTimestamp(lastUpdated)}
           </p>
         )}
+      </section>
+
+      {/* ─── OPENAI GPT PRICING ─── */}
+      <section id="gpt-pricing" className="scroll-mt-24">
         <GptPricingTable />
       </section>
 
@@ -1791,70 +1931,91 @@ export function Settings() {
                   );
                 })}
               </div>
-              <div className="border-t border-border pt-3">
-                <p className="text-xs font-medium text-gray-300">{t("hooks.display.title")}</p>
-                <p className="mt-0.5 text-[11px] text-gray-500">{t("hooks.display.description")}</p>
-                <div className="mt-2 inline-flex rounded-lg border border-border bg-surface-3 p-1">
-                  {(["claude", "codex", "both"] as ProviderScope[]).map((provider) => (
-                    <button
-                      key={provider}
-                      type="button"
-                      onClick={() => setDataScope({ ...dataScope, provider })}
-                      className={`rounded-md px-2.5 py-1 text-xs transition-colors ${
-                        (dataScope.provider || "claude") === provider
-                          ? "bg-accent text-white"
-                          : "text-gray-400 hover:text-gray-200"
-                      }`}
-                    >
-                      {provider === "claude"
-                        ? "Claude"
-                        : provider === "codex"
-                          ? "Codex"
-                          : t("hooks.display.both")}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </>
           )}
         </div>
       </section>
 
-      {/* ─── CLAUDE HOME ─── */}
-      <section id="claude-home" className="scroll-mt-24">
+      {/* ─── SESSION DATA LOCATIONS ─── */}
+      <section id="session-homes" className="scroll-mt-24">
         <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2 mb-1">
           <FolderOpen className="w-4 h-4 text-gray-500" />
-          {t("claudeHome.title")}
+          {t("homes.title")}
         </h3>
-        <p className="text-xs text-gray-500 mb-1">{t("claudeHome.description")}</p>
+        <p className="text-xs text-gray-500 mb-1">{t("homes.description")}</p>
         <p className="text-[11px] text-gray-600 italic mb-4 leading-snug">{t("cursorPathsNote")}</p>
 
-        <div className="card p-5 space-y-4">
-          <div className="flex items-center gap-3">
-            <input
-              type="text"
-              value={claudeHomeInput}
-              onChange={(e) => {
-                setClaudeHomeInput(e.target.value);
-                setClaudeHomeError(null);
-              }}
-              className="flex-1 bg-surface-4 border border-surface-3 rounded-lg px-3 py-2 text-sm text-gray-200 font-mono focus:outline-none focus:border-violet-500/50"
-              placeholder={t("claudeHome.placeholder")}
-            />
-            <button
-              onClick={handleSaveClaudeHome}
-              disabled={claudeHomeSaving || claudeHomeInput === claudeHome}
-              className="btn-primary px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {claudeHomeSaving ? t("claudeHome.saving") : t("claudeHome.save")}
-            </button>
+        <div className="card p-5 space-y-5">
+          <div>
+            <div className="mb-2 flex items-center gap-2">
+              <p className="text-sm font-medium text-gray-200">{t("claudeHome.title")}</p>
+              <code className="rounded bg-surface-3 px-1.5 py-0.5 text-[10px] text-gray-500">
+                CLAUDE_HOME
+              </code>
+            </div>
+            <p className="mb-3 text-xs text-gray-500">{t("claudeHome.description")}</p>
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                value={claudeHomeInput}
+                onChange={(e) => {
+                  setClaudeHomeInput(e.target.value);
+                  setClaudeHomeError(null);
+                }}
+                className="flex-1 bg-surface-4 border border-surface-3 rounded-lg px-3 py-2 text-sm text-gray-200 font-mono focus:outline-none focus:border-violet-500/50"
+                placeholder={t("claudeHome.placeholder")}
+              />
+              <button
+                onClick={handleSaveClaudeHome}
+                disabled={claudeHomeSaving || claudeHomeInput === claudeHome}
+                className="btn-primary px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {claudeHomeSaving ? t("claudeHome.saving") : t("claudeHome.save")}
+              </button>
+            </div>
+            {claudeHomeError && <p className="text-xs text-red-400">{claudeHomeError}</p>}
+            {claudeHome && (
+              <p className="text-xs text-gray-500">
+                {t("claudeHome.current")}
+                <code className="ml-1 text-gray-400">{claudeHome}</code>
+              </p>
+            )}
           </div>
-          {claudeHomeError && <p className="text-xs text-red-400">{claudeHomeError}</p>}
-          {claudeHome && (
-            <p className="text-xs text-gray-500">
-              {t("claudeHome.current")} <code className="text-gray-400">{claudeHome}</code>
-            </p>
-          )}
+          <div className="border-t border-border pt-5">
+            <div className="mb-2 flex items-center gap-2">
+              <p className="text-sm font-medium text-gray-200">{t("codexHome.title")}</p>
+              <code className="rounded bg-surface-3 px-1.5 py-0.5 text-[10px] text-gray-500">
+                DASHBOARD_CODEX_HOME
+              </code>
+            </div>
+            <p className="mb-3 text-xs text-gray-500">{t("codexHome.description")}</p>
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                value={codexHomeInput}
+                onChange={(e) => {
+                  setCodexHomeInput(e.target.value);
+                  setCodexHomeError(null);
+                }}
+                className="flex-1 bg-surface-4 border border-surface-3 rounded-lg px-3 py-2 text-sm text-gray-200 font-mono focus:outline-none focus:border-violet-500/50"
+                placeholder={t("codexHome.placeholder")}
+              />
+              <button
+                onClick={handleSaveCodexHome}
+                disabled={codexHomeSaving || codexHomeInput === codexHome}
+                className="btn-primary px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {codexHomeSaving ? t("codexHome.saving") : t("codexHome.save")}
+              </button>
+            </div>
+            {codexHomeError && <p className="mt-2 text-xs text-red-400">{codexHomeError}</p>}
+            {codexHome && (
+              <p className="mt-2 text-xs text-gray-500">
+                {t("codexHome.current")}
+                <code className="ml-1 text-gray-400">{codexHome}</code>
+              </p>
+            )}
+          </div>
         </div>
       </section>
 

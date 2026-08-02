@@ -420,8 +420,9 @@ const BASE = "/api";
  * Append the current global data-scope (see {@link activeSourcesParam}) as a
  * `sources` query param, unless the caller already set one. Called by the
  * scoped list/aggregate endpoints (sessions, events, agents, stats, analytics)
- * so changing the scope narrows the whole app without every call site threading
- * it. `mode: "all"` yields no param, so unscoped installs hit clean URLs.
+ * so changing a machine or product scope narrows the whole app without every
+ * call site threading it. An all-machine / both-product selection yields no
+ * added filter, so unscoped installs hit clean URLs.
  */
 function applyScope(qs: URLSearchParams): URLSearchParams {
   if (!qs.has("sources")) {
@@ -649,7 +650,7 @@ export const api = {
       if (params?.sort_desc !== undefined) qs.set("sort_desc", String(params.sort_desc));
       if (params?.limit) qs.set("limit", String(params.limit));
       if (params?.offset) qs.set("offset", String(params.offset));
-      applyScope(qs); // narrow to the active data scope (source machines)
+      applyScope(qs); // narrow to the active machine and product scope
       const queryString = qs.toString();
       // Omit the "?" entirely when there are no params, for a clean/cacheable URL.
       return request<{ sessions: Session[]; total: number; limit: number; offset: number }>(
@@ -988,6 +989,18 @@ export const api = {
        */
       set: (path: string) =>
         request<{ ok: boolean; claude_home: string }>("/settings/claude-home", {
+          method: "PUT",
+          body: JSON.stringify({ path }),
+        }),
+    },
+    /** Get/set the local Codex state root. Changing it re-arms the live rollout
+     * watcher and immediately scans the selected `sessions/` tree. */
+    codexHome: {
+      /** @returns `{ codex_home }` — the resolved Codex state directory. */
+      get: () => request<{ codex_home: string }>("/settings/codex-home"),
+      /** @param path New absolute `~/.codex`-style directory. */
+      set: (path: string) =>
+        request<{ ok: boolean; codex_home: string }>("/settings/codex-home", {
           method: "PUT",
           body: JSON.stringify({ path }),
         }),

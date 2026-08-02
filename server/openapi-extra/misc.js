@@ -2,8 +2,8 @@
  * @file Supplementary OpenAPI 3.0 fragments for endpoints that were previously
  * undocumented in the base spec (server/openapi.js). Covers:
  *   - GET    /api/sessions/facets              (Sessions)
- *   - GET    /api/settings/claude-home         (Settings)
- *   - PUT    /api/settings/claude-home         (Settings)
+ *   - GET    /api/settings/{claude,codex}-home (Settings)
+ *   - PUT    /api/settings/{claude,codex}-home (Settings)
  *   - GET    /api/workflows/runs               (Workflows)
  *   - GET    /api/workflows/runs/{runId}       (Workflows)
  *   - GET    /api/remote-sources               (Remote Sources)
@@ -320,6 +320,46 @@ const schemas = {
         description: "The resolved absolute path now in effect (after `~` expansion).",
         example: "/Users/son/.codefuse/engine/cc",
       },
+    },
+  },
+
+  SettingsCodexHomeResponse: {
+    type: "object",
+    description:
+      "The Codex state directory the dashboard reads rollout transcripts and hook configuration from. Defaults to DASHBOARD_CODEX_HOME, then CODEX_HOME, then `~/.codex`.",
+    required: ["codex_home"],
+    properties: {
+      codex_home: {
+        type: "string",
+        description: "Absolute path to the active local Codex state directory.",
+        example: "/Users/son/.codex",
+      },
+    },
+  },
+
+  SettingsCodexHomeUpdateRequest: {
+    type: "object",
+    description:
+      "Request body for changing the Codex state directory. A leading `~` is expanded to the user's home directory; the resolved path must be absolute and point to an existing directory.",
+    required: ["path"],
+    properties: {
+      path: {
+        type: "string",
+        description:
+          "New Codex state directory. A leading `~/` is expanded before validation. Must resolve to an absolute existing directory.",
+        example: "~/.codex",
+      },
+    },
+  },
+
+  SettingsCodexHomeUpdateResponse: {
+    type: "object",
+    description:
+      "Confirmation that DASHBOARD_CODEX_HOME was updated, persisted to `.env`, and the live rollout synchronizer was re-armed for the new sessions directory.",
+    required: ["ok", "codex_home"],
+    properties: {
+      ok: { type: "boolean", enum: [true] },
+      codex_home: { type: "string", example: "/Users/son/.codex" },
     },
   },
 
@@ -1048,6 +1088,69 @@ const paths = {
                 error: {
                   code: "INVALID_PATH",
                   message: "Directory does not exist: /Users/son/.codefuse/engine/cc",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+
+  "/api/settings/codex-home": {
+    get: {
+      tags: ["Settings"],
+      summary: "Get the active Codex state directory",
+      description:
+        "Returns the local Codex directory the dashboard uses for rollout JSONL discovery and hook configuration. Resolves to DASHBOARD_CODEX_HOME, then CODEX_HOME, then `<homedir>/.codex`.",
+      operationId: "getCodexHome",
+      responses: {
+        200: {
+          description: "Current Codex state directory",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/SettingsCodexHomeResponse" },
+              example: { codex_home: "/Users/son/.codex" },
+            },
+          },
+        },
+      },
+    },
+    put: {
+      tags: ["Settings"],
+      summary: "Update the Codex state directory",
+      description:
+        "Changes the Codex directory used for rollout and hook discovery. A leading `~/` in `path` is expanded; the result must be an existing absolute directory. On success, DASHBOARD_CODEX_HOME is applied immediately, persisted to the project `.env`, and the live synchronizer re-watches and scans the new `sessions/` tree without a server restart.",
+      operationId: "updateCodexHome",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/SettingsCodexHomeUpdateRequest" },
+            example: { path: "~/.codex" },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: "Codex state directory updated",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/SettingsCodexHomeUpdateResponse" },
+              example: { ok: true, codex_home: "/Users/son/.codex" },
+            },
+          },
+        },
+        400: {
+          description:
+            "Invalid path — `path` missing or not a string, or the resolved path is not absolute / does not exist / is not a directory (code INVALID_PATH).",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              example: {
+                error: {
+                  code: "INVALID_PATH",
+                  message: "Directory does not exist: /Users/son/.codex",
                 },
               },
             },

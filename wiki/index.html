@@ -2004,7 +2004,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                 <tr>
                   <td><code>DASHBOARD_CODEX_HOME</code></td>
                   <td><code>~/.codex</code></td>
-                  <td>Optional Codex home. Defaults to <code>CODEX_HOME</code> or <code>~/.codex</code>.</td>
+                  <td>Optional Codex home. Settings saves this dashboard-only override, re-arms live rollout watching, and immediately scans the new <code>sessions/</code> tree.</td>
                 </tr>
                 <tr>
                   <td><code>DASHBOARD_CODEX_SYNC_MS</code></td>
@@ -5242,6 +5242,12 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
             The <code>/settings</code> route provides a comprehensive management interface with
             six sections:
           </p>
+          <p>
+            <strong>Dashboard Data</strong> lets you switch the entire app between Claude Code,
+            Codex, or both. Sessions, agents, events, token totals, workflows, analytics, and
+            costs refetch immediately. The same page saves separate Claude Code and Codex homes;
+            saving the Codex home re-arms live rollout watching and performs a fresh scan.
+          </p>
 
           <div class="feature-grid">
             <div class="feature-card">
@@ -6909,8 +6915,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=43" defer></script>
-    <script src="script.js?v=39" defer></script>
+    <script src="i18n-content.js?v=44" defer></script>
+    <script src="script.js?v=40" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

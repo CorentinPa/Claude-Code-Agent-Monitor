@@ -15,6 +15,7 @@ Complete REST API and WebSocket documentation for Agent Dashboard.
   - [Tools](#tools)
   - [Metrics](#metrics)
   - [Pricing](#pricing)
+  - [Settings](#settings)
   - [Notifications](#notifications)
   - [Remote Data Sources](#remote-data-sources)
 - [WebSocket API](#websocket-api)
@@ -698,7 +699,7 @@ curl -X PUT http://localhost:4820/api/pricing \
 
 ---
 
-#### OpenAI / Codex Pricing Rules
+#### OpenAI GPT Pricing Rules
 
 ```http
 GET    /api/pricing/gpt
@@ -706,7 +707,7 @@ PUT    /api/pricing/gpt
 DELETE /api/pricing/gpt/:pattern
 ```
 
-These endpoints manage the separate GPT rate card used only for Codex sessions. Each row has four per-million-token rates for each of three groups: `short_*` for standard requests at or below 272K input tokens, `long_*` for larger standard requests, and `fast_*` for Fast mode. The four rates are input, cached input, cache writes, and output. Every present rate must be a finite non-negative number. Cost responses include an unpriced row when a model or selected context/service tier has no configured rate, rather than silently guessing a price.
+These endpoints manage the separate GPT rate card used only for Codex sessions. Each row has four USD-per-million-token rates for each of three groups: `short_*` for standard requests at or below 272K input tokens, `long_*` for larger standard requests, and `fast_*` for Fast mode. The four rates are input, cached input, cache writes, and output. Every present rate must be a finite non-negative number. A published but unavailable tier is stored as an all-zero group and surfaced in cost responses as unpriced, rather than silently guessing a price.
 
 ```json
 {
@@ -956,6 +957,15 @@ curl "http://localhost:4820/api/sessions?sources=local,4d1f0e2a-7b9c-4c33-8a21-9
 ```
 
 ---
+
+### Settings
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` / `PUT` | `/api/settings/claude-home` | Read or update the Claude Code transcript/configuration root |
+| `GET` / `PUT` | `/api/settings/codex-home` | Read or update the Codex rollout/hooks root; saving re-arms the live watcher and schedules an immediate session scan |
+
+Both home updates accept `{ "path": "/absolute/path" }` (a leading `~/` is expanded). The resolved path must exist and be a directory; invalid input returns `400 INVALID_PATH`. Codex changes are persisted as `DASHBOARD_CODEX_HOME` and notify the background synchronizer after the response so a large history cannot delay the Settings action.
 
 ### Claude Config Explorer
 

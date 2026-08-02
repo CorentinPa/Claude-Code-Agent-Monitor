@@ -11,8 +11,10 @@
     "enableDesc": "Hiển thị bạn đồng hành ở góc trên toàn bảng điều khiển (⌘B để mở)"
   },
   "pricing": {
-    "title": "Định giá mô hình",
-    "description": "Đơn giá theo một triệu token (USD). Dùng % làm ký tự đại diện trong mẫu. Một số mô hình có mức giá giới thiệu có thời hạn (hiển thị màu tím); usage vào hoặc trước ngày kết thúc tính theo mức đó, sau đó tính theo mức chuẩn.",
+    "title": "Định giá mô hình Claude của Anthropic",
+    "navClaude": "Giá Claude",
+    "navGpt": "Giá Codex",
+    "description": "Đơn giá API Anthropic theo một triệu token (USD). Dùng % làm ký tự đại diện trong mẫu. Một số mô hình có mức giá giới thiệu có thời hạn (hiển thị màu tím); usage vào hoặc trước ngày kết thúc tính theo mức đó, sau đó tính theo mức chuẩn.",
     "introNote": "Ưu đãi ${{input}}/${{output}} đến {{until}}",
     "introRatesTitle": "Giá giới thiệu",
     "introRatesHint": "Để trống ngày nếu không có ưu đãi",
@@ -43,8 +45,10 @@
     "fastInput": "Fast Input",
     "fastOutput": "Fast Output",
     "gpt": {
-      "title": "Giá OpenAI / Codex",
-      "description": "USD trên 1M token. Yêu cầu chuẩn dùng mức Short với đầu vào không quá 272K token và Long khi vượt 272K; Fast mode dùng bảng giá công bố riêng.",
+      "title": "Định giá mô hình GPT của OpenAI",
+      "description": "Đơn giá API OpenAI công bố cho mức dùng Codex. Yêu cầu chuẩn dùng mức Short với đầu vào không quá 272K token và Long khi vượt 272K; Fast mode dùng bảng giá riêng.",
+      "unit": "USD trên 1M token",
+      "unavailableNote": "Mọi số tiền đều là USD trên 1M token. Dấu gạch ngang nghĩa là OpenAI không công bố mức giá ngữ cảnh hoặc Fast mode đó, vì vậy dashboard đánh dấu usage phù hợp là chưa có giá thay vì đoán.",
       "name": "Tên",
       "short": "Chuẩn · Short ≤272K",
       "long": "Chuẩn · Long >272K",
@@ -57,13 +61,37 @@
     }
   },
   "claudeHome": {
-    "title": "CLAUDE_HOME",
-    "description": "Thư mục gốc chứa dữ liệu phiên Claude Code. Thay đổi sẽ cập nhật ngay đường dẫn quét cho transcript và import.",
+    "title": "Thư mục chính Claude Code",
+    "description": "Thư mục gốc cho transcript, import và cấu hình Claude Code. Thay đổi sẽ áp dụng ngay cho các lần đọc tệp tiếp theo.",
     "save": "Lưu",
     "saving": "Đang lưu...",
     "current": "Hiện tại:",
     "placeholder": "/đường-dẫn/tới/claude-home",
     "saveFailed": "Cập nhật CLAUDE_HOME thất bại"
+  },
+  "codexHome": {
+    "title": "Thư mục chính Codex",
+    "description": "Thư mục gốc cho các phiên rollout và hook Codex. Lưu vị trí mới sẽ kích hoạt lại giám sát thời gian thực và quét các phiên ngay lập tức.",
+    "save": "Lưu",
+    "saving": "Đang lưu...",
+    "current": "Hiện tại:",
+    "placeholder": "/đường-dẫn/tới/codex-home",
+    "saveFailed": "Không thể cập nhật thư mục chính Codex"
+  },
+  "homes": {
+    "title": "Vị trí dữ liệu phiên",
+    "description": "Cấu hình các thư mục Claude Code và Codex cục bộ mà dashboard đọc. Mỗi vị trí đã lưu được áp dụng mà không cần khởi động lại ứng dụng."
+  },
+  "display": {
+    "title": "Dữ liệu dashboard",
+    "description": "Chọn phiên, token, chi phí và hoạt động của sản phẩm nào hiển thị trên toàn ứng dụng. Thay đổi có hiệu lực ngay và độc lập với bộ lọc nguồn dữ liệu máy.",
+    "claude": "Claude Code",
+    "codex": "Codex",
+    "both": "Cả hai",
+    "claudeDescription": "Chỉ hiển thị dữ liệu Claude Code.",
+    "codexDescription": "Chỉ hiển thị dữ liệu Codex.",
+    "bothDescription": "Kết hợp dữ liệu Claude Code và Codex.",
+    "beta": "Beta"
   },
   "hooks": {
     "title": "Cấu hình hook",

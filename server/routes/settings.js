@@ -1,5 +1,7 @@
 /**
- * @file Express router for settings-related endpoints, providing system info, database statistics, hook status, and operations to clear data, re-import sessions, reinstall hooks, reset pricing, export data, and perform cleanup of stale sessions. This allows the frontend to manage and maintain the agent monitoring system effectively.
+ * @file Express router for dashboard settings: system information, pricing and
+ * hook operations, data maintenance, and live-safe Claude Code/Codex session
+ * home configuration for the frontend Settings experience.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -31,6 +33,7 @@ const APP_VERSION = (() => {
 })();
 
 const { getSettingsPath, getClaudeHome, setClaudeHome } = require("../lib/claude-home");
+const { getCodexHome, setCodexHome } = require("../lib/codex-home");
 const CLAUDE_SETTINGS_PATH = getSettingsPath();
 
 function getDbSize() {
@@ -255,6 +258,31 @@ router.put("/claude-home", (req, res) => {
   try {
     const resolved = setClaudeHome(newPath);
     res.json({ ok: true, claude_home: resolved });
+  } catch (err) {
+    res.status(400).json({
+      error: { code: "INVALID_PATH", message: err.message },
+    });
+  }
+});
+
+// GET /api/settings/codex-home — get the active Codex state directory.
+router.get("/codex-home", (_req, res) => {
+  res.json({ codex_home: getCodexHome() });
+});
+
+// PUT /api/settings/codex-home — repoint the Codex rollout scanner and hooks.
+// setCodexHome notifies the live synchronizer, which re-watches and immediately
+// sweeps the new sessions directory without blocking this response.
+router.put("/codex-home", (req, res) => {
+  const { path: newPath } = req.body;
+  if (!newPath || typeof newPath !== "string") {
+    return res.status(400).json({
+      error: { code: "INVALID_PATH", message: "path is required and must be a string" },
+    });
+  }
+  try {
+    const resolved = setCodexHome(newPath);
+    res.json({ ok: true, codex_home: resolved });
   } catch (err) {
     res.status(400).json({
       error: { code: "INVALID_PATH", message: err.message },

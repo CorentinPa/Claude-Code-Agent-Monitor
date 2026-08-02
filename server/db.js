@@ -561,7 +561,6 @@ const DEFAULT_PRICING = [
 // rate card publishes a long-context column receive long rates; unsupported
 // combinations remain zero and surface as explicitly unpriced rather than
 // silently inventing a cost. Columns: pattern, name, short, long, fast.
-const gptLongRates = (short) => [short[0] * 2, short[1] * 2, short[2] * 2, short[3] * 1.5];
 const gptRate = (pattern, name, short, fast = [0, 0, 0, 0], long = [0, 0, 0, 0]) => [
   pattern,
   name,
@@ -570,57 +569,21 @@ const gptRate = (pattern, name, short, fast = [0, 0, 0, 0], long = [0, 0, 0, 0])
   ...fast,
 ];
 const DEFAULT_GPT_PRICING = [
-  gptRate(
-    "gpt-5.6-sol%",
-    "GPT-5.6 Sol",
-    [5, 0.5, 6.25, 30],
-    [10, 1, 12.5, 60],
-    gptLongRates([5, 0.5, 6.25, 30])
-  ),
-  gptRate(
-    "gpt-5.6-terra%",
-    "GPT-5.6 Terra",
-    [2, 0.2, 2.5, 12],
-    [4, 0.4, 5, 24],
-    gptLongRates([2, 0.2, 2.5, 12])
-  ),
+  gptRate("gpt-5.6-sol%", "GPT-5.6 Sol", [5, 0.5, 6.25, 30], [10, 1, 12.5, 60], [10, 1, 12.5, 45]),
+  gptRate("gpt-5.6-terra%", "GPT-5.6 Terra", [2, 0.2, 2.5, 12], [4, 0.4, 5, 24], [4, 0.4, 5, 18]),
   gptRate(
     "gpt-5.6-luna%",
     "GPT-5.6 Luna",
     [0.2, 0.02, 0.25, 1.2],
     [0.4, 0.04, 0.5, 2.4],
-    gptLongRates([0.2, 0.02, 0.25, 1.2])
+    [0.4, 0.04, 0.5, 1.8]
   ),
-  gptRate("gpt-5.5-pro%", "GPT-5.5 Pro", [30, 0, 0, 180], undefined, gptLongRates([30, 0, 0, 180])),
-  gptRate(
-    "gpt-5.5%",
-    "GPT-5.5",
-    [5, 0.5, 0, 30],
-    [12.5, 1.25, 0, 75],
-    gptLongRates([5, 0.5, 0, 30])
-  ),
-  gptRate("gpt-5.4-pro%", "GPT-5.4 Pro", [30, 0, 0, 180], undefined, gptLongRates([30, 0, 0, 180])),
-  gptRate(
-    "gpt-5.4-mini%",
-    "GPT-5.4 Mini",
-    [0.75, 0.075, 0, 4.5],
-    [1.5, 0.15, 0, 9],
-    gptLongRates([0.75, 0.075, 0, 4.5])
-  ),
-  gptRate(
-    "gpt-5.4-nano%",
-    "GPT-5.4 Nano",
-    [0.2, 0.02, 0, 1.25],
-    undefined,
-    gptLongRates([0.2, 0.02, 0, 1.25])
-  ),
-  gptRate(
-    "gpt-5.4%",
-    "GPT-5.4",
-    [2.5, 0.25, 0, 15],
-    [5, 0.5, 0, 30],
-    gptLongRates([2.5, 0.25, 0, 15])
-  ),
+  gptRate("gpt-5.5-pro%", "GPT-5.5 Pro", [30, 0, 0, 180], undefined, [60, 0, 0, 270]),
+  gptRate("gpt-5.5%", "GPT-5.5", [5, 0.5, 0, 30], [12.5, 1.25, 0, 75], [10, 1, 0, 45]),
+  gptRate("gpt-5.4-pro%", "GPT-5.4 Pro", [30, 0, 0, 180], undefined, [60, 0, 0, 270]),
+  gptRate("gpt-5.4-mini%", "GPT-5.4 Mini", [0.75, 0.075, 0, 4.5], [1.5, 0.15, 0, 9]),
+  gptRate("gpt-5.4-nano%", "GPT-5.4 Nano", [0.2, 0.02, 0, 1.25], undefined),
+  gptRate("gpt-5.4%", "GPT-5.4", [2.5, 0.25, 0, 15], [5, 0.5, 0, 30], [5, 0.5, 0, 22.5]),
   gptRate("gpt-5.2-pro%", "GPT-5.2 Pro", [21, 0, 0, 168]),
   gptRate("gpt-5.2%", "GPT-5.2", [1.75, 0.175, 0, 14], [3.5, 0.35, 0, 28]),
   gptRate("gpt-5.1%", "GPT-5.1", [1.25, 0.125, 0, 10], [2.5, 0.25, 0, 20]),
@@ -665,6 +628,29 @@ function seedGptPricing(dbHandle = db) {
   seed(DEFAULT_GPT_PRICING);
 }
 seedGptPricing();
+
+// v1 seeded long-context prices for GPT-5.4 Mini and Nano by applying the
+// flagship multiplier mechanically. OpenAI's rate card marks those long tiers
+// unavailable. Correct only the exact old seed values so an operator's custom
+// long-context price is never overwritten during a normal dashboard upgrade.
+function repairLegacyGptPricing(dbHandle = db) {
+  const repair = dbHandle.prepare(`
+    UPDATE gpt_model_pricing
+    SET long_input_per_mtok = 0,
+        long_cached_input_per_mtok = 0,
+        long_cache_write_per_mtok = 0,
+        long_output_per_mtok = 0,
+        updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+    WHERE model_pattern = ?
+      AND long_input_per_mtok = ?
+      AND long_cached_input_per_mtok = ?
+      AND long_cache_write_per_mtok = ?
+      AND long_output_per_mtok = ?
+  `);
+  repair.run("gpt-5.4-mini%", 1.5, 0.15, 0, 6.75);
+  repair.run("gpt-5.4-nano%", 0.4, 0.04, 0, 1.875);
+}
+repairLegacyGptPricing();
 
 // Top-up: insert any default pattern that isn't already present. Preserves
 // user edits to existing rows — we only add what's missing, never overwrite.
@@ -1788,4 +1774,5 @@ module.exports = {
   DEFAULT_GPT_PRICING,
   applyIntroPricing,
   seedGptPricing,
+  repairLegacyGptPricing,
 };

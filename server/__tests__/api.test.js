@@ -61,6 +61,7 @@ const EXPECTED_API_PATHS = [
   "/api/settings/export",
   "/api/settings/cleanup",
   "/api/settings/claude-home",
+  "/api/settings/codex-home",
   "/api/import/guide",
   "/api/import/rescan",
   "/api/import/scan-path",
@@ -592,6 +593,58 @@ describe("Stats API", () => {
     const res = await fetch("/api/stats");
     assert.ok(res.body.total_sessions >= 2);
     assert.ok(res.body.total_agents >= 2);
+  });
+});
+
+// ============================================================
+// Settings and GPT pricing API
+// ============================================================
+describe("Settings and GPT pricing API", () => {
+  it("returns the active Codex home without exposing a raw environment override", async () => {
+    const res = await fetch("/api/settings/codex-home");
+    assert.equal(res.status, 200);
+    assert.equal(typeof res.body.codex_home, "string");
+    assert.ok(path.isAbsolute(res.body.codex_home));
+  });
+
+  it("seeds the supplied GPT card with explicit long-context availability", async () => {
+    const res = await fetch("/api/pricing/gpt");
+    assert.equal(res.status, 200);
+    const byPattern = new Map(res.body.pricing.map((rule) => [rule.model_pattern, rule]));
+
+    assert.deepEqual(
+      [
+        "short_input_per_mtok",
+        "short_cached_input_per_mtok",
+        "short_cache_write_per_mtok",
+        "short_output_per_mtok",
+        "long_input_per_mtok",
+        "long_cached_input_per_mtok",
+        "long_cache_write_per_mtok",
+        "long_output_per_mtok",
+        "fast_input_per_mtok",
+        "fast_cached_input_per_mtok",
+        "fast_cache_write_per_mtok",
+        "fast_output_per_mtok",
+      ].map((field) => byPattern.get("gpt-5.6-luna%")[field]),
+      [0.2, 0.02, 0.25, 1.2, 0.4, 0.04, 0.5, 1.8, 0.4, 0.04, 0.5, 2.4]
+    );
+
+    // The published card intentionally has no long-context tier for these
+    // models; zero keeps costs honest and is surfaced as unavailable in the UI.
+    for (const pattern of ["gpt-5.4-mini%", "gpt-5.4-nano%"]) {
+      const rule = byPattern.get(pattern);
+      assert.ok(rule, `expected ${pattern} to be seeded`);
+      assert.deepEqual(
+        [
+          rule.long_input_per_mtok,
+          rule.long_cached_input_per_mtok,
+          rule.long_cache_write_per_mtok,
+          rule.long_output_per_mtok,
+        ],
+        [0, 0, 0, 0]
+      );
+    }
   });
 });
 

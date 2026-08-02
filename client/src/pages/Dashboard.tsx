@@ -161,6 +161,7 @@ function formatUptime(seconds: number): string {
 function SystemHealthTab() {
   const [info, setInfo] = useState<SystemInfo | null>(null);
   const [workflow, setWorkflow] = useState<WorkflowData | null>(null);
+  const [scope] = useDataScope();
 
   const loadData = useCallback(async () => {
     try {
@@ -170,7 +171,7 @@ function SystemHealthTab() {
     } catch (e) {
       console.error(e);
     }
-  }, []);
+  }, [scope]);
 
   useEffect(() => {
     loadData();
@@ -1006,8 +1007,8 @@ export function Dashboard() {
     return () => ro.disconnect();
   }, [activeTab]);
 
-  // Global data scope; a change re-runs `load` (the api layer injects the
-  // matching `sources` param into the calls below).
+  // Global data scope; a change re-runs `load` (the API layer injects matching
+  // source-machine and provider params into the calls below).
   const [scope] = useDataScope();
 
   const load = useCallback(async () => {

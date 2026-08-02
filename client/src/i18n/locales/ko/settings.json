@@ -11,8 +11,10 @@
     "enableDesc": "대시보드 전반에 코너 도우미를 표시합니다(⌘B로 열기)"
   },
   "pricing": {
-    "title": "모델 가격 정책",
-    "description": "백만 토큰당 요금(USD)입니다. 패턴에서는 %를 와일드카드로 사용하세요. 일부 모델은 기간 한정 도입 요금(보라색으로 표시)이 있으며, 마감일 이전 사용량은 해당 요금으로, 이후 사용량은 표준 요금으로 청구됩니다.",
+    "title": "Anthropic Claude 모델 가격 정책",
+    "navClaude": "Claude 가격",
+    "navGpt": "Codex 가격",
+    "description": "백만 토큰당 Anthropic API 요금(USD)입니다. 패턴에서는 %를 와일드카드로 사용하세요. 일부 모델은 기간 한정 도입 요금(보라색으로 표시)이 있으며, 마감일 이전 사용량은 해당 요금으로, 이후 사용량은 표준 요금으로 청구됩니다.",
     "introNote": "도입가 ${{input}}/${{output}}, {{until}}까지",
     "introRatesTitle": "도입 요금",
     "introRatesHint": "프로모션이 없으면 날짜를 비워 두세요",
@@ -43,8 +45,10 @@
     "fastInput": "Fast Input",
     "fastOutput": "Fast Output",
     "gpt": {
-      "title": "OpenAI / Codex 가격",
-      "description": "토큰 100만 개당 USD입니다. 표준 요청은 입력 토큰이 272K 이하일 때 Short, 초과일 때 Long 요율을 사용하며 Fast 모드는 별도 공개 요율을 사용합니다.",
+      "title": "OpenAI GPT 모델 가격 정책",
+      "description": "Codex 사용을 위한 공개 OpenAI API 요금입니다. 표준 요청은 입력 토큰이 272K 이하일 때 Short, 초과일 때 Long 요율을 사용하며 Fast 모드는 별도 요금표를 사용합니다.",
+      "unit": "토큰 100만 개당 USD",
+      "unavailableNote": "모든 금액은 토큰 100만 개당 USD입니다. 대시는 OpenAI가 해당 컨텍스트 또는 Fast 모드 요율을 공개하지 않았음을 뜻하므로, 대시보드는 추정하지 않고 일치하는 사용량을 미가격으로 표시합니다.",
       "name": "이름",
       "short": "표준 · Short ≤272K",
       "long": "표준 · Long >272K",
@@ -57,13 +61,37 @@
     }
   },
   "claudeHome": {
-    "title": "CLAUDE_HOME",
-    "description": "Claude Code 세션 데이터의 루트 디렉터리입니다. 변경하면 트랜스크립트와 가져오기의 스캔 경로가 즉시 업데이트됩니다.",
+    "title": "Claude Code 홈",
+    "description": "Claude Code 트랜스크립트, 가져오기, 구성의 루트 디렉터리입니다. 변경하면 이후 파일 읽기에 즉시 적용됩니다.",
     "save": "저장",
     "saving": "저장 중...",
     "current": "현재:",
     "placeholder": "/path/to/claude-home",
     "saveFailed": "CLAUDE_HOME 업데이트에 실패했습니다"
+  },
+  "codexHome": {
+    "title": "Codex 홈",
+    "description": "Codex rollout 세션과 hook의 루트 디렉터리입니다. 새 위치를 저장하면 실시간 모니터링을 다시 연결하고 세션을 즉시 스캔합니다.",
+    "save": "저장",
+    "saving": "저장 중...",
+    "current": "현재:",
+    "placeholder": "/path/to/codex-home",
+    "saveFailed": "Codex 홈 업데이트에 실패했습니다"
+  },
+  "homes": {
+    "title": "세션 데이터 위치",
+    "description": "대시보드가 읽는 로컬 Claude Code 및 Codex 디렉터리를 구성합니다. 저장한 위치는 앱을 다시 시작하지 않아도 적용됩니다."
+  },
+  "display": {
+    "title": "대시보드 데이터",
+    "description": "앱 전체에 표시할 제품의 세션, 토큰, 비용 및 활동을 선택하세요. 변경 사항은 즉시 적용되며 머신 데이터 소스 필터와 독립적입니다.",
+    "claude": "Claude Code",
+    "codex": "Codex",
+    "both": "둘 다",
+    "claudeDescription": "Claude Code 데이터만 표시합니다.",
+    "codexDescription": "Codex 데이터만 표시합니다.",
+    "bothDescription": "Claude Code와 Codex 데이터를 함께 표시합니다.",
+    "beta": "베타"
   },
   "hooks": {
     "title": "Hook 설정",

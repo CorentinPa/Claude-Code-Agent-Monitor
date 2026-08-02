@@ -125,4 +125,28 @@ describe("i18n resources", () => {
       }
     }
   });
+
+  it("ships the global provider and session-home settings in every supported locale", () => {
+    const keys = [
+      "display.title",
+      "display.claude",
+      "display.codex",
+      "display.both",
+      "display.claudeDescription",
+      "display.codexDescription",
+      "display.bothDescription",
+      "homes.title",
+      "codexHome.title",
+      "pricing.navClaude",
+      "pricing.navGpt",
+      "pricing.gpt.title",
+      "pricing.gpt.unavailableNote",
+    ];
+
+    for (const language of ["en", "zh", "vi", "ko", "es"]) {
+      for (const key of keys) {
+        expect(i18n.getResource(language, "settings", key)).toBeTruthy();
+      }
+    }
+  });
 });

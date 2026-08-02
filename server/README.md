@@ -504,9 +504,9 @@ Request body shape:
 | `GET`    | `/api/pricing`            | List pricing rules                     |
 | `PUT`    | `/api/pricing`            | Create/update a pricing rule           |
 | `DELETE` | `/api/pricing/:pattern`   | Delete pricing rule                    |
-| `GET`    | `/api/pricing/gpt`        | List the separate OpenAI/Codex rate card |
-| `PUT`    | `/api/pricing/gpt`        | Create/update an OpenAI/Codex rate row |
-| `DELETE` | `/api/pricing/gpt/:pattern` | Delete an OpenAI/Codex rate row      |
+| `GET`    | `/api/pricing/gpt`        | List the separate OpenAI GPT rate card |
+| `PUT`    | `/api/pricing/gpt`        | Create/update an OpenAI GPT rate row |
+| `DELETE` | `/api/pricing/gpt/:pattern` | Delete an OpenAI GPT rate row      |
 | `GET`    | `/api/pricing/cost`       | Total cost across all sessions         |
 | `GET`    | `/api/pricing/cost/:id`   | Cost breakdown for one session         |
 
@@ -576,6 +576,10 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
 | `GET`  | `/api/settings/export`         | Export all data (sessions, agents, events, token_usage, workflows, dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) as one versioned JSON attachment |
 | `POST` | `/api/settings/import`         | Restore a bundle from `/export`. Multipart `file`, or JSON `{ path }` (server reads it). Idempotent + non-destructive: sessions already present are skipped whole |
 | `POST` | `/api/settings/cleanup`        | Abandon stale sessions and purge old data        |
+| `GET` / `PUT` | `/api/settings/claude-home` | Read or update the Claude Code transcript/configuration root |
+| `GET` / `PUT` | `/api/settings/codex-home` | Read or update the Codex rollout/hooks root; saving immediately re-arms the watcher and schedules a scan |
+
+Both home updates accept `{ "path": "/absolute/path" }`; a leading `~/` is expanded, and a missing or non-directory path returns `400 INVALID_PATH`. The Codex setting persists as `DASHBOARD_CODEX_HOME`, not `CODEX_HOME`, so Settings never mutates the broader Codex CLI environment.
 
 ### Claude Config Explorer (`/api/cc-config`)
 
@@ -1424,7 +1428,7 @@ DASHBOARD_DB_PATH=./data/dashboard.db  # SQLite database path
 
 # Background services
 DASHBOARD_SESSION_SYNC_MS=30000    # Continuous project-sync poll interval (ms); 0 disables the poll (watcher stays)
-DASHBOARD_CODEX_HOME=              # Optional Codex home; default CODEX_HOME or ~/.codex
+DASHBOARD_CODEX_HOME=              # Optional Codex home; Settings saves this dashboard-only override and immediately re-arms live watching
 DASHBOARD_CODEX_SYNC_MS=4000       # Codex rollout safety-net poll (ms); 0 disables poll (watcher stays)
 DASHBOARD_LIVENESS_PROBE=1         # 0 disables the dead-session liveness reap (use when hooks arrive from another machine)
 DASHBOARD_LIVENESS_IDLE_SECONDS=60 # Idle gate before the liveness reap may complete a process-less session
