@@ -983,7 +983,7 @@ curl "http://localhost:4820/api/sessions?sources=local,4d1f0e2a-7b9c-4c33-8a21-9
 
 Both home updates accept `{ "path": "/absolute/path" }` (a leading `~/` is expanded). The resolved path must exist and be a directory; invalid input returns `400 INVALID_PATH`. Codex changes are persisted as `DASHBOARD_CODEX_HOME` and notify the background synchronizer after the response so a large history cannot delay the Settings action.
 
-### Claude Config Explorer
+### Agent Config
 
 The `/api/cc-config/*` namespace powers the Claude Config Explorer page. All read endpoints are pure file reads under `CLAUDE_HOME` and the project's `.claude/` dir; mutations are limited to low-risk text-file artifacts (skills, subagents, slash commands, output styles, memory) and always create a timestamped backup before writing. Plugins, MCP servers, hooks-in-settings, and live `settings.json` files stay read-only because they are written concurrently by the running Claude Code CLI.
 
@@ -1017,23 +1017,35 @@ DELETE /api/cc-config/file     Body: { scope, type, name? }
 
 Backup paths look like `<root>/cc-config-backups/<type>/<base>.<ISO>.bak[.dir]` — outside the directories Claude Code scans, so a deleted skill cannot resurface as a backup-named one. The Backups modal in the UI auto-builds `mv` restore commands.
 
-### Run Claude
+### Codex Config Explorer
 
-The `/api/run/*` namespace spawns and supervises `claude` subprocesses from the dashboard. Every route enforces a same-origin / loopback-Origin guard; browser requests must come from `localhost`, `127.0.0.1`, `::1`, or `0.0.0.0`. CLI / curl requests with no `Origin` header pass through. When `DASHBOARD_TOKEN` is set, a valid token is also required here (like the rest of `/api/*` — see [Authentication](#authentication)).
+The Codex half of Agent Config is deliberately read-only. It safely discovers configuration defaults, cached models, profiles, MCP servers, projects, skills, rules, hooks, plugins, and instruction files beneath the configured Codex home. Values with secret-like TOML or JSON keys are redacted server-side.
+
+```http
+GET /api/codex-config/overview
+GET /api/codex-config/file?path=<absolute-path-under-codex-home>
+```
+
+The file endpoint also accepts this repository's `AGENTS.md`, rejects every other path, and caps returned bodies at 256 KiB. `codex_config_changed` is emitted over WebSocket when relevant configuration, skill, rule, or plugin files change.
+
+### Run Agent
+
+The `/api/run/*` namespace spawns and supervises Claude Code subprocesses **and native interactive Codex app-server threads** from the dashboard. Every route enforces a same-origin / loopback-Origin guard; browser requests must come from `localhost`, `127.0.0.1`, `::1`, or `0.0.0.0`. CLI / curl requests with no `Origin` header pass through. When `DASHBOARD_TOKEN` is set, a valid token is also required here (like the rest of `/api/*` — see [Authentication](#authentication)).
 
 ```http
 GET    /api/run                       List all handles + concurrency state
-GET    /api/run/binary                { found, path } for the `claude` binary
+GET    /api/run/binary?provider=…     { found, path, provider } for `claude` or `codex`
+GET    /api/run/models?provider=…     Dynamic provider model choices
 GET    /api/run/cwds                  Suggested cwds (dashboard, home, recent)
 GET    /api/run/files?cwd=&q=         Fuzzy file search inside cwd for the @-file autocomplete
                                        (skips node_modules, .git, dist, build, .next, .cache, coverage, vendor)
-POST   /api/run                       Spawn — Body: { prompt, mode, cwd?, model?, permissionMode?, resumeSessionId?, effort? }
-POST   /api/run/:id/message           Send follow-up turn — Body: { text }
+POST   /api/run                       Spawn — Body: { provider?, prompt, mode?, cwd?, model?, permissionMode?, sandbox?, resumeSessionId?, effort? }
+POST   /api/run/:id/message           Send follow-up turn — Body: { text, provider? }
 GET    /api/run/:id[?envelopes=1]     Handle state; ?envelopes=1 includes the in-memory envelope log
 DELETE /api/run/:id                   Stop (SIGTERM → SIGKILL after 5 s)
 ```
 
-`mode` is `"headless"` (single-shot, stdin closed after spawn, prompt in argv via `-p`) or `"conversation"` (multi-turn, stdin stays open, prompt and follow-ups piped as stream-json envelopes). `resumeSessionId` requires conversation mode and adds `--resume <id>` so the run continues an existing Claude Code session — the cwd is locked to the original session's cwd. **When `resumeSessionId` is set, `prompt` may be empty** — the spawner skips the initial stdin write and `claude --resume` idles on the resumed conversation until the user posts a follow-up via `POST /api/run/:id/message`. Headless mode and fresh conversations still require a non-empty prompt (`EBADPROMPT` otherwise). `effort` (`"low"` / `"medium"` / `"high"`) maps to `--effort` and tunes the model's thinking budget. The spawner always passes `--output-format stream-json --verbose --include-partial-messages` so output streams over the existing dashboard WebSocket as `run_stream` (parsed envelopes, including `stream_event` deltas for character-by-character rendering), `run_status` (status transitions), and `run_input_ack` (stdin write confirmed). Concurrency is effectively uncapped (default ceiling 10000, override with `RUN_MAX_CONCURRENT`) — the terminal TUI has no cap and neither does the dashboard; the ceiling exists only to prevent fork-bomb footguns from a buggy client.
+`provider` defaults to `"claude"`. Claude keeps `"headless"` (single-shot, prompt in argv via `-p`) and `"conversation"` modes, including `resumeSessionId` support. Codex always uses a real multi-turn app-server thread; its `permissionMode` is an approval policy (`"untrusted"`, `"on-request"`, or `"never"`) and its `sandbox` is `"read-only"`, `"workspace-write"`, or `"danger-full-access"`. Codex's model list is retrieved from the signed-in local app server, while Claude returns its supported aliases plus locally observed models because the Claude CLI has no model-list command. `run_stream` carries parsed Claude stream-json envelopes or normalized Codex app-server events; `run_status` and `run_input_ack` cover both providers. Concurrency is effectively uncapped (default ceiling 10000, override with `RUN_MAX_CONCURRENT`) — the ceiling exists only to prevent fork-bomb footguns from a buggy client.
 
 Spawned `claude` processes fire the dashboard's hooks like any other CLI session, so they show up in `/api/sessions`, the analytics, the Kanban board, and the Workflows page automatically — the Run page itself just owns the live streaming UX.
 

@@ -6,6 +6,16 @@
  */
 window.__WIKI_CONTENT_I18N = {
   zh: {
+    "<strong>Run Agent</strong> now begins by choosing Claude Code or Codex. Codex starts a native interactive <code>app-server</code> thread, offers provider-native approval and sandbox controls, and discovers models directly from the signed-in CLI so new releases appear without a dashboard update.":
+      "<strong>运行 Agent</strong>现在会先选择 Claude Code 或 Codex。Codex 会启动原生交互式 <code>app-server</code> 线程，提供提供方原生审批与沙箱控制，并直接从已登录 CLI 发现模型，因此新版本无需更新仪表盘即可出现。",
+    "The same page also has a <strong>Codex</strong> switch. Its safe, read-only explorer shows defaults, the model cache, profiles, MCP servers, projects, skills, rules, hooks, plugins, and instruction files from <code>CODEX_HOME</code>. Secret-like TOML and JSON values are redacted, and <code>codex_config_changed</code> refreshes the view when those files change.":
+      "同一页面还有 <strong>Codex</strong> 切换项。其安全的只读浏览器会显示 <code>CODEX_HOME</code> 中的默认值、模型缓存、配置文件、MCP 服务器、项目、技能、规则、Hook、插件和指令文件。类似密钥的 TOML 和 JSON 值会脱敏，文件变化时 <code>codex_config_changed</code> 会刷新视图。",
+    '<span class="caption-icon">🧰</span> <span><strong>Agent Config</strong> — switch between the editable Claude Code explorer and a live, read-only Codex explorer for defaults, models, profiles, MCP, projects, skills, rules, hooks, plugins, and instructions. Secret-like values are redacted.</span>':
+      '<span class="caption-icon">🧰</span> <span><strong>Agent 配置</strong> — 可在可编辑的 Claude Code 浏览器与实时只读 Codex 浏览器之间切换，查看默认值、模型、配置文件、MCP、项目、技能、规则、Hook、插件和指令。类似密钥的值会被脱敏。</span>',
+    '<span class="caption-icon">▶️</span> <span><strong>Run Agent</strong> — choose Claude Code or Codex each time you open the launcher. Claude supports Conversation or Headless mode; Codex starts a native interactive thread with approval and sandbox controls.</span>':
+      '<span class="caption-icon">▶️</span> <span><strong>运行 Agent</strong> — 每次打开启动器时选择 Claude Code 或 Codex。Claude 支持对话或单次模式；Codex 启动带审批与沙箱控制的原生交互线程。</span>',
+    '<span class="caption-icon">💬</span> <span><strong>Run Agent · live stream</strong> — Claude stream-json and Codex app-server events render together as chat, including reasoning, commands, file changes, and tool activity. Dashboard Runs lets you re-attach later.</span>':
+      '<span class="caption-icon">💬</span> <span><strong>运行 Agent · 实时流</strong> — Claude stream-json 与 Codex app-server 事件会以聊天形式一同呈现，包括推理、命令、文件变更和工具活动。Dashboard Runs 支持稍后重新连接。</span>',
     "Codex also reads its native session index, so <code>/rename</code> titles reach session and agent cards in real time. Its conversation reader includes human turns plus <code>exec</code> custom-tool calls and outputs, and loads older pages when you reach the top of the transcript.":
       "Codex 还会读取其原生会话索引，因此 <code>/rename</code> 标题会实时显示在会话和 agent 卡片上。其对话读取器包含用户回合以及 <code>exec</code> 自定义工具调用和输出，并会在到达 transcript 顶部时加载更早的页面。",
     "Optional Codex home. Settings saves this dashboard-only override, re-arms live rollout watching, and immediately scans the new <code>sessions/</code> tree.":
@@ -1342,6 +1352,16 @@ window.__WIKI_CONTENT_I18N = {
       "<strong>服务端分页</strong>的表格，列出每一个已记录的会话。每一页只获取对应的数据片段，因此无论会话数量多少，成本计算都保持有界。针对 <code>id</code>、<code>name</code> 和 <code>cwd</code> 的不区分大小写搜索在服务端运行，并带有 300 ms 防抖；状态过滤器可与搜索组合以精确缩小范围。可搜索的复选框项目选择器支持选择多个目录；完整长路径仍可查看，紧凑的触发器文字让筛选栏保持易读。排序使用相同的自定义下拉模式。每一行显示会话的真实名称（从 transcript 实时同步：<code>/rename</code> 或 <code>claude -n</code> 标题，否则使用自动标题，再否则使用首条用户 prompt，并回退到短 ID）、状态徽章、agent 数量、时长、模型和预估成本。点击任意行即可深入查看完整的会话详情视图，包含对话记录和 agent 层级。",
   },
   vi: {
+    "<strong>Run Agent</strong> now begins by choosing Claude Code or Codex. Codex starts a native interactive <code>app-server</code> thread, offers provider-native approval and sandbox controls, and discovers models directly from the signed-in CLI so new releases appear without a dashboard update.":
+      "<strong>Chạy Agent</strong> giờ bắt đầu bằng việc chọn Claude Code hoặc Codex. Codex khởi tạo thread <code>app-server</code> tương tác native, có approval và sandbox riêng, đồng thời khám phá model trực tiếp từ CLI đã đăng nhập để model mới xuất hiện mà không cần cập nhật dashboard.",
+    "The same page also has a <strong>Codex</strong> switch. Its safe, read-only explorer shows defaults, the model cache, profiles, MCP servers, projects, skills, rules, hooks, plugins, and instruction files from <code>CODEX_HOME</code>. Secret-like TOML and JSON values are redacted, and <code>codex_config_changed</code> refreshes the view when those files change.":
+      "Cùng trang còn có công tắc <strong>Codex</strong>. Trình khám phá an toàn, chỉ đọc hiển thị mặc định, cache model, profile, máy chủ MCP, dự án, skill, rule, hook, plugin và tệp hướng dẫn từ <code>CODEX_HOME</code>. Giá trị TOML và JSON giống bí mật được che đi; <code>codex_config_changed</code> làm mới giao diện khi các tệp thay đổi.",
+    '<span class="caption-icon">🧰</span> <span><strong>Agent Config</strong> — switch between the editable Claude Code explorer and a live, read-only Codex explorer for defaults, models, profiles, MCP, projects, skills, rules, hooks, plugins, and instructions. Secret-like values are redacted.</span>':
+      '<span class="caption-icon">🧰</span> <span><strong>Cấu hình Agent</strong> — chuyển giữa trình khám phá Claude Code có thể chỉnh sửa và trình khám phá Codex trực tiếp, chỉ đọc cho mặc định, model, profile, MCP, dự án, skill, rule, hook, plugin và hướng dẫn. Giá trị giống bí mật được che đi.</span>',
+    '<span class="caption-icon">▶️</span> <span><strong>Run Agent</strong> — choose Claude Code or Codex each time you open the launcher. Claude supports Conversation or Headless mode; Codex starts a native interactive thread with approval and sandbox controls.</span>':
+      '<span class="caption-icon">▶️</span> <span><strong>Chạy Agent</strong> — chọn Claude Code hoặc Codex mỗi khi mở trình khởi chạy. Claude hỗ trợ Hội thoại hoặc Một lần; Codex khởi chạy thread tương tác native với approval và sandbox.</span>',
+    '<span class="caption-icon">💬</span> <span><strong>Run Agent · live stream</strong> — Claude stream-json and Codex app-server events render together as chat, including reasoning, commands, file changes, and tool activity. Dashboard Runs lets you re-attach later.</span>':
+      '<span class="caption-icon">💬</span> <span><strong>Chạy Agent · luồng trực tiếp</strong> — stream-json của Claude và sự kiện app-server của Codex cùng hiển thị như chat, gồm reasoning, command, thay đổi tệp và hoạt động tool. Dashboard Runs cho phép gắn lại sau.</span>',
     "Codex also reads its native session index, so <code>/rename</code> titles reach session and agent cards in real time. Its conversation reader includes human turns plus <code>exec</code> custom-tool calls and outputs, and loads older pages when you reach the top of the transcript.":
       "Codex cũng đọc chỉ mục phiên gốc, vì vậy tiêu đề <code>/rename</code> xuất hiện trên thẻ phiên và agent theo thời gian thực. Trình đọc hội thoại gồm lượt của người dùng cùng lời gọi và đầu ra custom tool <code>exec</code>, đồng thời tải các trang cũ hơn khi bạn chạm đầu transcript.",
     "Optional Codex home. Settings saves this dashboard-only override, re-arms live rollout watching, and immediately scans the new <code>sessions/</code> tree.":
@@ -2696,6 +2716,16 @@ window.__WIKI_CONTENT_I18N = {
       "Bảng <strong>phân trang phía máy chủ</strong> liệt kê mọi phiên đã ghi. Mỗi trang chỉ lấy phần dữ liệu của mình nên việc tính chi phí luôn có giới hạn, dù có bao nhiêu phiên. Tìm kiếm không phân biệt hoa thường trên <code>id</code>, <code>name</code> và <code>cwd</code> chạy ở phía máy chủ với độ trễ chống dội 300 ms; bộ lọc trạng thái kết hợp với tìm kiếm để thu hẹp chính xác. Bộ chọn dự án dạng hộp kiểm có thể tìm kiếm hỗ trợ chọn nhiều thư mục; đường dẫn dài vẫn có thể xem đầy đủ, còn văn bản gọn trên nút giữ thanh lọc dễ đọc. Sắp xếp dùng cùng mẫu menu tùy chỉnh. Mỗi hàng hiển thị tên thật của phiên (đồng bộ trực tiếp từ bản ghi: tiêu đề <code>/rename</code> hoặc <code>claude -n</code>, nếu không thì tiêu đề tự động, nếu vẫn không có thì prompt đầu tiên của người dùng, với dự phòng là ID ngắn), huy hiệu trạng thái, số lượng agent, thời lượng, mô hình và chi phí ước tính. Nhấp vào bất kỳ hàng nào để đi sâu vào chế độ xem chi tiết đầy đủ của phiên với bản ghi hội thoại và phân cấp agent.",
   },
   ko: {
+    "<strong>Run Agent</strong> now begins by choosing Claude Code or Codex. Codex starts a native interactive <code>app-server</code> thread, offers provider-native approval and sandbox controls, and discovers models directly from the signed-in CLI so new releases appear without a dashboard update.":
+      "<strong>에이전트 실행</strong>은 이제 Claude Code 또는 Codex 선택으로 시작합니다. Codex는 네이티브 대화형 <code>app-server</code> 스레드를 시작하고 제공자 고유의 승인 및 샌드박스 제어를 제공하며, 로그인한 CLI에서 모델을 직접 검색하므로 대시보드를 업데이트하지 않아도 새 모델이 나타납니다.",
+    "The same page also has a <strong>Codex</strong> switch. Its safe, read-only explorer shows defaults, the model cache, profiles, MCP servers, projects, skills, rules, hooks, plugins, and instruction files from <code>CODEX_HOME</code>. Secret-like TOML and JSON values are redacted, and <code>codex_config_changed</code> refreshes the view when those files change.":
+      "같은 페이지에는 <strong>Codex</strong> 전환도 있습니다. 안전한 읽기 전용 탐색기는 <code>CODEX_HOME</code>의 기본값, 모델 캐시, 프로필, MCP 서버, 프로젝트, 스킬, 규칙, 훅, 플러그인, 지침 파일을 보여 줍니다. 비밀과 유사한 TOML 및 JSON 값은 마스킹되고 파일이 바뀌면 <code>codex_config_changed</code>가 보기를 새로고침합니다.",
+    '<span class="caption-icon">🧰</span> <span><strong>Agent Config</strong> — switch between the editable Claude Code explorer and a live, read-only Codex explorer for defaults, models, profiles, MCP, projects, skills, rules, hooks, plugins, and instructions. Secret-like values are redacted.</span>':
+      '<span class="caption-icon">🧰</span> <span><strong>에이전트 구성</strong> — 편집 가능한 Claude Code 탐색기와 기본값, 모델, 프로필, MCP, 프로젝트, 스킬, 규칙, 훅, 플러그인, 지침을 위한 실시간 읽기 전용 Codex 탐색기 사이를 전환합니다. 비밀과 유사한 값은 마스킹됩니다.</span>',
+    '<span class="caption-icon">▶️</span> <span><strong>Run Agent</strong> — choose Claude Code or Codex each time you open the launcher. Claude supports Conversation or Headless mode; Codex starts a native interactive thread with approval and sandbox controls.</span>':
+      '<span class="caption-icon">▶️</span> <span><strong>에이전트 실행</strong> — 실행기를 열 때마다 Claude Code 또는 Codex를 선택합니다. Claude는 대화 또는 원샷 모드를 지원하고, Codex는 승인 및 샌드박스 제어가 있는 네이티브 대화형 스레드를 시작합니다.</span>',
+    '<span class="caption-icon">💬</span> <span><strong>Run Agent · live stream</strong> — Claude stream-json and Codex app-server events render together as chat, including reasoning, commands, file changes, and tool activity. Dashboard Runs lets you re-attach later.</span>':
+      '<span class="caption-icon">💬</span> <span><strong>에이전트 실행 · 라이브 스트림</strong> — Claude stream-json과 Codex app-server 이벤트가 추론, 명령, 파일 변경, 도구 활동을 포함한 채팅으로 함께 표시됩니다. Dashboard Runs를 통해 나중에 다시 연결할 수 있습니다.</span>',
     "Codex also reads its native session index, so <code>/rename</code> titles reach session and agent cards in real time. Its conversation reader includes human turns plus <code>exec</code> custom-tool calls and outputs, and loads older pages when you reach the top of the transcript.":
       "Codex는 네이티브 세션 인덱스도 읽으므로 <code>/rename</code> 제목이 세션과 agent 카드에 실시간으로 반영됩니다. 대화 리더에는 사용자 턴과 <code>exec</code> custom-tool 호출 및 출력이 포함되며, transcript 상단에 도달하면 이전 페이지를 불러옵니다.",
     "Optional Codex home. Settings saves this dashboard-only override, re-arms live rollout watching, and immediately scans the new <code>sessions/</code> tree.":
@@ -4034,6 +4064,16 @@ window.__WIKI_CONTENT_I18N = {
       "<strong>서버 페이지네이션</strong> 테이블은 기록된 모든 세션을 보여줍니다. 각 페이지는 해당 구간만 가져오므로 세션 수와 관계없이 비용 계산 범위가 제한됩니다. <code>id</code>, <code>name</code>, <code>cwd</code>에 대한 대소문자 구분 없는 검색은 300 ms 디바운스와 함께 서버 측에서 실행되며 상태 필터와 조합할 수 있습니다. 검색 가능한 체크박스 프로젝트 선택기로 여러 디렉터리를 고를 수 있고, 긴 경로는 전체를 확인할 수 있으며 간결한 트리거 텍스트가 필터 바를 읽기 쉽게 유지합니다. 정렬도 같은 맞춤 드롭다운 패턴을 사용합니다. 각 행은 세션의 실제 이름(트랜스크립트에서 실시간으로 동기화됨: <code>/rename</code> 또는 <code>claude -n</code> 제목, 없으면 자동 생성된 제목, 그마저도 없으면 첫 사용자 프롬프트, 최종적으로 짧은 ID로 대체), 상태 배지, 에이전트 수, 지속 시간, 모델, 예상 비용을 표시합니다. 행을 클릭하면 대화 트랜스크립트와 에이전트 계층 구조가 포함된 전체 세션 상세 화면으로 이동합니다.",
   },
   es: {
+    "<strong>Run Agent</strong> now begins by choosing Claude Code or Codex. Codex starts a native interactive <code>app-server</code> thread, offers provider-native approval and sandbox controls, and discovers models directly from the signed-in CLI so new releases appear without a dashboard update.":
+      "<strong>Ejecutar agente</strong> ahora comienza eligiendo Claude Code o Codex. Codex inicia un hilo <code>app-server</code> interactivo nativo, ofrece controles de aprobación y sandbox propios del proveedor, y detecta modelos directamente desde la CLI con sesión iniciada para que los lanzamientos nuevos aparezcan sin actualizar el panel.",
+    "The same page also has a <strong>Codex</strong> switch. Its safe, read-only explorer shows defaults, the model cache, profiles, MCP servers, projects, skills, rules, hooks, plugins, and instruction files from <code>CODEX_HOME</code>. Secret-like TOML and JSON values are redacted, and <code>codex_config_changed</code> refreshes the view when those files change.":
+      "La misma página también tiene un selector de <strong>Codex</strong>. Su explorador seguro y de solo lectura muestra valores predeterminados, la caché de modelos, perfiles, servidores MCP, proyectos, habilidades, reglas, ganchos, complementos y archivos de instrucciones de <code>CODEX_HOME</code>. Los valores TOML y JSON similares a secretos se ocultan, y <code>codex_config_changed</code> actualiza la vista cuando cambian esos archivos.",
+    '<span class="caption-icon">🧰</span> <span><strong>Agent Config</strong> — switch between the editable Claude Code explorer and a live, read-only Codex explorer for defaults, models, profiles, MCP, projects, skills, rules, hooks, plugins, and instructions. Secret-like values are redacted.</span>':
+      '<span class="caption-icon">🧰</span> <span><strong>Configuración de agentes</strong> — alterna entre el explorador editable de Claude Code y el explorador de Codex en vivo y de solo lectura para valores predeterminados, modelos, perfiles, MCP, proyectos, habilidades, reglas, ganchos, complementos e instrucciones. Los valores similares a secretos se ocultan.</span>',
+    '<span class="caption-icon">▶️</span> <span><strong>Run Agent</strong> — choose Claude Code or Codex each time you open the launcher. Claude supports Conversation or Headless mode; Codex starts a native interactive thread with approval and sandbox controls.</span>':
+      '<span class="caption-icon">▶️</span> <span><strong>Ejecutar agente</strong> — elige Claude Code o Codex cada vez que abras el iniciador. Claude admite los modos Conversación o Sin interfaz; Codex inicia un hilo interactivo nativo con controles de aprobación y sandbox.</span>',
+    '<span class="caption-icon">💬</span> <span><strong>Run Agent · live stream</strong> — Claude stream-json and Codex app-server events render together as chat, including reasoning, commands, file changes, and tool activity. Dashboard Runs lets you re-attach later.</span>':
+      '<span class="caption-icon">💬</span> <span><strong>Ejecutar agente · transmisión en vivo</strong> — las envolturas stream-json de Claude y los eventos de app-server de Codex se muestran juntos como chat, incluidos razonamiento, comandos, cambios de archivos y actividad de herramientas. Dashboard Runs permite volver a conectarte después.</span>',
     "Codex also reads its native session index, so <code>/rename</code> titles reach session and agent cards in real time. Its conversation reader includes human turns plus <code>exec</code> custom-tool calls and outputs, and loads older pages when you reach the top of the transcript.":
       "Codex también lee su índice de sesiones nativo, por lo que los títulos de <code>/rename</code> llegan a las tarjetas de sesión y agente en tiempo real. Su lector de conversaciones incluye turnos humanos, llamadas y salidas de herramientas personalizadas <code>exec</code>, y carga páginas anteriores al llegar a la parte superior de la transcripción.",
     "Optional Codex home. Settings saves this dashboard-only override, re-arms live rollout watching, and immediately scans the new <code>sessions/</code> tree.":
@@ -5804,6 +5844,8 @@ window.__WIKI_CONTENT_I18N = {
   },
   plain: {
     es: {
+      "Run Agent": "Ejecutar agente",
+      "Agent Config": "Configuración de agentes",
       "ccam CLI": "CLI de ccam",
       "12 discovery tabs": "12 pestañas de descubrimiento",
       "Safe mutations": "Modificaciones seguras",
@@ -6009,6 +6051,8 @@ window.__WIKI_CONTENT_I18N = {
       "Workflow Runs": "Ejecuciones del flujo de trabajo",
     },
     zh: {
+      "Run Agent": "运行 Agent",
+      "Agent Config": "Agent 配置",
       "Remote Data Sources": "远程数据源",
       "How It Works": "工作原理",
       Setup: "设置",
@@ -6197,6 +6241,8 @@ window.__WIKI_CONTENT_I18N = {
       "Workflow Runs": "工作流运行",
     },
     vi: {
+      "Run Agent": "Chạy Agent",
+      "Agent Config": "Cấu hình Agent",
       "Remote Data Sources": "Nguồn dữ liệu từ xa",
       "How It Works": "Cách hoạt động",
       Setup: "Thiết lập",
@@ -6388,6 +6434,8 @@ window.__WIKI_CONTENT_I18N = {
       "Workflow Runs": "Lần chạy quy trình",
     },
     ko: {
+      "Run Agent": "에이전트 실행",
+      "Agent Config": "에이전트 구성",
       "Remote Data Sources": "원격 데이터 소스",
       "How It Works": "작동 방식",
       Setup: "설정",

@@ -637,6 +637,7 @@ export const api = {
       sort_desc?: boolean;
       limit?: number;
       offset?: number;
+      provider?: "claude" | "codex";
     }) => {
       const qs = new URLSearchParams();
       // Only append params that were actually supplied so the URL stays minimal.
@@ -651,6 +652,9 @@ export const api = {
       if (params?.limit) qs.set("limit", String(params.limit));
       if (params?.offset) qs.set("offset", String(params.offset));
       applyScope(qs); // narrow to the active machine and product scope
+      // A provider-specific picker (for example Run Agent resume) must be
+      // able to narrow a globally-both dashboard to its native session type.
+      if (params?.provider) qs.set("provider", params.provider);
       const queryString = qs.toString();
       // Omit the "?" entirely when there are no params, for a clean/cacheable URL.
       return request<{ sessions: Session[]; total: number; limit: number; offset: number }>(
@@ -1561,9 +1565,18 @@ export const api = {
       requestBackupsHelper(params),
   },
 
+  /** Read-only local Codex configuration discovery. Codex owns these TOML /
+   * JSON files, so the dashboard exposes safe metadata and redacted file
+   * inspection rather than concurrent editing. */
+  codexConfig: {
+    overview: () => request<CodexConfigOverview>("/codex-config/overview"),
+    file: (absPath: string) =>
+      request<CodexConfigFile>(`/codex-config/file?path=${encodeURIComponent(absPath)}`),
+  },
+
   // ────────────────────────────────── Run API ─────────────────────────────────
-  /** Spawn/manage headless or conversational `claude` CLI child processes
-   *  launched from the dashboard's Run page, and stream their output. */
+  /** Spawn/manage Claude Code processes and interactive Codex app-server
+   * threads launched from the dashboard's Run Agent page. */
   run: {
     /**
      * GET /api/run - currently tracked runs (in-memory handles) plus
@@ -1591,7 +1604,15 @@ export const api = {
      *
      * @returns `{ found, path }` — whether a binary was located and its path.
      */
-    binary: () => request<{ found: boolean; path: string | null }>("/run/binary"),
+    binary: (provider: RunProvider = "claude") =>
+      request<{ found: boolean; path: string | null; provider: RunProvider }>(
+        `/run/binary?provider=${provider}`
+      ),
+    /** Account-aware model discovery. Codex comes directly from its local
+     * app-server; Claude Code has no equivalent CLI endpoint, so its response
+     * transparently reports observed local models plus supported aliases. */
+    models: (provider: RunProvider) =>
+      request<RunModelsResponse>(`/run/models?provider=${provider}`),
     /**
      * GET /api/run/cwds - suggested working directories for the cwd picker.
      * @returns `{ items }` — {@link CwdSuggestion} entries (dashboard/home/recent).
@@ -1653,10 +1674,10 @@ export const api = {
      * @param text The user's follow-up message written to the CLI's stdin.
      * @returns `{ messageId }` — id correlating this input with its `run_input_ack`.
      */
-    send: (id: string, text: string) =>
+    send: (id: string, text: string, provider: RunProvider = "claude") =>
       request<{ messageId: string }>(`/run/${encodeURIComponent(id)}/message`, {
         method: "POST",
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, provider }),
       }),
     /**
      * DELETE /api/run/:id - forcibly terminate a running process.
@@ -2334,6 +2355,50 @@ export interface CcHookScripts {
   items: { name: string; file: string; size: number; mtime: number }[];
 }
 
+/** Safe, read-only view of one local Codex configuration file. Sensitive TOML
+ * and JSON values are redacted server-side before this reaches the browser. */
+export interface CodexConfigFile {
+  path: string;
+  text: string;
+  size: number;
+  mtime: number;
+  truncated: boolean;
+}
+
+export interface CodexConfigOverview {
+  home: string;
+  config: CodexConfigFile & { exists: boolean };
+  defaults: { model: string | null; reasoningEffort: string | null; personality: string | null };
+  counts: Record<string, number>;
+  models: {
+    file: string;
+    fetchedAt: string | null;
+    items: Array<{
+      id: string;
+      name: string;
+      description: string | null;
+      defaultEffort: string | null;
+      efforts: string[];
+      contextWindow: number | null;
+      visible: boolean;
+    }>;
+  };
+  profiles: Array<{ path: string; exists: boolean; size: number; mtime: number | null }>;
+  mcp: Array<{
+    name: string;
+    command: string | null;
+    url: string | null;
+    enabled: boolean;
+    envNames: string[];
+  }>;
+  projects: Array<{ path: string; name: string }>;
+  skills: Array<{ name: string; file: string; preview: string; mtime: number }>;
+  hooks: { file: string; items: Array<{ event: string; groups: number }> };
+  rules: Array<{ name: string; file: string; preview: string; mtime: number | null }>;
+  plugins: Array<{ name: string; path: string }>;
+  instructions: Array<{ path: string; name: string; preview: string; mtime: number }>;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Run types — request/response shapes for the Run page's `claude` process
 // spawning/management. `RunMode`/`RunStatus`/`PermissionMode`/`EffortLevel`
@@ -2342,6 +2407,7 @@ export interface CcHookScripts {
 
 /** "headless" runs to completion unattended and streams only output;
  *  "conversation" keeps stdin open so the user can send follow-up messages. */
+export type RunProvider = "claude" | "codex";
 export type RunMode = "headless" | "conversation";
 /** Lifecycle of a spawned `claude` process, mirrored in `RunHandle.status`
  *  and `RunStatusPayload.status`. "abandoned" is applied by server cleanup
@@ -2349,19 +2415,23 @@ export type RunMode = "headless" | "conversation";
 export type RunStatus = "spawning" | "running" | "completed" | "error" | "killed" | "abandoned";
 /** Maps 1:1 to the `claude --permission-mode` CLI flag. */
 export type PermissionMode = "acceptEdits" | "default" | "plan" | "bypassPermissions";
+export type CodexApprovalPolicy = "untrusted" | "on-request" | "never";
+export type CodexSandbox = "read-only" | "workspace-write" | "danger-full-access";
 /** Maps 1:1 to the `claude --effort` CLI flag; "" omits the flag (model default). */
-export type EffortLevel = "" | "low" | "medium" | "high" | "xhigh" | "max";
+export type EffortLevel = "" | "low" | "medium" | "high" | "xhigh" | "max" | "ultra";
 
 /** Body for POST /api/run - parameters for spawning a new `claude` process. */
 export interface RunStartArgs {
   /** Initial prompt/task text passed to the CLI. */
   prompt: string;
   mode: RunMode;
+  provider?: RunProvider;
   /** Working directory to launch in; server default applies if omitted. */
   cwd?: string;
   /** `--model` value; omitted inherits the CLI's own default (settings.json). */
   model?: string;
-  permissionMode?: PermissionMode;
+  permissionMode?: PermissionMode | CodexApprovalPolicy;
+  sandbox?: CodexSandbox;
   /** Resume an existing Claude Code session id (`--resume`) instead of starting fresh. */
   resumeSessionId?: string;
   effort?: EffortLevel;
@@ -2374,12 +2444,14 @@ export interface RunStartArgs {
  *  argv/tails/envelope counters) that only exists while the server tracks it. */
 export interface RunHandle {
   id: string;
+  provider: RunProvider;
   /** OS process id; null before the process has actually spawned. */
   pid: number | null;
   mode: RunMode;
   cwd: string;
   model: string | null;
-  permissionMode: PermissionMode;
+  permissionMode: PermissionMode | CodexApprovalPolicy;
+  sandbox?: CodexSandbox | null;
   effort: EffortLevel | null;
   prompt: string;
   /** Full argv the server invoked the CLI with, for debugging. */
@@ -2396,6 +2468,8 @@ export interface RunHandle {
   error: string | null;
   /** Claude Code session id the run created/resumed, once known. */
   sessionId: string | null;
+  threadName?: string | null;
+  activeTurnId?: string | null;
   /** Count of stream-json envelopes emitted so far. */
   envelopeCount: number;
   /** Last chunk of captured stdout, for a quick inline preview. */
@@ -2425,12 +2499,14 @@ export interface RunListResponse {
  */
 export interface DashboardRunHistoryItem {
   id: string;
+  provider: RunProvider;
   /** Claude Code session id the run created/resumed; null if never captured. */
   session_id: string | null;
   mode: RunMode;
   cwd: string;
   model: string | null;
-  permission_mode: PermissionMode | null;
+  permission_mode: (PermissionMode | CodexApprovalPolicy) | null;
+  sandbox: CodexSandbox | null;
   effort: EffortLevel | null;
   resume_session_id: string | null;
   /** Truncated leading excerpt of the original prompt, for the history list. */
@@ -2461,6 +2537,16 @@ export interface ModelChoice {
   label: string; // user-facing
   /** Short helper text shown under the option. */
   hint?: string;
+  supportedEfforts?: Exclude<EffortLevel, "">[];
+  defaultEffort?: Exclude<EffortLevel, ""> | null;
+  isDefault?: boolean;
+}
+
+export interface RunModelsResponse {
+  provider: RunProvider;
+  dynamic: boolean;
+  source: string;
+  items: ModelChoice[];
 }
 
 // Effort level choices for `claude --effort`. Higher = more thinking tokens
@@ -2481,25 +2567,7 @@ export const RUN_EFFORT_CHOICES: EffortChoice[] = [
   { id: "high", label: "High", hint: "More reasoning, slower" },
   { id: "xhigh", label: "Extra-high", hint: "Deep reasoning" },
   { id: "max", label: "Max", hint: "All-out - slowest, most tokens" },
-];
-
-// Curated model list. "" means "inherit from settings.json" - no --model flag.
-// Static UI data for the Run page's model picker; the first entry inherits the
-// configured default and the rest map to concrete `--model` values.
-export const RUN_MODEL_CHOICES: ModelChoice[] = [
-  { id: "", label: "Inherit from settings", hint: "Use whatever your settings.json model is" },
-  {
-    id: "claude-opus-4-8[1m]",
-    label: "Opus 4.8 (1M context)",
-    hint: "Highest capability, 1M token window",
-  },
-  {
-    id: "claude-opus-4-7[1m]",
-    label: "Opus 4.7 (1M context)",
-    hint: "Previous Opus, 1M token window",
-  },
-  { id: "sonnet", label: "Sonnet 4.6", hint: "Balanced capability and speed" },
-  { id: "haiku", label: "Haiku 4.5", hint: "Fastest, lightest" },
+  { id: "ultra", label: "Ultra", hint: "Maximum reasoning and delegation" },
 ];
 
 /** Result of a transcript import run - returned by `api.import.rescan`,

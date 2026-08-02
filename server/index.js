@@ -61,6 +61,7 @@ const pushRouter = require("./routes/push");
 const importRouter = require("./routes/import");
 const updatesRouter = require("./routes/updates");
 const ccConfigRouter = require("./routes/cc-config");
+const codexConfigRouter = require("./routes/codex-config");
 const runRouter = require("./routes/run");
 const alertsRouter = require("./routes/alerts");
 const webhooksRouter = require("./routes/webhooks");
@@ -99,6 +100,7 @@ function createApp() {
   app.use("/api/import", importRouter);
   app.use("/api/updates", updatesRouter);
   app.use("/api/cc-config", ccConfigRouter);
+  app.use("/api/codex-config", codexConfigRouter);
   app.use("/api/run", runRouter);
   app.use("/api/alerts", alertsRouter);
   app.use("/api/webhooks", webhooksRouter);
@@ -358,6 +360,12 @@ function startBackgroundServices() {
     startCcWatcher({ broadcast });
   } catch (err) {
     console.warn("cc-watcher failed to start:", err.message);
+  }
+  try {
+    const { startCodexConfigWatcher } = require("./lib/codex-config-watcher");
+    startCodexConfigWatcher({ broadcast });
+  } catch (err) {
+    console.warn("codex-config-watcher failed to start:", err.message);
   }
   // Near-real-time Workflow-tool run ingestion. The run journal is written when
   // a workflow finishes — which may not coincide with a hook — so a fast,

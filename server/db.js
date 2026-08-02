@@ -280,17 +280,19 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
   );
 
-  -- Persistent record of every Claude run spawned via the dashboard's
-  -- /api/run endpoint. Survives the in-memory handle reap so the Run page
-  -- can list completed / errored / killed runs and offer Resume long after
-  -- the spawner has forgotten about them.
+  -- Persistent record of every Claude Code or Codex run spawned via the
+  -- dashboard's /api/run endpoint. Survives the in-memory handle reap so the
+  -- Run Agent page can list completed / errored / killed runs and offer Resume
+  -- long after the spawner has forgotten about them.
   CREATE TABLE IF NOT EXISTS dashboard_runs (
     id TEXT PRIMARY KEY,
     session_id TEXT,
+    provider TEXT NOT NULL DEFAULT 'claude',
     mode TEXT NOT NULL,
     cwd TEXT NOT NULL,
     model TEXT,
     permission_mode TEXT,
+    sandbox TEXT,
     effort TEXT,
     resume_session_id TEXT,
     prompt_preview TEXT,
@@ -843,6 +845,24 @@ try {
   db.prepare("ALTER TABLE sessions ADD COLUMN provider TEXT NOT NULL DEFAULT 'claude'").run();
 }
 db.exec(`CREATE INDEX IF NOT EXISTS idx_sessions_provider ON sessions(provider)`);
+
+// Dashboard run records predate provider-aware launching. Keep existing rows
+// as Claude Code runs and add the Codex-specific sandbox metadata without
+// rebuilding the table, preserving installed users' run history.
+try {
+  db.prepare("SELECT provider FROM dashboard_runs LIMIT 1").get();
+} catch {
+  db.prepare("ALTER TABLE dashboard_runs ADD COLUMN provider TEXT NOT NULL DEFAULT 'claude'").run();
+}
+try {
+  db.prepare("SELECT sandbox FROM dashboard_runs LIMIT 1").get();
+} catch {
+  db.prepare("ALTER TABLE dashboard_runs ADD COLUMN sandbox TEXT").run();
+}
+db.exec(
+  `CREATE INDEX IF NOT EXISTS idx_dashboard_runs_provider
+   ON dashboard_runs(provider, started_at DESC)`
+);
 
 // Remote data sources: other machines whose Claude Code history this dashboard
 // pulls in over SSH. Config only — NO secrets are stored here: authentication

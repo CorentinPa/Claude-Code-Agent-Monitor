@@ -1,6 +1,45 @@
 {
-  "title": "Trình khám phá cấu hình Claude",
-  "subtitle": "Toàn cảnh thiết lập Claude Code của bạn - plugin, skill, subagent, máy chủ MCP, hook và cài đặt.",
+  "title": "Cấu hình Agent",
+  "subtitle": "Kiểm tra và hiểu cấu hình Agent cục bộ của bạn.",
+  "provider": {
+    "aria": "Nhà cung cấp cấu hình",
+    "beta": "BETA",
+    "claude": {
+      "label": "Claude Code",
+      "subtitle": "Toàn cảnh thiết lập Claude Code: plugin, skill, subagent, máy chủ MCP, hook và cài đặt."
+    },
+    "codex": {
+      "label": "Codex",
+      "subtitle": "Đọc cấu hình Codex cục bộ, model, profile, máy chủ MCP, skill, hook và rule."
+    }
+  },
+  "codex": {
+    "title": "Cấu hình Codex",
+    "readOnly": "Chỉ đọc; bí mật được che trước khi hiển thị.",
+    "home": "Thư mục Codex",
+    "defaultModel": "Model",
+    "defaultEffort": "Suy luận",
+    "personality": "Phong cách",
+    "enabled": "Đã bật",
+    "disabled": "Đã tắt",
+    "envNames": "Tên biến môi trường",
+    "empty": "Chưa có cấu hình ở đây.",
+    "viewFile": "Xem tệp",
+    "fileError": "Không thể mở tệp cấu hình",
+    "tabs": {
+      "overview": "Tổng quan",
+      "settings": "Cài đặt",
+      "models": "Model",
+      "profiles": "Profile",
+      "mcp": "Máy chủ MCP",
+      "projects": "Dự án",
+      "skills": "Skill",
+      "hooks": "Hook",
+      "rules": "Rule",
+      "plugins": "Plugin",
+      "instructions": "Hướng dẫn"
+    }
+  },
   "refresh": "Làm mới",
   "refreshing": "Đang làm mới…",
   "lastUpdated": "Cập nhật lần cuối {{time}}",

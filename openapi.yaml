@@ -55,8 +55,10 @@ tags:
     description: OpenAPI/Swagger endpoints
   - name: CcConfig
     description: 'Claude Code configuration explorer: discover and (for low-risk artifacts) edit skills, agents, commands, output styles, MCP servers, hooks, settings, memory, plugins, marketplaces, keybindings, statusline'
+  - name: CodexConfig
+    description: 'Read-only Codex CLI configuration discovery: defaults, model cache, profiles, MCP servers, projects, skills, rules, hooks, plugins, and instruction files.'
   - name: Run
-    description: Spawn and supervise Claude Code runs from the dashboard (headless or interactive conversation), stream output over WebSocket, and manage run history
+    description: Spawn and supervise Claude Code or interactive Codex runs from the dashboard, stream output over WebSocket, and manage run history
   - name: Push
     description: Web Push notification subscriptions and broadcast (VAPID); also fires native Electron notifications when hosted in the desktop app
 components:
@@ -3011,6 +3013,124 @@ components:
           description: Backups across the requested scope/type buckets, sorted newest first.
           items:
             $ref: '#/components/schemas/CcConfigBackup'
+    CodexConfigOverview:
+      type: object
+      description: Safe metadata discovered beneath the configured CODEX_HOME. Values of secret-like TOML/JSON keys are redacted before the response is sent.
+      required:
+        - home
+        - config
+        - defaults
+        - counts
+        - models
+        - profiles
+        - mcp
+        - projects
+        - skills
+        - hooks
+        - rules
+        - plugins
+        - instructions
+      properties:
+        home:
+          type: string
+          description: Resolved Codex home directory.
+          example: /Users/dev/.codex
+        config:
+          type: object
+          properties:
+            path:
+              type: string
+            exists:
+              type: boolean
+            text:
+              type: string
+              description: Redacted config.toml preview.
+            truncated:
+              type: boolean
+        defaults:
+          type: object
+          properties:
+            model:
+              type: string
+              nullable: true
+            reasoningEffort:
+              type: string
+              nullable: true
+            personality:
+              type: string
+              nullable: true
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+        models:
+          type: object
+          additionalProperties: true
+        profiles:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        mcp:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        projects:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        skills:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        hooks:
+          type: object
+          additionalProperties: true
+        rules:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        plugins:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        instructions:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    CodexConfigFile:
+      type: object
+      required:
+        - path
+        - text
+        - size
+        - mtime
+        - truncated
+      properties:
+        path:
+          type: string
+        text:
+          type: string
+          description: Contents, redacted where applicable and capped at 256 KiB.
+        size:
+          type: integer
+        mtime:
+          type: number
+        truncated:
+          type: boolean
+    RunProvider:
+      type: string
+      enum:
+        - claude
+        - codex
+      description: The CLI provider used for the run.
+      example: codex
     RunHandle:
       type: object
       description: Live, in-memory view of a spawned `claude` subprocess. Returned by GET /api/run (in `items`), POST /api/run (201), and GET /api/run/{id}. Backed by the spawner's handle map, which reaps each handle 5 minutes after the process exits — after that the run is only visible via GET /api/run/history.
@@ -3036,6 +3156,8 @@ components:
         - stdoutTail
         - stderrTail
       properties:
+        provider:
+          $ref: '#/components/schemas/RunProvider'
         id:
           type: string
           format: uuid
@@ -3064,11 +3186,6 @@ components:
           example: claude-opus-4-8
         permissionMode:
           type: string
-          enum:
-            - acceptEdits
-            - default
-            - plan
-            - bypassPermissions
           description: Permission mode passed via `--permission-mode`. Defaults to `acceptEdits` when omitted or invalid.
           example: acceptEdits
         effort:
@@ -3079,6 +3196,7 @@ components:
             - high
             - xhigh
             - max
+            - ultra
           nullable: true
           description: Thinking-effort level passed via `--effort` (higher = more reasoning tokens before the assistant turn). Null inherits the model default.
           example: high
@@ -3107,6 +3225,14 @@ components:
           nullable: true
           description: Claude session id this run resumed (`--resume`), or null for a fresh run. Conversation mode only.
           example: null
+        sandbox:
+          type: string
+          nullable: true
+          enum:
+            - read-only
+            - workspace-write
+            - danger-full-access
+          description: Codex sandbox policy; null for Claude runs.
         status:
           type: string
           enum:
@@ -3370,7 +3496,10 @@ components:
       required:
         - found
         - path
+        - provider
       properties:
+        provider:
+          $ref: '#/components/schemas/RunProvider'
         found:
           type: boolean
           description: True when `claude` resolves on PATH.
@@ -3380,12 +3509,55 @@ components:
           nullable: true
           description: Absolute path to the resolved `claude` binary, or null when not found.
           example: /usr/local/bin/claude
+    RunModelsResponse:
+      type: object
+      required:
+        - provider
+        - dynamic
+        - source
+        - items
+      properties:
+        provider:
+          $ref: '#/components/schemas/RunProvider'
+        dynamic:
+          type: boolean
+          description: True for Codex's signed-in live app-server catalog.
+        source:
+          type: string
+          example: codex-app-server
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - label
+            properties:
+              id:
+                type: string
+              label:
+                type: string
+              hint:
+                type: string
+                nullable: true
+              supportedEfforts:
+                type: array
+                items:
+                  type: string
+              defaultEffort:
+                type: string
+                nullable: true
+              isDefault:
+                type: boolean
     RunSpawnRequest:
       type: object
       description: 'Request body for spawning a run. SIDE EFFECT: a successful call spawns a real `claude` process in `cwd`, begins streaming `run_stream`/`run_status` WebSocket messages, and persists a row to `dashboard_runs`.'
       required:
         - prompt
       properties:
+        provider:
+          $ref: '#/components/schemas/RunProvider'
+          description: Defaults to Claude. Codex always starts an interactive conversation thread.
         prompt:
           type: string
           description: Initial user prompt. Required and non-empty UNLESS mode is `conversation` AND resumeSessionId is set (a resumed conversation may start empty and idle on stdin).
@@ -3422,14 +3594,16 @@ components:
           example: high
         permissionMode:
           type: string
-          enum:
-            - acceptEdits
-            - default
-            - plan
-            - bypassPermissions
-          default: acceptEdits
           description: Permission mode passed via `--permission-mode`. Unknown values silently fall back to `acceptEdits`.
           example: acceptEdits
+        sandbox:
+          type: string
+          enum:
+            - read-only
+            - workspace-write
+            - danger-full-access
+          description: Codex sandbox policy. Ignored for Claude.
+          example: workspace-write
     RunSpawnConcurrencyResponse:
       type: object
       description: HTTP 429 body when the concurrency cap is reached (ECONCURRENCY). In addition to the standard `error` envelope, this response carries a top-level `running` array listing the runs currently occupying the cap.
@@ -3474,6 +3648,9 @@ components:
       required:
         - text
       properties:
+        provider:
+          $ref: '#/components/schemas/RunProvider'
+          description: Provider owning the run. Defaults to Claude for backwards compatibility.
         text:
           type: string
           description: The follow-up user message. Required and non-empty (else EBADINPUT).
@@ -8323,6 +8500,83 @@ paths:
                     isDir: false
                     mtime: 1718900000000
                     size: 2048
+  /api/codex-config/overview:
+    get:
+      tags:
+        - CodexConfig
+      summary: Read safe Codex configuration metadata
+      description: Returns the current Codex defaults, available model cache, profiles, configured MCP servers/projects, skills, rules, hooks, plugins, and instruction-file metadata. This endpoint only reads local files and redacts secret-like values.
+      operationId: codexConfigOverview
+      responses:
+        '200':
+          description: Read-only Codex configuration overview.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodexConfigOverview'
+  /api/codex-config/file:
+    get:
+      tags:
+        - CodexConfig
+      summary: Read one safe Codex configuration file
+      description: Reads one file contained by CODEX_HOME, or this repository's AGENTS.md. TOML and JSON secret-like values are redacted; files are capped at 256 KiB. Paths outside those roots are refused.
+      operationId: codexConfigFile
+      parameters:
+        - name: path
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Absolute path under CODEX_HOME or to this project's AGENTS.md.
+      responses:
+        '200':
+          description: Redacted file content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodexConfigFile'
+        '400':
+          description: READ_DENIED — the requested file is outside the allowed roots or unreadable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/run/models:
+    get:
+      tags:
+        - Run
+      summary: Discover models for a provider
+      description: For Codex, queries the signed-in local `codex app-server` model catalog so newly available models appear without a dashboard release. Claude Code exposes no equivalent model-list command, so Claude returns durable aliases plus models observed in local session history.
+      operationId: runModels
+      parameters:
+        - name: provider
+          in: query
+          schema:
+            $ref: '#/components/schemas/RunProvider'
+            default: claude
+      responses:
+        '200':
+          description: Provider model choices.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunModelsResponse'
+        '403':
+          description: 'Cross-origin rejected (EBADORIGIN). Enforced by the router-level loopback same-origin guard on every /api/run route: a browser request carrying an Origin/Referer whose host is not localhost / 127.0.0.1 / ::1 / 0.0.0.0 is refused. Requests without an Origin header (e.g. curl) are allowed.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: EBADORIGIN
+                  message: cross-origin requests are not allowed
+        '503':
+          description: Codex model discovery failed (for example, the CLI is unavailable or not signed in).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /api/run:
     get:
       tags:
@@ -8384,7 +8638,7 @@ paths:
       tags:
         - Run
       summary: Spawn a new run
-      description: Spawns a real `claude` Code subprocess in the sanitised `cwd`. In `headless` mode the prompt is passed via argv and stdin is closed (one turn, then exit); in `conversation` mode stdin stays open for follow-ups via POST /api/run/{id}/message, and an existing session may be resumed with `resumeSessionId`. The child is always run with `--output-format stream-json --verbose --include-partial-messages`; parsed envelopes are broadcast as `run_stream` WebSocket messages and lifecycle transitions as `run_status`. A row is persisted to `dashboard_runs`, and the in-memory handle is reaped 5 minutes after exit. Concurrency is capped (ECONCURRENCY -> 429). The loopback same-origin guard applies. Returns the freshly-created RunHandle.
+      description: Spawns a Claude Code subprocess or a native interactive Codex app-server thread in the sanitised `cwd`. Claude supports headless and multi-turn conversation modes; Codex always starts/resumes a multi-turn thread and emits structured app-server events in `run_stream`. Provider-specific approval/sandbox settings are validated before spawning. A row is persisted to `dashboard_runs`, and the in-memory handle is reaped after exit. Concurrency is capped (ECONCURRENCY -> 429). The loopback same-origin guard applies. Returns the freshly-created RunHandle.
       operationId: runSpawn
       requestBody:
         required: true
@@ -8658,9 +8912,15 @@ paths:
     get:
       tags:
         - Run
-      summary: Check whether the `claude` binary is on PATH
-      description: Probes PATH (via which/where) for the `claude` binary so the UI can warn before the user clicks Run. The binary is NOT invoked — only resolved. Read-only — no process is spawned beyond the lookup. The loopback same-origin guard applies.
+      summary: Check whether the selected agent binary is on PATH
+      description: Probes PATH (via which/where) for the selected `claude` or `codex` binary so the UI can warn before the user clicks Run. The binary is NOT invoked — only resolved. Read-only — no process is spawned beyond the lookup. The loopback same-origin guard applies.
       operationId: runBinary
+      parameters:
+        - name: provider
+          in: query
+          schema:
+            $ref: '#/components/schemas/RunProvider'
+            default: claude
       responses:
         '200':
           description: Binary resolution result
@@ -8670,7 +8930,8 @@ paths:
                 $ref: '#/components/schemas/RunBinaryResponse'
               example:
                 found: true
-                path: /usr/local/bin/claude
+                path: /usr/local/bin/codex
+                provider: codex
         '403':
           description: 'Cross-origin rejected (EBADORIGIN). Enforced by the router-level loopback same-origin guard on every /api/run route: a browser request carrying an Origin/Referer whose host is not localhost / 127.0.0.1 / ::1 / 0.0.0.0 is refused. Requests without an Origin header (e.g. curl) are allowed.'
           content:

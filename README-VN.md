@@ -228,9 +228,9 @@ flowchart LR
 </p>
 
 <p align="center">
-  <img src="images/config.png" alt="Trình khám phá cấu hình Claude" width="100%">
+  <img src="images/config.png" alt="Cấu hình Agent — trình khám phá Claude Code và Codex" width="100%">
   <br>
-  <em>🧰 <strong>Trình khám phá cấu hình Claude</strong> — Trình kiểm tra 12-tab cho mọi thứ Claude Code biết: skills, subagents, lệnh slash, output styles, plugin (kèm số đóng góp của từng plugin), marketplaces, máy chủ MCP, hooks, settings (ẩn key bí mật), memory (các tệp `CLAUDE.md` của user + project cùng kho memory dựa-trên-tệp theo từng dự án — mọi `*.md` dưới `~/.claude/projects/<slug>/memory/`, nhóm theo dự án và tìm kiếm được), keybindings (kèm trình chỉnh sửa có cấu trúc ngay trong giao diện) và statusline. Hỗ trợ tạo / sửa / xoá trên các bề mặt rủi ro thấp — các tệp văn bản, các tệp auto-memory theo từng dự án, và `keybindings.json` — với sao lưu dấu thời gian bắt buộc</em>
+  <em>🧰 <strong>Cấu hình Agent</strong> — chuyển giữa trình khám phá Claude Code đầy đủ và trình khám phá Codex chỉ đọc, cập nhật trực tiếp cho mặc định, model, profile, MCP, dự án, skill, rule, hook, plugin và hướng dẫn. Giá trị bí mật của Codex được che đi.</em>
 </p>
 
 <p align="center">
@@ -240,15 +240,15 @@ flowchart LR
 </p>
 
 <p align="center">
-  <img src="images/run.png" alt="Chạy Claude — cấu hình trước khi chạy" width="100%">
+  <img src="images/run.png" alt="Chạy Agent — chọn Claude Code hoặc Codex" width="100%">
   <br>
-  <em>▶️ <strong>Chạy Claude</strong> — Khởi chạy tiến trình con <code>claude</code> ngay trong dashboard. Chọn chế độ (Hội thoại / Một lần), nguồn (phiên mới vs tiếp tục từ lịch sử đầy đủ), thư mục làm việc (autocomplete với cwd gần đây), model, permission mode và mức suy nghĩ. Same-origin guard trên route ngăn drive-by spawn từ trình duyệt</em>
+  <em>▶️ <strong>Chạy Agent</strong> — chọn Claude Code hoặc Codex mỗi khi mở trình khởi chạy. Claude giữ chế độ Hội thoại / Một lần; Codex khởi tạo thread tương tác native với các tùy chọn approval và sandbox riêng. Danh sách model Codex đến trực tiếp từ CLI đã đăng nhập.</em>
 </p>
 
 <p align="center">
-  <img src="images/run-results.png" alt="Chạy Claude — luồng đầu ra trực tiếp" width="100%">
+  <img src="images/run-results.png" alt="Chạy Agent — luồng đầu ra trực tiếp" width="100%">
   <br>
-  <em>💬 <strong>Chạy Claude · luồng trực tiếp</strong> — đầu ra streaming kiểu chat với render từng ký tự thực sự nhờ <code>--include-partial-messages</code>. Tool uses, tool results và thinking blocks đều có thể thu gọn. Bộ chuyển đổi run đang chạy ở header cho phép để run chạy nền và gắn lại sau. "View session →" sẽ deep-link tới UI Sessions ngay khi có session ID</em>
+  <em>💬 <strong>Chạy Agent · luồng trực tiếp</strong> — stream-json của Claude và sự kiện app-server của Codex đều hiển thị như chat, gồm reasoning, command, thay đổi tệp và hoạt động tool. Dashboard Runs cho phép để agent chạy nền rồi gắn lại sau.</em>
 </p>
 
 <p align="center">

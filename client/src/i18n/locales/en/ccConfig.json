@@ -1,6 +1,45 @@
 {
-  "title": "Claude Config Explorer",
-  "subtitle": "Your Claude Code setup at a glance - plugins, skills, subagents, MCP servers, hooks, and settings.",
+  "title": "Agent Config",
+  "subtitle": "Inspect and understand your local agent setup.",
+  "provider": {
+    "aria": "Configuration provider",
+    "beta": "BETA",
+    "claude": {
+      "label": "Claude Code",
+      "subtitle": "Your Claude Code setup at a glance — plugins, skills, subagents, MCP servers, hooks, and settings."
+    },
+    "codex": {
+      "label": "Codex",
+      "subtitle": "Read your local Codex configuration, models, profiles, MCP servers, skills, hooks, and rules."
+    }
+  },
+  "codex": {
+    "title": "Codex configuration",
+    "readOnly": "Read-only, with secrets redacted before display.",
+    "home": "Codex home",
+    "defaultModel": "Model",
+    "defaultEffort": "Reasoning",
+    "personality": "Personality",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "envNames": "Environment names",
+    "empty": "Nothing configured here yet.",
+    "viewFile": "View file",
+    "fileError": "Unable to open configuration file",
+    "tabs": {
+      "overview": "Overview",
+      "settings": "Settings",
+      "models": "Models",
+      "profiles": "Profiles",
+      "mcp": "MCP servers",
+      "projects": "Projects",
+      "skills": "Skills",
+      "hooks": "Hooks",
+      "rules": "Rules",
+      "plugins": "Plugins",
+      "instructions": "Instructions"
+    }
+  },
   "refresh": "Refresh",
   "refreshing": "Refreshing…",
   "lastUpdated": "Last updated {{time}}",

@@ -230,9 +230,9 @@ flowchart LR
 </p>
 
 <p align="center">
-  <img src="images/config.png" alt="Claude 配置浏览器" width="100%">
+  <img src="images/config.png" alt="Agent 配置 — Claude Code 和 Codex 浏览器" width="100%">
   <br>
-  <em>🧰 <strong>Claude 配置浏览器</strong> — 12 标签页检查器，涵盖 Claude Code 知道的一切：技能、子代理、斜杠命令、输出样式、插件（含每个插件的贡献计数）、市场、MCP 服务器、Hook、设置（密钥脱敏）、记忆（用户与项目 `CLAUDE.md` 文件，外加按项目分组、可搜索的文件型记忆存储 —— `~/.claude/projects/<slug>/memory/` 下的每个 `*.md`）、快捷键（含内联结构化编辑器）与状态行。在低风险表面支持创建/编辑/删除 —— 文本文件工件、按项目的 auto-memory 文件，以及 `keybindings.json` —— 带强制时间戳备份</em>
+  <em>🧰 <strong>Agent 配置</strong> — 在完整 Claude Code 浏览器和实时只读 Codex 浏览器之间切换，查看默认值、模型、配置文件、MCP、项目、技能、规则、Hook、插件和指令。Codex 密钥会脱敏，配置变更会实时刷新。</em>
 </p>
 
 <p align="center">
@@ -242,15 +242,15 @@ flowchart LR
 </p>
 
 <p align="center">
-  <img src="images/run.png" alt="运行 Claude — 启动前配置" width="100%">
+  <img src="images/run.png" alt="运行 Agent — Claude Code 和 Codex 选择" width="100%">
   <br>
-  <em>▶️ <strong>运行 Claude</strong> — 直接在仪表盘内启动 <code>claude</code> 子进程。选择模式（对话 / 单次）、来源（新会话 vs 从完整历史中恢复）、工作目录（带最近 cwd 自动补全）、模型、权限模式与思考强度。路由上的同源守卫防止浏览器 drive-by spawn</em>
+  <em>▶️ <strong>运行 Agent</strong> — 每次打开启动器时选择 Claude Code 或 Codex。Claude 保留对话 / 单次模式；Codex 通过原生交互线程启动，并有自己的审批与沙箱控制。Codex 模型直接来自已登录 CLI 的动态目录。</em>
 </p>
 
 <p align="center">
-  <img src="images/run-results.png" alt="运行 Claude — 实时流式输出" width="100%">
+  <img src="images/run-results.png" alt="运行 Agent — 实时流式输出" width="100%">
   <br>
-  <em>💬 <strong>运行 Claude · 实时流</strong> — 聊天式流式输出，通过 <code>--include-partial-messages</code> 实现真正的逐字符渲染。工具调用、工具结果与思考块均可折叠。标题栏的进行中运行切换器允许你将运行留在后台并稍后重新附加。会话 ID 一旦获知，"查看会话 →"即可深链至常规 Sessions UI</em>
+  <em>💬 <strong>运行 Agent · 实时流</strong> — Claude stream-json 与 Codex app-server 事件都会以聊天形式呈现，包括推理、命令、文件变更和工具活动。仪表盘运行让你将 Agent 留在后台并稍后重新连接。</em>
 </p>
 
 <p align="center">

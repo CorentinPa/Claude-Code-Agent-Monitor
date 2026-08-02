@@ -65,6 +65,12 @@ The client is a single-page application (SPA) built with modern web technologies
 
 `SplashScreen.tsx` asks which provider data to display (Claude Code, Codex, or both) before the router becomes available. Continuing opens a provider-locked live-monitoring setup gate. It checks the existing hook state, warns before refreshing dashboard-owned entries, calls `POST /api/settings/install-hooks`, and shows command output in place. Users can continue only after that in-app install succeeds or by explicitly confirming that hooks were already installed. This prevents a first dashboard visit from silently looking inactive when live hook capture has not been configured.
 
+### Run Agent and Agent Config
+
+`/run` deliberately opens on a provider choice, then keeps an accessible Claude Code / Codex toggle beside the live-status chip. Claude preserves the established headless and stream-json conversation experience. Codex uses the native local `codex app-server` protocol for a real interactive thread: it supports a model selected from the signed-in live catalog, its own approval policy and sandbox selection, stop, resume, follow-ups, and re-attach. WebSocket `run_stream` frames are normalized in `Run.tsx`, so both providers render messages, reasoning, command/tool activity, file changes, and status changes in the same resilient live view.
+
+`/cc-config` is presented as **Agent Config**. Its Claude Code switch keeps the existing editable, backup-first explorer. Its Codex switch renders `CodexConfigExplorer.tsx`, a secret-redacted, read-only view of defaults, model cache, profiles, MCP servers, projects, skills, rules, hooks, plugins, and instructions. It subscribes to `codex_config_changed`, so a local CLI or filesystem change refreshes the visible configuration without a page reload.
+
 ```mermaid
 graph TB
     subgraph "Browser Runtime"

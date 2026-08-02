@@ -547,6 +547,7 @@
  *  - `run_stream` / `run_status` / `run_input_ack` ... {@link RunStreamPayload} /
  *    {@link RunStatusPayload} / {@link RunInputAckPayload}
  *  - `cc_config_changed` ............................ {@link CcConfigChangedPayload}
+ *  - `codex_config_changed` ......................... {@link CcConfigChangedPayload}
  *  - `alert_triggered` / `alert_updated` ............ {@link AlertEvent}
  *  - `workflow_upserted` ............................ {@link WorkflowRun}
  *
@@ -1676,7 +1677,8 @@ export interface WSMessage {
    *  session_created/updated → Session; agent_created/updated → Agent;
    *  new_event → DashboardEvent; import.progress → ImportProgressMessage;
    *  update_status → UpdateStatusPayload; run_stream/run_status/run_input_ack
-   *  → their matching Run*Payload; cc_config_changed → CcConfigChangedPayload;
+   *  → their matching Run*Payload; cc_config_changed / codex_config_changed
+   *  → CcConfigChangedPayload;
    *  alert_triggered/alert_updated → AlertEvent; workflow_upserted → WorkflowRun;
    *  remote_source.status → RemoteSourceStatusPayload;
    *  remote_data.updated → RemoteDataUpdatedPayload. */
@@ -1692,6 +1694,7 @@ export interface WSMessage {
     | "run_status"
     | "run_input_ack"
     | "cc_config_changed"
+    | "codex_config_changed"
     | "alert_triggered"
     | "alert_updated"
     | "workflow_upserted"

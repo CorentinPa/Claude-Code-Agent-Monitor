@@ -1,6 +1,45 @@
 {
-  "title": "Claude 설정 탐색기",
-  "subtitle": "플러그인, 스킬, Subagent, MCP 서버, hooks, 설정 등 Claude Code 구성을 한눈에 확인하세요.",
+  "title": "Agent 설정",
+  "subtitle": "로컬 Agent 설정을 확인하고 이해하세요.",
+  "provider": {
+    "aria": "설정 제공자",
+    "beta": "베타",
+    "claude": {
+      "label": "Claude Code",
+      "subtitle": "플러그인, 스킬, Subagent, MCP 서버, hooks, 설정 등 Claude Code 구성을 한눈에 확인하세요."
+    },
+    "codex": {
+      "label": "Codex",
+      "subtitle": "로컬 Codex 설정, 모델, 프로필, MCP 서버, 스킬, hooks, 규칙을 읽습니다."
+    }
+  },
+  "codex": {
+    "title": "Codex 설정",
+    "readOnly": "읽기 전용이며 표시 전에 비밀 값이 가려집니다.",
+    "home": "Codex 홈",
+    "defaultModel": "모델",
+    "defaultEffort": "추론",
+    "personality": "성격",
+    "enabled": "사용",
+    "disabled": "사용 안 함",
+    "envNames": "환경 변수 이름",
+    "empty": "아직 구성된 항목이 없습니다.",
+    "viewFile": "파일 보기",
+    "fileError": "구성 파일을 열 수 없습니다",
+    "tabs": {
+      "overview": "개요",
+      "settings": "설정",
+      "models": "모델",
+      "profiles": "프로필",
+      "mcp": "MCP 서버",
+      "projects": "프로젝트",
+      "skills": "스킬",
+      "hooks": "Hooks",
+      "rules": "규칙",
+      "plugins": "플러그인",
+      "instructions": "지침"
+    }
+  },
   "refresh": "새로고침",
   "refreshing": "새로고침 중…",
   "lastUpdated": "마지막 업데이트: {{time}}",

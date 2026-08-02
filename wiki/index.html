@@ -1356,7 +1356,7 @@
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-emerald">▶️</div>
-                  <h3 id="feat-run-claude">Run Claude</h3>
+                  <h3 id="feat-run-claude">Run Agent</h3>
                   <p>
                     Spawn <code>claude</code> subprocesses straight from the dashboard with
                     a chat-style streaming UI — multi-turn <b>Conversation</b> or single-shot
@@ -1366,6 +1366,12 @@
                     never loses history. Slash-command autocomplete, file references, live
                     token/context-window meter, and a thinking-effort dial bring TUI parity
                     to the browser. Same-origin guard blocks drive-by spawns.
+                  </p>
+                  <p>
+                    <strong>Run Agent</strong> now begins by choosing Claude Code or Codex. Codex
+                    starts a native interactive <code>app-server</code> thread, offers provider-native
+                    approval and sandbox controls, and discovers models directly from the signed-in
+                    CLI so new releases appear without a dashboard update.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1385,7 +1391,7 @@
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-amber">🧰</div>
-                  <h3 id="feat-config-explorer">Claude Config Explorer</h3>
+                  <h3 id="feat-config-explorer">Agent Config</h3>
                   <p>
                     A 12-tab inspector at <code>/cc-config</code> for everything Claude Code
                     knows about: skills, subagents, slash commands, output styles, plugins,
@@ -1564,20 +1570,20 @@
               <div class="screenshot-caption"><span class="caption-icon">🧬</span> <span><strong>Workflow Runs · in a session</strong> — the same fleets linked to their launching session, so a session's dynamic-workflow sub-agents and their folded-in token cost are visible inline</span></div>
             </div>
             <div class="screenshot-card" id="ss-config">
-              <img src="../images/config.png" alt="Claude Config Explorer" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Claude Config Explorer</strong> — 12-tab inspector for skills, subagents, slash commands, plugins, MCP servers, hooks, settings, memory, keybindings, and statusline. Safe edits with backups</span></div>
+              <img src="../images/config.png" alt="Agent Config — Claude Code and Codex explorers" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Agent Config</strong> — switch between the editable Claude Code explorer and a live, read-only Codex explorer for defaults, models, profiles, MCP, projects, skills, rules, hooks, plugins, and instructions. Secret-like values are redacted.</span></div>
             </div>
             <div class="screenshot-card" id="ss-config-skills">
               <img src="../images/config-skills.png" alt="Claude Config Explorer — Skills tab" width="100%" loading="lazy" decoding="async" />
               <div class="screenshot-caption"><span class="caption-icon">🧩</span> <span><strong>Claude Config Explorer · Skills</strong> — the Skills tab lists every discovered skill (user, project, and plugin) with its description and source, is searchable across the whole set, and opens any skill file for a safe, timestamp-backed edit</span></div>
             </div>
             <div class="screenshot-card" id="ss-run">
-              <img src="../images/run.png" alt="Run Claude — pre-run configuration" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">▶️</span> <span><strong>Run Claude</strong> — spawn or resume Claude subprocesses from the browser. Pick Conversation or Headless mode, set cwd, model, permission level, and thinking effort. Same-origin guard included</span></div>
+              <img src="../images/run.png" alt="Run Agent — Claude Code and Codex launch selection" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">▶️</span> <span><strong>Run Agent</strong> — choose Claude Code or Codex each time you open the launcher. Claude supports Conversation or Headless mode; Codex starts a native interactive thread with approval and sandbox controls.</span></div>
             </div>
             <div class="screenshot-card">
-              <img src="../images/run-results.png" alt="Run Claude — live streaming output" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">💬</span> <span><strong>Run Claude · live stream</strong> — character-by-character streaming output. Tool uses, tool results, and thinking blocks are collapsible. Active runs switcher juggles multiple sessions</span></div>
+              <img src="../images/run-results.png" alt="Run Agent — live streaming output" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">💬</span> <span><strong>Run Agent · live stream</strong> — Claude stream-json and Codex app-server events render together as chat, including reasoning, commands, file changes, and tool activity. Dashboard Runs lets you re-attach later.</span></div>
             </div>
             <div class="screenshot-card" id="ss-settings">
               <img src="../images/settings.png" alt="Settings Overview" width="100%" loading="lazy" decoding="async" />
@@ -5340,7 +5346,7 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
         <!-- ─── Claude Config Explorer ─────────────────────────────────────── -->
         <section id="config-explorer">
           <div class="section-label">◈ Integrations</div>
-          <h2>Claude Config Explorer</h2>
+          <h2>Agent Config</h2>
 
           <div class="screenshot-gallery">
             <div class="screenshot-card">
@@ -5364,6 +5370,13 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
             mutation. A <code>cc-watcher</code> on <code>CLAUDE_HOME</code> plus
             <code>cc_config_changed</code> WebSocket messages keep the page live when files change
             outside the dashboard.
+          </p>
+          <p>
+            The same page also has a <strong>Codex</strong> switch. Its safe, read-only explorer
+            shows defaults, the model cache, profiles, MCP servers, projects, skills, rules, hooks,
+            plugins, and instruction files from <code>CODEX_HOME</code>. Secret-like TOML and JSON
+            values are redacted, and <code>codex_config_changed</code> refreshes the view when those
+            files change.
           </p>
 
           <div class="feature-grid">
@@ -6921,7 +6934,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=45" defer></script>
+    <script src="i18n-content.js?v=46" defer></script>
     <script src="script.js?v=40" defer></script>
     <script>
       (function () {

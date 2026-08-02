@@ -228,9 +228,9 @@ flowchart LR
 </p>
 
 <p align="center">
-  <img src="images/config.png" alt="Claude Config Explorer" width="100%">
+  <img src="images/config.png" alt="에이전트 구성 — Claude Code 및 Codex 탐색기" width="100%">
   <br>
-  <em>🧰 <strong>Claude 설정 탐색기</strong> — Claude Code가 알고 있는 모든 것을 위한 12탭 인스펙터: 스킬, 서브에이전트, 슬래시 명령, 출력 스타일, 플러그인(플러그인별 기여 항목 포함), 마켓플레이스, MCP 서버, Hook, 설정(비밀 키 마스킹 포함), 메모리(사용자 + 프로젝트 `CLAUDE.md` 파일과 프로젝트별 파일 기반 메모리 저장소 — `~/.claude/projects/<slug>/memory/` 아래의 모든 `*.md` 파일을 프로젝트별로 그룹화하고 검색 가능), 키바인딩(인라인 구조화 편집기 포함), Statusline. 저위험 표면 — 텍스트 파일 아티팩트, 프로젝트별 자동 메모리 파일, `keybindings.json` — 에서 필수 타임스탬프 백업과 함께 생성 / 편집 / 삭제 가능</em>
+  <em>🧰 <strong>에이전트 구성</strong> — 전체 Claude Code 탐색기와 기본값, 모델, 프로필, MCP, 프로젝트, 스킬, 규칙, 훅, 플러그인, 지침을 보여 주는 실시간 읽기 전용 Codex 탐색기 사이를 전환합니다. Codex 비밀 값은 마스킹되고 변경 사항은 즉시 새로고침됩니다.</em>
 </p>
 
 <p align="center">
@@ -240,15 +240,15 @@ flowchart LR
 </p>
 
 <p align="center">
-  <img src="images/run.png" alt="Run Claude — pre-run config" width="100%">
+  <img src="images/run.png" alt="에이전트 실행 — Claude Code 또는 Codex 선택" width="100%">
   <br>
-  <em>▶️ <strong>Run Claude</strong> — 대시보드 안에서 바로 <code>claude</code> 서브프로세스를 생성합니다. 모드(대화 / 원샷), 소스(새 세션 vs 전체 기록에서 재개), 작업 디렉터리(최근 cwd 자동완성), 모델, 권한 모드, thinking effort를 선택하세요. 동일 출처 가드가 브라우저 드라이브바이 생성을 방지합니다</em>
+  <em>▶️ <strong>에이전트 실행</strong> — 실행기를 열 때마다 Claude Code 또는 Codex를 선택합니다. Claude는 대화 / 원샷 모드를 유지하고, Codex는 고유한 승인 및 샌드박스 제어가 있는 네이티브 대화형 스레드를 시작합니다. Codex 모델은 로그인된 CLI 카탈로그에서 동적으로 가져옵니다.</em>
 </p>
 
 <p align="center">
-  <img src="images/run-results.png" alt="Run Claude — live streaming output" width="100%">
+  <img src="images/run-results.png" alt="에이전트 실행 — 라이브 스트리밍 출력" width="100%">
   <br>
-  <em>💬 <strong>Run Claude · 라이브 스트림</strong> — <code>--include-partial-messages</code>를 통한 실제 문자 단위 렌더링의 채팅 스타일 스트리밍 출력. 도구 사용, 도구 결과, thinking 블록 모두 접을 수 있습니다. 헤더의 활성 실행 전환기로 실행을 백그라운드에 두고 나중에 다시 연결할 수 있습니다. 세션 ID가 확인되는 즉시 "세션 보기 →"가 일반 세션 UI로 딥링크합니다</em>
+  <em>💬 <strong>에이전트 실행 · 라이브 스트림</strong> — Claude stream-json과 Codex app-server 이벤트가 추론, 명령, 파일 변경, 도구 활동을 포함한 채팅으로 표시됩니다. Dashboard Runs를 통해 에이전트를 백그라운드에서 실행하고 나중에 다시 연결할 수 있습니다.</em>
 </p>
 
 <p align="center">

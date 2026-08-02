@@ -228,9 +228,9 @@ Vino con un elegante tema oscuro, diseño responsive y navegación intuitiva par
 </p>
 
 <p align="center">
-<img src="images/config.png" alt="Explorador de configuración de Claude" width="100%">
+<img src="images/config.png" alt="Configuración de agentes — exploradores de Claude Code y Codex" width="100%">
 <br>
-<em>🧰 <strong>Explorador de Configuración de Claude</strong> — Inspector de 12 pestañas para todo lo que Claude Code sabe: habilidades, subagentes, comandos de guión, estilos de salida, plugins (con contribuciones por plugin), mercados, servidores MCP, ganchos, configuraciones (con redacción de clave secreta), memoria (los archivos del usuario + proyecto `CLAUDE.md` más el almacenamiento de memoria basado en archivos por proyecto — cada `*.md` bajo `~/.claude/projects/<slug>/memory/`, agrupados por proyecto y buscables, con enlaces de índice `MEMORY.md` clicables que saltan al archivo de hechos correspondiente), asociaciones de teclas (con un editor estructurado inline) y línea de estado. Crear / editar / eliminar en superficies de bajo riesgo — los artefactos de archivos de texto, los archivos de memoria automática por proyecto y `keybindings.json` — con copias de seguridad con hora y fecha obligatorias</em>
+<em>🧰 <strong>Configuración de agentes</strong> — cambia entre el explorador completo de Claude Code y un explorador de Codex en vivo y de solo lectura para valores predeterminados, modelos, perfiles, MCP, proyectos, habilidades, reglas, ganchos, complementos e instrucciones. Los secretos de Codex se ocultan y los cambios se actualizan en vivo.</em>
 </p>
 
 <p align="center">
@@ -240,15 +240,15 @@ Vino con un elegante tema oscuro, diseño responsive y navegación intuitiva par
 </p>
 
 <p align="center">
-<img src="images/run.png" alt="Ejecutar Claude — configuración previa a la ejecución" width="100%">
+<img src="images/run.png" alt="Ejecutar agente — selección de Claude Code o Codex" width="100%">
 <br>
-<em>▶️ <strong>Ejecuta Claude</strong> — genera subprocesos <code>claude</code> justo dentro del panel de control. Elige el modo (Conversación / Único disparo), la fuente (nueva sesión vs. continuar desde tu historial completo), el directorio de trabajo (completa automáticamente con los cwds recientes), el modelo, el modo de permiso y el esfuerzo de pensamiento. La guardia de origen compartido evita que el navegador genere subprocesos de forma pasiva</em>
+<em>▶️ <strong>Ejecutar agente</strong> — elige Claude Code o Codex cada vez que abras el iniciador. Claude conserva los modos Conversación / Una sola vez; Codex inicia un hilo interactivo nativo con sus propios controles de aprobación y sandbox. Los modelos de Codex provienen del catálogo de la CLI con sesión iniciada.</em>
 </p>
 
 <p align="center">
-<img src="images/run-results.png" alt="Ejecutar Claude — salida de transmisión en vivo" width="100%">
+<img src="images/run-results.png" alt="Ejecutar agente — salida de transmisión en vivo" width="100%">
 <br>
-<em>💬 <strong>Ejecuta Claude · transmisión en vivo</strong> — salida de transmisión en estilo chat con renderizado real de carácter en carácter a través de <code>--include-partial-messages</code>. Las herramientas de uso, los resultados de las herramientas y los bloques de pensamiento son todos colapsables. El interruptor de ejecuciones activas en el encabezado le permite dejar una ejecución en segundo plano y volver a adjuntarla más tarde. "Ver sesión →" hace un enlace profundo a la interfaz de usuario de Sesiones estándar tan pronto como se conoce el ID de la sesión</em>
+<em>💬 <strong>Ejecutar agente · transmisión en vivo</strong> — las envolturas stream-json de Claude y los eventos de app-server de Codex se muestran como un chat con razonamiento, comandos, cambios de archivos y actividad de herramientas. Las ejecuciones del panel permiten dejar un agente trabajando en segundo plano y volver a conectarte después.</em>
 </p>
 
 <p align="center">

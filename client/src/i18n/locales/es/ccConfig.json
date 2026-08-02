@@ -1,6 +1,45 @@
 {
-  "title": "Explorador de configuración de Claude",
-  "subtitle": "Tu configuración de Claude Code de un vistazo: complementos, habilidades, subagentes, servidores MCP, ganchos y ajustes.",
+  "title": "Configuración del agente",
+  "subtitle": "Inspecciona y comprende la configuración de tus agentes locales.",
+  "provider": {
+    "aria": "Proveedor de configuración",
+    "beta": "BETA",
+    "claude": {
+      "label": "Claude Code",
+      "subtitle": "Tu configuración de Claude Code de un vistazo: complementos, habilidades, subagentes, servidores MCP, ganchos y ajustes."
+    },
+    "codex": {
+      "label": "Codex",
+      "subtitle": "Lee la configuración local de Codex, modelos, perfiles, servidores MCP, habilidades, ganchos y reglas."
+    }
+  },
+  "codex": {
+    "title": "Configuración de Codex",
+    "readOnly": "Solo lectura; los secretos se ocultan antes de mostrarse.",
+    "home": "Directorio de Codex",
+    "defaultModel": "Modelo",
+    "defaultEffort": "Razonamiento",
+    "personality": "Personalidad",
+    "enabled": "Habilitado",
+    "disabled": "Deshabilitado",
+    "envNames": "Nombres de variables de entorno",
+    "empty": "Aún no hay nada configurado aquí.",
+    "viewFile": "Ver archivo",
+    "fileError": "No se pudo abrir el archivo de configuración",
+    "tabs": {
+      "overview": "Resumen",
+      "settings": "Ajustes",
+      "models": "Modelos",
+      "profiles": "Perfiles",
+      "mcp": "Servidores MCP",
+      "projects": "Proyectos",
+      "skills": "Habilidades",
+      "hooks": "Ganchos",
+      "rules": "Reglas",
+      "plugins": "Complementos",
+      "instructions": "Instrucciones"
+    }
+  },
   "refresh": "Actualizar",
   "refreshing": "Actualizando…",
   "lastUpdated": "Última actualización {{time}}",

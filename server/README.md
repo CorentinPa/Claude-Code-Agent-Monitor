@@ -607,22 +607,32 @@ Reads — and carefully gated mutations for low-risk text-file artifacts — for
 | `PUT`    | `/api/cc-config/file`                 | Create or overwrite a text-file artifact (skills/agents/commands/output-styles/memory). Body: `{ scope, type, name?, content }`. Auto-backs-up if file exists. Atomic temp + rename. 256 KB cap. Per-project file-based memory is also editable via `{ scope: "auto-memory", type: "auto-memory", project, name }` — backups land under `<memory-dir>/.cc-config-backups/auto-memory/`, and an invalid project slug returns `EBADPROJECT` |
 | `DELETE` | `/api/cc-config/file`                 | Backup-then-delete a text-file artifact. Skill dirs are backed up whole before recursive removal |
 
-### Run Claude (`/api/run`)
+### Codex Config Explorer (`/api/codex-config`)
 
-HTTP surface for spawning and supervising `claude` subprocesses from the dashboard. Every route enforces a same-origin / loopback-Origin guard against browser CSRF.
+The Agent Config page also includes a **read-only Codex explorer**. It discovers only safe metadata under the configured Codex home: defaults, the model cache, profiles, MCP servers, projects, skills, rules, hooks, plugins, and instruction files. Secret-like TOML and JSON values are redacted before any response; no Codex files are mutated. `lib/codex-config-watcher.js` broadcasts `codex_config_changed` on relevant config, skill, rule, or plugin changes so the page refreshes immediately.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/api/codex-config/overview` | Redacted metadata for every Codex config surface used by Agent Config |
+| `GET` | `/api/codex-config/file?path=…` | Redacted, size-capped file view for a file under Codex home or this project's `AGENTS.md` |
+
+### Run Agent (`/api/run`)
+
+Provider-aware HTTP surface for spawning and supervising Claude Code processes and native interactive Codex threads from the dashboard. Every route enforces a same-origin / loopback-Origin guard against browser CSRF.
 
 | Method   | Path                          | Description |
 | -------- | ----------------------------- | ----------- |
 | `GET`    | `/api/run`                    | List handles + `maxConcurrent` + `activeCount` |
-| `GET`    | `/api/run/binary`             | Probe whether `claude` is on `PATH` |
+| `GET`    | `/api/run/binary?provider=…`  | Probe whether `claude` or `codex` is on `PATH` |
+| `GET`    | `/api/run/models?provider=…`  | Signed-in dynamic Codex model catalog; Claude aliases plus locally observed models |
 | `GET`    | `/api/run/cwds`               | Suggested cwds (dashboard, home, recent from sessions) |
 | `GET`    | `/api/run/files?cwd=…&q=…`    | Fuzzy file search inside `cwd` for the Run page's `@`-file autocomplete. Skips `node_modules`, `.git`, `dist`, `build`, `.next`, `.cache`, `coverage`, `vendor`, etc. Cwd is required and must exist; results are capped and ranked by basename match |
-| `POST`   | `/api/run`                    | Spawn. Body: `{ prompt, mode, cwd?, model?, permissionMode?, resumeSessionId?, effort? }`. `effort` (`low`/`medium`/`high`) maps to `--effort`. When `resumeSessionId` is set in conversation mode, `prompt` may be empty — the spawner skips the initial stdin write and `claude --resume` idles until the client POSTs a follow-up to `/api/run/:id/message`. Spawner always passes `--output-format stream-json --verbose --include-partial-messages` for character-by-character streaming. Concurrency is effectively uncapped by default (ceiling 10000, override with `RUN_MAX_CONCURRENT`) — the terminal TUI has no cap and neither does the dashboard; the ceiling is sanity-only to prevent fork-bomb footguns |
-| `POST`   | `/api/run/:id/message`        | Send follow-up turn (conversation mode only). Body: `{ text }` |
+| `POST`   | `/api/run`                    | Spawn. Body: `{ provider?: "claude"\|"codex", prompt, mode?, cwd?, model?, permissionMode?, sandbox?, resumeSessionId?, effort? }`. Claude supports headless or stream-json conversation. Codex always starts/resumes a native interactive app-server thread, with `permissionMode` as its approval policy (`untrusted`/`on-request`/`never`) and `sandbox` as `read-only`/`workspace-write`/`danger-full-access`. `effort` maps to the provider's native reasoning setting. Concurrency is effectively uncapped by default (ceiling 10000, override with `RUN_MAX_CONCURRENT`) |
+| `POST`   | `/api/run/:id/message`        | Send follow-up turn. Body: `{ text, provider? }` |
 | `GET`    | `/api/run/:id`                | Handle state. `?envelopes=1` includes the in-memory envelope log for re-attach |
 | `DELETE` | `/api/run/:id`                | Stop (SIGTERM → SIGKILL after 5 s) |
 
-WebSocket message types added: `run_stream` (parsed stream-json envelope, including `stream_event` deltas from `--include-partial-messages`), `run_status` (status transitions), `run_input_ack` (stdin write confirmed), and `cc_config_changed` (broadcast by `lib/cc-watcher.js` on `fs.watch` events under `~/.claude/` and by `routes/cc-config.js` after every successful PUT/DELETE — debounced at 500 ms, payload `{ source: "dashboard"|"fs", action?, scope?, type?, name?, paths? }`).
+WebSocket message types added: `run_stream` (Claude stream-json envelopes or normalized Codex app-server events), `run_status` (status transitions), `run_input_ack` (follow-up accepted), `cc_config_changed`, and `codex_config_changed` (the read-only Codex explorer's filesystem refresh signal).
 
 ### Import History
 

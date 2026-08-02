@@ -384,6 +384,10 @@ graph TD
 
 ### API Documentation
 
+#### Provider-aware Agent surfaces
+
+`/run` is a provider-aware launcher: the established `run-spawner.js` owns Claude Code subprocesses, while `codex-app-server.js` and `codex-run-spawner.js` own a local native Codex app-server thread. `routes/run.js` unifies their lifecycle, history, re-attach, concurrency guard, model discovery, and WebSocket frames. Codex models are queried dynamically from the signed-in app server; Claude exposes only its aliases plus locally observed models because its CLI has no model-list endpoint. `codex-config-discovery.js`, `routes/codex-config.js`, and `codex-config-watcher.js` comprise the read-only, redacted Codex half of `/cc-config`, emitting `codex_config_changed` when relevant config files change.
+
 Both JSDoc and Swagger/OpenAPI 3.0.3 are used for API documentation. JSDoc comments in route handlers provide inline documentation and type hints, while the OpenAPI spec is generated centrally and rendered three ways for interactive and read-optimized API exploration.
 
 | Layer | Source | Purpose |

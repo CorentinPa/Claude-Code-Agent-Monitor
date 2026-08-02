@@ -1,6 +1,8 @@
 /**
  * @file CcConfig.tsx
- * @description Claude Code configuration explorer. Surfaces every plugin,
+ * @description Agent configuration explorer. Switches between the complete
+ * Claude Code configuration workspace and a safe, read-only Codex explorer.
+ * The Claude workspace surfaces every plugin,
  * skill, subagent, slash command, MCP server, hook, settings file, memory
  * file, marketplace, keybinding, and statusline script Claude Code knows
  * about. Read access for all surfaces; create / edit / delete for the
@@ -102,6 +104,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { api } from "../lib/api";
+import { CodexConfigExplorer } from "../components/CodexConfigExplorer";
 import type {
   CcArtifactType,
   CcBackup,
@@ -241,6 +244,7 @@ type Toast = { kind: "success" | "error"; message: string } | null;
 
 export function CcConfig() {
   const { t } = useTranslation("ccConfig");
+  const [provider, setProvider] = useState<"claude" | "codex">("claude");
   const [tab, setTab] = useState<TabKey>("overview");
   const [scope, setScope] = useState<CcScope>("all");
   const [data, setData] = useState<PageState>(EMPTY_STATE);
@@ -489,6 +493,8 @@ export function CcConfig() {
   return (
     <div className="space-y-5">
       <Header
+        provider={provider}
+        onProviderChange={setProvider}
         loading={loading}
         lastUpdated={lastUpdated}
         scope={scope}
@@ -498,76 +504,84 @@ export function CcConfig() {
         wsConnected={wsConnected}
       />
 
-      {error && (
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{t("loadError", { message: error })}</span>
-        </div>
-      )}
+      {provider === "codex" ? (
+        <CodexConfigExplorer />
+      ) : (
+        <>
+          {error && (
+            <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{t("loadError", { message: error })}</span>
+            </div>
+          )}
 
-      <Tabs current={tab} onSelect={setTab} counts={data.overview?.counts} />
+          <Tabs current={tab} onSelect={setTab} counts={data.overview?.counts} />
 
-      <div className="rounded-xl border border-border bg-surface-1">
-        {tab !== "overview" && (
-          <div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
-            <Search className="w-4 h-4 text-gray-500" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t("common.search")}
-              className="h-7 bg-transparent text-sm text-gray-100 placeholder:text-gray-500 focus:outline-none flex-1"
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch("")}
-                title={t("common.clearSearch")}
-                aria-label={t("common.clearSearch")}
-                className="h-7 w-7 flex-shrink-0 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-200 hover:bg-surface-3 focus:outline-none focus:ring-1 focus:ring-accent/40"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
+          <div className="rounded-xl border border-border bg-surface-1">
+            {tab !== "overview" && (
+              <div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
+                <Search className="w-4 h-4 text-gray-500" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={t("common.search")}
+                  className="h-7 bg-transparent text-sm text-gray-100 placeholder:text-gray-500 focus:outline-none flex-1"
+                />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    title={t("common.clearSearch")}
+                    aria-label={t("common.clearSearch")}
+                    className="h-7 w-7 flex-shrink-0 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-200 hover:bg-surface-3 focus:outline-none focus:ring-1 focus:ring-accent/40"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                {isMutable(tab) && tab !== "memory" && (
+                  <button
+                    onClick={() => openCreate(tabToArtifactType(tab))}
+                    className="h-7 text-[11px] font-medium px-2.5 rounded-md border border-accent/30 bg-accent/10 hover:bg-accent/20 text-accent inline-flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3 h-3" />
+                    {t("edit.newButton")}
+                  </button>
+                )}
+              </div>
             )}
-            {isMutable(tab) && tab !== "memory" && (
-              <button
-                onClick={() => openCreate(tabToArtifactType(tab))}
-                className="h-7 text-[11px] font-medium px-2.5 rounded-md border border-accent/30 bg-accent/10 hover:bg-accent/20 text-accent inline-flex items-center gap-1.5"
-              >
-                <Plus className="w-3 h-3" />
-                {t("edit.newButton")}
-              </button>
-            )}
+            <div className="p-4">
+              <TabPanel
+                tab={tab}
+                data={data}
+                search={search}
+                onOpenFile={openViewer}
+                onEdit={openEdit}
+                onDelete={openDelete}
+                onCreateMemory={(s) => openCreate("memory", s)}
+                onEditAuto={openEditAuto}
+                onDeleteAuto={openDeleteAuto}
+                onCreateAuto={openCreateAuto}
+                onKeybindingsSaved={fetchAll}
+                onToast={setToast}
+              />
+            </div>
           </div>
-        )}
-        <div className="p-4">
-          <TabPanel
-            tab={tab}
-            data={data}
-            search={search}
-            onOpenFile={openViewer}
-            onEdit={openEdit}
-            onDelete={openDelete}
-            onCreateMemory={(s) => openCreate("memory", s)}
-            onEditAuto={openEditAuto}
-            onDeleteAuto={openDeleteAuto}
-            onCreateAuto={openCreateAuto}
-            onKeybindingsSaved={fetchAll}
-            onToast={setToast}
-          />
-        </div>
-      </div>
 
-      {viewer && <FileViewer state={viewer} onClose={() => setViewer(null)} />}
-      {editor && <EditorModal state={editor} onClose={() => setEditor(null)} onSave={handleSave} />}
-      {confirmDelete && (
-        <ConfirmDeleteModal
-          state={confirmDelete}
-          onCancel={() => setConfirmDelete(null)}
-          onConfirm={handleDelete}
-        />
+          {viewer && <FileViewer state={viewer} onClose={() => setViewer(null)} />}
+          {editor && (
+            <EditorModal state={editor} onClose={() => setEditor(null)} onSave={handleSave} />
+          )}
+          {confirmDelete && (
+            <ConfirmDeleteModal
+              state={confirmDelete}
+              onCancel={() => setConfirmDelete(null)}
+              onConfirm={handleDelete}
+            />
+          )}
+          {toast && <ToastNotice toast={toast} onDismiss={() => setToast(null)} />}
+          {backupsOpen && <BackupsModal onClose={() => setBackupsOpen(false)} />}
+        </>
       )}
-      {toast && <ToastNotice toast={toast} onDismiss={() => setToast(null)} />}
-      {backupsOpen && <BackupsModal onClose={() => setBackupsOpen(false)} />}
     </div>
   );
 }
@@ -575,6 +589,8 @@ export function CcConfig() {
 // ── Header ────────────────────────────────────────────────────────────
 
 interface HeaderProps {
+  provider: "claude" | "codex";
+  onProviderChange: (provider: "claude" | "codex") => void;
   loading: boolean;
   lastUpdated: Date | null;
   scope: CcScope;
@@ -585,6 +601,8 @@ interface HeaderProps {
 }
 
 function Header({
+  provider,
+  onProviderChange,
   loading,
   lastUpdated,
   scope,
@@ -622,20 +640,23 @@ function Header({
                 {tCommon("offline")}
               </span>
             )}
+            <ProviderToggle value={provider} onChange={onProviderChange} />
           </div>
-          <p className="text-xs text-gray-500 max-w-2xl">{t("subtitle")}</p>
+          <p className="text-xs text-gray-500 max-w-2xl">{t(`provider.${provider}.subtitle`)}</p>
         </div>
       </div>
       <div className="flex flex-col items-stretch lg:items-end gap-2 flex-shrink-0">
         <div className="flex items-center gap-2 justify-end flex-wrap">
-          <ScopeToggle value={scope} onChange={onScopeChange} />
-          <button
-            onClick={onOpenBackups}
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium text-gray-200 hover:bg-surface-3 transition-colors"
-          >
-            <History className="w-3.5 h-3.5" />
-            {t("backups.openButton")}
-          </button>
+          {provider === "claude" && <ScopeToggle value={scope} onChange={onScopeChange} />}
+          {provider === "claude" && (
+            <button
+              onClick={onOpenBackups}
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium text-gray-200 hover:bg-surface-3 transition-colors"
+            >
+              <History className="w-3.5 h-3.5" />
+              {t("backups.openButton")}
+            </button>
+          )}
           <button
             onClick={onRefresh}
             disabled={loading}
@@ -652,6 +673,35 @@ function Header({
         )}
       </div>
     </header>
+  );
+}
+
+function ProviderToggle({
+  value,
+  onChange,
+}: {
+  value: "claude" | "codex";
+  onChange: (value: "claude" | "codex") => void;
+}) {
+  const { t } = useTranslation("ccConfig");
+  return (
+    <div
+      className="inline-flex rounded-full border border-border bg-surface-2 p-0.5"
+      aria-label={t("provider.aria", "Configuration provider")}
+    >
+      {(["claude", "codex"] as const).map((option) => (
+        <button
+          key={option}
+          onClick={() => onChange(option)}
+          className={`rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${value === option ? "bg-accent/20 text-accent" : "text-gray-400 hover:text-gray-200"}`}
+        >
+          {t(`provider.${option}.label`)}
+          {option === "codex" && (
+            <span className="ml-1 text-[9px] text-amber-400">{t("provider.beta", "BETA")}</span>
+          )}
+        </button>
+      ))}
+    </div>
   );
 }
 
