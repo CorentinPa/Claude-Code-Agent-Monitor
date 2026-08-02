@@ -4019,17 +4019,18 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
 
           <h3>Live Status</h3>
           <p>
-            Because a remote session is pulled over SSH, it never emits live hooks to this
-            dashboard, so remote sessions (<code>source</code> ≠ <code>local</code>) are excluded
-            from every local liveness and stale sweep — the process liveness reap, the watchdog
-            transcript scan, the startup cleanup, and the periodic abandon sweep all skip them.
-            Instead, a remote session's live status is reconciled from the mirrored transcript on
-            every sync: activity is judged from the <b>newest event timestamp inside the
-            JSONL</b> (falling back to mirror mtime). If the last event is within
-            <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) the session stays
-            <code>active</code>; once the mirror stops advancing for longer than that window, the
-            session is reconciled to <code>completed</code>. This keeps a still-running remote
-            session from being wrongly shown as Completed.
+            Remote sessions never emit live hooks to this dashboard, so a healthy source remains
+            exempt from the local process-liveness reap and watchdog transcript scan. Every
+            successful sync still reconciles live status from the mirrored transcript: activity is
+            judged from the <b>newest event timestamp inside the JSONL</b> (falling back to mirror
+            mtime); within <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes)
+            keeps the session <code>active</code>, otherwise it is reconciled to
+            <code>completed</code>. If an SSH sync fails — or a source is stranded in
+            <code>syncing</code> longer than <code>DASHBOARD_STALE_MINUTES</code> — and an active
+            session is itself older than that same window, the ordinary stale-session sweep marks
+            it <code>abandoned</code> and completes its agents. A later fresh mirror reactivates a
+            session that is still writing, so unavailable remotes never leave permanent Waiting
+            cards.
           </p>
 
           <h3>Security Model</h3>
@@ -4072,7 +4073,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                 <tr>
                   <td><code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code></td>
                   <td><code>600000</code></td>
-                  <td>Freshness window (10 min) for a Remote Data Source session's live status — judged from the newest JSONL event timestamp in the mirror (mtime fallback); remote sessions receive no live hooks, so this replaces the local liveness and stale sweeps (which skip them)</td>
+                  <td>Freshness window (10 min) for a Remote Data Source session's live status — judged from the newest JSONL event timestamp in the mirror (mtime fallback); healthy sources stay out of local liveness/stale checks, while errored or stale-syncing sources fall back to the global abandon sweep</td>
                 </tr>
               </tbody>
             </table>
@@ -6953,7 +6954,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=50" defer></script>
+    <script src="i18n-content.js?v=51" defer></script>
     <script src="script.js?v=42" defer></script>
     <script>
       (function () {

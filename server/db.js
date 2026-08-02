@@ -1143,16 +1143,32 @@ try {
 // Legacy sessions (created before SessionEnd hook) will never receive a SessionEnd event,
 // so they stay "active" forever. Complete any active session whose last event is older than
 // 1 hour — the CLI process is certainly gone by then.
-// Remote-source sessions (source != 'local') are exempt: their "last event" is bounded by
-// the rsync cadence, not the remote CLI's actual activity, so a busy remote session could be
-// wrongly completed here. server/lib/remote-sync.js owns their status via mirror reconciliation.
+// A healthy remote source remains exempt because its freshly mirrored transcript
+// is authoritative. A source that has failed, or has been stuck "syncing" for
+// the same hour, cannot provide that authority; fall back to the global stale
+// rule so its old Waiting cards do not become permanent.
 db.prepare(
   `
   UPDATE sessions SET
     status = 'completed',
     ended_at = COALESCE(ended_at, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
   WHERE status = 'active'
-    AND (source = 'local' OR source IS NULL)
+    AND (
+      source = 'local'
+      OR source IS NULL
+      OR NOT EXISTS (SELECT 1 FROM remote_sources rs WHERE rs.id = sessions.source)
+      OR EXISTS (
+        SELECT 1 FROM remote_sources rs
+        WHERE rs.id = sessions.source
+          AND (
+            rs.status = 'error'
+            OR (
+              rs.status = 'syncing'
+              AND rs.updated_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 hour')
+            )
+          )
+      )
+    )
     AND started_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 hour')
     AND NOT EXISTS (
       SELECT 1 FROM events e
@@ -1352,15 +1368,26 @@ const stmts = {
   touchSession: db.prepare(
     "UPDATE sessions SET updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?"
   ),
-  // Remote-source sessions (source != 'local') are excluded: their updated_at is
-  // driven by the rsync/import cadence rather than the remote CLI's real activity,
-  // so the periodic abandon sweep must not touch them. remote-sync.js reconciles
-  // their status from the mirrored transcript instead.
+  // A healthy remote source is excluded: mirror reconciliation owns its state,
+  // and import cadence is not remote activity. If the source errors, its only
+  // status authority is gone, so let the same stale rule abandon old sessions.
+  // A `syncing` state is trusted only while it is newer than the global stale
+  // window; a crash can otherwise strand a source in syncing forever.
   findStaleSessions: db.prepare(
-    `SELECT id FROM sessions
-     WHERE status = 'active' AND id != ?
-       AND (source = 'local' OR source IS NULL)
-       AND updated_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-' || ? || ' minutes')`
+    `SELECT s.id FROM sessions s
+     LEFT JOIN remote_sources rs ON rs.id = s.source
+     WHERE s.status = 'active' AND s.id != ?
+       AND s.updated_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-' || ? || ' minutes')
+       AND (
+         s.source = 'local'
+         OR s.source IS NULL
+         OR rs.id IS NULL
+         OR rs.status = 'error'
+         OR (
+           rs.status = 'syncing'
+           AND rs.updated_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-' || ? || ' minutes')
+         )
+       )`
   ),
 
   insertEvent: db.prepare(

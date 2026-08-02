@@ -2833,7 +2833,8 @@
               <strong>Remote Data Sources</strong> extend the same importer over SSH (scp/tar mirror),
               pulling <code>~/.claude/projects</code> from other machines on a 15 s background poller
               (immediate pull on add/re-enable) and tagging each session with its origin so a global
-              data-scope selector can filter the whole app.
+              data-scope selector can filter the whole app. If a remote fails or stays stuck syncing,
+              the normal stale-session fallback clears old Waiting cards until a fresh mirror arrives.
             </p>
           </div>
           <div class="feature-card">
@@ -3188,7 +3189,7 @@
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
                 <h4>Remote Data Sources</h4>
-                <p>Pull sessions from other machines over SSH, tagged by origin, with a global data-scope selector</p>
+                <p>Pull sessions from other machines over SSH, tagged by origin, with a global data scope and stale-sync recovery</p>
               </div>
             </div>
           </div>

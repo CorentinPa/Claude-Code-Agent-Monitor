@@ -553,10 +553,71 @@ describe("/api/remote-sources session_count", () => {
   });
 });
 
+// ── Remote failure stale fallback ───────────────────────────────────────────
+// A healthy source owns lifecycle reconciliation from its current mirror. Once
+// it cannot sync, that authority disappears; old active/Waiting rows must fall
+// through to the same global stale sweep as local sessions instead of lingering
+// forever. These assert eligibility for the shared prepared statement that both
+// the periodic sweep and hook-triggered orphan cleanup use.
+describe("remote failure stale fallback", () => {
+  const STALE_MINUTES = 180;
+  const oldIso = () => new Date(Date.now() - (STALE_MINUTES + 10) * 60 * 1000).toISOString();
+
+  function addRemoteSession(sourceId, sessionId) {
+    stmts.insertSession.run(sessionId, "Remote waiting", "active", "/remote/project", null, null);
+    stmts.setSessionSource.run(sourceId, sessionId);
+    db.prepare("UPDATE sessions SET updated_at = ? WHERE id = ?").run(oldIso(), sessionId);
+  }
+
+  it("includes an old session when its remote source reports an SSH error", () => {
+    const sourceId = "src_stale_error";
+    stmts.insertRemoteSource.run(sourceId, "Offline", "offline@example", null, null, null, 1);
+    addRemoteSession(sourceId, "remote-stale-error");
+    stmts.setRemoteSourceStatus.run("error", "connection timed out", sourceId);
+
+    const staleIds = new Set(
+      stmts.findStaleSessions
+        .all("__remote-test__", STALE_MINUTES, STALE_MINUTES)
+        .map((row) => row.id)
+    );
+    assert.ok(staleIds.has("remote-stale-error"));
+  });
+
+  it("includes a remote source stranded in syncing beyond the stale window", () => {
+    const sourceId = "src_stale_syncing";
+    stmts.insertRemoteSource.run(sourceId, "Stranded", "stranded@example", null, null, null, 1);
+    addRemoteSession(sourceId, "remote-stale-syncing");
+    stmts.setRemoteSourceStatus.run("syncing", null, sourceId);
+    db.prepare("UPDATE remote_sources SET updated_at = ? WHERE id = ?").run(oldIso(), sourceId);
+
+    const staleIds = new Set(
+      stmts.findStaleSessions
+        .all("__remote-test__", STALE_MINUTES, STALE_MINUTES)
+        .map((row) => row.id)
+    );
+    assert.ok(staleIds.has("remote-stale-syncing"));
+  });
+
+  it("keeps an old session out of the global sweep while its source remains healthy", () => {
+    const sourceId = "src_stale_healthy";
+    stmts.insertRemoteSource.run(sourceId, "Healthy", "healthy@example", null, null, null, 1);
+    addRemoteSession(sourceId, "remote-stale-healthy");
+    stmts.setRemoteSourceSyncResult.run("ok", null, new Date().toISOString(), "{}", sourceId);
+
+    const staleIds = new Set(
+      stmts.findStaleSessions
+        .all("__remote-test__", STALE_MINUTES, STALE_MINUTES)
+        .map((row) => row.id)
+    );
+    assert.ok(!staleIds.has("remote-stale-healthy"));
+  });
+});
+
 // ── Remote session status reconciliation ─────────────────────────────────────
-// A remote session gets NO live hooks and is excluded from every local liveness/
-// staleness sweep, so its active/completed state is driven solely by whether its
-// mirrored transcript is still advancing. These exercise that reconciliation
+// A healthy remote source gets NO live hooks and keeps its sessions outside the
+// local liveness/staleness sweeps, so successful mirror reconciliation owns
+// active/completed state. An errored or stale-syncing source deliberately falls
+// back to the shared stale sweep above. These exercise successful reconciliation
 // directly against a staged tree with controlled mtimes.
 describe("reconcileRemoteSessionStatus", () => {
   const dbModule = require("../db");

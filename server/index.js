@@ -1080,7 +1080,11 @@ if (require.main === module) {
   const sweepWorkflowSeen = new Map();
   setInterval(() => {
     // 1. Stale session cleanup — batch agent updates to avoid N+1 queries
-    const stale = cleanupDb.stmts.findStaleSessions.all("__periodic__", STALE_MINUTES);
+    const stale = cleanupDb.stmts.findStaleSessions.all(
+      "__periodic__",
+      STALE_MINUTES,
+      STALE_MINUTES
+    );
     const now = new Date().toISOString();
     if (stale.length > 0) {
       const staleIds = stale.map((s) => s.id);
