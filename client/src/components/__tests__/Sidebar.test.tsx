@@ -77,10 +77,10 @@ describe("Sidebar", () => {
     expect(screen.getByRole("button", { name: "English" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "English" }));
 
-    expect(screen.getByRole("button", { name: "Chinese 中文" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Vietnamese VI" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Korean 한국어" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Spanish ES" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Chinese 中文" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Vietnamese VI" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Korean 한국어" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Spanish ES" })).toBeInTheDocument();
   });
 
   it("should switch to Vietnamese when Vietnamese option is clicked", async () => {
@@ -88,7 +88,7 @@ describe("Sidebar", () => {
     renderSidebar(true);
 
     await user.click(screen.getByRole("button", { name: "English" }));
-    await user.click(screen.getByRole("button", { name: "Vietnamese VI" }));
+    await user.click(screen.getByRole("option", { name: "Vietnamese VI" }));
 
     await waitFor(() => {
       expect(screen.getByText("Tổng quan")).toBeInTheDocument();
@@ -101,7 +101,7 @@ describe("Sidebar", () => {
     renderSidebar(true);
 
     await user.click(screen.getByRole("button", { name: "English" }));
-    await user.click(screen.getByRole("button", { name: "Korean 한국어" }));
+    await user.click(screen.getByRole("option", { name: "Korean 한국어" }));
 
     await waitFor(() => {
       expect(screen.getByText("대시보드")).toBeInTheDocument();
@@ -114,7 +114,7 @@ describe("Sidebar", () => {
     renderSidebar(true, true);
 
     await user.click(screen.getByRole("button", { name: "English" }));
-    await user.click(screen.getByRole("button", { name: "Spanish ES" }));
+    await user.click(screen.getByRole("option", { name: "Spanish ES" }));
 
     await waitFor(() => {
       expect(screen.getByTitle("Panel")).toBeInTheDocument();
