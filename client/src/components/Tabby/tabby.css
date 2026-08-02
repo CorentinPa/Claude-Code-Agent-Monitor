@@ -73,7 +73,8 @@
   stroke: #8b93f9;
   stroke-width: 2;
   stroke-linejoin: round;
-  transform-origin: 80px 68px;
+  transform-box: view-box;
+  transform-origin: 67px 90px;
 }
 .tabby-whiskers path,
 .tabby-brows path,

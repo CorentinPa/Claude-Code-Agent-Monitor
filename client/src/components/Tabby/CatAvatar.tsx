@@ -174,10 +174,10 @@ export function CatAvatar({ mood, reducedMotion, hovered = false, size = 60 }: C
       {/* soft glow halo */}
       <circle className="tabby-halo" cx="50" cy="56" r="33" />
 
-      {/* tail - fluffy curl to the right */}
+      {/* Tail starts inside the body silhouette so its base stays naturally anchored. */}
       <path
         className="tabby-tail"
-        d="M78 74 q24 4 19 -22 q-3 -14 -12 -11 q8 4 6 14 q-3 12 -16 9 z"
+        d="M67 92 C78 92 87 84 90 73 C94 61 91 49 84 46 C78 43 73 48 76 54 C78 51 82 52 84 57 C87 65 82 75 75 80 C71 83 67 85 63 86 Z"
       />
 
       {/* body / chest peeking up from the bottom */}
