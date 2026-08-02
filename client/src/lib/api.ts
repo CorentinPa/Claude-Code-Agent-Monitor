@@ -390,6 +390,7 @@ import type {
   Analytics,
   CostResult,
   DashboardEvent,
+  GptModelPricing,
   ModelPricing,
   Session,
   SessionDrillIn,
@@ -409,7 +410,7 @@ import type {
   WorkflowRunDetail,
 } from "./types";
 
-import { activeSourcesParam } from "./dataScope";
+import { activeProvidersParam, activeSourcesParam } from "./dataScope";
 
 // Root path all endpoint paths are appended to. Kept relative (no host) so the
 // same client bundle works behind the Vite dev proxy and in same-origin prod.
@@ -426,6 +427,10 @@ function applyScope(qs: URLSearchParams): URLSearchParams {
   if (!qs.has("sources")) {
     const sources = activeSourcesParam();
     if (sources) qs.set("sources", sources);
+  }
+  if (!qs.has("providers")) {
+    const providers = activeProvidersParam();
+    if (providers) qs.set("providers", providers);
   }
   return qs;
 }
@@ -595,7 +600,12 @@ export const api = {
      *   and `sources`: the distinct machine origins present in the data (always
      *   includes at least `"local"`), for the data-scope selector.
      */
-    facets: () => request<{ cwds: string[]; sources: string[] }>("/sessions/facets"),
+    facets: () => {
+      const qs = applyScope(new URLSearchParams());
+      return request<{ cwds: string[]; sources: string[]; providers: string[] }>(
+        `/sessions/facets${qs.size ? `?${qs.toString()}` : ""}`
+      );
+    },
     /**
      * GET /api/sessions - paginated, filterable, sortable session list.
      *
@@ -658,13 +668,15 @@ export const api = {
      * @param id The session id.
      * @returns `{ session, agents, events, workflows }` for the detail view.
      */
-    get: (id: string) =>
-      request<{
+    get: (id: string) => {
+      const qs = applyScope(new URLSearchParams());
+      return request<{
         session: Session;
         agents: Agent[];
         events: DashboardEvent[];
         workflows: WorkflowRun[];
-      }>(`/sessions/${encodeURIComponent(id)}`),
+      }>(`/sessions/${encodeURIComponent(id)}${qs.size ? `?${qs.toString()}` : ""}`);
+    },
     /**
      * GET /api/sessions/:id/stats - per-session rollups for the detail page.
      *
@@ -674,7 +686,12 @@ export const api = {
      * @param id The session id.
      * @returns {@link SessionStats} for that one session.
      */
-    stats: (id: string) => request<SessionStats>(`/sessions/${encodeURIComponent(id)}/stats`),
+    stats: (id: string) => {
+      const qs = applyScope(new URLSearchParams());
+      return request<SessionStats>(
+        `/sessions/${encodeURIComponent(id)}/stats${qs.size ? `?${qs.toString()}` : ""}`
+      );
+    },
     /**
      * GET /api/sessions/:id/transcripts - the picker list of available
      * transcripts (main agent, subagents, compaction markers) for this session.
@@ -688,8 +705,12 @@ export const api = {
      * @param id The session id.
      * @returns {@link TranscriptListResult} — the selectable transcript entries.
      */
-    transcripts: (id: string) =>
-      request<TranscriptListResult>(`/sessions/${encodeURIComponent(id)}/transcripts`),
+    transcripts: (id: string) => {
+      const qs = applyScope(new URLSearchParams());
+      return request<TranscriptListResult>(
+        `/sessions/${encodeURIComponent(id)}/transcripts${qs.size ? `?${qs.toString()}` : ""}`
+      );
+    },
     /**
      * GET /api/sessions/:id/transcript - a page of parsed transcript messages.
      * Paginate with `after`/`before` (JSONL line numbers from the previous
@@ -735,6 +756,7 @@ export const api = {
       // `!= null` so a legitimate line number of 0 is forwarded (0 is falsy).
       if (params?.after != null) qs.set("after", String(params.after));
       if (params?.before != null) qs.set("before", String(params.before));
+      applyScope(qs);
       const q = qs.toString();
       return request<TranscriptResult>(
         `/sessions/${encodeURIComponent(id)}/transcript${q ? `?${q}` : ""}`
@@ -845,7 +867,12 @@ export const api = {
      *
      * @returns `{ event_types, tool_names }` — the distinct values for each filter.
      */
-    facets: () => request<{ event_types: string[]; tool_names: string[] }>("/events/facets"),
+    facets: () => {
+      const qs = applyScope(new URLSearchParams());
+      return request<{ event_types: string[]; tool_names: string[] }>(
+        `/events/facets${qs.size ? `?${qs.toString()}` : ""}`
+      );
+    },
   },
 
   // ─────────────────────────────── Analytics API ──────────────────────────────
@@ -997,6 +1024,22 @@ export const api = {
         "/settings/reinstall-hooks",
         { method: "POST" }
       ),
+    /** Install the selected dashboard lifecycle hooks from the Settings chooser. */
+    installHooks: (providers: Array<"claude" | "codex">) =>
+      request<{
+        ok: boolean;
+        results: Record<
+          string,
+          { ok: boolean; replaced?: boolean; output?: string[]; status?: Record<string, unknown> }
+        >;
+        hooks: {
+          installed: boolean;
+          providers: Record<
+            string,
+            { installed: boolean; path: string; hooks: Record<string, boolean> }
+          >;
+        };
+      }>("/settings/install-hooks", { method: "POST", body: JSON.stringify({ providers }) }),
     /**
      * POST /api/settings/reset-pricing - restore the built-in default
      * {@link ModelPricing} rules, discarding any custom edits.
@@ -1087,8 +1130,12 @@ export const api = {
      * @param status Optional lifecycle filter; "all" (or omitted) means no filter.
      * @returns {@link WorkflowData} — the aggregated workflow-intelligence panel.
      */
-    get: (status?: string) =>
-      request<WorkflowData>(`/workflows${status && status !== "all" ? `?status=${status}` : ""}`),
+    get: (status?: string) => {
+      const qs = new URLSearchParams();
+      if (status && status !== "all") qs.set("status", status);
+      applyScope(qs);
+      return request<WorkflowData>(`/workflows${qs.size ? `?${qs.toString()}` : ""}`);
+    },
     /**
      * GET /api/workflows/session/:id - single-session drill-in (agent tree,
      * tool timeline, swim lanes).
@@ -1099,8 +1146,12 @@ export const api = {
      * @param id The session id to reconstruct.
      * @returns {@link SessionDrillIn} — the agent tree, tool timeline, and lanes.
      */
-    session: (id: string) =>
-      request<SessionDrillIn>(`/workflows/session/${encodeURIComponent(id)}`),
+    session: (id: string) => {
+      const qs = applyScope(new URLSearchParams());
+      return request<SessionDrillIn>(
+        `/workflows/session/${encodeURIComponent(id)}${qs.size ? `?${qs.toString()}` : ""}`
+      );
+    },
     // Workflow-tool runs (issue #167) - fleets ingested from on-disk journals.
     // These two endpoints cover fleets that emit no hooks: the server reads their
     // run journals off disk (see server/lib/workflow-ingest.js) instead of the
@@ -1124,6 +1175,7 @@ export const api = {
       if (params?.session_id) qs.set("session_id", params.session_id);
       if (params?.limit != null) qs.set("limit", String(params.limit));
       if (params?.offset != null) qs.set("offset", String(params.offset));
+      applyScope(qs);
       const q = qs.toString();
       return request<WorkflowRunsResponse>(`/workflows/runs${q ? `?${q}` : ""}`);
     },
@@ -1136,8 +1188,12 @@ export const api = {
      * @param runId The Workflow-tool run id.
      * @returns {@link WorkflowRunDetail} — the run plus its agents and events.
      */
-    run: (runId: string) =>
-      request<WorkflowRunDetail>(`/workflows/runs/${encodeURIComponent(runId)}`),
+    run: (runId: string) => {
+      const qs = applyScope(new URLSearchParams());
+      return request<WorkflowRunDetail>(
+        `/workflows/runs/${encodeURIComponent(runId)}${qs.size ? `?${qs.toString()}` : ""}`
+      );
+    },
   },
 
   // ─────────────────────────────── Pricing API ────────────────────────────────
@@ -1148,6 +1204,17 @@ export const api = {
      * @returns `{ pricing }` — the full list of {@link ModelPricing} rules.
      */
     list: () => request<{ pricing: ModelPricing[] }>("/pricing"),
+    /** GET /api/pricing/gpt - OpenAI/Codex price rules, separate from Claude pricing. */
+    listGpt: () => request<{ pricing: GptModelPricing[] }>("/pricing/gpt"),
+    /** PUT /api/pricing/gpt - create or update an OpenAI/Codex price rule. */
+    upsertGpt: (data: Omit<GptModelPricing, "updated_at">) =>
+      request<{ pricing: GptModelPricing }>("/pricing/gpt", {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    /** DELETE /api/pricing/gpt/:pattern - remove an OpenAI/Codex price rule. */
+    deleteGpt: (pattern: string) =>
+      request<{ ok: boolean }>(`/pricing/gpt/${encodeURIComponent(pattern)}`, { method: "DELETE" }),
     /**
      * PUT /api/pricing - create a new rule or overwrite the one matching
      * `data.model_pattern` (the primary key).
@@ -1206,10 +1273,11 @@ export const api = {
      * @param sessionId The session to price.
      * @returns {@link CostResult} — the cost breakdown for that one session.
      */
-    sessionCost: (sessionId: string) =>
-      request<CostResult>(
-        `/pricing/cost/${encodeURIComponent(sessionId)}?tz_offset=${new Date().getTimezoneOffset()}`
-      ),
+    sessionCost: (sessionId: string) => {
+      const qs = new URLSearchParams({ tz_offset: String(new Date().getTimezoneOffset()) });
+      applyScope(qs);
+      return request<CostResult>(`/pricing/cost/${encodeURIComponent(sessionId)}?${qs.toString()}`);
+    },
   },
 
   // ──────────────────────────────── Import API ────────────────────────────────

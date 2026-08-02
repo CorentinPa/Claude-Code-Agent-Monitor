@@ -343,7 +343,9 @@ npm run setup
 npm run install-hooks
 ```
 
-This adds hook entries to `~/.claude/settings.json` that forward events to the dashboard. Existing hooks are preserved.
+The installer opens an interactive multi-select: use arrow keys, <kbd>Space</kbd>, and <kbd>Enter</kbd> to choose **Claude Code**, **Codex (beta)**, or both (Claude Code is preselected). Claude Code entries live in `~/.claude/settings.json`; Codex entries live in `~/.codex/hooks.json`. If a selected dashboard hook set already exists, it warns before replacing only this dashboard's entries — unrelated hooks are preserved. You can make the same selection later in **Settings → Hook Configuration → Install hooks**.
+
+Codex rollouts in `~/.codex/sessions` are also discovered continuously. The dashboard reads their append-only JSONL incrementally, so sessions, tokens, costs, conversation rows, and WebSocket updates stay current even if a hook notification is missed.
 
 ### 3. Start
 
@@ -614,6 +616,8 @@ flowchart LR
 | `DASHBOARD_LIVENESS_PROBE` | `1` (on) | Set to `0` to disable the watchdog's **dead-session liveness reap** (the `ps`/`lsof`-based probe that completes `active` sessions whose `claude` process no longer exists — recovering a `SessionEnd` lost while the dashboard was down). Sessions forwarded from **another machine** (household hooks) report a non-POSIX `cwd` and are auto-skipped by the reap, so a mixed local + forwarded deployment no longer needs this off; disable it only for a purely-remote setup where local processes prove nothing. Auto-disabled on Windows and inside containers |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | Idle gate for the **watchdog-tick** liveness reap: a session is only completed when its transcript hasn't been written for at least this long (the last hook write is the fallback clock when no transcript exists on disk), so a mid-turn or just-resumed session never flickers out on a transient probe miss. The startup passes ignore this gate — at boot the probe alone decides, so sessions quit moments before launch clear immediately |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | Poll interval (ms) for the continuous `~/.claude/projects` background sync that surfaces projects added after startup whose sessions never flow through hooks. The `fs.watch` watcher fires near-instantly regardless; this poll is the safety net (watchers can miss events / not fire on network filesystems). Set to `0` to disable the poll while leaving the watcher running |
+| `DASHBOARD_CODEX_HOME` | `CODEX_HOME` or `~/.codex` | Optional local Codex state directory. Rollouts are read only from its `sessions/` tree; it does not change Codex configuration unless you explicitly install hooks. |
+| `DASHBOARD_CODEX_SYNC_MS` | `4000` | Safety-net poll interval (ms) for append-only Codex rollouts. Codex hooks trigger the same incremental ingest immediately; set to `0` to disable only the poll while retaining the filesystem watcher when available. |
 | `DASHBOARD_REMOTE_SYNC_MS` | `15000` (15 s) | Poll interval (ms) for the **Remote Data Sources** background sync that pulls each enabled remote's `~/.claude/projects` over SSH and re-imports it through the local importer. New/enabled sources also sync immediately. Set to `0` to disable the poller (manual / on-demand syncs still work) |
 | `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000` (10 min) | Freshness window for a **Remote Data Source** session's live status. On each sync, a remote session whose mirrored transcript has a **last JSONL event** within this window is treated as still running (`active`); once the mirror stops advancing for longer than this, the session is reconciled to `completed`. Remote sessions receive no live hooks, so this replaces the local liveness/stale sweeps (which skip them). Raise it for slow links or very long idle turns |
 | `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` | `600000` (10 min) | Per-source timeout (ms) for a single remote sync (`scp` pull + import) before it is aborted |
@@ -1150,7 +1154,7 @@ See [docs/API.md → Metrics](./docs/API.md#metrics) for the full metric list an
 | `POST` | `/api/settings/reimport`       | Re-import legacy sessions from `~/.claude/`      |
 | `POST` | `/api/settings/reinstall-hooks`| Reinstall Claude Code hooks                      |
 | `POST` | `/api/settings/reset-pricing`  | Reset pricing to defaults                        |
-| `GET`  | `/api/settings/export`         | Export all data (sessions, agents, events, token_usage, workflows, dashboard_runs, alert_rules, model_pricing) as one versioned JSON download |
+| `GET`  | `/api/settings/export`         | Export all data (sessions, agents, events, token_usage, workflows, dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) as one versioned JSON download |
 | `POST` | `/api/settings/import`         | Restore a bundle from `/export` (multipart `file` or JSON `{ path }`). Idempotent + non-destructive — existing sessions are skipped whole |
 | `POST` | `/api/settings/cleanup`        | Abandon stale sessions, purge old data           |
 
@@ -1212,7 +1216,7 @@ A fourth mode — **Restore backup** — imports a full dashboard export
 `GET /api/settings/export`) rather than raw Claude transcripts. This is
 the round-trip counterpart to Export: it restores every table (sessions,
 agents, events, token_usage, workflows, dashboard_runs, alert_rules,
-model_pricing) and is idempotent + non-destructive — a session already
+model_pricing, gpt_model_pricing) and is idempotent + non-destructive — a session already
 present is skipped whole, so you can safely **consolidate several
 machines** into one dashboard without duplicating or overwriting
 anything. Backed by `server/lib/data-transfer.js` and

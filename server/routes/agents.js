@@ -8,6 +8,7 @@ const { stmts, db } = require("../db");
 const { broadcast } = require("../websocket");
 const { attachAgentCosts } = require("./pricing");
 const { parseSources, sessionIdInSourcesClause } = require("../lib/source-filter");
+const { parseProviders, sessionIdInProvidersClause } = require("../lib/provider-filter");
 
 const router = Router();
 
@@ -18,17 +19,29 @@ router.get("/", (req, res) => {
   const status = req.query.status;
   const session_id = req.query.session_id;
   const sources = parseSources(req);
+  const providers = parseProviders(req);
 
   let rows;
-  if (session_id) {
-    // A session belongs to exactly one source, so no extra source filter needed.
-    rows = stmts.listAgentsBySession.all(session_id);
-  } else if (sources) {
-    // Data-scope active: build a dynamic query restricting agents to sessions
-    // from the chosen machines. `agents` carries only session_id → subquery.
-    const scope = sessionIdInSourcesClause(sources, "session_id");
-    const clauses = [scope.clause];
-    const params = [...scope.params];
+  if (session_id || sources || providers) {
+    // Agents carry only session_id, so source/provider scope composes via the
+    // owning session. This also prevents direct session_id requests bypassing
+    // a selected provider.
+    const clauses = [];
+    const params = [];
+    if (session_id) {
+      clauses.push("session_id = ?");
+      params.push(session_id);
+    }
+    const sourceScope = sessionIdInSourcesClause(sources, "session_id");
+    if (sourceScope.clause) {
+      clauses.push(sourceScope.clause);
+      params.push(...sourceScope.params);
+    }
+    const providerScope = sessionIdInProvidersClause(providers, "session_id");
+    if (providerScope.clause) {
+      clauses.push(providerScope.clause);
+      params.push(...providerScope.params);
+    }
     if (status) {
       clauses.push("status = ?");
       params.push(status);

@@ -41,7 +41,20 @@
     "cacheWrite5m": "缓存写入 (5m)",
     "cacheWrite1h": "缓存写入 (1h)",
     "fastInput": "快速输入",
-    "fastOutput": "快速输出"
+    "fastOutput": "快速输出",
+    "gpt": {
+      "title": "OpenAI / Codex 定价",
+      "description": "每 100 万令牌的美元价格。标准请求在输入令牌不超过 272K 时使用短上下文费率，超过 272K 时使用长上下文费率；快速模式使用其单独公布的费率表。",
+      "name": "名称",
+      "short": "标准 · 短上下文 ≤272K",
+      "long": "标准 · 长上下文 >272K",
+      "fast": "快速模式",
+      "input": "输入",
+      "cached": "缓存输入",
+      "write": "缓存写入",
+      "output": "输出",
+      "deleteConfirm": "删除此 GPT 定价规则？"
+    }
   },
   "claudeHome": {
     "title": "CLAUDE_HOME",
@@ -54,12 +67,30 @@
   },
   "hooks": {
     "title": "钩子配置",
-    "description": "Claude Code 钩子将事件实时转发到仪表盘。",
+    "description": "Claude Code 和 Codex 钩子将事件实时转发到仪表盘。",
     "allInstalled": "所有钩子已安装",
+    "someInstalled": "钩子已配置",
     "incomplete": "钩子不完整",
     "reinstall": "重新安装钩子",
+    "configure": "配置钩子",
     "success": "钩子安装成功",
-    "failed": "钩子安装失败"
+    "failed": "钩子安装失败",
+    "display": {
+      "title": "仪表盘数据",
+      "description": "立即按产品筛选所有仪表盘视图。机器数据源筛选保持独立。",
+      "both": "两者"
+    },
+    "modal": {
+      "title": "安装仪表盘钩子",
+      "description": "选择一个或两个产品。现有仪表盘钩子条目将更新；无关的钩子命令不会被更改。",
+      "claude": "来自 ~/.claude/settings.json 的生命周期钩子。",
+      "codex": "来自 ~/.codex/hooks.json 的生命周期钩子，并以 rollout JSONL 作为实时后备。",
+      "installed": "已安装",
+      "overrideWarning": "已找到一个或多个所选产品的现有 Hook 配置。继续只会替换此仪表盘匹配的条目，并保留无关 Hook。",
+      "preserveNote": "必须至少选择一个产品。",
+      "install": "安装所选钩子",
+      "failed": "无法安装所选钩子。"
+    }
   },
   "notifications": {
     "title": "通知",

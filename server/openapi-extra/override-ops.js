@@ -212,7 +212,7 @@ const RESET_PRICING_EXAMPLE = {
 
 const EXPORT_EXAMPLE = {
   format: "ccam-export",
-  version: 1,
+  version: 2,
   exported_at: "2026-06-26T01:12:44.913Z",
   sessions: [
     {
@@ -267,6 +267,24 @@ const EXPORT_EXAMPLE = {
     },
   ],
   model_pricing: RESET_PRICING_EXAMPLE.pricing,
+  gpt_model_pricing: [
+    {
+      model_pattern: "gpt-5.6-terra%",
+      display_name: "GPT-5.6 Terra",
+      short_input_per_mtok: 2,
+      short_cached_input_per_mtok: 0.2,
+      short_cache_write_per_mtok: 2.5,
+      short_output_per_mtok: 12,
+      long_input_per_mtok: 4,
+      long_cached_input_per_mtok: 0.4,
+      long_cache_write_per_mtok: 5,
+      long_output_per_mtok: 18,
+      fast_input_per_mtok: 4,
+      fast_cached_input_per_mtok: 0.4,
+      fast_cache_write_per_mtok: 5,
+      fast_output_per_mtok: 24,
+    },
+  ],
 };
 
 const CLEANUP_EXAMPLE = {
@@ -988,7 +1006,7 @@ const paths = {
       tags: ["Settings"],
       summary: "Delete all dashboard data",
       description:
-        "⚠ DESTRUCTIVE — IRREVERSIBLE. Deletes ALL sessions, agents, events, token_usage rows, the fired-alert feed (alert_events), and the webhook delivery log. There is no confirmation step and no undo — export first via GET /api/settings/export if you need a backup. User CONFIGURATION survives: alert *rules*, webhook *targets*, and model_pricing are preserved (they're settings, not captured data). The response echoes the row counts that existed BEFORE the wipe so the UI can report what was removed.",
+        "⚠ DESTRUCTIVE — IRREVERSIBLE. Deletes ALL sessions, agents, events, token_usage rows, the fired-alert feed (alert_events), and the webhook delivery log. There is no confirmation step and no undo — export first via GET /api/settings/export if you need a backup. User CONFIGURATION survives: alert *rules*, webhook *targets*, model_pricing, and gpt_model_pricing are preserved (they're settings, not captured data). The response echoes the row counts that existed BEFORE the wipe so the UI can report what was removed.",
       operationId: "clearData",
       responses: {
         200: {
@@ -1080,7 +1098,7 @@ const paths = {
       tags: ["Settings"],
       summary: "Reset pricing table to defaults",
       description:
-        "⚠ DESTRUCTIVE to pricing customizations. Deletes EVERY row in the model_pricing table and re-seeds it from the dashboard's built-in DEFAULT_PRICING list. Any custom rates or custom model patterns you added are permanently lost — there is no undo. Captured session/token data is untouched (only the pricing rules used to *compute* cost change). The response returns the full freshly-seeded pricing table.",
+        "⚠ DESTRUCTIVE to pricing customizations. Deletes EVERY row in both model_pricing and gpt_model_pricing, then re-seeds the dashboard's built-in Claude and GPT rate cards. Any custom rates or custom model patterns you added are permanently lost — there is no undo. Captured session/token data is untouched (only the pricing rules used to *compute* cost change). The response returns the freshly-seeded tables.",
       operationId: "resetPricing",
       responses: {
         200: {
@@ -1101,7 +1119,7 @@ const paths = {
       tags: ["Settings"],
       summary: "Export all dashboard data as JSON",
       description:
-        'Exports the entire dataset as a single versioned JSON document — all sessions, agents, events, token_usage rows, workflows, dashboard_runs, alert_rules, and model_pricing — stamped with `format: "ccam-export"`, `version`, and `exported_at`. Served with a `Content-Disposition: attachment` header (filename `agent-monitor-export-YYYY-MM-DD.json`) so browsers download it. Use it to back up before a destructive operation (clear-data / cleanup with purge_days) or to migrate/consolidate data across machines — the bundle is re-importable via POST /api/settings/import. Read-only; nothing is modified.',
+        'Exports the entire dataset as a single versioned JSON document — all sessions, agents, events, token_usage rows, workflows, dashboard_runs, alert_rules, model_pricing, and gpt_model_pricing — stamped with `format: "ccam-export"`, `version`, and `exported_at`. Served with a `Content-Disposition: attachment` header (filename `agent-monitor-export-YYYY-MM-DD.json`) so browsers download it. Use it to back up before a destructive operation (clear-data / cleanup with purge_days) or to migrate/consolidate data across machines — the bundle is re-importable via POST /api/settings/import. Read-only; nothing is modified.',
       operationId: "exportData",
       responses: {
         200: {
@@ -1122,7 +1140,7 @@ const paths = {
       tags: ["Settings"],
       summary: "Restore (import) a previously exported data bundle",
       description:
-        'Restores a bundle produced by GET /api/settings/export. Supply it either as `multipart/form-data` with a single `file` field (browser upload) or as a JSON body `{ "path": "<absolute path>" }` (the server reads the file from disk — used by the `ccam import-data` CLI, and it also sidesteps the global 1 MB JSON body cap for large bundles). The restore is idempotent and NON-DESTRUCTIVE: it is session-atomic, so a session already present (matched by its UUID) is skipped whole together with its agents/events/token_usage/workflows, and independent config rows (dashboard_runs, alert_rules, model_pricing) are inserted only when absent. Nothing existing is overwritten — ideal for consolidating several machines into one dashboard. The response reports per-table counts.',
+        'Restores a bundle produced by GET /api/settings/export. Supply it either as `multipart/form-data` with a single `file` field (browser upload) or as a JSON body `{ "path": "<absolute path>" }` (the server reads the file from disk — used by the `ccam import-data` CLI, and it also sidesteps the global 1 MB JSON body cap for large bundles). The restore is idempotent and NON-DESTRUCTIVE: it is session-atomic, so a session already present (matched by its UUID) is skipped whole together with its agents/events/token_usage/workflows, and independent config rows (dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) are inserted only when absent. Nothing existing is overwritten — ideal for consolidating several machines into one dashboard. The response reports per-table counts.',
       operationId: "importData",
       requestBody: {
         required: true,
@@ -1170,6 +1188,7 @@ const paths = {
                 dashboard_runs: 11,
                 alert_rules: 2,
                 model_pricing: 0,
+                gpt_model_pricing: 0,
                 errors: 0,
               },
             },

@@ -1173,6 +1173,12 @@
                     main-agent cards still show the session total. Pricing changes retroactively
                     recalculate all stored sessions, and imports apply the same rate table.
                   </p>
+                  <p>
+                    Codex rollouts are accounted separately with fresh, cached, cache-write,
+                    output, and reasoning-output deltas. The GPT rate card distinguishes standard
+                    short context (≤272K input tokens), long context, and Fast mode; unavailable
+                    published tiers remain explicitly unpriced until you set a rate.
+                  </p>
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-indigo">⚙️</div>
@@ -1760,6 +1766,14 @@ npm run mcp:start:repl         # interactive CLI with tab completion
 # http://localhost:5173  (dev)
 # http://localhost:4820  (prod after npm run build && npm start)</code></pre>
 
+          <p>
+            The manual installer is interactive: Claude Code starts selected; use arrow keys,
+            <kbd>Space</kbd>, then <kbd>Enter</kbd> to choose Claude Code, Codex (beta), or both.
+            If a selected dashboard hook is already present, it warns before replacing only that
+            entry and preserves unrelated hooks. The same guided installer is available from
+            <strong>Settings → Hook Configuration</strong>.
+          </p>
+
           <h3>Alternative: Docker / Podman</h3>
           <p>
             A multi-stage <code>Dockerfile</code> and <code>docker-compose.yml</code> are included.
@@ -1953,6 +1967,16 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                   <td>
                     Poll interval for the background sync of <code>~/.claude/projects</code>; <code>0</code> disables the poll but keeps the filesystem watcher
                   </td>
+                </tr>
+                <tr>
+                  <td><code>DASHBOARD_CODEX_HOME</code></td>
+                  <td><code>~/.codex</code></td>
+                  <td>Optional Codex home. Defaults to <code>CODEX_HOME</code> or <code>~/.codex</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>DASHBOARD_CODEX_SYNC_MS</code></td>
+                  <td><code>4000</code></td>
+                  <td>Safety-net interval (ms) for incremental Codex rollout scanning. Default <code>4000</code>; <code>0</code> disables polling but keeps the watcher.</td>
                 </tr>
                 <tr>
                   <td><code>NODE_ENV</code></td>
@@ -6852,8 +6876,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations (zh/vi) — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=41" defer></script>
-    <script src="script.js?v=32" defer></script>
+    <script src="i18n-content.js?v=42" defer></script>
+    <script src="script.js?v=33" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

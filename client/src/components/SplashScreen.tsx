@@ -3,11 +3,9 @@
  * @description Branding splash shown once per browser session on app load. A
  * dark-tech "constellation" overlay built around the node-graph brand mark:
  * a time-aware greeting, a bold (localized) tagline, and two subtexts reveal
- * in a staggered cascade. The tagline and the subtext pair are picked at
- * random (per mount) from localized pools in `splash.json`, so the copy is
- * fresh each session. The overlay holds for ~2.5s, then fades out and
- * unmounts. Clicking anywhere skips it; honors
- * `prefers-reduced-motion`. CSS-only animations (no extra deps).
+ * in a staggered cascade. Before entering the dashboard, it asks which product
+ * data to show (Claude Code, Codex beta, or both) and persists that global
+ * choice so every scoped view immediately agrees.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -56,12 +54,11 @@
  *
  * ----------------------------------------------------------------------------- */
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { setProviderScope, type ProviderScope } from "../lib/dataScope";
 
-const SESSION_KEY = "splash-shown-v1";
-const HOLD_MS = 2500; // visible dwell after the entrance settles
-const EXIT_MS = 600; // fade-out duration
+const SESSION_KEY = "provider-onboarding-shown-v1";
 
 /** Map the local hour to a greeting bucket. */
 function greetingKey(hour: number): "morning" | "afternoon" | "evening" | "night" {
@@ -82,9 +79,7 @@ export function SplashScreen() {
       return true;
     }
   });
-  const [exiting, setExiting] = useState(false);
-  const exitTimer = useRef<number | null>(null);
-  const doneTimer = useRef<number | null>(null);
+  const [provider, setProvider] = useState<ProviderScope>("claude");
 
   // Pick the tagline + subtext pair ONCE per mount from the localized pools.
   // Falls back to the singular keys if a locale ships no array. Must run as an
@@ -102,26 +97,15 @@ export function SplashScreen() {
     };
   });
 
-  const beginExit = () => {
-    if (exiting) return;
-    setExiting(true);
-    doneTimer.current = window.setTimeout(() => setMounted(false), EXIT_MS);
-  };
-
-  useEffect(() => {
-    if (!mounted) return;
+  const continueToDashboard = () => {
+    setProviderScope(provider);
     try {
       sessionStorage.setItem(SESSION_KEY, "1");
     } catch {
-      /* sessionStorage may be unavailable (private mode) - show anyway */
+      /* storage may be unavailable; the in-memory scope still updates */
     }
-    exitTimer.current = window.setTimeout(beginExit, HOLD_MS);
-    return () => {
-      if (exitTimer.current) window.clearTimeout(exitTimer.current);
-      if (doneTimer.current) window.clearTimeout(doneTimer.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mounted]);
+    setMounted(false);
+  };
 
   if (!mounted) return null;
 
@@ -131,9 +115,9 @@ export function SplashScreen() {
   return (
     <div
       role="dialog"
+      aria-modal="true"
       aria-label={`${greeting}. ${copy.tagline}`}
-      onClick={beginExit}
-      className={`splash-root ${exiting ? "splash-exit" : ""}`}
+      className="splash-root"
     >
       <style>{SPLASH_CSS}</style>
 
@@ -162,6 +146,37 @@ export function SplashScreen() {
         <p className="splash-sub splash-sub-2">{copy.sub2}</p>
 
         <div className="splash-brand">{t("brand")}</div>
+
+        <div className="splash-provider-picker" role="radiogroup" aria-label={t("provider.title")}>
+          <p className="splash-provider-title">{t("provider.title")}</p>
+          <p className="splash-provider-subtitle">{t("provider.description")}</p>
+          <div className="splash-provider-cards">
+            {(
+              [
+                ["claude", "Claude Code", "provider.claude"],
+                ["codex", "Codex", "provider.codex"],
+                ["both", t("provider.both"), "provider.both"],
+              ] as const
+            ).map(([value, label, key]) => (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={provider === value}
+                onClick={() => setProvider(value)}
+                className={`splash-provider-card ${provider === value ? "is-selected" : ""}`}
+              >
+                <span className="splash-provider-card-name">
+                  {label} {value === "codex" && <em>{t("provider.beta")}</em>}
+                </span>
+                <span>{t(`${key}.description`)}</span>
+              </button>
+            ))}
+          </div>
+          <button type="button" className="splash-continue" onClick={continueToDashboard}>
+            {t("provider.continue")}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -298,9 +313,6 @@ const SPLASH_CSS = `
      app rendered behind it flashes through for the fade duration. Only the
      content cascades in (below); the dark backdrop is solid immediately. */
 }
-.splash-root.splash-exit {
-  animation: splashFadeOut ${EXIT_MS}ms cubic-bezier(0.4, 0, 0.2, 1) both;
-}
 .splash-bg {
   position: absolute;
   inset: 0;
@@ -426,6 +438,27 @@ const SPLASH_CSS = `
   opacity: 0;
   animation: splashRise 0.7s ease 1.1s forwards;
 }
+.splash-provider-picker {
+  margin: 1.5rem auto 0;
+  max-width: 38rem;
+  opacity: 0;
+  animation: splashRise 0.7s ease 1.22s forwards;
+}
+.splash-provider-title { margin: 0; color: #e9e9f3; font-size: 0.9rem; font-weight: 650; }
+.splash-provider-subtitle { margin: 0.35rem 0 0; color: #8b8ba2; font-size: 0.75rem; }
+.splash-provider-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.55rem; margin-top: 0.85rem; }
+.splash-provider-card {
+  min-height: 5.25rem; padding: 0.7rem; text-align: left; color: #9d9db4;
+  border: 1px solid rgba(129, 140, 248, 0.2); border-radius: 0.75rem;
+  background: rgba(20, 20, 33, 0.78); transition: 160ms ease; cursor: pointer;
+}
+.splash-provider-card:hover { border-color: rgba(165, 180, 252, 0.55); background: rgba(31, 31, 53, 0.94); }
+.splash-provider-card.is-selected { color: #e5e7ff; border-color: #818cf8; background: rgba(79, 70, 229, 0.18); box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.25), 0 8px 28px rgba(49, 46, 129, 0.2); }
+.splash-provider-card-name { display: block; color: inherit; font-size: 0.78rem; font-weight: 650; margin-bottom: 0.35rem; }
+.splash-provider-card em { font-style: normal; color: #fbbf24; font-size: 0.6rem; margin-left: 0.2rem; text-transform: uppercase; letter-spacing: 0.07em; }
+.splash-provider-card span:last-child { display: block; font-size: 0.67rem; line-height: 1.35; }
+.splash-continue { margin-top: 0.9rem; border: 0; border-radius: 0.55rem; background: #6366f1; color: #fff; padding: 0.55rem 1.25rem; font-size: 0.78rem; font-weight: 650; cursor: pointer; transition: 160ms ease; }
+.splash-continue:hover { background: #818cf8; transform: translateY(-1px); }
 
 @keyframes splashFadeOut {
   from { opacity: 1; transform: scale(1); filter: blur(0); }
@@ -456,7 +489,8 @@ const SPLASH_CSS = `
   .splash-greeting,
   .splash-tagline,
   .splash-sub,
-  .splash-brand {
+  .splash-brand,
+  .splash-provider-picker {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     opacity: 1 !important;

@@ -696,6 +696,9 @@ export interface Session {
    * dashboard's own machine; any other value is a remote source id (see the
    * Remote Data Sources feature / `remote_sources`). Maps to `sessions.source`. */
   source?: string;
+  /** Product that created this session. Historical records default to Claude;
+   *  Codex rollouts are marked `codex` and use the GPT price card. */
+  provider?: "claude" | "codex";
 }
 
 /**
@@ -1043,6 +1046,29 @@ export interface ModelPricing {
    *  active promo, so usage always prices at the standard rates above. */
   intro_until?: string | null;
   /** ISO timestamp this rule was last created/updated. */
+  updated_at: string;
+}
+
+/**
+ * An editable OpenAI/Codex rate rule. The distinct price bands represent the
+ * public GPT card: standard short context (<=272K input tokens), standard long
+ * context (>272K), and Fast mode. All values are USD per million tokens.
+ */
+export interface GptModelPricing {
+  model_pattern: string;
+  display_name: string;
+  short_input_per_mtok: number;
+  short_cached_input_per_mtok: number;
+  short_cache_write_per_mtok: number;
+  short_output_per_mtok: number;
+  long_input_per_mtok: number;
+  long_cached_input_per_mtok: number;
+  long_cache_write_per_mtok: number;
+  long_output_per_mtok: number;
+  fast_input_per_mtok: number;
+  fast_cached_input_per_mtok: number;
+  fast_cache_write_per_mtok: number;
+  fast_output_per_mtok: number;
   updated_at: string;
 }
 

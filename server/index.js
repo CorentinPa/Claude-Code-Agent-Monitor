@@ -1,5 +1,6 @@
 /**
- * @file Sets up the Express server with API routes and WebSocket, serves the React client in production, and includes periodic maintenance tasks like session cleanup and compaction scanning.
+ * @file Sets up the Express server, API routes, WebSocket, production client,
+ * and non-blocking Claude/Codex transcript synchronizers and maintenance jobs.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -377,6 +378,14 @@ function startBackgroundServices() {
   } catch (err) {
     console.warn("session sync failed to start:", err.message);
   }
+  // Codex rollouts are append-only JSONL files under ~/.codex/sessions. Hooks
+  // nudge this path immediately; this watcher + short poll closes the gap when
+  // a hook is unavailable, untrusted, or fired while the dashboard was down.
+  try {
+    startCodexSessionSync(broadcast);
+  } catch (err) {
+    console.warn("Codex session sync failed to start:", err.message);
+  }
   // Pull Claude Code history from enabled remote (SSH) sources on an interval so
   // usage collected on other machines shows up here in near real time. Off by
   // default cost-wise: the loop only does work when the user has configured at
@@ -504,6 +513,90 @@ function startWorkflowPoll(broadcast) {
     }
   }, POLL_MS);
   if (timer.unref) timer.unref();
+}
+
+/**
+ * Keep Codex rollout transcripts current with a debounced filesystem watcher
+ * plus a small safety-net poll. Codex hooks call the same incremental ingestor,
+ * so repeated notifications are harmless: its durable byte cursor means an
+ * unchanged file performs no token/event writes and emits no websocket frames.
+ */
+function startCodexSessionSync(broadcast) {
+  const fs = require("fs");
+  const { getCodexSessionsDir } = require("./lib/codex-home");
+  const { findCodexTranscripts, ingestCodexTranscript } = require("./lib/codex-ingest");
+  const sessionsDir = getCodexSessionsDir();
+  const fingerprints = new Map();
+  let running = false;
+  let queued = false;
+
+  function publish(result) {
+    if (!result?.changed || !result.session) return;
+    broadcast(result.created ? "session_created" : "session_updated", result.session);
+    if (result.agent) broadcast(result.created ? "agent_created" : "agent_updated", result.agent);
+    for (const event of result.events || []) broadcast("new_event", event);
+  }
+
+  function runSweep() {
+    if (running) {
+      queued = true;
+      return;
+    }
+    running = true;
+    try {
+      for (const transcriptPath of findCodexTranscripts(sessionsDir)) {
+        let stat;
+        try {
+          stat = fs.statSync(transcriptPath);
+        } catch {
+          continue;
+        }
+        const fingerprint = `${stat.size}:${stat.mtimeMs}`;
+        if (fingerprints.get(transcriptPath) === fingerprint) continue;
+        fingerprints.set(transcriptPath, fingerprint);
+        publish(ingestCodexTranscript(transcriptPath));
+      }
+    } catch {
+      // Codex is optional; an unreadable/missing home must not affect startup.
+    } finally {
+      running = false;
+      if (queued) {
+        queued = false;
+        setImmediate(runSweep);
+      }
+    }
+  }
+
+  const initial = setTimeout(runSweep, 300);
+  if (initial.unref) initial.unref();
+
+  const pollMs = process.env.DASHBOARD_CODEX_SYNC_MS
+    ? Number(process.env.DASHBOARD_CODEX_SYNC_MS)
+    : 4_000;
+  if (Number.isFinite(pollMs) && pollMs > 0) {
+    const timer = setInterval(runSweep, pollMs);
+    if (timer.unref) timer.unref();
+  }
+
+  let debounce;
+  const schedule = () => {
+    if (debounce) return;
+    debounce = setTimeout(() => {
+      debounce = null;
+      runSweep();
+    }, 150);
+    if (debounce.unref) debounce.unref();
+  };
+  try {
+    if (fs.existsSync(sessionsDir)) {
+      const recursive = process.platform === "darwin" || process.platform === "win32";
+      const watcher = fs.watch(sessionsDir, { recursive }, schedule);
+      watcher.on("error", () => {});
+      if (watcher.unref) watcher.unref();
+    }
+  } catch {
+    // The poll remains the fallback on filesystems without watcher support.
+  }
 }
 
 /**

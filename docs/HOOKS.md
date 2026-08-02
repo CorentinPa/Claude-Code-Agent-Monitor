@@ -155,6 +155,8 @@ graph TB
 npm run install-hooks
 ```
 
+The installer is interactive: use arrow keys, <kbd>Space</kbd>, then <kbd>Enter</kbd> to select Claude Code, Codex (beta), or both. It starts with Claude Code selected. Existing dashboard hook entries are detected and warned about before replacement; unrelated entries remain untouched. The same multi-select is available from **Settings → Hook Configuration → Install hooks**.
+
 > [!IMPORTANT]
 > **Hooks are a host-side step.** Claude Code runs on your host, so the hook
 > command must reference a `hook-handler.js` path that exists on the **host**.
@@ -165,6 +167,8 @@ npm run install-hooks
 > `http://localhost:4820`, which a containerized dashboard already publishes.
 > (Escape hatch for running Claude Code *inside* the same container:
 > `CCAM_ALLOW_CONTAINER_HOOKS=1 npm run install-hooks`.)
+
+For Codex, the installer writes only this dashboard's lifecycle entries to `~/.codex/hooks.json`. Each entry runs `scripts/codex-hook-handler.js`, which immediately POSTs the rollout path to `POST /api/hooks/codex` and exits. The server acknowledges `202` before parsing, then incrementally consumes `~/.codex/sessions/**/rollout-*.jsonl`; duplicate hook and watcher notifications are idempotent through a durable byte cursor. Supported lifecycle notifications are `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, and `SessionEnd`. `PreToolUse` intentionally ingests the just-completed model turn before a long-running tool delays its matching `PostToolUse` notification.
 
 This copies hook scripts from `scripts/hooks/` to `.githooks/`:
 

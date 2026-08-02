@@ -5,8 +5,22 @@
 
 const { Router } = require("express");
 const { db, stmts } = require("../db");
+const { parseProviders } = require("../lib/provider-filter");
 
 const router = Router();
+
+// Workflow intelligence is built from Claude Code's agent/workflow records.
+// Codex sessions are first-class elsewhere, but do not produce this product's
+// Workflow-tool artifacts. Returning an empty, correctly shaped view for a
+// Codex-only scope prevents Claude records leaking into the global selection.
+function includesClaude(req) {
+  const providers = parseProviders(req);
+  return !providers || providers.includes("claude");
+}
+
+function scopedSessionExists(session, req) {
+  return !!session && includesClaude(req) && (session.provider || "claude") === "claude";
+}
 
 // ── Helper: compute session duration in seconds ──
 function durationSec(s) {
@@ -19,7 +33,9 @@ function durationSec(s) {
 router.get("/", (req, res) => {
   try {
     // Optional status filter: "active", "completed", or omit for all
-    const statusFilter = req.query.status || null;
+    const statusFilter = includesClaude(req)
+      ? req.query.status || null
+      : "__codex_workflows_are_not_available__";
     const data = {
       stats: getWorkflowStats(statusFilter),
       orchestration: getOrchestrationData(statusFilter),
@@ -44,7 +60,9 @@ router.get("/session/:id", (req, res) => {
   try {
     const sessionId = req.params.id;
     const session = stmts.getSession.get(sessionId);
-    if (!session) return res.status(404).json({ error: { message: "Session not found" } });
+    if (!scopedSessionExists(session, req)) {
+      return res.status(404).json({ error: { message: "Session not found" } });
+    }
 
     const agents = stmts.listAgentsBySession.all(sessionId);
     const events = db
@@ -792,6 +810,9 @@ router.get("/runs", (req, res) => {
   try {
     const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 1000);
     const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
+    if (!includesClaude(req)) {
+      return res.json({ runs: [], total: 0, counts: {}, limit, offset });
+    }
     const status = req.query.status && req.query.status !== "all" ? req.query.status : null;
     const sessionId = req.query.session_id || null;
 
@@ -819,6 +840,11 @@ router.get("/runs", (req, res) => {
 // GET /runs/:runId — one run with its linked inner agents + their events.
 router.get("/runs/:runId", (req, res) => {
   try {
+    if (!includesClaude(req)) {
+      return res
+        .status(404)
+        .json({ error: { code: "WORKFLOW_NOT_FOUND", message: "Workflow run not found" } });
+    }
     const wf = stmts.getWorkflow.get(req.params.runId);
     if (!wf) {
       return res

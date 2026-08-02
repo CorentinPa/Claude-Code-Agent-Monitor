@@ -184,6 +184,9 @@ db.exec(`
     speed TEXT NOT NULL DEFAULT 'standard',
     inference_geo TEXT NOT NULL DEFAULT 'global',
     service_tier TEXT NOT NULL DEFAULT 'standard',
+    -- short/long is meaningful for GPT pricing (the per-request 272K
+    -- boundary). Claude rows retain the harmless default short value.
+    context_size TEXT NOT NULL DEFAULT 'short' CHECK(context_size IN ('short','long')),
     input_tokens INTEGER NOT NULL DEFAULT 0,
     output_tokens INTEGER NOT NULL DEFAULT 0,
     cache_read_tokens INTEGER NOT NULL DEFAULT 0,
@@ -203,7 +206,7 @@ db.exec(`
     baseline_web_search INTEGER NOT NULL DEFAULT 0,
     baseline_web_fetch INTEGER NOT NULL DEFAULT 0,
     baseline_code_execution INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (session_id, model, speed, inference_geo, service_tier),
+    PRIMARY KEY (session_id, model, speed, inference_geo, service_tier, context_size),
     FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
   );
 
@@ -231,6 +234,42 @@ db.exec(`
     intro_cache_write_per_mtok REAL NOT NULL DEFAULT 0,
     intro_cache_write_1h_per_mtok REAL NOT NULL DEFAULT 0,
     intro_until TEXT,
+    updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  );
+
+  -- OpenAI / Codex price rules intentionally live apart from Anthropic rules:
+  -- GPT has request-size bands and explicit Fast cache rates, neither of which
+  -- maps faithfully onto model_pricing's Claude-specific cache tiers.
+  CREATE TABLE IF NOT EXISTS gpt_model_pricing (
+    model_pattern TEXT PRIMARY KEY,
+    display_name TEXT NOT NULL,
+    short_input_per_mtok REAL NOT NULL DEFAULT 0,
+    short_cached_input_per_mtok REAL NOT NULL DEFAULT 0,
+    short_cache_write_per_mtok REAL NOT NULL DEFAULT 0,
+    short_output_per_mtok REAL NOT NULL DEFAULT 0,
+    long_input_per_mtok REAL NOT NULL DEFAULT 0,
+    long_cached_input_per_mtok REAL NOT NULL DEFAULT 0,
+    long_cache_write_per_mtok REAL NOT NULL DEFAULT 0,
+    long_output_per_mtok REAL NOT NULL DEFAULT 0,
+    fast_input_per_mtok REAL NOT NULL DEFAULT 0,
+    fast_cached_input_per_mtok REAL NOT NULL DEFAULT 0,
+    fast_cache_write_per_mtok REAL NOT NULL DEFAULT 0,
+    fast_output_per_mtok REAL NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  );
+
+  -- Durable cursor state for append-only Codex rollout JSONL files. Keeping the
+  -- last cumulative counters makes duplicate hook/watcher notifications free.
+  CREATE TABLE IF NOT EXISTS codex_ingest_state (
+    transcript_path TEXT PRIMARY KEY,
+    session_id TEXT,
+    byte_offset INTEGER NOT NULL DEFAULT 0,
+    remainder TEXT NOT NULL DEFAULT '',
+    input_tokens INTEGER NOT NULL DEFAULT 0,
+    cached_input_tokens INTEGER NOT NULL DEFAULT 0,
+    cache_write_input_tokens INTEGER NOT NULL DEFAULT 0,
+    output_tokens INTEGER NOT NULL DEFAULT 0,
+    reasoning_output_tokens INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
   );
 
@@ -518,6 +557,115 @@ const DEFAULT_PRICING = [
   ["claude-3-opus%", "Claude Opus 3", 15, 75, 1.5, 18.75, 30, 0, 0],
 ];
 
+// OpenAI pricing supplied for Codex support. Only models for which the supplied
+// rate card publishes a long-context column receive long rates; unsupported
+// combinations remain zero and surface as explicitly unpriced rather than
+// silently inventing a cost. Columns: pattern, name, short, long, fast.
+const gptLongRates = (short) => [short[0] * 2, short[1] * 2, short[2] * 2, short[3] * 1.5];
+const gptRate = (pattern, name, short, fast = [0, 0, 0, 0], long = [0, 0, 0, 0]) => [
+  pattern,
+  name,
+  ...short,
+  ...long,
+  ...fast,
+];
+const DEFAULT_GPT_PRICING = [
+  gptRate(
+    "gpt-5.6-sol%",
+    "GPT-5.6 Sol",
+    [5, 0.5, 6.25, 30],
+    [10, 1, 12.5, 60],
+    gptLongRates([5, 0.5, 6.25, 30])
+  ),
+  gptRate(
+    "gpt-5.6-terra%",
+    "GPT-5.6 Terra",
+    [2, 0.2, 2.5, 12],
+    [4, 0.4, 5, 24],
+    gptLongRates([2, 0.2, 2.5, 12])
+  ),
+  gptRate(
+    "gpt-5.6-luna%",
+    "GPT-5.6 Luna",
+    [0.2, 0.02, 0.25, 1.2],
+    [0.4, 0.04, 0.5, 2.4],
+    gptLongRates([0.2, 0.02, 0.25, 1.2])
+  ),
+  gptRate("gpt-5.5-pro%", "GPT-5.5 Pro", [30, 0, 0, 180], undefined, gptLongRates([30, 0, 0, 180])),
+  gptRate(
+    "gpt-5.5%",
+    "GPT-5.5",
+    [5, 0.5, 0, 30],
+    [12.5, 1.25, 0, 75],
+    gptLongRates([5, 0.5, 0, 30])
+  ),
+  gptRate("gpt-5.4-pro%", "GPT-5.4 Pro", [30, 0, 0, 180], undefined, gptLongRates([30, 0, 0, 180])),
+  gptRate(
+    "gpt-5.4-mini%",
+    "GPT-5.4 Mini",
+    [0.75, 0.075, 0, 4.5],
+    [1.5, 0.15, 0, 9],
+    gptLongRates([0.75, 0.075, 0, 4.5])
+  ),
+  gptRate(
+    "gpt-5.4-nano%",
+    "GPT-5.4 Nano",
+    [0.2, 0.02, 0, 1.25],
+    undefined,
+    gptLongRates([0.2, 0.02, 0, 1.25])
+  ),
+  gptRate(
+    "gpt-5.4%",
+    "GPT-5.4",
+    [2.5, 0.25, 0, 15],
+    [5, 0.5, 0, 30],
+    gptLongRates([2.5, 0.25, 0, 15])
+  ),
+  gptRate("gpt-5.2-pro%", "GPT-5.2 Pro", [21, 0, 0, 168]),
+  gptRate("gpt-5.2%", "GPT-5.2", [1.75, 0.175, 0, 14], [3.5, 0.35, 0, 28]),
+  gptRate("gpt-5.1%", "GPT-5.1", [1.25, 0.125, 0, 10], [2.5, 0.25, 0, 20]),
+  gptRate("gpt-5-pro%", "GPT-5 Pro", [15, 0, 0, 120]),
+  gptRate("gpt-5-mini%", "GPT-5 Mini", [0.25, 0.025, 0, 2], [0.45, 0.045, 0, 3.6]),
+  gptRate("gpt-5-nano%", "GPT-5 Nano", [0.05, 0.005, 0, 0.4]),
+  gptRate("gpt-5%", "GPT-5", [1.25, 0.125, 0, 10], [2.5, 0.25, 0, 20]),
+  gptRate("gpt-4.1-mini%", "GPT-4.1 Mini", [0.4, 0.1, 0, 1.6], [0.7, 0.175, 0, 2.8]),
+  gptRate("gpt-4.1-nano%", "GPT-4.1 Nano", [0.1, 0.025, 0, 0.4], [0.2, 0.05, 0, 0.8]),
+  gptRate("gpt-4.1%", "GPT-4.1", [2, 0.5, 0, 8], [3.5, 0.875, 0, 14]),
+  gptRate("gpt-4o-2024-05-13%", "GPT-4o (2024-05-13)", [5, 0, 0, 15], [8.75, 0, 0, 26.25]),
+  gptRate("gpt-4o-mini%", "GPT-4o Mini", [0.15, 0.075, 0, 0.6], [0.25, 0.125, 0, 1]),
+  gptRate("gpt-4o%", "GPT-4o", [2.5, 1.25, 0, 10], [4.25, 2.125, 0, 17]),
+  gptRate("gpt-4-turbo-2024-04-09%", "GPT-4 Turbo (2024-04-09)", [10, 0, 0, 30]),
+  gptRate("gpt-4-0613%", "GPT-4 (0613)", [30, 0, 0, 60]),
+  gptRate("o4-mini%", "o4-mini", [1.1, 0.275, 0, 4.4], [2, 0.5, 0, 8]),
+  gptRate("o3-pro%", "o3 Pro", [20, 0, 0, 80]),
+  gptRate("o3-mini%", "o3-mini", [1.1, 0.55, 0, 4.4]),
+  gptRate("o3%", "o3", [2, 0.5, 0, 8], [3.5, 0.875, 0, 14]),
+  gptRate("o1-pro%", "o1 Pro", [150, 0, 0, 600]),
+  gptRate("o1%", "o1", [15, 7.5, 0, 60]),
+  gptRate("gpt-3.5-turbo-0125%", "GPT-3.5 Turbo (0125)", [0.5, 0, 0, 1.5]),
+  gptRate("gpt-3.5-turbo-1106%", "GPT-3.5 Turbo (1106)", [1, 0, 0, 2]),
+  gptRate("gpt-3.5-turbo-instruct%", "GPT-3.5 Turbo Instruct", [1.5, 0, 0, 2]),
+  gptRate("gpt-3.5-turbo%", "GPT-3.5 Turbo", [0.5, 0, 0, 1.5]),
+  gptRate("davinci-002%", "Davinci-002", [2, 0, 0, 2]),
+  gptRate("babbage-002%", "Babbage-002", [0.4, 0, 0, 0.4]),
+];
+
+function seedGptPricing(dbHandle = db) {
+  const insert = dbHandle.prepare(`
+    INSERT OR IGNORE INTO gpt_model_pricing (
+      model_pattern, display_name,
+      short_input_per_mtok, short_cached_input_per_mtok, short_cache_write_per_mtok, short_output_per_mtok,
+      long_input_per_mtok, long_cached_input_per_mtok, long_cache_write_per_mtok, long_output_per_mtok,
+      fast_input_per_mtok, fast_cached_input_per_mtok, fast_cache_write_per_mtok, fast_output_per_mtok
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const seed = dbHandle.transaction((rows) => {
+    for (const row of rows) insert.run(...row);
+  });
+  seed(DEFAULT_GPT_PRICING);
+}
+seedGptPricing();
+
 // Top-up: insert any default pattern that isn't already present. Preserves
 // user edits to existing rows — we only add what's missing, never overwrite.
 // This runs every startup so new default models (e.g. Opus 4.8) appear in the
@@ -699,6 +847,16 @@ try {
   db.prepare("ALTER TABLE sessions ADD COLUMN source TEXT NOT NULL DEFAULT 'local'").run();
 }
 db.exec(`CREATE INDEX IF NOT EXISTS idx_sessions_source ON sessions(source)`);
+
+// Product provider is deliberately independent from `source`: a local machine
+// can contribute both Claude Code and Codex sessions, while a remote source can
+// do the same. Historical rows are Claude by definition and keep their view.
+try {
+  db.prepare("SELECT provider FROM sessions LIMIT 1").get();
+} catch {
+  db.prepare("ALTER TABLE sessions ADD COLUMN provider TEXT NOT NULL DEFAULT 'claude'").run();
+}
+db.exec(`CREATE INDEX IF NOT EXISTS idx_sessions_provider ON sessions(provider)`);
 
 // Remote data sources: other machines whose Claude Code history this dashboard
 // pulls in over SSH. Config only — NO secrets are stored here: authentication
@@ -898,6 +1056,63 @@ try {
   db.pragma("foreign_keys = ON");
 }
 
+// Migrate: add the per-request context-size bucket. SQLite cannot extend the
+// composite primary key in place. Every historical Claude bucket maps to
+// `short`, which is intentionally ignored by the Claude calculator and thus
+// preserves its exact prior total.
+try {
+  db.prepare("SELECT context_size FROM token_usage LIMIT 1").get();
+} catch {
+  db.pragma("foreign_keys = OFF");
+  db.prepare("ALTER TABLE token_usage RENAME TO token_usage_pre_context_size").run();
+  db.exec(`
+    CREATE TABLE token_usage (
+      session_id TEXT NOT NULL,
+      model TEXT NOT NULL DEFAULT 'unknown',
+      speed TEXT NOT NULL DEFAULT 'standard',
+      inference_geo TEXT NOT NULL DEFAULT 'global',
+      service_tier TEXT NOT NULL DEFAULT 'standard',
+      context_size TEXT NOT NULL DEFAULT 'short' CHECK(context_size IN ('short','long')),
+      input_tokens INTEGER NOT NULL DEFAULT 0,
+      output_tokens INTEGER NOT NULL DEFAULT 0,
+      cache_read_tokens INTEGER NOT NULL DEFAULT 0,
+      cache_write_tokens INTEGER NOT NULL DEFAULT 0,
+      cache_write_1h_tokens INTEGER NOT NULL DEFAULT 0,
+      web_search_requests INTEGER NOT NULL DEFAULT 0,
+      web_fetch_requests INTEGER NOT NULL DEFAULT 0,
+      code_execution_requests INTEGER NOT NULL DEFAULT 0,
+      baseline_input INTEGER NOT NULL DEFAULT 0,
+      baseline_output INTEGER NOT NULL DEFAULT 0,
+      baseline_cache_read INTEGER NOT NULL DEFAULT 0,
+      baseline_cache_write INTEGER NOT NULL DEFAULT 0,
+      baseline_cache_write_1h INTEGER NOT NULL DEFAULT 0,
+      baseline_web_search INTEGER NOT NULL DEFAULT 0,
+      baseline_web_fetch INTEGER NOT NULL DEFAULT 0,
+      baseline_code_execution INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (session_id, model, speed, inference_geo, service_tier, context_size),
+      FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+    )
+  `);
+  db.exec(`
+    INSERT INTO token_usage (
+      session_id, model, speed, inference_geo, service_tier, context_size,
+      input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cache_write_1h_tokens,
+      web_search_requests, web_fetch_requests, code_execution_requests,
+      baseline_input, baseline_output, baseline_cache_read, baseline_cache_write,
+      baseline_cache_write_1h, baseline_web_search, baseline_web_fetch, baseline_code_execution
+    )
+    SELECT
+      session_id, model, speed, inference_geo, service_tier, 'short',
+      input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cache_write_1h_tokens,
+      web_search_requests, web_fetch_requests, code_execution_requests,
+      baseline_input, baseline_output, baseline_cache_read, baseline_cache_write,
+      baseline_cache_write_1h, baseline_web_search, baseline_web_fetch, baseline_code_execution
+    FROM token_usage_pre_context_size
+  `);
+  db.prepare("DROP TABLE token_usage_pre_context_size").run();
+  db.pragma("foreign_keys = ON");
+}
+
 // Startup cleanup: mark stale active sessions as completed.
 // Legacy sessions (created before SessionEnd hook) will never receive a SessionEnd event,
 // so they stay "active" forever. Complete any active session whose last event is older than
@@ -965,6 +1180,9 @@ const stmts = {
   insertSession: db.prepare(
     "INSERT INTO sessions (id, name, status, cwd, model, started_at, updated_at, metadata) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), ?)"
   ),
+  insertCodexSession: db.prepare(
+    "INSERT INTO sessions (id, name, status, cwd, model, provider, source, started_at, updated_at, metadata) VALUES (?, ?, ?, ?, ?, 'codex', ?, ?, ?, ?)"
+  ),
   updateSession: db.prepare(
     "UPDATE sessions SET name = COALESCE(?, name), status = COALESCE(?, status), ended_at = COALESCE(?, ended_at), metadata = COALESCE(?, metadata), updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?"
   ),
@@ -1001,6 +1219,9 @@ const stmts = {
   // includes at least 'local' via the column default.
   distinctSessionSources: db.prepare(
     "SELECT DISTINCT source FROM sessions WHERE source IS NOT NULL AND source != '' ORDER BY source"
+  ),
+  distinctSessionProviders: db.prepare(
+    "SELECT DISTINCT provider FROM sessions WHERE provider IS NOT NULL AND provider != '' ORDER BY provider"
   ),
 
   // ── Remote sources (SSH machines the dashboard pulls history from) ──────────
@@ -1141,10 +1362,10 @@ const stmts = {
   // Legacy additive upsert. Targets the standard/global/standard bucket; kept
   // for backward compatibility with any caller using the original 6-arg shape.
   upsertTokenUsage: db.prepare(`
-    INSERT INTO token_usage (session_id, model, speed, inference_geo, service_tier,
+    INSERT INTO token_usage (session_id, model, speed, inference_geo, service_tier, context_size,
                              input_tokens, output_tokens, cache_read_tokens, cache_write_tokens)
-    VALUES (?, ?, 'standard', 'global', 'standard', ?, ?, ?, ?)
-    ON CONFLICT(session_id, model, speed, inference_geo, service_tier) DO UPDATE SET
+    VALUES (?, ?, 'standard', 'global', 'standard', 'short', ?, ?, ?, ?)
+    ON CONFLICT(session_id, model, speed, inference_geo, service_tier, context_size) DO UPDATE SET
       input_tokens = input_tokens + excluded.input_tokens,
       output_tokens = output_tokens + excluded.output_tokens,
       cache_read_tokens = cache_read_tokens + excluded.cache_read_tokens,
@@ -1174,13 +1395,13 @@ const stmts = {
   //   input, output, cache_read, cache_write, cache_write_1h,
   //   web_search, web_fetch, code_execution
   replaceTokenUsage: db.prepare(`
-    INSERT INTO token_usage (session_id, model, speed, inference_geo, service_tier,
+    INSERT INTO token_usage (session_id, model, speed, inference_geo, service_tier, context_size,
                              input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cache_write_1h_tokens,
                              web_search_requests, web_fetch_requests, code_execution_requests,
                              baseline_input, baseline_output, baseline_cache_read, baseline_cache_write, baseline_cache_write_1h,
                              baseline_web_search, baseline_web_fetch, baseline_code_execution)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0)
-    ON CONFLICT(session_id, model, speed, inference_geo, service_tier) DO UPDATE SET
+    VALUES (?, ?, ?, ?, ?, 'short', ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0)
+    ON CONFLICT(session_id, model, speed, inference_geo, service_tier, context_size) DO UPDATE SET
       baseline_input = MAX(input_tokens + baseline_input - excluded.input_tokens, 0),
       baseline_output = MAX(output_tokens + baseline_output - excluded.output_tokens, 0),
       baseline_cache_read = MAX(cache_read_tokens + baseline_cache_read - excluded.cache_read_tokens, 0),
@@ -1198,6 +1419,38 @@ const stmts = {
       web_fetch_requests = excluded.web_fetch_requests,
       code_execution_requests = excluded.code_execution_requests
   `),
+  // Incremental Codex counter deltas. Unlike the full Claude re-parser, Codex
+  // rollouts expose an authoritative per-request delta, so we only ever add a
+  // newly observed request to its model/tier/context-size bucket.
+  upsertCodexTokenDelta: db.prepare(`
+    INSERT INTO token_usage (
+      session_id, model, speed, inference_geo, service_tier, context_size,
+      input_tokens, output_tokens, cache_read_tokens, cache_write_tokens
+    ) VALUES (?, ?, ?, 'global', 'standard', ?, ?, ?, ?, ?)
+    ON CONFLICT(session_id, model, speed, inference_geo, service_tier, context_size) DO UPDATE SET
+      input_tokens = input_tokens + excluded.input_tokens,
+      output_tokens = output_tokens + excluded.output_tokens,
+      cache_read_tokens = cache_read_tokens + excluded.cache_read_tokens,
+      cache_write_tokens = cache_write_tokens + excluded.cache_write_tokens
+  `),
+  getCodexIngestState: db.prepare("SELECT * FROM codex_ingest_state WHERE transcript_path = ?"),
+  upsertCodexIngestState: db.prepare(`
+    INSERT INTO codex_ingest_state (
+      transcript_path, session_id, byte_offset, remainder,
+      input_tokens, cached_input_tokens, cache_write_input_tokens,
+      output_tokens, reasoning_output_tokens, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+    ON CONFLICT(transcript_path) DO UPDATE SET
+      session_id = excluded.session_id,
+      byte_offset = excluded.byte_offset,
+      remainder = excluded.remainder,
+      input_tokens = excluded.input_tokens,
+      cached_input_tokens = excluded.cached_input_tokens,
+      cache_write_input_tokens = excluded.cache_write_input_tokens,
+      output_tokens = excluded.output_tokens,
+      reasoning_output_tokens = excluded.reasoning_output_tokens,
+      updated_at = excluded.updated_at
+  `),
   getTokenTotals: db.prepare(`
     SELECT
       COALESCE(SUM(input_tokens + baseline_input), 0) as total_input,
@@ -1211,7 +1464,7 @@ const stmts = {
     FROM token_usage
   `),
   getTokensBySession: db.prepare(
-    `SELECT model, speed, inference_geo, service_tier,
+    `SELECT model, speed, inference_geo, service_tier, context_size,
       input_tokens + baseline_input as input_tokens,
       output_tokens + baseline_output as output_tokens,
       cache_read_tokens + baseline_cache_read as cache_read_tokens,
@@ -1262,6 +1515,33 @@ const stmts = {
   matchPricing: db.prepare(
     "SELECT * FROM model_pricing WHERE ? LIKE REPLACE(model_pattern, '%', '%') LIMIT 1"
   ),
+  // GPT / Codex pricing
+  listGptPricing: db.prepare("SELECT * FROM gpt_model_pricing ORDER BY display_name ASC"),
+  getGptPricing: db.prepare("SELECT * FROM gpt_model_pricing WHERE model_pattern = ?"),
+  upsertGptPricing: db.prepare(`
+    INSERT INTO gpt_model_pricing (
+      model_pattern, display_name,
+      short_input_per_mtok, short_cached_input_per_mtok, short_cache_write_per_mtok, short_output_per_mtok,
+      long_input_per_mtok, long_cached_input_per_mtok, long_cache_write_per_mtok, long_output_per_mtok,
+      fast_input_per_mtok, fast_cached_input_per_mtok, fast_cache_write_per_mtok, fast_output_per_mtok, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+    ON CONFLICT(model_pattern) DO UPDATE SET
+      display_name = excluded.display_name,
+      short_input_per_mtok = excluded.short_input_per_mtok,
+      short_cached_input_per_mtok = excluded.short_cached_input_per_mtok,
+      short_cache_write_per_mtok = excluded.short_cache_write_per_mtok,
+      short_output_per_mtok = excluded.short_output_per_mtok,
+      long_input_per_mtok = excluded.long_input_per_mtok,
+      long_cached_input_per_mtok = excluded.long_cached_input_per_mtok,
+      long_cache_write_per_mtok = excluded.long_cache_write_per_mtok,
+      long_output_per_mtok = excluded.long_output_per_mtok,
+      fast_input_per_mtok = excluded.fast_input_per_mtok,
+      fast_cached_input_per_mtok = excluded.fast_cached_input_per_mtok,
+      fast_cache_write_per_mtok = excluded.fast_cache_write_per_mtok,
+      fast_output_per_mtok = excluded.fast_output_per_mtok,
+      updated_at = excluded.updated_at
+  `),
+  deleteGptPricing: db.prepare("DELETE FROM gpt_model_pricing WHERE model_pattern = ?"),
   toolUsageCounts: db.prepare(`
     SELECT tool_name, COUNT(*) as count
     FROM events
@@ -1500,4 +1780,12 @@ const stmts = {
   ),
 };
 
-module.exports = { db, stmts, DB_PATH, DEFAULT_PRICING, applyIntroPricing };
+module.exports = {
+  db,
+  stmts,
+  DB_PATH,
+  DEFAULT_PRICING,
+  DEFAULT_GPT_PRICING,
+  applyIntroPricing,
+  seedGptPricing,
+};

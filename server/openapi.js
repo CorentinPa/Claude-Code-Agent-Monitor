@@ -80,12 +80,12 @@ function createOpenApiSpec() {
     tags: [
       { name: "Health", description: "Service liveness checks" },
       { name: "Metrics", description: "Prometheus / OpenMetrics scrape endpoint" },
-      { name: "Sessions", description: "Claude Code session lifecycle" },
+      { name: "Sessions", description: "Claude Code and Codex session lifecycle" },
       { name: "Agents", description: "Main/subagent records and status" },
       { name: "Events", description: "Event stream persistence" },
       { name: "Stats", description: "High-level dashboard counters" },
       { name: "Analytics", description: "Aggregated analytics views" },
-      { name: "Hooks", description: "Claude hook ingestion endpoint" },
+      { name: "Hooks", description: "Claude Code and Codex hook ingestion endpoints" },
       { name: "Pricing", description: "Model pricing and token cost calculations" },
       { name: "Workflows", description: "Workflow intelligence and session drill-in" },
       { name: "Settings", description: "Operational maintenance endpoints" },
@@ -191,6 +191,14 @@ function createOpenApiSpec() {
           schema: { type: "string" },
           description:
             "Comma-separated list of data-source ids to include. The built-in local history is the id `local`; remote SSH machines use their `remote_sources.id`. Omit to include every source. Filters on the `sessions.source` column.",
+        },
+        ProvidersQuery: {
+          name: "providers",
+          in: "query",
+          required: false,
+          schema: { type: "string", example: "claude,codex" },
+          description:
+            "Comma-separated product providers to include: `claude`, `codex`, or both. Omit to include every provider.",
         },
       },
       schemas: {
@@ -910,6 +918,61 @@ function createOpenApiSpec() {
           required: ["pricing"],
           properties: { pricing: { $ref: "#/components/schemas/PricingRule" } },
         },
+        GptPricingRule: {
+          type: "object",
+          required: ["model_pattern", "display_name", "updated_at"],
+          description:
+            "OpenAI/Codex token pricing. Standard requests use short rates at or below 272K input tokens and long rates above that; Fast requests use the explicit fast rate card.",
+          properties: {
+            model_pattern: { type: "string" },
+            display_name: { type: "string" },
+            short_input_per_mtok: { type: "number" },
+            short_cached_input_per_mtok: { type: "number" },
+            short_cache_write_per_mtok: { type: "number" },
+            short_output_per_mtok: { type: "number" },
+            long_input_per_mtok: { type: "number" },
+            long_cached_input_per_mtok: { type: "number" },
+            long_cache_write_per_mtok: { type: "number" },
+            long_output_per_mtok: { type: "number" },
+            fast_input_per_mtok: { type: "number" },
+            fast_cached_input_per_mtok: { type: "number" },
+            fast_cache_write_per_mtok: { type: "number" },
+            fast_output_per_mtok: { type: "number" },
+            updated_at: { type: "string", format: "date-time" },
+          },
+        },
+        GptPricingUpsertRequest: {
+          type: "object",
+          required: ["model_pattern", "display_name"],
+          properties: {
+            model_pattern: { type: "string" },
+            display_name: { type: "string" },
+            short_input_per_mtok: { type: "number" },
+            short_cached_input_per_mtok: { type: "number" },
+            short_cache_write_per_mtok: { type: "number" },
+            short_output_per_mtok: { type: "number" },
+            long_input_per_mtok: { type: "number" },
+            long_cached_input_per_mtok: { type: "number" },
+            long_cache_write_per_mtok: { type: "number" },
+            long_output_per_mtok: { type: "number" },
+            fast_input_per_mtok: { type: "number" },
+            fast_cached_input_per_mtok: { type: "number" },
+            fast_cache_write_per_mtok: { type: "number" },
+            fast_output_per_mtok: { type: "number" },
+          },
+        },
+        GptPricingListResponse: {
+          type: "object",
+          required: ["pricing"],
+          properties: {
+            pricing: { type: "array", items: { $ref: "#/components/schemas/GptPricingRule" } },
+          },
+        },
+        GptPricingUpsertResponse: {
+          type: "object",
+          required: ["pricing"],
+          properties: { pricing: { $ref: "#/components/schemas/GptPricingRule" } },
+        },
         CostBreakdownItem: {
           type: "object",
           required: [
@@ -1262,7 +1325,17 @@ function createOpenApiSpec() {
         },
         ExportResponse: {
           type: "object",
-          required: ["exported_at", "sessions", "agents", "events", "token_usage", "model_pricing"],
+          required: [
+            "format",
+            "version",
+            "exported_at",
+            "sessions",
+            "agents",
+            "events",
+            "token_usage",
+            "model_pricing",
+            "gpt_model_pricing",
+          ],
           properties: {
             format: {
               type: "string",
@@ -1270,7 +1343,7 @@ function createOpenApiSpec() {
                 'Bundle format marker (always "ccam-export" for exports from this version).',
               example: "ccam-export",
             },
-            version: { type: "integer", description: "Bundle schema version.", example: 1 },
+            version: { type: "integer", description: "Bundle schema version.", example: 2 },
             exported_at: { type: "string", format: "date-time" },
             sessions: { type: "array", items: { $ref: "#/components/schemas/Session" } },
             agents: { type: "array", items: { $ref: "#/components/schemas/Agent" } },
@@ -1289,6 +1362,10 @@ function createOpenApiSpec() {
             },
             alert_rules: { type: "array", items: { type: "object", additionalProperties: true } },
             model_pricing: { type: "array", items: { $ref: "#/components/schemas/PricingRule" } },
+            gpt_model_pricing: {
+              type: "array",
+              items: { $ref: "#/components/schemas/GptPricingRule" },
+            },
           },
         },
         ImportResponse: {
@@ -1304,6 +1381,7 @@ function createOpenApiSpec() {
             "dashboard_runs",
             "alert_rules",
             "model_pricing",
+            "gpt_model_pricing",
             "errors",
           ],
           description:
@@ -1325,6 +1403,7 @@ function createOpenApiSpec() {
             dashboard_runs: { type: "integer" },
             alert_rules: { type: "integer" },
             model_pricing: { type: "integer" },
+            gpt_model_pricing: { type: "integer" },
             errors: { type: "integer" },
           },
         },
@@ -1474,7 +1553,11 @@ function createOpenApiSpec() {
           tags: ["Sessions"],
           summary: "Get session details",
           operationId: "getSession",
-          parameters: [{ $ref: "#/components/parameters/SessionIdPath" }],
+          parameters: [
+            { $ref: "#/components/parameters/SessionIdPath" },
+            { $ref: "#/components/parameters/SourcesQuery" },
+            { $ref: "#/components/parameters/ProvidersQuery" },
+          ],
           responses: {
             200: {
               description: "Session with associated agents/events",
@@ -1534,7 +1617,11 @@ function createOpenApiSpec() {
           description:
             "Returns aggregated counts for the SessionOverview panel: events, events-by-type, top tool usage, error count, agent type/status counts, subagent type breakdown, and token totals. All aggregation runs in SQL — cheap to call even for sessions with tens of thousands of events. Frontend debounces calls to this endpoint on `new_event` / `agent_*` / `session_updated` websocket frames so counters track the running session.",
           operationId: "getSessionStats",
-          parameters: [{ $ref: "#/components/parameters/SessionIdPath" }],
+          parameters: [
+            { $ref: "#/components/parameters/SessionIdPath" },
+            { $ref: "#/components/parameters/SourcesQuery" },
+            { $ref: "#/components/parameters/ProvidersQuery" },
+          ],
           responses: {
             200: {
               description: "Aggregated session stats",
@@ -1840,6 +1927,10 @@ function createOpenApiSpec() {
           tags: ["Events"],
           summary: "Distinct event_type and tool_name values available in the DB",
           operationId: "listEventFacets",
+          parameters: [
+            { $ref: "#/components/parameters/SourcesQuery" },
+            { $ref: "#/components/parameters/ProvidersQuery" },
+          ],
           responses: {
             200: {
               description: "Facet values for populating filter dropdowns",
@@ -1951,6 +2042,50 @@ function createOpenApiSpec() {
           },
         },
       },
+      "/api/hooks/codex": {
+        post: {
+          tags: ["Hooks"],
+          summary: "Queue a non-blocking Codex rollout ingest",
+          operationId: "ingestCodexHook",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["hook_type", "data"],
+                  properties: {
+                    hook_type: {
+                      type: "string",
+                      description:
+                        "Codex lifecycle hook (SessionStart, UserPromptSubmit, PostToolUse, Stop, or SessionEnd)",
+                    },
+                    data: {
+                      type: "object",
+                      properties: { transcript_path: { type: "string" } },
+                      additionalProperties: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            202: {
+              description: "Hook acknowledged; rollout parsing continues asynchronously",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["ok", "queued"],
+                    properties: { ok: { type: "boolean" }, queued: { type: "boolean" } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       "/api/pricing": {
         get: {
           tags: ["Pricing"],
@@ -1994,6 +2129,74 @@ function createOpenApiSpec() {
                 "application/json": {
                   schema: { $ref: "#/components/schemas/ErrorResponse" },
                 },
+              },
+            },
+          },
+        },
+      },
+      "/api/pricing/gpt": {
+        get: {
+          tags: ["Pricing"],
+          summary: "List OpenAI/Codex pricing rules",
+          operationId: "listGptPricingRules",
+          responses: {
+            200: {
+              description: "GPT pricing rules",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/GptPricingListResponse" },
+                },
+              },
+            },
+          },
+        },
+        put: {
+          tags: ["Pricing"],
+          summary: "Create or update an OpenAI/Codex pricing rule",
+          operationId: "upsertGptPricingRule",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/GptPricingUpsertRequest" },
+              },
+            },
+          },
+          responses: {
+            200: {
+              description: "GPT pricing rule stored",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/GptPricingUpsertResponse" },
+                },
+              },
+            },
+            400: {
+              description: "Invalid request body",
+              content: {
+                "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } },
+              },
+            },
+          },
+        },
+      },
+      "/api/pricing/gpt/{pattern}": {
+        delete: {
+          tags: ["Pricing"],
+          summary: "Delete an OpenAI/Codex pricing rule",
+          operationId: "deleteGptPricingRule",
+          parameters: [{ $ref: "#/components/parameters/PatternPath" }],
+          responses: {
+            200: {
+              description: "Rule deleted",
+              content: {
+                "application/json": { schema: { $ref: "#/components/schemas/DeleteOkResponse" } },
+              },
+            },
+            404: {
+              description: "Rule not found",
+              content: {
+                "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } },
               },
             },
           },
@@ -2072,7 +2275,10 @@ function createOpenApiSpec() {
           tags: ["Workflows"],
           summary: "Get workflow intelligence aggregates",
           operationId: "getWorkflowIntelligence",
-          parameters: [{ $ref: "#/components/parameters/WorkflowStatusQuery" }],
+          parameters: [
+            { $ref: "#/components/parameters/WorkflowStatusQuery" },
+            { $ref: "#/components/parameters/ProvidersQuery" },
+          ],
           responses: {
             200: {
               description: "Workflow aggregate data",
@@ -2098,7 +2304,10 @@ function createOpenApiSpec() {
           tags: ["Workflows"],
           summary: "Get workflow drill-in for one session",
           operationId: "getWorkflowSession",
-          parameters: [{ $ref: "#/components/parameters/SessionIdPath" }],
+          parameters: [
+            { $ref: "#/components/parameters/SessionIdPath" },
+            { $ref: "#/components/parameters/ProvidersQuery" },
+          ],
           responses: {
             200: {
               description: "Workflow session detail",
@@ -2206,6 +2415,58 @@ function createOpenApiSpec() {
                 "application/json": {
                   schema: { $ref: "#/components/schemas/ErrorResponse" },
                 },
+              },
+            },
+          },
+        },
+      },
+      "/api/settings/install-hooks": {
+        post: {
+          tags: ["Settings"],
+          summary: "Install dashboard hooks for Claude Code, Codex, or both",
+          operationId: "installSelectedHooks",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["providers"],
+                  properties: {
+                    providers: {
+                      type: "array",
+                      minItems: 1,
+                      uniqueItems: true,
+                      items: { type: "string", enum: ["claude", "codex"] },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            200: {
+              description: "Selected hook installers completed",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    required: ["ok", "results", "hooks"],
+                    properties: {
+                      ok: { type: "boolean" },
+                      results: { type: "object", additionalProperties: true },
+                      hooks: {
+                        $ref: "#/components/schemas/ReinstallHooksResponse/properties/hooks",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            400: {
+              description: "No valid product selected",
+              content: {
+                "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } },
               },
             },
           },

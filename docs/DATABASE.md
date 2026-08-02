@@ -168,7 +168,7 @@ graph LR
 
 ### sessions
 
-Tracks Claude Code sessions (one per CLI invocation or background task). Schema mirrors `server/db.js`.
+Tracks Claude Code and Codex sessions (one per CLI invocation or background task). Schema mirrors `server/db.js`.
 
 > **Cursor (informational):** Rows imported from `~/.claude` JSONL transcripts may also represent **Cursor** agent sessions — Cursor happens to use the same on-disk layout as Claude Code. The schema does not record which app created a session.
 
@@ -180,6 +180,7 @@ CREATE TABLE sessions (
         CHECK (status IN ('active','completed','error','abandoned')),
     cwd TEXT,
     model TEXT,
+    provider TEXT NOT NULL DEFAULT 'claude',                          -- claude | codex
     started_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
     ended_at TEXT,
     metadata TEXT,
@@ -200,6 +201,7 @@ CREATE TABLE sessions (
 | `status` | TEXT | NO | `active`, `completed`, `error`, or `abandoned` (CHECK-constrained). Besides the `SessionEnd` hook, the 15 s watchdog's **liveness reap** also lands `active` → `completed` when no running `claude` process has the session's `cwd` (a `SessionEnd` lost while the dashboard was down); gated by `DASHBOARD_LIVENESS_IDLE_SECONDS`, disabled via `DASHBOARD_LIVENESS_PROBE=0`. Sessions with a non-`local` `source` (Remote Data Sources) are exempt from the reap and both stale sweeps — their status is reconciled from the SSH mirror by `remote-sync.js` instead |
 | `cwd` | TEXT | YES | Working directory the CLI was launched from |
 | `model` | TEXT | YES | Claude model ID (e.g. `claude-opus-4-7`) |
+| `provider` | TEXT | NO | Product that produced the session: `claude` (default) or `codex`. Powers the composable `providers` API scope and lets shared token buckets use the correct rate card. |
 | `started_at` | TEXT | NO | ISO 8601 timestamp |
 | `ended_at` | TEXT | YES | ISO 8601 timestamp on terminal transition |
 | `metadata` | TEXT | YES | JSON blob for extras (turn duration totals, thinking blocks, …) |
@@ -434,6 +436,38 @@ Standard rates and intro rates are edited independently: the pricing update path
 | Pattern | Input | Output | Intro Input | Intro Output | Intro Until |
 |---------|-------|--------|-------------|--------------|-------------|
 | `claude-sonnet-5%` | $3.00 | $15.00 | $2.00 | $10.00 | `2026-08-31` |
+
+---
+
+### gpt_model_pricing
+
+Separate OpenAI/Codex rate card. It deliberately does not reuse `model_pricing`: Codex tracks explicit cached-input and cache-write token classes, and OpenAI's published card has short, long, and Fast groups.
+
+```sql
+CREATE TABLE gpt_model_pricing (
+    model_pattern TEXT PRIMARY KEY,
+    display_name TEXT NOT NULL,
+    short_input_per_mtok REAL NOT NULL DEFAULT 0,
+    short_cached_input_per_mtok REAL NOT NULL DEFAULT 0,
+    short_cache_write_per_mtok REAL NOT NULL DEFAULT 0,
+    short_output_per_mtok REAL NOT NULL DEFAULT 0,
+    long_input_per_mtok REAL NOT NULL DEFAULT 0,
+    long_cached_input_per_mtok REAL NOT NULL DEFAULT 0,
+    long_cache_write_per_mtok REAL NOT NULL DEFAULT 0,
+    long_output_per_mtok REAL NOT NULL DEFAULT 0,
+    fast_input_per_mtok REAL NOT NULL DEFAULT 0,
+    fast_cached_input_per_mtok REAL NOT NULL DEFAULT 0,
+    fast_cache_write_per_mtok REAL NOT NULL DEFAULT 0,
+    fast_output_per_mtok REAL NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL
+);
+```
+
+Standard Codex usage whose request input is `<= 272000` tokens uses the `short_*` group; requests above that boundary use `long_*`; `speed = fast` uses `fast_*`. A zero/missing group is reported as unpriced rather than treated as a free model. Users manage these rows through `/api/pricing/gpt` and the dedicated Settings table.
+
+### codex_ingest_state
+
+Durable append cursor for every Codex `rollout-*.jsonl`. It stores the byte offset, incomplete-line remainder, owning session id, and latest cumulative token snapshot. This makes simultaneous hook, `fs.watch`, and 4-second poll notifications idempotent: only newly appended complete JSONL records become events or token deltas.
 
 ---
 

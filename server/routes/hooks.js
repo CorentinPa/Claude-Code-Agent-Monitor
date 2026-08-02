@@ -1,5 +1,7 @@
 /**
- * @file Express router for handling incoming hook events from Claude CLI. It processes various hook types (PreToolUse, PostToolUse, Stop, SubagentStop, SessionStart, SessionEnd, Notification), updates session and agent states accordingly in the database, extracts token usage from transcripts, detects compaction events, and broadcasts updates to connected clients via WebSocket.
+ * @file Express router for Claude Code hook events plus a fail-safe Codex
+ * rollout hook endpoint. It updates sessions and agents, extracts usage, and
+ * broadcasts real-time changes without blocking either CLI.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -1022,6 +1024,43 @@ const processEvent = db.transaction((hookType, data) => {
   return event;
 });
 
+function codexTranscriptPath(data) {
+  const candidates = [
+    data?.transcript_path,
+    data?.transcriptPath,
+    data?.session?.transcript_path,
+    data?.context?.transcript_path,
+  ];
+  return candidates.find((candidate) => typeof candidate === "string") || null;
+}
+
+// Codex hooks intentionally acknowledge before parsing. The companion handler
+// is fail-safe and exits as soon as bytes are on the wire; a long historical
+// rollout must never make Codex wait. The append-only ingestor deduplicates a
+// simultaneous watcher notification by byte cursor and broadcasts the same
+// frames as Claude hooks once processing completes.
+router.post("/codex", (req, res) => {
+  const hookType = req.body?.hook_type || req.body?.event_type || "unknown";
+  const data = req.body?.data || req.body || {};
+  const transcriptPath = codexTranscriptPath(data);
+  if (!transcriptPath) {
+    return res.status(202).json({ ok: true, queued: false, reason: "No transcript path supplied" });
+  }
+  res.status(202).json({ ok: true, queued: true });
+  setImmediate(() => {
+    try {
+      const { ingestCodexHook } = require("../lib/codex-ingest");
+      const result = ingestCodexHook(transcriptPath, hookType);
+      if (!result?.changed || !result.session) return;
+      broadcast(result.created ? "session_created" : "session_updated", result.session);
+      if (result.agent) broadcast(result.created ? "agent_created" : "agent_updated", result.agent);
+      for (const event of result.events || []) broadcast("new_event", event);
+    } catch {
+      // Hook ingestion is intentionally fail-safe: polling remains the fallback.
+    }
+  });
+});
+
 router.post("/event", (req, res) => {
   const { hook_type, data } = req.body;
   if (!hook_type || !data) {
@@ -1426,7 +1465,8 @@ function livenessReap({ ignoreIdleGate = false } = {}) {
     .prepare(
       `SELECT id, name, cwd, transcript_path, updated_at FROM sessions
        WHERE status = 'active' AND cwd IS NOT NULL AND cwd <> ''
-         AND (source = 'local' OR source IS NULL)`
+         AND (source = 'local' OR source IS NULL)
+         AND COALESCE(provider, 'claude') = 'claude'`
     )
     .all();
   if (activeSessions.length === 0) return; // nothing to check — skip the ps/lsof cost

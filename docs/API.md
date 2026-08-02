@@ -125,6 +125,7 @@ Returns all sessions, ordered by most recent activity.
 | `sort_by` | string | `time` | Ordering dimension: `time`, `duration`, or `price` |
 | `sort_desc` | boolean | `true` | Use descending order; set to `false` for ascending order |
 | `sources` | string | - | Comma-separated data-source ids to include (the built-in local history is `local`; remote SSH machines use their `remote_sources.id`). Omit for all sources. Also accepted on `/api/events`, `/api/agents`, `/api/stats`, `/api/analytics`, and `/api/pricing/cost`. See [Remote Data Sources](#remote-data-sources) |
+| `providers` | string | - | Comma-separated product providers: `claude`, `codex`, or both. It composes with `sources` and is accepted by the scoped list, aggregate, facet, per-session detail, cost, and workflow routes. Codex-only workflow responses are empty because Workflow-tool artifacts are Claude Code-specific. |
 
 **Example Request:**
 
@@ -694,6 +695,37 @@ curl -X PUT http://localhost:4820/api/pricing \
 |------|-------------|
 | 400 | Missing `model_pattern`/`display_name`, or `intro_until` not a `YYYY-MM-DD` date |
 | 500 | Database error |
+
+---
+
+#### OpenAI / Codex Pricing Rules
+
+```http
+GET    /api/pricing/gpt
+PUT    /api/pricing/gpt
+DELETE /api/pricing/gpt/:pattern
+```
+
+These endpoints manage the separate GPT rate card used only for Codex sessions. Each row has four per-million-token rates for each of three groups: `short_*` for standard requests at or below 272K input tokens, `long_*` for larger standard requests, and `fast_*` for Fast mode. The four rates are input, cached input, cache writes, and output. Every present rate must be a finite non-negative number. Cost responses include an unpriced row when a model or selected context/service tier has no configured rate, rather than silently guessing a price.
+
+```json
+{
+  "model_pattern": "gpt-5.6-terra%",
+  "display_name": "GPT-5.6 Terra",
+  "short_input_per_mtok": 2,
+  "short_cached_input_per_mtok": 0.2,
+  "short_cache_write_per_mtok": 2.5,
+  "short_output_per_mtok": 12,
+  "long_input_per_mtok": 4,
+  "long_cached_input_per_mtok": 0.4,
+  "long_cache_write_per_mtok": 5,
+  "long_output_per_mtok": 18,
+  "fast_input_per_mtok": 4,
+  "fast_cached_input_per_mtok": 0.4,
+  "fast_cache_write_per_mtok": 5,
+  "fast_output_per_mtok": 24
+}
+```
 
 ---
 

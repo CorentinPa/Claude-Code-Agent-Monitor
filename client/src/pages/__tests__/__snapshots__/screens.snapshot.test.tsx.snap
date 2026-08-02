@@ -8197,7 +8197,6 @@ exports[`screen snapshots > Settings 1`] = `
                 d="M12 5v14"
               />
             </svg>
-             
             Add Model
           </button>
         </div>
@@ -8269,6 +8268,166 @@ exports[`screen snapshots > Settings 1`] = `
           />
         </table>
       </div>
+      <div
+        class="mt-7 border-t border-border pt-6"
+      >
+        <div
+          class="mb-3 flex flex-wrap items-start justify-between gap-3"
+        >
+          <div>
+            <h4
+              class="text-sm font-medium text-gray-200"
+            >
+              OpenAI / Codex Pricing
+            </h4>
+            <p
+              class="mt-1 max-w-3xl text-xs leading-relaxed text-gray-500"
+            >
+              USD per 1M tokens. Standard requests use Short rates at or below 272K input tokens and Long rates above 272K; Fast mode uses its own published rate card.
+            </p>
+          </div>
+          <button
+            class="btn-ghost text-xs"
+            type="button"
+          >
+            <svg
+              class="lucide lucide-plus h-3.5 w-3.5"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12h14"
+              />
+              <path
+                d="M12 5v14"
+              />
+            </svg>
+            Add Model
+          </button>
+        </div>
+        <div
+          class="overflow-x-auto rounded-lg border border-border"
+        >
+          <table
+            class="w-full min-w-[1180px] text-left text-xs"
+          >
+            <thead
+              class="bg-surface-3 text-[10px] uppercase tracking-wide text-gray-500"
+            >
+              <tr>
+                <th
+                  class="px-3 py-2"
+                  rowspan="2"
+                >
+                  Pattern
+                </th>
+                <th
+                  class="px-3 py-2"
+                  rowspan="2"
+                >
+                  Name
+                </th>
+                <th
+                  class="border-l border-border px-2 py-2 text-center"
+                  colspan="4"
+                >
+                  Standard · Short ≤272K
+                </th>
+                <th
+                  class="border-l border-border px-2 py-2 text-center"
+                  colspan="4"
+                >
+                  Standard · Long &gt;272K
+                </th>
+                <th
+                  class="border-l border-border px-2 py-2 text-center"
+                  colspan="4"
+                >
+                  Fast mode
+                </th>
+                <th
+                  class="px-3 py-2"
+                  rowspan="2"
+                >
+                  Actions
+                </th>
+              </tr>
+              <tr>
+                <th
+                  class="border-l border-border px-2 py-1.5 text-right"
+                >
+                  Input
+                </th>
+                <th
+                  class="border-l border-border px-2 py-1.5 text-right"
+                >
+                  Cached
+                </th>
+                <th
+                  class="border-l border-border px-2 py-1.5 text-right"
+                >
+                  Cache write
+                </th>
+                <th
+                  class="border-l border-border px-2 py-1.5 text-right"
+                >
+                  Output
+                </th>
+                <th
+                  class="border-l border-border px-2 py-1.5 text-right"
+                >
+                  Input
+                </th>
+                <th
+                  class="border-l border-border px-2 py-1.5 text-right"
+                >
+                  Cached
+                </th>
+                <th
+                  class="border-l border-border px-2 py-1.5 text-right"
+                >
+                  Cache write
+                </th>
+                <th
+                  class="border-l border-border px-2 py-1.5 text-right"
+                >
+                  Output
+                </th>
+                <th
+                  class="border-l border-border px-2 py-1.5 text-right"
+                >
+                  Input
+                </th>
+                <th
+                  class="border-l border-border px-2 py-1.5 text-right"
+                >
+                  Cached
+                </th>
+                <th
+                  class="border-l border-border px-2 py-1.5 text-right"
+                >
+                  Cache write
+                </th>
+                <th
+                  class="border-l border-border px-2 py-1.5 text-right"
+                >
+                  Output
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="divide-y divide-border/60"
+            />
+          </table>
+        </div>
+      </div>
     </section>
     <section
       class="scroll-mt-24"
@@ -8307,7 +8466,7 @@ exports[`screen snapshots > Settings 1`] = `
       <p
         class="text-xs text-gray-500 mb-4"
       >
-        Claude Code hooks forward events to the dashboard in real time.
+        Claude Code and Codex hooks forward events to the dashboard in real time.
       </p>
       <div
         class="card p-5 space-y-4"
@@ -8341,14 +8500,14 @@ exports[`screen snapshots > Settings 1`] = `
                 />
               </svg>
                
-              All hooks installed
+              Hooks configured
             </span>
           </div>
           <button
-            class="btn-ghost text-xs disabled:opacity-50"
+            class="btn-ghost text-xs"
           >
             <svg
-              class="lucide lucide-rotate-ccw w-3.5 h-3.5"
+              class="lucide lucide-plug w-3.5 h-3.5"
               fill="none"
               height="24"
               stroke="currentColor"
@@ -8360,23 +8519,145 @@ exports[`screen snapshots > Settings 1`] = `
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
+                d="M12 22v-5"
               />
               <path
-                d="M3 3v5h5"
+                d="M9 8V2"
+              />
+              <path
+                d="M15 8V2"
+              />
+              <path
+                d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"
               />
             </svg>
-            Reinstall Hooks
+            Configure Hooks
           </button>
         </div>
         <div
-          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2"
-        />
-        <p
-          class="text-[11px] text-gray-600 font-mono truncate"
+          class="grid grid-cols-1 sm:grid-cols-2 gap-2"
         >
-          /tmp/settings.json
-        </p>
+          <div
+            class="rounded-md bg-surface-2 px-3 py-2"
+          >
+            <div
+              class="flex items-center gap-1.5 text-xs"
+            >
+              <svg
+                class="lucide lucide-circle-check-big w-3 h-3 text-emerald-400"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21.801 10A10 10 0 1 1 17 3.335"
+                />
+                <path
+                  d="m9 11 3 3L22 4"
+                />
+              </svg>
+              <span
+                class="font-medium text-gray-300"
+              >
+                Claude Code
+              </span>
+            </div>
+            <p
+              class="mt-1 truncate text-[10px] text-gray-600"
+            >
+              Not configured
+            </p>
+          </div>
+          <div
+            class="rounded-md bg-surface-2 px-3 py-2"
+          >
+            <div
+              class="flex items-center gap-1.5 text-xs"
+            >
+              <svg
+                class="lucide lucide-circle-x w-3 h-3 text-red-400"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="m15 9-6 6"
+                />
+                <path
+                  d="m9 9 6 6"
+                />
+              </svg>
+              <span
+                class="font-medium text-gray-300"
+              >
+                Codex
+              </span>
+              <span
+                class="text-[10px] text-amber-300"
+              >
+                Beta
+              </span>
+            </div>
+            <p
+              class="mt-1 truncate text-[10px] text-gray-600"
+            >
+              Not configured
+            </p>
+          </div>
+        </div>
+        <div
+          class="border-t border-border pt-3"
+        >
+          <p
+            class="text-xs font-medium text-gray-300"
+          >
+            Dashboard data
+          </p>
+          <p
+            class="mt-0.5 text-[11px] text-gray-500"
+          >
+            Immediately filter every dashboard view to a product. Machine data-source filtering remains independent.
+          </p>
+          <div
+            class="mt-2 inline-flex rounded-lg border border-border bg-surface-3 p-1"
+          >
+            <button
+              class="rounded-md px-2.5 py-1 text-xs transition-colors bg-accent text-white"
+              type="button"
+            >
+              Claude
+            </button>
+            <button
+              class="rounded-md px-2.5 py-1 text-xs transition-colors text-gray-400 hover:text-gray-200"
+              type="button"
+            >
+              Codex
+            </button>
+            <button
+              class="rounded-md px-2.5 py-1 text-xs transition-colors text-gray-400 hover:text-gray-200"
+              type="button"
+            >
+              Both
+            </button>
+          </div>
+        </div>
       </div>
     </section>
     <section

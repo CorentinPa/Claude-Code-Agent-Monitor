@@ -66,6 +66,7 @@ import { useEffect, useState, useCallback, useMemo, useRef, useSyncExternalStore
 import { useTranslation } from "react-i18next";
 import { RefreshCw, Columns3, ChevronDown, HelpCircle } from "lucide-react";
 import { api } from "../lib/api";
+import { useDataScope } from "../lib/dataScope";
 import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { AgentCard } from "../components/AgentCard";
@@ -124,6 +125,7 @@ function persistView(view: BoardView): void {
 
 export function KanbanBoard() {
   const { t } = useTranslation("kanban");
+  const [dataScope] = useDataScope();
   const [view, setViewState] = useState<BoardView>(loadView);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -149,7 +151,7 @@ export function KanbanBoard() {
     ]);
     setAgents(agentResults.flatMap((r) => r.agents));
     setSessions(sessionsRes.sessions);
-  }, []);
+  }, [dataScope]);
 
   const loadSessions = useCallback(async () => {
     // Each column needs the full set for its status - column-level
@@ -164,7 +166,7 @@ export function KanbanBoard() {
       persistedStatuses.map((status) => api.sessions.list({ status, limit: 10000 }))
     );
     setSessions(results.flatMap((r) => r.sessions));
-  }, []);
+  }, [dataScope]);
 
   const load = useCallback(async () => {
     try {

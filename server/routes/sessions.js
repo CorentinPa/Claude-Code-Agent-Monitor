@@ -12,8 +12,9 @@ const path = require("path");
 const readline = require("readline");
 const { stmts, db } = require("../db");
 const { broadcast } = require("../websocket");
-const { calculateCost, attachAgentCosts } = require("./pricing");
+const { calculateProviderCost, attachAgentCosts } = require("./pricing");
 const { parseSources, sourceColumnClause } = require("../lib/source-filter");
+const { parseProviders, providerColumnClause } = require("../lib/provider-filter");
 const {
   getClaudeHome,
   getProjectsDir,
@@ -26,6 +27,15 @@ const {
 } = require("../lib/claude-home");
 
 const router = Router();
+
+function sessionIsInScope(session, req) {
+  const sources = parseSources(req);
+  const providers = parseProviders(req);
+  return (
+    (!sources || sources.includes(session.source || "local")) &&
+    (!providers || providers.includes(session.provider || "claude"))
+  );
+}
 
 // JSONL entry types the transcript reader turns into renderable messages.
 // `user`/`assistant` are the conversation. `custom-title` is the metadata line
@@ -160,6 +170,11 @@ router.get("/", (req, res) => {
     where.push(sourceFilter.clause);
     params.push(...sourceFilter.params);
   }
+  const providerFilter = providerColumnClause(parseProviders(req));
+  if (providerFilter.clause) {
+    where.push(providerFilter.clause);
+    params.push(...providerFilter.params);
+  }
 
   const whereSql = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
   const total = db.prepare(`SELECT COUNT(*) as c FROM sessions s ${whereSql}`).get(...params).c;
@@ -178,6 +193,7 @@ router.get("/", (req, res) => {
 
     if (allRows.length > 0) {
       const rules = stmts.listPricing.all();
+      const gptRules = stmts.listGptPricing.all();
 
       for (let i = 0; i < allRows.length; i += 900) {
         const chunk = allRows.slice(i, i + 900);
@@ -185,25 +201,33 @@ router.get("/", (req, res) => {
         const placeholders = ids.map(() => "?").join(",");
         const chunkTokens = db
           .prepare(
-            `SELECT session_id, model,
+            `SELECT session_id, model, speed, inference_geo, service_tier, context_size,
               input_tokens + baseline_input as input_tokens,
               output_tokens + baseline_output as output_tokens,
               cache_read_tokens + baseline_cache_read as cache_read_tokens,
-              cache_write_tokens + baseline_cache_write as cache_write_tokens
+              cache_write_tokens + baseline_cache_write as cache_write_tokens,
+              cache_write_1h_tokens + baseline_cache_write_1h as cache_write_1h_tokens,
+              web_search_requests + baseline_web_search as web_search_requests,
+              web_fetch_requests + baseline_web_fetch as web_fetch_requests,
+              code_execution_requests + baseline_code_execution as code_execution_requests
             FROM token_usage WHERE session_id IN (${placeholders})`
           )
           .all(...ids);
 
+        const providerBySession = new Map(chunk.map((session) => [session.id, session.provider]));
         const tokensBySession = {};
         for (const t of chunkTokens) {
           if (!tokensBySession[t.session_id]) tokensBySession[t.session_id] = [];
-          tokensBySession[t.session_id].push(t);
+          tokensBySession[t.session_id].push({
+            ...t,
+            provider: providerBySession.get(t.session_id) || "claude",
+          });
         }
 
         for (const row of chunk) {
           const sessionTokens = tokensBySession[row.id];
           row.cost = sessionTokens
-            ? calculateCost(sessionTokens, rules, row.started_at).total_cost
+            ? calculateProviderCost(sessionTokens, rules, gptRules, row.started_at).total_cost
             : 0;
         }
       }
@@ -235,26 +259,35 @@ router.get("/", (req, res) => {
       const placeholders = ids.map(() => "?").join(",");
       const allTokens = db
         .prepare(
-          `SELECT session_id, model,
+          `SELECT session_id, model, speed, inference_geo, service_tier, context_size,
             input_tokens + baseline_input as input_tokens,
             output_tokens + baseline_output as output_tokens,
             cache_read_tokens + baseline_cache_read as cache_read_tokens,
-            cache_write_tokens + baseline_cache_write as cache_write_tokens
+            cache_write_tokens + baseline_cache_write as cache_write_tokens,
+            cache_write_1h_tokens + baseline_cache_write_1h as cache_write_1h_tokens,
+            web_search_requests + baseline_web_search as web_search_requests,
+            web_fetch_requests + baseline_web_fetch as web_fetch_requests,
+            code_execution_requests + baseline_code_execution as code_execution_requests
           FROM token_usage WHERE session_id IN (${placeholders})`
         )
         .all(...ids);
 
       const rules = stmts.listPricing.all();
+      const gptRules = stmts.listGptPricing.all();
+      const providerBySession = new Map(rows.map((session) => [session.id, session.provider]));
       const tokensBySession = {};
       for (const t of allTokens) {
         if (!tokensBySession[t.session_id]) tokensBySession[t.session_id] = [];
-        tokensBySession[t.session_id].push(t);
+        tokensBySession[t.session_id].push({
+          ...t,
+          provider: providerBySession.get(t.session_id) || "claude",
+        });
       }
 
       for (const row of rows) {
         const sessionTokens = tokensBySession[row.id];
         row.cost = sessionTokens
-          ? calculateCost(sessionTokens, rules, row.started_at).total_cost
+          ? calculateProviderCost(sessionTokens, rules, gptRules, row.started_at).total_cost
           : 0;
       }
     }
@@ -263,19 +296,31 @@ router.get("/", (req, res) => {
   res.json({ sessions: rows, limit, offset, total });
 });
 
-router.get("/facets", (_req, res) => {
+router.get("/facets", (req, res) => {
+  const sourceFilter = sourceColumnClause(parseSources(req), "s.source");
+  const providerFilter = providerColumnClause(parseProviders(req), "s.provider");
+  const clauses = [
+    "s.cwd IS NOT NULL",
+    "s.cwd != ''",
+    sourceFilter.clause,
+    providerFilter.clause,
+  ].filter(Boolean);
   const rows = db
-    .prepare("SELECT DISTINCT cwd FROM sessions WHERE cwd IS NOT NULL AND cwd != '' ORDER BY cwd")
-    .all();
+    .prepare(`SELECT DISTINCT s.cwd FROM sessions s WHERE ${clauses.join(" AND ")} ORDER BY s.cwd`)
+    .all(...sourceFilter.params, ...providerFilter.params);
   // Distinct origins present in the data, so the UI can offer a source facet /
   // scope selector. Always includes at least 'local' (the column default).
   const sources = stmts.distinctSessionSources.all().map((r) => r.source);
-  res.json({ cwds: rows.map((r) => r.cwd), sources });
+  const providers = stmts.distinctSessionProviders.all().map((r) => r.provider);
+  res.json({ cwds: rows.map((r) => r.cwd), sources, providers });
 });
 
 router.get("/:id", (req, res) => {
   const session = stmts.getSession.get(req.params.id);
   if (!session) {
+    return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
+  }
+  if (!sessionIsInScope(session, req)) {
     return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
   }
   // Each agent's OWN cost (from its metadata token buckets) so subagent cards on
@@ -312,6 +357,9 @@ router.get("/:id/stats", (req, res) => {
   const sessionId = req.params.id;
   const session = stmts.getSession.get(sessionId);
   if (!session) {
+    return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
+  }
+  if (!sessionIsInScope(session, req)) {
     return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
   }
 
@@ -397,6 +445,9 @@ router.patch("/:id", (req, res) => {
   if (!existing) {
     return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
   }
+  if (!sessionIsInScope(existing, req)) {
+    return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
+  }
 
   stmts.updateSession.run(
     name || null,
@@ -416,6 +467,32 @@ router.get("/:id/transcripts", async (req, res) => {
   const session = stmts.getSession.get(req.params.id);
   if (!session) {
     return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
+  }
+  if (!sessionIsInScope(session, req)) {
+    return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
+  }
+
+  // Codex uses a single append-only rollout rather than Claude Code's
+  // projects/<cwd>/<session>/subagents layout. Surface it through the same
+  // transcript contract so the Conversation tab stays provider-agnostic.
+  if (session.provider === "codex") {
+    const mainAgent = stmts.listAgentsBySession
+      .all(session.id)
+      .find((agent) => agent.type === "main");
+    return res.json({
+      transcripts:
+        session.transcript_path && fs.existsSync(session.transcript_path)
+          ? [
+              {
+                id: "main",
+                name: "Codex",
+                type: "main",
+                has_transcript: true,
+                db_agent_id: mainAgent?.id || null,
+              },
+            ]
+          : [],
+    });
   }
 
   const result = [];
@@ -612,9 +689,118 @@ router.get("/:id/transcripts", async (req, res) => {
 //   after: JSONL line number, only return messages after this line (incremental mode)
 //   before: JSONL line number, only return messages before this line (history mode)
 //   offset: legacy pagination offset (compatible, mutually exclusive with after/before)
+function codexContentText(content) {
+  if (!Array.isArray(content)) return "";
+  return content
+    .map((part) => (typeof part?.text === "string" ? part.text : ""))
+    .filter(Boolean)
+    .join("\n");
+}
+
+/** Translate Codex rollout response items into the shared conversation DTO. */
+function parseCodexMessage(entry, line) {
+  if (entry.type !== "response_item") return null;
+  const item = entry.payload || {};
+  const timestamp = entry.timestamp || null;
+  if (item.type === "message") {
+    const text = codexContentText(item.content);
+    // Codex injects this descriptor at session start; it is not a human turn.
+    if (!text.trim() || text.trim().startsWith("<environment_context>")) return null;
+    return {
+      type: item.role === "assistant" ? "assistant" : "user",
+      sender: item.role === "assistant" ? "assistant" : "user",
+      timestamp,
+      content: [{ type: "text", text: truncate(text, 10240) }],
+      line,
+    };
+  }
+  if (item.type === "function_call") {
+    return {
+      type: "assistant",
+      sender: "assistant",
+      timestamp,
+      content: [
+        {
+          type: "tool_use",
+          name: item.name || "tool",
+          id: item.call_id || null,
+          input: truncateObj(item.arguments || "", 10240),
+        },
+      ],
+      line,
+    };
+  }
+  if (item.type === "function_call_output") {
+    return {
+      type: "user",
+      sender: "tool",
+      timestamp,
+      content: [
+        {
+          type: "tool_result",
+          id: item.call_id || null,
+          output: truncate(
+            typeof item.output === "string" ? item.output : JSON.stringify(item.output || ""),
+            10240
+          ),
+          is_error: false,
+        },
+      ],
+      line,
+    };
+  }
+  return null;
+}
+
+async function readCodexTranscript(jsonlPath, { limit, afterLine, beforeLine, offset }) {
+  const messages = [];
+  let lineNum = 0;
+  let total = 0;
+  let hasMore = false;
+  const rl = readline.createInterface({
+    input: fs.createReadStream(jsonlPath, { encoding: "utf8" }),
+    crlfDelay: Infinity,
+  });
+
+  for await (const line of rl) {
+    lineNum++;
+    if (!line.trim()) continue;
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    const message = parseCodexMessage(entry, lineNum);
+    if (!message) continue;
+    if (beforeLine !== null && lineNum >= beforeLine) break;
+    total++;
+    if (afterLine !== null && lineNum <= afterLine) continue;
+    if (offset > 0 && total <= offset) continue;
+    messages.push(message);
+    if (afterLine !== null || offset > 0) {
+      if (messages.length >= limit) {
+        hasMore = true;
+        break;
+      }
+    } else if (beforeLine !== null || messages.length > limit) {
+      messages.shift();
+      hasMore = true;
+    }
+  }
+
+  const firstLine = messages[0]?.line || 0;
+  const lastLine = messages[messages.length - 1]?.line || 0;
+  messages.forEach((message) => delete message.line);
+  return { messages, total, has_more: hasMore, first_line: firstLine, last_line: lastLine };
+}
+
 router.get("/:id/transcript", async (req, res) => {
   const session = stmts.getSession.get(req.params.id);
   if (!session) {
+    return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
+  }
+  if (!sessionIsInScope(session, req)) {
     return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
   }
 
@@ -627,6 +813,19 @@ router.get("/:id/transcript", async (req, res) => {
   const afterLine = req.query.after ? parseInt(req.query.after) : null;
   const beforeLine = req.query.before ? parseInt(req.query.before) : null;
   const offset = parseInt(req.query.offset) || 0;
+
+  if (session.provider === "codex") {
+    if (!session.transcript_path || !fs.existsSync(session.transcript_path)) {
+      return res.json({ messages: [], total: 0, has_more: false, last_line: 0, first_line: 0 });
+    }
+    try {
+      return res.json(
+        await readCodexTranscript(session.transcript_path, { limit, afterLine, beforeLine, offset })
+      );
+    } catch {
+      return res.json({ messages: [], total: 0, has_more: false, last_line: 0, first_line: 0 });
+    }
+  }
 
   // Determine the JSONL file path to read. Prefer the live file under
   // ~/.claude/projects, then fall back to the dashboard's durable snapshot —

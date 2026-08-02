@@ -26,7 +26,7 @@ tags:
   - name: Metrics
     description: Prometheus / OpenMetrics scrape endpoint
   - name: Sessions
-    description: Claude Code session lifecycle
+    description: Claude Code and Codex session lifecycle
   - name: Agents
     description: Main/subagent records and status
   - name: Events
@@ -36,7 +36,7 @@ tags:
   - name: Analytics
     description: Aggregated analytics views
   - name: Hooks
-    description: Claude hook ingestion endpoint
+    description: Claude Code and Codex hook ingestion endpoints
   - name: Pricing
     description: Model pricing and token cost calculations
   - name: Workflows
@@ -149,6 +149,14 @@ components:
       schema:
         type: string
       description: Comma-separated list of data-source ids to include. The built-in local history is the id `local`; remote SSH machines use their `remote_sources.id`. Omit to include every source. Filters on the `sessions.source` column.
+    ProvidersQuery:
+      name: providers
+      in: query
+      required: false
+      schema:
+        type: string
+        example: claude,codex
+      description: 'Comma-separated product providers to include: `claude`, `codex`, or both. Omit to include every provider.'
   schemas:
     ErrorObject:
       type: object
@@ -1120,6 +1128,95 @@ components:
       properties:
         pricing:
           $ref: '#/components/schemas/PricingRule'
+    GptPricingRule:
+      type: object
+      required:
+        - model_pattern
+        - display_name
+        - updated_at
+      description: OpenAI/Codex token pricing. Standard requests use short rates at or below 272K input tokens and long rates above that; Fast requests use the explicit fast rate card.
+      properties:
+        model_pattern:
+          type: string
+        display_name:
+          type: string
+        short_input_per_mtok:
+          type: number
+        short_cached_input_per_mtok:
+          type: number
+        short_cache_write_per_mtok:
+          type: number
+        short_output_per_mtok:
+          type: number
+        long_input_per_mtok:
+          type: number
+        long_cached_input_per_mtok:
+          type: number
+        long_cache_write_per_mtok:
+          type: number
+        long_output_per_mtok:
+          type: number
+        fast_input_per_mtok:
+          type: number
+        fast_cached_input_per_mtok:
+          type: number
+        fast_cache_write_per_mtok:
+          type: number
+        fast_output_per_mtok:
+          type: number
+        updated_at:
+          type: string
+          format: date-time
+    GptPricingUpsertRequest:
+      type: object
+      required:
+        - model_pattern
+        - display_name
+      properties:
+        model_pattern:
+          type: string
+        display_name:
+          type: string
+        short_input_per_mtok:
+          type: number
+        short_cached_input_per_mtok:
+          type: number
+        short_cache_write_per_mtok:
+          type: number
+        short_output_per_mtok:
+          type: number
+        long_input_per_mtok:
+          type: number
+        long_cached_input_per_mtok:
+          type: number
+        long_cache_write_per_mtok:
+          type: number
+        long_output_per_mtok:
+          type: number
+        fast_input_per_mtok:
+          type: number
+        fast_cached_input_per_mtok:
+          type: number
+        fast_cache_write_per_mtok:
+          type: number
+        fast_output_per_mtok:
+          type: number
+    GptPricingListResponse:
+      type: object
+      required:
+        - pricing
+      properties:
+        pricing:
+          type: array
+          items:
+            $ref: '#/components/schemas/GptPricingRule'
+    GptPricingUpsertResponse:
+      type: object
+      required:
+        - pricing
+      properties:
+        pricing:
+          $ref: '#/components/schemas/GptPricingRule'
     CostBreakdownItem:
       type: object
       required:
@@ -1646,12 +1743,15 @@ components:
     ExportResponse:
       type: object
       required:
+        - format
+        - version
         - exported_at
         - sessions
         - agents
         - events
         - token_usage
         - model_pricing
+        - gpt_model_pricing
       properties:
         format:
           type: string
@@ -1660,7 +1760,7 @@ components:
         version:
           type: integer
           description: Bundle schema version.
-          example: 1
+          example: 2
         exported_at:
           type: string
           format: date-time
@@ -1700,6 +1800,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PricingRule'
+        gpt_model_pricing:
+          type: array
+          items:
+            $ref: '#/components/schemas/GptPricingRule'
     ImportResponse:
       type: object
       required:
@@ -1713,6 +1817,7 @@ components:
         - dashboard_runs
         - alert_rules
         - model_pricing
+        - gpt_model_pricing
         - errors
       description: Per-table counts from restoring an export bundle. Session-scoped counts are rows newly inserted; sessions_skipped counts sessions already present (skipped whole to stay idempotent).
       properties:
@@ -1742,6 +1847,8 @@ components:
         alert_rules:
           type: integer
         model_pricing:
+          type: integer
+        gpt_model_pricing:
           type: integer
         errors:
           type: integer
@@ -5081,6 +5188,46 @@ paths:
                 error:
                   code: MISSING_SESSION
                   message: session_id is required in data
+  /api/hooks/codex:
+    post:
+      tags:
+        - Hooks
+      summary: Queue a non-blocking Codex rollout ingest
+      operationId: ingestCodexHook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - hook_type
+                - data
+              properties:
+                hook_type:
+                  type: string
+                  description: Codex lifecycle hook (SessionStart, UserPromptSubmit, PostToolUse, Stop, or SessionEnd)
+                data:
+                  type: object
+                  properties:
+                    transcript_path:
+                      type: string
+                  additionalProperties: true
+      responses:
+        '202':
+          description: Hook acknowledged; rollout parsing continues asynchronously
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - ok
+                  - queued
+                properties:
+                  ok:
+                    type: boolean
+                  queued:
+                    type: boolean
   /api/pricing:
     get:
       tags:
@@ -5168,6 +5315,64 @@ paths:
                 error:
                   code: INVALID_INPUT
                   message: model_pattern and display_name are required
+  /api/pricing/gpt:
+    get:
+      tags:
+        - Pricing
+      summary: List OpenAI/Codex pricing rules
+      operationId: listGptPricingRules
+      responses:
+        '200':
+          description: GPT pricing rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptPricingListResponse'
+    put:
+      tags:
+        - Pricing
+      summary: Create or update an OpenAI/Codex pricing rule
+      operationId: upsertGptPricingRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GptPricingUpsertRequest'
+      responses:
+        '200':
+          description: GPT pricing rule stored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GptPricingUpsertResponse'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/pricing/gpt/{pattern}:
+    delete:
+      tags:
+        - Pricing
+      summary: Delete an OpenAI/Codex pricing rule
+      operationId: deleteGptPricingRule
+      parameters:
+        - $ref: '#/components/parameters/PatternPath'
+      responses:
+        '200':
+          description: Rule deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteOkResponse'
+        '404':
+          description: Rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /api/pricing/{pattern}:
     delete:
       tags:
@@ -5681,7 +5886,7 @@ paths:
       tags:
         - Settings
       summary: Delete all dashboard data
-      description: '⚠ DESTRUCTIVE — IRREVERSIBLE. Deletes ALL sessions, agents, events, token_usage rows, the fired-alert feed (alert_events), and the webhook delivery log. There is no confirmation step and no undo — export first via GET /api/settings/export if you need a backup. User CONFIGURATION survives: alert *rules*, webhook *targets*, and model_pricing are preserved (they''re settings, not captured data). The response echoes the row counts that existed BEFORE the wipe so the UI can report what was removed.'
+      description: '⚠ DESTRUCTIVE — IRREVERSIBLE. Deletes ALL sessions, agents, events, token_usage rows, the fired-alert feed (alert_events), and the webhook delivery log. There is no confirmation step and no undo — export first via GET /api/settings/export if you need a backup. User CONFIGURATION survives: alert *rules*, webhook *targets*, model_pricing, and gpt_model_pricing are preserved (they''re settings, not captured data). The response echoes the row counts that existed BEFORE the wipe so the UI can report what was removed.'
       operationId: clearData
       responses:
         '200':
@@ -5764,12 +5969,61 @@ paths:
                 error:
                   code: HOOK_INSTALL_FAILED
                   message: 'EACCES: permission denied, open ''/Users/son/.claude/settings.json'''
+  /api/settings/install-hooks:
+    post:
+      tags:
+        - Settings
+      summary: Install dashboard hooks for Claude Code, Codex, or both
+      operationId: installSelectedHooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - providers
+              properties:
+                providers:
+                  type: array
+                  minItems: 1
+                  uniqueItems: true
+                  items:
+                    type: string
+                    enum:
+                      - claude
+                      - codex
+      responses:
+        '200':
+          description: Selected hook installers completed
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - ok
+                  - results
+                  - hooks
+                properties:
+                  ok:
+                    type: boolean
+                  results:
+                    type: object
+                    additionalProperties: true
+                  hooks:
+                    $ref: '#/components/schemas/ReinstallHooksResponse/properties/hooks'
+        '400':
+          description: No valid product selected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /api/settings/reset-pricing:
     post:
       tags:
         - Settings
       summary: Reset pricing table to defaults
-      description: ⚠ DESTRUCTIVE to pricing customizations. Deletes EVERY row in the model_pricing table and re-seeds it from the dashboard's built-in DEFAULT_PRICING list. Any custom rates or custom model patterns you added are permanently lost — there is no undo. Captured session/token data is untouched (only the pricing rules used to *compute* cost change). The response returns the full freshly-seeded pricing table.
+      description: ⚠ DESTRUCTIVE to pricing customizations. Deletes EVERY row in both model_pricing and gpt_model_pricing, then re-seeds the dashboard's built-in Claude and GPT rate cards. Any custom rates or custom model patterns you added are permanently lost — there is no undo. Captured session/token data is untouched (only the pricing rules used to *compute* cost change). The response returns the freshly-seeded tables.
       operationId: resetPricing
       responses:
         '200':
@@ -5806,7 +6060,7 @@ paths:
       tags:
         - Settings
       summary: Export all dashboard data as JSON
-      description: 'Exports the entire dataset as a single versioned JSON document — all sessions, agents, events, token_usage rows, workflows, dashboard_runs, alert_rules, and model_pricing — stamped with `format: "ccam-export"`, `version`, and `exported_at`. Served with a `Content-Disposition: attachment` header (filename `agent-monitor-export-YYYY-MM-DD.json`) so browsers download it. Use it to back up before a destructive operation (clear-data / cleanup with purge_days) or to migrate/consolidate data across machines — the bundle is re-importable via POST /api/settings/import. Read-only; nothing is modified.'
+      description: 'Exports the entire dataset as a single versioned JSON document — all sessions, agents, events, token_usage rows, workflows, dashboard_runs, alert_rules, model_pricing, and gpt_model_pricing — stamped with `format: "ccam-export"`, `version`, and `exported_at`. Served with a `Content-Disposition: attachment` header (filename `agent-monitor-export-YYYY-MM-DD.json`) so browsers download it. Use it to back up before a destructive operation (clear-data / cleanup with purge_days) or to migrate/consolidate data across machines — the bundle is re-importable via POST /api/settings/import. Read-only; nothing is modified.'
       operationId: exportData
       responses:
         '200':
@@ -5817,7 +6071,7 @@ paths:
                 $ref: '#/components/schemas/ExportResponse'
               example:
                 format: ccam-export
-                version: 1
+                version: 2
                 exported_at: '2026-06-26T01:12:44.913Z'
                 sessions:
                   - id: 5f3c0e2a-1b9d-4c77-8a21-9e0f7b6d4c11
@@ -5880,6 +6134,21 @@ paths:
                     fast_input_per_mtok: 0
                     fast_output_per_mtok: 0
                     updated_at: '2026-06-26T00:00:00.000Z'
+                gpt_model_pricing:
+                  - model_pattern: gpt-5.6-terra%
+                    display_name: GPT-5.6 Terra
+                    short_input_per_mtok: 2
+                    short_cached_input_per_mtok: 0.2
+                    short_cache_write_per_mtok: 2.5
+                    short_output_per_mtok: 12
+                    long_input_per_mtok: 4
+                    long_cached_input_per_mtok: 0.4
+                    long_cache_write_per_mtok: 5
+                    long_output_per_mtok: 18
+                    fast_input_per_mtok: 4
+                    fast_cached_input_per_mtok: 0.4
+                    fast_cache_write_per_mtok: 5
+                    fast_output_per_mtok: 24
   /api/settings/cleanup:
     post:
       tags:
@@ -9359,7 +9628,7 @@ paths:
       tags:
         - Settings
       summary: Restore (import) a previously exported data bundle
-      description: 'Restores a bundle produced by GET /api/settings/export. Supply it either as `multipart/form-data` with a single `file` field (browser upload) or as a JSON body `{ "path": "<absolute path>" }` (the server reads the file from disk — used by the `ccam import-data` CLI, and it also sidesteps the global 1 MB JSON body cap for large bundles). The restore is idempotent and NON-DESTRUCTIVE: it is session-atomic, so a session already present (matched by its UUID) is skipped whole together with its agents/events/token_usage/workflows, and independent config rows (dashboard_runs, alert_rules, model_pricing) are inserted only when absent. Nothing existing is overwritten — ideal for consolidating several machines into one dashboard. The response reports per-table counts.'
+      description: 'Restores a bundle produced by GET /api/settings/export. Supply it either as `multipart/form-data` with a single `file` field (browser upload) or as a JSON body `{ "path": "<absolute path>" }` (the server reads the file from disk — used by the `ccam import-data` CLI, and it also sidesteps the global 1 MB JSON body cap for large bundles). The restore is idempotent and NON-DESTRUCTIVE: it is session-atomic, so a session already present (matched by its UUID) is skipped whole together with its agents/events/token_usage/workflows, and independent config rows (dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) are inserted only when absent. Nothing existing is overwritten — ideal for consolidating several machines into one dashboard. The response reports per-table counts.'
       operationId: importData
       requestBody:
         required: true
@@ -9403,6 +9672,7 @@ paths:
                 dashboard_runs: 11
                 alert_rules: 2
                 model_pricing: 0
+                gpt_model_pricing: 0
                 errors: 0
         '400':
           description: Missing file, invalid JSON, or unrecognized export format

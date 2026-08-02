@@ -343,7 +343,9 @@ npm run setup
 npm run install-hooks
 ```
 
-이 명령은 이벤트를 대시보드로 전달하는 Hook 항목을 `~/.claude/settings.json`에 추가합니다. 기존 Hook은 보존됩니다.
+설치 프로그램은 대화형 다중 선택기를 엽니다. 화살표 키, <kbd>Space</kbd>, <kbd>Enter</kbd>로 **Claude Code**, **Codex (beta)** 또는 둘 다를 선택하세요(Claude Code가 기본 선택됨). Claude Code 항목은 `~/.claude/settings.json`에, Codex 항목은 `~/.codex/hooks.json`에 있습니다. 선택한 제품의 대시보드 Hook이 이미 있으면 이 대시보드의 항목만 교체하기 전에 경고하며 관련 없는 Hook은 보존됩니다. 이후 **Settings → Hook Configuration → Install hooks**에서도 같은 선택을 할 수 있습니다.
+
+`~/.codex/sessions`의 Codex rollout도 지속적으로 검색됩니다. 대시보드는 append-only JSONL을 증분으로 읽으므로 Hook 알림 하나를 놓쳐도 세션, 토큰, 비용, 대화 행, WebSocket 업데이트가 최신 상태로 유지됩니다.
 
 ### 3. 시작
 
@@ -611,6 +613,8 @@ flowchart LR
 | `DASHBOARD_LIVENESS_PROBE` | `1` (켜짐) | 워치독의 **죽은 세션 활성 상태 회수**(`claude` 프로세스가 더 이상 존재하지 않는 `active` 세션을 완료 처리하는 `ps`/`lsof` 기반 프로브 — 대시보드가 꺼져 있는 동안 유실된 `SessionEnd`를 복구)를 비활성화하려면 `0`으로 설정. **다른 머신**(household Hook)에서 전달된 세션은 비-POSIX `cwd`를 보고하여 회수가 자동으로 건너뛰므로, 혼합 로컬 + 전달 배포에서는 더 이상 이것을 끌 필요가 없습니다; 로컬 프로세스가 아무것도 증명하지 못하는 순수 원격 설정에서만 비활성화하십시오. Windows 및 컨테이너 내부에서는 자동으로 비활성화됩니다 |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | **워치독 틱** 활성 상태 회수를 위한 유휴 게이트: 세션의 트랜스크립트가 최소 이 시간 동안 기록되지 않았을 때에만 완료 처리되므로(디스크에 트랜스크립트가 없을 때는 마지막 Hook 기록이 폴백 시계), 턴 진행 중이거나 방금 재개된 세션이 일시적인 프로브 실패로 깜빡이며 사라지는 일이 없습니다. 시작 패스는 이 게이트를 무시합니다 — 부팅 시에는 프로브 단독으로 결정하므로, 실행 직전에 종료된 세션은 즉시 정리됩니다 |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | 시작 후 추가되어 세션이 Hook을 통해 흐르지 않는 프로젝트를 표면화하는 지속적 `~/.claude/projects` 백그라운드 동기화의 폴링 간격(ms). `fs.watch` 워처는 이와 무관하게 거의 즉시 발동합니다; 이 폴링은 안전망입니다(워처는 이벤트를 놓치거나 네트워크 파일시스템에서 발동하지 않을 수 있음). 워처는 계속 실행하면서 폴링만 비활성화하려면 `0`으로 설정하십시오 |
+| `DASHBOARD_CODEX_HOME` | `CODEX_HOME` 또는 `~/.codex` | 선택적 로컬 Codex 상태 디렉터리입니다. rollout은 `sessions/` 트리에서만 읽으며, 명시적으로 Hook을 설치하지 않는 한 Codex 구성은 변경하지 않습니다. |
+| `DASHBOARD_CODEX_SYNC_MS` | `4000` | append-only Codex rollout을 위한 안전망 폴링 간격(ms)입니다. Codex Hook은 같은 증분 수집을 즉시 실행합니다; `0`으로 설정하면 폴링만 끄고 가능한 경우 파일 시스템 워처는 유지합니다. |
 | `DASHBOARD_REMOTE_SYNC_MS` | `15000` | 원격 소스를 `scp`로 가져오는 간격(ms). 새 소스 추가/활성화 시 즉시 1회 동기화. `0`으로 설정하면 원격 소스 폴링이 비활성화됩니다 |
 | `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000` (10분) | **원격 데이터 소스** 세션의 실시간 상태에 대한 신선도 윈도우. 각 동기화 시, 미러 transcript의 **마지막 JSONL 이벤트**가 이 윈도우 내에 있으면 원격 세션은 여전히 실행 중(`active`)으로 취급되고, 미러가 이보다 오래 진행을 멈추면 세션은 `completed`로 조정됩니다. 원격 세션은 실시간 Hook을 받지 않으므로 이것이 로컬 활성 상태/오래됨 스윕(이들을 건너뜀)을 대체합니다. 느린 링크나 매우 긴 유휴 턴에는 값을 높이십시오 |
 | `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` | `600000` | 원격 소스별 `scp` 타임아웃 |
@@ -1120,7 +1124,8 @@ npm run monitoring:docker:up
 | `POST` | `/api/settings/clear-data`     | 모든 세션, 에이전트, 이벤트, 토큰 사용량 삭제    |
 | `POST` | `/api/settings/reimport`       | `~/.claude/`에서 레거시 세션 다시 가져오기       |
 | `POST` | `/api/settings/reinstall-hooks`| Claude Code Hook 재설치                          |
-| `POST` | `/api/settings/reset-pricing`  | 가격 책정을 기본값으로 재설정                    |
+| `POST` | `/api/settings/install-hooks` | Claude Code, Codex 또는 둘 모두의 Hook 설치; 관련 없는 Hook은 유지 |
+| `POST` | `/api/settings/reset-pricing`  | Claude 및 GPT 가격표를 기본값으로 재설정                    |
 | `GET`  | `/api/settings/export`         | 모든 데이터를 JSON 다운로드로 내보내기           |
 | `POST` | `/api/settings/import`         | `/export` 백업 복원 (multipart `file` 또는 JSON `{ path }`). 멱등 + 비파괴적 — 이미 있는 세션은 통째로 건너뜀 |
 | `POST` | `/api/settings/cleanup`        | 오래된 세션을 중단 처리하고 오래된 데이터 정리   |

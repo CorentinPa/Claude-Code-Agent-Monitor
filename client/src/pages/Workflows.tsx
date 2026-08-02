@@ -74,6 +74,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Workflow, RefreshCw, Download, AlertCircle, Info } from "lucide-react";
 import { api } from "../lib/api";
+import { useDataScope } from "../lib/dataScope";
 import { eventBus } from "../lib/eventBus";
 import type { WorkflowData, WSMessage } from "../lib/types";
 
@@ -95,6 +96,7 @@ type StatusFilter = "all" | "active" | "completed";
 
 export function Workflows() {
   const { t } = useTranslation("workflows");
+  const [dataScope] = useDataScope();
   const [data, setData] = useState<WorkflowData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +116,7 @@ export function Workflows() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, dataScope]);
 
   useEffect(() => {
     fetchData();

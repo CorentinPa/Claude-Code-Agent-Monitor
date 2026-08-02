@@ -41,7 +41,20 @@
     "cacheWrite5m": "Ghi bộ nhớ đệm (5m)",
     "cacheWrite1h": "Ghi bộ nhớ đệm (1h)",
     "fastInput": "Fast Input",
-    "fastOutput": "Fast Output"
+    "fastOutput": "Fast Output",
+    "gpt": {
+      "title": "Giá OpenAI / Codex",
+      "description": "USD trên 1M token. Yêu cầu chuẩn dùng mức Short với đầu vào không quá 272K token và Long khi vượt 272K; Fast mode dùng bảng giá công bố riêng.",
+      "name": "Tên",
+      "short": "Chuẩn · Short ≤272K",
+      "long": "Chuẩn · Long >272K",
+      "fast": "Fast mode",
+      "input": "Đầu vào",
+      "cached": "Đã cache",
+      "write": "Ghi cache",
+      "output": "Đầu ra",
+      "deleteConfirm": "Xóa quy tắc giá GPT này?"
+    }
   },
   "claudeHome": {
     "title": "CLAUDE_HOME",
@@ -54,12 +67,30 @@
   },
   "hooks": {
     "title": "Cấu hình hook",
-    "description": "Hooks của Claude Code chuyển tiếp sự kiện về dashboard theo thời gian thực.",
+    "description": "Hooks của Claude Code và Codex chuyển tiếp sự kiện về dashboard theo thời gian thực.",
     "allInstalled": "Đã cài đầy đủ hooks",
+    "someInstalled": "Đã cấu hình hooks",
     "incomplete": "Hooks chưa đầy đủ",
     "reinstall": "Cài lại hooks",
+    "configure": "Cấu hình hooks",
     "success": "Cài hooks thành công",
-    "failed": "Cài hooks thất bại"
+    "failed": "Cài hooks thất bại",
+    "display": {
+      "title": "Dữ liệu dashboard",
+      "description": "Lọc ngay mọi chế độ xem dashboard theo sản phẩm. Bộ lọc nguồn dữ liệu máy vẫn độc lập.",
+      "both": "Cả hai"
+    },
+    "modal": {
+      "title": "Cài hooks cho dashboard",
+      "description": "Chọn một hoặc cả hai sản phẩm. Mục hook của dashboard hiện có sẽ được cập nhật; các lệnh hook khác vẫn được giữ nguyên.",
+      "claude": "Hooks vòng đời từ ~/.claude/settings.json.",
+      "codex": "Hooks vòng đời từ ~/.codex/hooks.json, với JSONL rollout làm đường dự phòng thời gian thực.",
+      "installed": "Đã cài",
+      "overrideWarning": "Đã tìm thấy cấu hình hook hiện có cho một hoặc nhiều sản phẩm đã chọn. Tiếp tục chỉ thay thế các mục khớp của dashboard này và giữ nguyên các hook không liên quan.",
+      "preserveNote": "Phải chọn ít nhất một sản phẩm.",
+      "install": "Cài hooks đã chọn",
+      "failed": "Không thể cài các hooks đã chọn."
+    }
   },
   "notifications": {
     "title": "Thông báo",

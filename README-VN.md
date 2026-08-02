@@ -343,7 +343,9 @@ npm run setup
 npm run install-hooks
 ```
 
-Điều này thêm các mục hook vào `~/.claude/settings.json` để chuyển tiếp các sự kiện tới bảng điều khiển. Các móc hiện có được bảo tồn.
+Trình cài đặt mở bộ chọn đa lựa chọn tương tác: dùng phím mũi tên, <kbd>Space</kbd> và <kbd>Enter</kbd> để chọn **Claude Code**, **Codex (beta)** hoặc cả hai (Claude Code được chọn sẵn). Mục Claude Code nằm trong `~/.claude/settings.json`; mục Codex nằm trong `~/.codex/hooks.json`. Nếu bộ hook dashboard đã tồn tại cho lựa chọn đó, trình cài đặt sẽ cảnh báo trước khi chỉ thay thế các mục của dashboard này — các hook không liên quan được giữ nguyên. Bạn cũng có thể chọn tương tự trong **Settings → Hook Configuration → Install hooks**.
+
+Các rollout Codex trong `~/.codex/sessions` cũng được phát hiện liên tục. Dashboard đọc JSONL chỉ-ghi-nối thêm theo kiểu tăng dần, vì vậy phiên, token, chi phí, hàng hội thoại và cập nhật WebSocket luôn mới ngay cả khi bỏ lỡ một thông báo hook.
 
 ### 3. Bắt đầu
 
@@ -610,6 +612,8 @@ flowchart LR
 | `DASHBOARD_LIVENESS_PROBE` | `1` (bật) | Đặt `0` để tắt **cơ chế thu dọn phiên đã chết** của watchdog (probe dựa trên `ps`/`lsof` hoàn tất các phiên `active` mà tiến trình `claude` không còn tồn tại — khôi phục một `SessionEnd` bị mất khi dashboard không chạy). Các phiên được chuyển tiếp từ **máy khác** (household hooks) báo cáo `cwd` không phải POSIX và được cơ chế thu dọn tự động bỏ qua, nên một triển khai hỗn hợp cục bộ + chuyển tiếp không còn cần tắt tùy chọn này; chỉ tắt nó cho cấu hình thuần từ xa nơi tiến trình cục bộ không chứng minh được gì. Tự động tắt trên Windows và trong container |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | Ngưỡng nhàn rỗi cho cơ chế thu dọn **ở nhịp watchdog**: phiên chỉ bị hoàn tất khi transcript của nó không được ghi trong ít nhất khoảng này (lần ghi hook cuối là đồng hồ dự phòng khi không có transcript trên đĩa), nên phiên đang giữa lượt hoặc vừa resume không bao giờ biến mất do một lần probe trượt thoáng qua. Các lượt thu dọn lúc khởi động bỏ qua ngưỡng này — lúc boot chỉ probe quyết định, nên phiên thoát ngay trước khi mở app được dọn tức thì |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | Khoảng poll (ms) cho tiến trình đồng bộ nền `~/.claude/projects` liên tục, làm hiện ra các dự án được thêm sau khi khởi động mà các phiên của chúng không bao giờ đi qua hook. Watcher `fs.watch` vẫn kích hoạt gần như tức thì bất kể giá trị này; lần poll này là lưới an toàn (watcher có thể bỏ lỡ sự kiện / không kích hoạt trên hệ thống tệp mạng). Đặt thành `0` để tắt poll mà vẫn giữ watcher chạy |
+| `DASHBOARD_CODEX_HOME` | `CODEX_HOME` hoặc `~/.codex` | Thư mục trạng thái Codex cục bộ tùy chọn. Rollout chỉ được đọc từ cây `sessions/`; thư mục này không thay đổi cấu hình Codex trừ khi bạn chủ động cài hook. |
+| `DASHBOARD_CODEX_SYNC_MS` | `4000` | Khoảng poll an toàn (ms) cho rollout Codex chỉ-ghi-nối thêm. Hook Codex kích hoạt cùng bộ nạp tăng dần ngay lập tức; đặt `0` để chỉ tắt poll và vẫn giữ watcher hệ thống tệp khi có thể. |
 | `DASHBOARD_REMOTE_SYNC_MS` | `15000` | Khoảng thời gian (ms) để kéo dữ liệu từ các nguồn từ xa qua `scp`. Thêm hoặc bật lại nguồn cũng kích hoạt đồng bộ ngay. Đặt `0` để tắt việc poll nguồn từ xa |
 | `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000` (10 phút) | Cửa sổ độ mới cho trạng thái live của một phiên **Nguồn dữ liệu từ xa**. Ở mỗi lần đồng bộ, một phiên từ xa có **sự kiện JSONL cuối cùng** trong transcript đã mirror nằm trong cửa sổ này sẽ được giữ ở `active`; khi bản sao ngừng tiến triển lâu hơn ngưỡng này, phiên được đối chiếu về `completed`. Các phiên từ xa không nhận hook trực tiếp, nên tùy chọn này thay thế các lượt quét liveness/stale cục bộ (vốn bỏ qua chúng). Tăng giá trị này cho các kết nối chậm hoặc các lượt nghỉ (idle) dài |
 | `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` | `600000` | Thời gian chờ tối đa cho lần `scp` của mỗi nguồn từ xa |
@@ -1102,7 +1106,8 @@ Xem [docs/API.md → Metrics](./docs/API.md#metrics) để biết danh sách ch�
 | `POST` | `/api/settings/clear-data`     | Xóa tất cả các phiên, Agent, sự kiện, sử dụng token |
 | `POST` | `/api/settings/reimport`       | Nhập lại các phiên kế thừa từ `~/.claude/`      |
 | `POST` | `/api/settings/reinstall-hooks`| Cài đặt lại móc Claude Code                      |
-| `POST` | `/api/settings/reset-pricing`  | Đặt lại giá về mặc định                        |
+| `POST` | `/api/settings/install-hooks` | Cài hook Claude Code, Codex hoặc cả hai; giữ nguyên hook không liên quan |
+| `POST` | `/api/settings/reset-pricing`  | Đặt lại bảng giá Claude và GPT về mặc định                        |
 | `GET`  | `/api/settings/export`         | Xuất tất cả dữ liệu dưới dạng tải xuống JSON                 |
 | `POST` | `/api/settings/import`         | Khôi phục bản xuất từ `/export` (multipart `file` hoặc JSON `{ path }`). Idempotent + không phá hủy — phiên đã có được bỏ qua toàn bộ |
 | `POST` | `/api/settings/cleanup`        | Bỏ các phiên cũ, xóa dữ liệu cũ           |

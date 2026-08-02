@@ -345,7 +345,9 @@ npm run setup
 npm run install-hooks
 ```
 
-此命令会在 `~/.claude/settings.json` 中添加 Hook 条目，将事件转发到 Dashboard。已有的 Hook 配置会被保留。
+安装程序会打开交互式多选器：使用方向键、<kbd>Space</kbd> 和 <kbd>Enter</kbd> 选择 **Claude Code**、**Codex（beta）** 或两者（默认选中 Claude Code）。Claude Code 条目位于 `~/.claude/settings.json`；Codex 条目位于 `~/.codex/hooks.json`。如果所选产品的 Dashboard Hook 已存在，安装程序会在仅替换本 Dashboard 的条目前发出警告——无关 Hook 会被保留。之后也可在 **Settings → Hook Configuration → Install hooks** 中进行相同选择。
+
+`~/.codex/sessions` 中的 Codex rollout 也会持续被发现。Dashboard 会增量读取其仅追加 JSONL，因此即使漏掉某个 Hook 通知，会话、Token、成本、会话记录和 WebSocket 更新仍会保持最新。
 
 ### 3. 启动
 
@@ -611,6 +613,8 @@ flowchart LR
 | `DASHBOARD_LIVENESS_PROBE` | `1`（开启） | 设为 `0` 可禁用看门狗的**死亡会话存活性回收**（基于 `ps`/`lsof` 的探测，将 `claude` 进程已不存在的 `active` 会话标记为完成——恢复仪表盘停机期间丢失的 `SessionEnd`）。从**另一台机器**（家庭 Hook）转发来的会话会报告非 POSIX 的 `cwd`，会被回收自动跳过，因此混合的本地 + 转发部署不再需要关闭此项；仅在纯远程部署（本地进程无法证明任何事情）时才禁用它。在 Windows 和容器内自动禁用 |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | **看门狗节拍**存活性回收的空闲门槛：只有当会话的 Transcript 至少有这么长时间未被写入时（磁盘上没有 Transcript 时以最后一次 Hook 写入为后备时钟），才会将其标记为完成，因此回合中或刚 resume 的会话绝不会因一次瞬时的探测偏差而消失。启动时的回收跳过该门槛——boot 时由探测单独决定，因此启动前一刻退出的会话会立即清除 |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | 持续 `~/.claude/projects` 后台同步的轮询间隔（毫秒），用于显示启动后才加入、其会话从不经过 Hook 流入的项目。无论如何 `fs.watch` 监听器都会近乎即时触发；该轮询是安全兜底（监听器可能错过事件 / 在网络文件系统上不触发）。设为 `0` 可禁用轮询，同时让监听器保持运行 |
+| `DASHBOARD_CODEX_HOME` | `CODEX_HOME` 或 `~/.codex` | 可选的本地 Codex 状态目录。仅从其 `sessions/` 树读取 rollout；除非你明确安装 Hook，否则不会更改 Codex 配置。 |
+| `DASHBOARD_CODEX_SYNC_MS` | `4000` | 仅追加 Codex rollout 的安全兜底轮询间隔（毫秒）。Codex Hook 会立即触发同一个增量采集器；设为 `0` 仅禁用轮询，在可用时仍保留文件系统监听器。 |
 | `DASHBOARD_REMOTE_SYNC_MS` | `15000` | 通过 `scp` 拉取远程数据源的间隔（毫秒）。新增或重新启用数据源时会立即同步一次。设为 `0` 可禁用远程源轮询 |
 | `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000`（10 分钟） | 一个**远程数据源**会话实时状态的新鲜度窗口。每次同步时，镜像 Transcript 的 **JSONL 最后事件** 在此窗口内的远程会话会被视为仍在运行（`active`）；一旦镜像停止推进的时间超过此窗口，会话就被核对为 `completed`。远程会话不接收实时 Hook，因此本项取代了对它们跳过的本地存活性/过期扫描。链路较慢或空闲回合很长时可调大 |
 | `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` | `600000` | 每个远程源 `scp` 的超时时间 |
@@ -1103,7 +1107,8 @@ npm run monitoring:docker:up
 | `GET` | `/api/settings/info` | 系统信息、数据库统计、Hook 状态 |
 | `POST` | `/api/settings/clear-data` | 删除所有会话、Agent、事件、Token 用量 |
 | `POST` | `/api/settings/reinstall-hooks` | 重新安装 Claude Code Hook |
-| `POST` | `/api/settings/reset-pricing` | 重置定价为默认值 |
+| `POST` | `/api/settings/install-hooks` | 安装 Claude Code、Codex 或两者的 Hook；保留无关 Hook |
+| `POST` | `/api/settings/reset-pricing` | 重置 Claude 与 GPT 定价为默认值 |
 | `GET` | `/api/settings/export` | 以 JSON 下载方式导出所有数据 |
 | `POST` | `/api/settings/import` | 从 `/export` 恢复导出包（multipart `file` 或 JSON `{ path }`）。幂等且非破坏性——已存在的会话会被整体跳过 |
 | `POST` | `/api/settings/cleanup` | 废弃过期会话、清除旧数据 |
