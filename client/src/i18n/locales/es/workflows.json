@@ -54,7 +54,7 @@
       "why": "Por qué importa"
     },
     "orchestration": {
-      "what": "Un DAG por capas de cómo las sesiones de Claude Code se expanden: desde las sesiones de origen, hacia el agente principal, hacia cada tipo de subagente, a través de cualquier compresión de contexto, y finalmente hacia los resultados terminales (completado / error / abandonado).",
+      "what": "Un DAG por capas de cómo se expanden las sesiones de agentes: desde las sesiones de origen, hacia el agente principal, hacia cada tipo de subagente, a través de cualquier compresión de contexto, y finalmente hacia los resultados terminales (completado / error / abandonado).",
       "howToRead": "Cada columna es una capa. El ancho de la caja es constante; la pequeña insignia es el conteo. Los bordes fluyen de izquierda a derecha; los bordes más gruesos = transiciones más frecuentes. Pasa el cursor sobre cualquier nodo para ver estadísticas; haz clic para filtrar el resto de la página por él.",
       "why": "Úsalo para responder '¿a dónde va el trabajo en mis flujos?' - qué tipos de subagentes dominan, dónde entra la compresión, y qué caminos terminan en errores vs completaciones limpias."
     },
@@ -99,7 +99,7 @@
       "why": "Da una vista única de la distribución de costo/complejidad. Los valores atípicos son las sesiones que vale la pena investigar por comportamiento desbocado o picos de costo."
     },
     "compaction": {
-      "what": "Con qué frecuencia Claude activó la compresión de contexto en las sesiones: eventos totales, tokens recuperados y una distribución por sesión.",
+      "what": "Con qué frecuencia los agentes comprimieron el contexto en las sesiones: eventos totales, tokens recuperados y una distribución por sesión.",
       "howToRead": "Los dos cuadros de estadísticas muestran los eventos de compresión totales y los tokens acumulados recuperados. El gráfico de barras lista las sesiones con al menos una compresión, ordenadas de forma descendente por conteo.",
       "why": "Las compresiones indican presión de contexto. Una larga cola de sesiones con alta compresión generalmente significa flujos de trabajo que deberían dividirse, resumirse o migrarse a un modelo de contexto más largo."
     },
@@ -135,7 +135,7 @@
         "success": "En todas las ejecuciones de agentes principales + subagentes en el alcance: ejecuciones completadas ÷ (completadas + con error + abandonadas) × 100. Una ejecución cuenta como completada cuando se observa un Stop / SubagentStop sin un evento de error en medio.",
         "topFlow": "Se cuenta cada par consecutivo de llamadas de herramientas dentro de una sesión como una transición. El par que aparece con mayor frecuencia en todas las sesiones se muestra aquí como 'origen → destino'.",
         "compactions": "Número total de eventos de compresión de contexto registrados por los hooks PreCompact / SessionStart(compact), dividido por el número de sesiones en el alcance.",
-        "duration": "Tiempo promedio en tiempo real desde el primer evento de cada sesión (SessionStart) hasta su último evento (Stop / SessionEnd / último hook), promediado en todas las sesiones en el alcance."
+        "duration": "Tiempo promedio en tiempo real desde el primer evento registrado de cada sesión hasta su último evento registrado, promediado en todas las sesiones en el alcance."
       },
       "depth": {
         "zero": "no se han observado agentes anidados. Cada sesión se ejecutó solo con el agente principal - no ocurrió ninguna delegación de subagentes.",
@@ -152,7 +152,7 @@
         "veryHeavy": "muy intensivo en orquestación: las sesiones promedian 6+ ejecuciones de subagentes cada una."
       },
       "success": {
-        "perfect": "casi perfecto. Casi cada ejecución de agente termina con un evento Stop limpio - sin errores ni abandono.",
+        "perfect": "casi perfecto. Casi cada ejecución de agente termina limpiamente, sin errores ni abandono.",
         "healthy": "saludable. La gran mayoría de las ejecuciones de agentes se completan con éxito; solo fallos esporádicos.",
         "acceptable": "aceptable, pero vigila la tendencia de errores - aproximadamente 1 de cada 5-20 ejecuciones falla o se abandona.",
         "concerning": "preocupante - una parte significativa de las ejecuciones de agentes está fallando. Inspecciona la página de Errores para los principales culpables.",
@@ -211,18 +211,18 @@
         "outcome": "Capa 4 - Resultado"
       },
       "desc": {
-        "session": "Cada unidad aquí es una sesión de Claude Code que coincide con el filtro de estado actual. Los bordes salientes se expanden hacia los agentes principales que estas sesiones lanzaron.",
-        "main": "La ejecución Claude de nivel superior para cada sesión. Cada sesión tiene exactamente un agente principal; desde aquí el grafo se ramifica hacia los tipos de subagentes a los que delegó.",
+        "session": "Cada unidad aquí es una sesión de agente que coincide con el filtro de estado actual. Los bordes salientes se expanden hacia los agentes principales que estas sesiones lanzaron.",
+        "main": "La ejecución de agente de nivel superior para cada sesión. Cada sesión tiene exactamente un agente principal; desde aquí el grafo se ramifica hacia los tipos de subagentes a los que delegó.",
         "subagent": "Un subagente especializado al que el agente principal delegó (p. ej., a través de la herramienta Task).",
         "subagentClean": " Cada ejecución de este subagente se ha completado limpiamente.",
         "subagentAllError": " Cada ejecución de este subagente ha tenido error - investiga la definición del agente.",
         "subagentSomeErrors": " {{count}} ejecución(es) con error - consulta la Propagación de Errores a continuación para más detalles.",
         "subagentOverflow": "Todos los tipos de subagentes restantes colapsados en un nodo para que el grafo siga siendo legible. Pasa el cursor sobre cualquier otro nodo de subagente para ver estadísticas individuales.",
-        "nested": "Eventos de compresión de ventana de contexto. Claude activa una compresión cuando el contexto en ejecución se acerca al límite del modelo; el conteo refleja con qué frecuencia ocurrió eso en las sesiones en el alcance.",
-        "outcomeCompleted": "Sesiones cuyo hook final fue un evento Stop limpio. No se emitieron eventos de error antes de la terminación.",
+        "nested": "Eventos de compresión de ventana de contexto. Un agente comprime cuando el contexto en ejecución se acerca al límite del modelo; el conteo refleja con qué frecuencia ocurrió eso en las sesiones en el alcance.",
+        "outcomeCompleted": "Sesiones que terminaron limpiamente sin errores registrados antes de la finalización.",
         "outcomeError": "Sesiones que emitieron al menos un evento de error (error de herramienta, error de subagente o error de sesión) antes de terminar.",
-        "outcomeAbandoned": "Sesiones que se detuvieron sin un evento Stop limpio y sin errores explícitos - generalmente cerradas a mitad de vuelo.",
-        "outcomeFallback": "El estado terminal de las sesiones en el alcance, calculado a partir del último evento hook observado para cada sesión."
+        "outcomeAbandoned": "Sesiones que se detuvieron sin una señal de salida limpia y sin errores explícitos; normalmente se cerraron a mitad de ejecución.",
+        "outcomeFallback": "El estado terminal de las sesiones en el alcance, calculado a partir del último evento observado para cada sesión."
       }
     }
   },
@@ -422,7 +422,7 @@
   "compaction": {
     "title": "Análisis de Impacto de Compresión",
     "subtitle": "Cómo se distribuye la compresión de contexto en tus sesiones",
-    "help": "Cuando la ventana de contexto de una sesión se llena, Claude Code comprime el historial más antiguo en un resumen. Cada compresión es uno de esos eventos.",
+    "help": "Cuando la ventana de contexto de una sesión se llena, el agente activo comprime el historial más antiguo en un resumen. Cada compresión es uno de esos eventos.",
     "noData": "Sin compresiones registradas",
     "totalCompactions": "Total de compresiones",
     "sessionsAffected": "Sesiones afectadas",

@@ -25,7 +25,7 @@
   "sessionCount_plural": "{{count}}개 세션 기록됨",
   "noSessions": "세션을 찾을 수 없습니다",
   "noSessionsDesc": "검색어나 필터를 조정해 보세요.",
-  "noSessionsHint": "hooks가 설치된 Claude Code 세션을 시작하면 추적이 시작됩니다.",
+  "noSessionsHint": "hooks가 설치된 모니터링 Agent 세션을 시작하면 추적이 시작됩니다.",
   "tableSession": "세션",
   "tableStatus": "상태",
   "tableLastActive": "마지막 활동",
@@ -37,7 +37,7 @@
   "detail": {
     "waitingBanner": {
       "title": "입력을 기다리는 중",
-      "generic": "터미널에서 응답할 때까지 이 세션의 Claude Code가 일시 정지되어 있습니다."
+      "generic": "터미널에서 응답할 때까지 이 세션이 일시 정지되어 있습니다."
     },
     "failedLoad": "세션을 불러오지 못했습니다",
     "loading": "세션을 불러오는 중...",

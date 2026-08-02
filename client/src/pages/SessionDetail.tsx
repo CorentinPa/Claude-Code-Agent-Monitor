@@ -603,6 +603,7 @@ export function SessionDetail() {
             <SessionStatusBadge
               status={effectiveSessionStatus(session)}
               reason={sessionAwaitingReason(session)}
+              provider={session.provider}
             />
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
@@ -693,7 +694,11 @@ export function SessionDetail() {
                 <div
                   className={`text-[11px] ${urgent ? "text-amber-400/70" : "text-yellow-400/60"}`}
                 >
-                  {cfg ? t(cfg.descKey) : t("detail.waitingBanner.generic")}
+                  {cfg
+                    ? t(cfg.descKey, {
+                        provider: session.provider === "codex" ? "Codex" : "Claude",
+                      })
+                    : t("detail.waitingBanner.generic")}
                 </div>
               </div>
               {session.awaiting_input_since && (

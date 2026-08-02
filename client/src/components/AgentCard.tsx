@@ -216,7 +216,12 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
         </div>
         {/* compact: cards are narrow — inline reason chip would squeeze the
             title, so the reason stays hover-tooltip-only here. */}
-        <AgentStatusBadge status={status} reason={agentAwaitingReason(agent)} compact />
+        <AgentStatusBadge
+          status={status}
+          reason={agentAwaitingReason(agent)}
+          provider={session?.provider}
+          compact
+        />
       </div>
 
       {agent.task && (

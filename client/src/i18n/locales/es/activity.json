@@ -5,6 +5,6 @@
   "resume": "Reanudar",
   "pause": "Pausar",
   "noActivity": "Sin actividad aún",
-  "noActivityDesc": "Los eventos se transmitirán aquí en tiempo real mientras los agentes de Claude Code trabajan.",
+  "noActivityDesc": "Los eventos se transmitirán aquí en tiempo real mientras trabajan las sesiones de agentes.",
   "viewSession": "Sesión"
 }

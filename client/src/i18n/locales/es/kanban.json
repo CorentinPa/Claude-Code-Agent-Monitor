@@ -7,12 +7,12 @@
     "sessions": "Sesiones"
   },
   "noAgents": "Sin agentes rastreados aún",
-  "noAgentsDesc": "Inicia una sesión de Claude Code con los hooks instalados para ver los agentes aquí.",
+  "noAgentsDesc": "Inicia una sesión de agente supervisada con los hooks instalados para ver los agentes aquí.",
   "agentCount": "{{count}} agente rastreado",
   "agentCount_plural": "{{count}} agentes rastreados",
   "noAgentsInColumn": "Sin agentes",
   "noSessions": "Sin sesiones rastreadas aún",
-  "noSessionsDesc": "Inicia una sesión de Claude Code con los hooks instalados para ver las sesiones aquí.",
+  "noSessionsDesc": "Inicia una sesión de agente supervisada con los hooks instalados para ver las sesiones aquí.",
   "sessionCount": "{{count}} sesión rastreada",
   "sessionCount_plural": "{{count}} sesiones rastreadas",
   "noSessionsInColumn": "Sin sesiones",
@@ -29,17 +29,17 @@
   },
   "tooltip": {
     "agent": {
-      "working": "El agente está ejecutando activamente una llamada de herramienta ahora mismo.\n\nEntra en PreToolUse o UserPromptSubmit, sale en Stop (turno finalizado).",
-      "waiting": "El agente terminó su turno y está bloqueado por el humano — o bien Claude está esperando el siguiente mensaje del usuario o ha solicitado permiso para usar una herramienta.\n\nSe limpia en el siguiente PreToolUse / PostToolUse, o cuando la sesión termina.",
-      "completed": "El agente ha finalizado completamente para esta sesión — normalmente porque se disparó SessionEnd o, para subagentes, se procesó SubagentStop.\n\nNo se registrará más actividad para este agente.",
-      "error": "El agente registró un error y no continuará. Para agentes principales, esto proviene de un Stop con stop_reason=error; para subagentes, de una ejecución fallida."
+      "working": "El agente está procesando trabajo activamente ahora mismo.\n\nVolverá a Esperando cuando termine este turno.",
+      "waiting": "El agente terminó su turno o necesita una respuesta humana, como una aprobación de permiso.\n\nVolverá a trabajar cuando continúe la sesión.",
+      "completed": "El agente ha terminado completamente para esta sesión.\n\nNo se registrará más actividad para este agente.",
+      "error": "El agente registró un error y no continuará hasta que la sesión se reanude o se vuelva a intentar."
     },
     "session": {
-      "active": "La sesión está a mitad de turno — Claude está ejecutándose actualmente y el usuario no bloquea nada. Breve por naturaleza: una sesión pasa por Activa durante las llamadas de herramientas y vuelve a Espera al final del turno.",
-      "waiting": "La sesión está esperando al usuario. O bien Claude terminó su turno (más común) o ha presentado un aviso de permiso y está bloqueado hasta que el humano responda.\n\nBusca aquí las sesiones a las que debes responder.",
-      "completed": "La sesión se ha cerrado completamente — se disparó SessionEnd (CLI salió limpiamente) o el usuario la cerró explícitamente.\n\nTodos los agentes en esta sesión también están completados.",
-      "error": "La sesión terminó con un error — Claude devolvió stop_reason=error, ocurrió un fallo irrecuperable, o un error de API upstream terminó la ejecución.",
-      "abandoned": "La sesión quedó sin actividad sin un SessionEnd limpio. Marcada como abandonada después de 5+ minutos sin actividad (huérfana de /resume, caída de red, o la CLI fue terminada). Distinta de Completada: nunca vimos una señal de salida real."
+      "active": "La sesión está a mitad de turno: un agente está trabajando y el usuario no bloquea nada. Este estado es breve; la sesión vuelve a Esperando cuando termina el turno.",
+      "waiting": "La sesión está esperando tu respuesta. Puede que un turno haya terminado o que el agente necesite permiso o entrada.\n\nBusca aquí las sesiones a las que debes responder.",
+      "completed": "La sesión se cerró completamente porque su CLI salió limpiamente o se cerró de forma explícita.\n\nTodos los agentes de esta sesión también están completados.",
+      "error": "La sesión terminó con un error: un fallo irrecuperable o un error de API upstream finalizó la ejecución.",
+      "abandoned": "La sesión quedó inactiva sin una señal de salida limpia. Se marca como abandonada después de más de 5 minutos sin actividad (por ejemplo tras /resume, una caída de red o una CLI terminada). A diferencia de Completada, no se observó una salida real."
     }
   }
 }

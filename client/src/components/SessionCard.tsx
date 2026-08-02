@@ -132,7 +132,12 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
         </div>
         {/* compact: cards are narrow — inline reason chip would squeeze the
             title, so the reason stays hover-tooltip-only here. */}
-        <SessionStatusBadge status={status} reason={sessionAwaitingReason(session)} compact />
+        <SessionStatusBadge
+          status={status}
+          reason={sessionAwaitingReason(session)}
+          provider={session.provider}
+          compact
+        />
       </div>
 
       {session.cwd && (

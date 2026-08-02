@@ -585,7 +585,7 @@ export type AgentType = "main" | "subagent";
 /**
  * UI-only status that overlays the persisted SessionStatus/AgentStatus when
  * `awaiting_input_since` is set on a session or agent. Renders as a yellow
- * "Waiting" badge so the dashboard can flag sessions blocked on a Claude Code
+ * "Waiting" badge so the dashboard can flag sessions blocked on an agent CLI
  * permission prompt without changing the underlying lifecycle enum.
  *
  * The literal value is intentionally `"waiting"` (the same string as
@@ -600,14 +600,14 @@ export const AWAITING_STATUS = "waiting" as const;
  * `awaiting_reason` column (set/cleared in lock-step with
  * `awaiting_input_since` by `server/routes/hooks.js`):
  *
- * - `"notification"`  — a permission prompt or explicit input request; Claude
+ * - `"notification"`  — a permission prompt or explicit input request; the agent
  *    cannot continue until the user responds. The most actionable state.
- * - `"stop"`          — Claude finished its turn; the session idles until the
+ * - `"stop"`          — the agent finished its turn; the session idles until the
  *    next prompt is submitted.
  * - `"session_start"` — the CLI just started/resumed and sits at an empty
  *    prompt; nothing has been asked yet.
  * - `"interrupted"`   — the turn was cut short (Esc, or the watchdog recovered
- *    a lost Stop hook); Claude is waiting for direction.
+ *    a lost lifecycle event); the agent is waiting for direction.
  */
 export type AwaitingReason = "notification" | "stop" | "session_start" | "interrupted";
 
@@ -627,14 +627,14 @@ export type EffectiveAgentStatus = AgentStatus | typeof AWAITING_STATUS;
 export type EffectiveSessionStatus = SessionStatus | typeof AWAITING_STATUS;
 
 // ───── Session & Agent rows ─────
-// The two primary entities. A `Session` is one `claude` CLI invocation; an
+// The two primary entities. A `Session` is one monitored CLI invocation; an
 // `Agent` is one process within it (the main loop or a spawned subagent). Both
-// are created lazily on their first hook event and mutated as hooks stream in.
+// are created lazily on their first observed event and mutated as events stream in.
 
 /**
- * A Claude Code CLI invocation tracked by the dashboard - one row per top-level
- * `claude` process, created on its first hook event (or on import) and updated
- * as hooks stream in. Returned by GET /api/sessions, /api/sessions/:id, and
+ * A monitored agent CLI invocation tracked by the dashboard — one row per top-level
+ * process, created on its first observed event (or on import) and updated as
+ * events stream in. Returned by GET /api/sessions, /api/sessions/:id, and
  * pushed live via the `session_created`/`session_updated` WebSocket messages.
  *
  * Fields split into three groups: always-present columns (`id`..`metadata`),
@@ -643,7 +643,7 @@ export type EffectiveSessionStatus = SessionStatus | typeof AWAITING_STATUS;
  * `awaiting_input_since` overlay used to render the "Waiting" badge.
  */
 export interface Session {
-  /** Session UUID, taken from the Claude Code hook payload's `session_id`.
+  /** Session UUID, taken from the source CLI's session record.
    *  Primary key (`sessions.id`); also the foreign key that `Agent`/
    *  `DashboardEvent` rows join on. Example: `"9f2c1e7a-...-b3"`. */
   id: string;
@@ -683,9 +683,9 @@ export interface Session {
    *  active pricing rules. Only present on responses that attach pricing.
    *  Absolute dollars (e.g. `0.42`), already summed across all buckets. */
   cost?: number;
-  /** ISO timestamp set when Claude Code is blocked waiting for the user
-   * (permission prompt or "waiting for your input" notice). Cleared on the
-   * next non-Notification hook event. Null when the session is not waiting.
+  /** ISO timestamp set when an agent CLI is blocked waiting for the user
+   * (permission prompt or "waiting for your input" notice). Cleared when the
+   * source reports that work has resumed. Null when the session is not waiting.
    * Feeds {@link isSessionAwaitingInput} and the yellow "Waiting" overlay. */
   awaiting_input_since?: string | null;
   /** WHY the session is waiting - one of {@link AwaitingReason}, set/cleared in
@@ -703,8 +703,8 @@ export interface Session {
 }
 
 /**
- * A single agent process within a session: either the main Claude Code CLI or
- * a subagent spawned via the Task/Agent tool. Returned nested under `Session`
+ * A single agent process within a session: either the main agent CLI or a
+ * subagent spawned through the provider's delegation tool. Returned nested under `Session`
  * responses and by GET /api/agents; pushed live via `agent_created`/`agent_updated`.
  *
  * Main agents typically carry the session's overall cost; subagents may carry

@@ -672,7 +672,7 @@ exports[`screen snapshots > Activity feed 1`] = `
       <p
         class="text-sm text-gray-500 max-w-md mb-6"
       >
-        Events will stream here in real-time as Claude Code agents work.
+        Events will stream here in real-time as agent sessions work.
       </p>
     </div>
   </div>
@@ -743,7 +743,7 @@ exports[`screen snapshots > Analytics 1`] = `
             <p
               class="text-xs text-gray-500 flex items-center gap-2"
             >
-              Real-time monitoring and analytics for Claude Code sessions
+              Real-time monitoring and analytics for agent sessions
               <span
                 class="inline-flex items-center gap-1.5 text-[11px] text-gray-500 bg-surface-2 border border-border px-2 py-0.5 rounded-md font-mono ml-2"
               >
@@ -4830,7 +4830,7 @@ exports[`screen snapshots > Dashboard 1`] = `
           <p
             class="text-xs text-gray-500"
           >
-            Real-time overview of Claude Code agent activity
+            Real-time overview of agent activity
           </p>
         </div>
       </div>
@@ -5333,7 +5333,7 @@ exports[`screen snapshots > Dashboard 1`] = `
             <p
               class="text-sm text-gray-500 max-w-md mb-6"
             >
-              Agents will appear here when a Claude Code session is running.
+              Agents will appear here when a monitored session is running.
             </p>
           </div>
         </div>
@@ -5408,7 +5408,7 @@ exports[`screen snapshots > Dashboard 1`] = `
             <p
               class="text-sm text-gray-500 max-w-md mb-6"
             >
-              Events from Claude Code sessions will stream here in real-time.
+              Events from monitored sessions will stream here in real-time.
             </p>
           </div>
         </div>
@@ -5588,7 +5588,7 @@ exports[`screen snapshots > Kanban board 1`] = `
         <p
           class="text-sm text-gray-500 max-w-md mb-6"
         >
-          Start a Claude Code session with hooks installed to see agents appear here.
+          Start a monitored agent session with hooks installed to see agents appear here.
         </p>
         <button
           class="btn-primary"
@@ -7140,7 +7140,7 @@ exports[`screen snapshots > Sessions 1`] = `
       <p
         class="text-sm text-gray-500 max-w-md mb-6"
       >
-        Start a Claude Code session with hooks installed to begin tracking.
+        Start a monitored agent session with hooks installed to begin tracking.
       </p>
     </div>
   </div>

@@ -4,8 +4,8 @@
  * (or sub-agent) JSONL transcript, paginates it incrementally, and renders
  * the message stream via MessageList. Combines a WebSocket subscription, a
  * visibility-gated polling fallback, and a manual refresh button so the view
- * stays caught up even when hooks miss frames or the user is mid-text-only
- * turn (no PreToolUse fires until Stop). A top sentinel and scroll fallback
+ * stays caught up even when events miss frames or the user is mid-text-only
+ * turn. A top sentinel and scroll fallback
  * make older pages load reliably for both Claude and Codex transcripts.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
@@ -13,7 +13,7 @@
  * MODULE_GUIDE — extended in-file reference (comments only; safe to read, never executed)
  * =============================================================================
  * **Path:** `/Users/davidnguyen/WebstormProjects/Claude-Code-Agent-Monitor/client/src/components/conversation/ConversationView.tsx`
- * **Purpose:** Renders Claude transcript rows (user, assistant, tool calls) inside Session Detail with markdown, syntax highlighting, and TUI-style segments.
+ * **Purpose:** Renders provider transcript rows (user, assistant, tool calls) inside Session Detail with markdown, syntax highlighting, and TUI-style segments.
  *
  * ## Design constraints
  * - Local-first: no telemetry leaves the machine unless the user configures webhooks.
@@ -70,11 +70,10 @@ import { isRemoteDataRefreshMessage } from "../../lib/remoteDataEvents";
 import { MessageList } from "./MessageList";
 import type { TranscriptMessage, TranscriptInfo, WSMessage } from "../../lib/types";
 
-// Catch-up poll interval. Claude Code only fires hooks on PreToolUse /
-// PostToolUse / Stop, which means a user-typed message (no hook) and any
-// assistant text written between two hook fires is invisible until the next
-// hook event. A short visibility-gated poll closes that gap and also rescues
-// the conversation from missed/late WebSocket frames.
+// Catch-up poll interval. Some lifecycle event streams do not emit every
+// transcript write, so a user-typed message or assistant text may otherwise
+// remain invisible until the next event. A short visibility-gated poll closes
+// that gap and also rescues the conversation from missed/late WebSocket frames.
 const POLL_INTERVAL_MS = 3000;
 // Rescan the transcripts list periodically so new subagents that spawn
 // mid-session appear in the dropdown without a page reload.
@@ -503,11 +502,10 @@ export function ConversationView({ sessionId, initialTranscriptId }: Conversatio
           <div className="mx-auto max-w-md py-12 text-center">
             <p className="text-sm text-gray-400">No conversation records found.</p>
             <p className="mt-2 text-xs leading-relaxed text-gray-500">
-              This session's metadata was imported, but its transcript file is no longer on disk.
-              Claude Code automatically deletes inactive session transcripts after a retention
-              period (<code className="text-gray-400">cleanupPeriodDays</code>, default 30 days), so
-              older conversations may already be gone. Sessions imported from now on are snapshotted
-              and kept even after Claude Code prunes the originals.
+              This session&apos;s metadata was imported, but its transcript file is no longer on
+              disk. Older conversations may be unavailable when the original CLI has cleaned up its
+              local history. Sessions imported from now on are snapshotted and kept even after the
+              original transcript disappears.
             </p>
           </div>
         ) : (
