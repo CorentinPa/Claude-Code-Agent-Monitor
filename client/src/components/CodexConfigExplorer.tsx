@@ -1,9 +1,9 @@
 /**
  * @file Codex configuration workspace with a parity navigation model, live
- * overview metrics, account-visible models, profile overlays, redacted
- * previews, and backup-backed edit/delete actions for Codex's user-maintained
- * profiles, hooks, rules, skills, and instruction files. The base config stays
- * explicitly edit-only.
+ * overview metrics, account-visible models, copyable profile launch commands,
+ * redacted previews, and backup-backed edit/delete actions for Codex's
+ * user-maintained profiles, hooks, rules, skills, and instruction files. The
+ * base config stays explicitly edit-only.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -14,10 +14,12 @@ import {
   AlertTriangle,
   BookOpen,
   Box,
+  Check,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Code2,
+  Copy,
   ExternalLink,
   FileText,
   FolderTree,
@@ -733,9 +735,7 @@ function CodexTab({
                     t={t}
                   />
                 </div>
-                <code className="mt-3 block overflow-x-auto rounded-md border border-border bg-surface-1 px-2 py-1.5 text-[11px] text-gray-300">
-                  codex --profile {item.name}
-                </code>
+                <ProfileLaunchCommand name={item.name} t={t} />
                 <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[11px]">
                   <ProfileSetting label={t("codex.profileModel", "Model")} value={item.model} />
                   <ProfileSetting
@@ -1246,6 +1246,44 @@ function ProfileSetting({ label, value }: { label: string; value: string | null 
       <p className="mt-0.5 truncate font-mono text-gray-300" title={value || "—"}>
         {value || "—"}
       </p>
+    </div>
+  );
+}
+
+/** A ready-to-paste invocation for a profile. Keeping the command next to its
+ * overlay makes the CLI behavior discoverable without asking the user to
+ * select terminal text manually. */
+function ProfileLaunchCommand({ name, t }: { name: string; t: TFunction }) {
+  const command = `codex --profile ${name}`;
+  const [copied, setCopied] = useState(false);
+
+  const copyCommand = async () => {
+    try {
+      await navigator.clipboard.writeText(command);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard access can be unavailable in non-secure browser contexts.
+    }
+  };
+
+  return (
+    <div className="mt-3 flex items-center gap-2 rounded-md border border-border bg-surface-1 px-2 py-1.5">
+      <code className="min-w-0 flex-1 truncate font-mono text-[11px] text-gray-300" title={command}>
+        {command}
+      </code>
+      <button
+        type="button"
+        onClick={() => void copyCommand()}
+        className="inline-flex flex-shrink-0 items-center gap-1 rounded border border-border bg-surface-2 px-1.5 py-1 text-[10px] font-medium text-gray-300 transition-colors hover:bg-surface-3 hover:text-gray-100"
+        title={t("snippet.copy", "Copy")}
+        aria-label={t("snippet.copy", "Copy")}
+      >
+        {copied ? <Check className="h-3 w-3 text-emerald-300" /> : <Copy className="h-3 w-3" />}
+        <span aria-live="polite">
+          {copied ? t("snippet.copied", "Copied") : t("snippet.copy", "Copy")}
+        </span>
+      </button>
     </div>
   );
 }
