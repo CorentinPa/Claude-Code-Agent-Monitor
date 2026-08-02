@@ -74,7 +74,6 @@ import {
   Globe,
   PanelLeftClose,
   PanelLeftOpen,
-  Languages,
   RefreshCw,
   X,
   Plug,
@@ -87,6 +86,7 @@ import type { LucideIcon } from "lucide-react";
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
 import type { UpdateStatusPayload, WSMessage } from "../lib/types";
+import { Select } from "./Select";
 
 function isUpdatePayload(x: unknown): x is UpdateStatusPayload {
   return typeof x === "object" && x !== null && "git_repo" in x && "update_available" in x;
@@ -107,7 +107,7 @@ const NAV_KEYS = [
 const STORAGE_KEY = "sidebar-collapsed";
 const STATS_STORAGE_KEY = "sidebar-connection-stats";
 const RECENT_EVENTS_CAP = 8;
-const SUPPORTED_LANGUAGES = ["en", "zh", "vi", "ko"] as const;
+const SUPPORTED_LANGUAGES = ["en", "zh", "vi", "ko", "es"] as const;
 type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 interface PersistedStats {
@@ -169,7 +169,7 @@ function loadStats(): PersistedStats {
 
 function normalizeLanguage(language: string): SupportedLanguage {
   const base = language.toLowerCase().split("-")[0];
-  if (base === "zh" || base === "vi" || base === "en" || base === "ko") {
+  if (base === "zh" || base === "vi" || base === "en" || base === "ko" || base === "es") {
     return base;
   }
   return "en";
@@ -375,15 +375,11 @@ export function Sidebar({ wsConnected, collapsed, onToggle }: SidebarProps) {
           ? t("nav:upToDate")
           : t("nav:checkForUpdates");
   const currentLanguage = normalizeLanguage(i18n.resolvedLanguage ?? i18n.language);
-  const currentIndex = SUPPORTED_LANGUAGES.indexOf(currentLanguage);
-  const nextLanguage = SUPPORTED_LANGUAGES[(currentIndex + 1) % SUPPORTED_LANGUAGES.length];
-  const switchLanguageTitle = t("nav:switchLanguage", {
-    language: t(`nav:languageNames.${nextLanguage}`),
-  });
-
-  const toggleLang = () => {
-    i18n.changeLanguage(nextLanguage);
-  };
+  const languageOptions = SUPPORTED_LANGUAGES.map((language) => ({
+    value: language,
+    label: t(`nav:languageNames.${language}`),
+    hint: t(`nav:languageShort.${language}`),
+  }));
 
   const changeLanguage = (language: SupportedLanguage) => {
     if (language !== currentLanguage) {
@@ -468,46 +464,20 @@ export function Sidebar({ wsConnected, collapsed, onToggle }: SidebarProps) {
 
       {/* Language controls */}
       <div className="px-2 pb-2 flex-shrink-0">
-        {collapsed ? (
-          <button
-            onClick={toggleLang}
-            className="w-full h-9 rounded-lg border border-border bg-surface-2 text-gray-300 hover:bg-surface-3 hover:text-gray-100 transition-colors flex flex-col items-center justify-center gap-0.5"
-            title={switchLanguageTitle}
-            aria-label={switchLanguageTitle}
-          >
-            <Languages className="w-3.5 h-3.5" />
-            <span className="text-[10px] font-semibold leading-none">
-              {t(`nav:languageShort.${currentLanguage}`)}
-            </span>
-          </button>
-        ) : (
-          <div className="rounded-lg border border-border bg-surface-2 p-2">
+        <div className="rounded-lg border border-border bg-surface-2 p-2">
+          {!collapsed && (
             <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
               {t("nav:language")}
             </p>
-            <div className="mt-2 grid grid-cols-4 gap-1">
-              {SUPPORTED_LANGUAGES.map((language) => {
-                const active = language === currentLanguage;
-                return (
-                  <button
-                    key={language}
-                    onClick={() => changeLanguage(language)}
-                    aria-pressed={active}
-                    aria-label={t(`nav:languageNames.${language}`)}
-                    title={t(`nav:languageNames.${language}`)}
-                    className={`rounded-md px-2 py-1.5 text-[11px] font-semibold transition-colors ${
-                      active
-                        ? "bg-accent/20 text-accent border border-accent/30"
-                        : "bg-surface-1 text-gray-400 border border-border hover:bg-surface-3 hover:text-gray-200"
-                    }`}
-                  >
-                    {t(`nav:languageShort.${language}`)}
-                  </button>
-                );
-              })}
-            </div>
+          )}
+          <div className={collapsed ? "" : "mt-2"}>
+            <Select<SupportedLanguage>
+              value={currentLanguage}
+              onChange={changeLanguage}
+              options={languageOptions}
+            />
           </div>
-        )}
+        </div>
       </div>
 
       {/* Collapse toggle */}

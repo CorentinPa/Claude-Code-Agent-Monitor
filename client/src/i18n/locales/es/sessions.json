@@ -1,0 +1,43 @@
+{
+  "title": "Sesiones",
+  "searchPlaceholder": "Buscar sesiones...",
+  "filterAll": "Todas",
+  "filterActive": "Activas",
+  "filterWaiting": "En espera",
+  "filterCompleted": "Completadas",
+  "filterError": "Error",
+  "filterAbandoned": "Abandonadas",
+  "sessionCount": "{{count}} sesión registrada",
+  "sessionCount_plural": "{{count}} sesiones registradas",
+  "noSessions": "No se encontraron sesiones",
+  "noSessionsDesc": "Intenta ajustar tu búsqueda o los filtros.",
+  "noSessionsHint": "Inicia una sesión de Claude Code con los hooks instalados para comenzar el seguimiento.",
+  "tableSession": "Sesión",
+  "tableStatus": "Estado",
+  "tableLastActive": "Última Actividad",
+  "tableDuration": "Duración",
+  "tableAgents": "Agentes",
+  "tableCost": "Costo",
+  "tableDirectory": "Directorio",
+  "defaultName": "Sesión ",
+  "detail": {
+    "waitingBanner": {
+      "title": "Esperando tu entrada",
+      "generic": "Claude Code está pausado en esta sesión hasta que respondas en la terminal."
+    },
+    "failedLoad": "No se pudo cargar la sesión",
+    "loading": "Cargando sesión...",
+    "notFound": "Sesión no encontrada",
+    "backToSessions": "Volver a Sesiones",
+    "agents": "Agentes",
+    "noAgents": "No se registraron agentes.",
+    "unparented": "Subagentes Sin Padre",
+    "costBreakdown": "Desglose de Costos",
+    "eventTimeline": "Línea de Tiempo de Eventos",
+    "noEvents": "No se registraron eventos.",
+    "conversation": "Conversación",
+    "timeline": "Línea de tiempo ({{shown}}/{{total}})",
+    "transcriptNotFound": "No se encontró la transcripción de la conversación para este agente. El archivo de transcripción puede estar ausente o aún no vinculado."
+  },
+  "remoteSourceBadgeTitle": "Recopilado desde una máquina remota"
+}

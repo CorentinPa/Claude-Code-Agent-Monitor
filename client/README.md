@@ -206,7 +206,7 @@ client/
 │   │   ├── useWebSocket.ts      # Auto-reconnecting WebSocket hook
 │   │   └── useNotifications.ts  # Browser push notification triggers
 │   │
-│   ├── i18n/               # Internationalization (en / zh / vi / ko)
+│   ├── i18n/               # Internationalization (en / zh / vi / ko / es)
 │   ├── App.tsx             # Root component + router setup
 │   ├── main.tsx            # Entry point
 │   └── index.css           # Tailwind + custom utilities

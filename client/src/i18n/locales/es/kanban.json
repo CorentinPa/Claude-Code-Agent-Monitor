@@ -1,0 +1,45 @@
+{
+  "title": "Tablero Kanban",
+  "subtitle": "Vista Kanban de todos los agentes por estado",
+  "subtitleSessions": "Vista Kanban de todas las sesiones por estado",
+  "viewToggle": {
+    "agents": "Agentes",
+    "sessions": "Sesiones"
+  },
+  "noAgents": "Sin agentes rastreados aún",
+  "noAgentsDesc": "Inicia una sesión de Claude Code con los hooks instalados para ver los agentes aquí.",
+  "agentCount": "{{count}} agente rastreado",
+  "agentCount_plural": "{{count}} agentes rastreados",
+  "noAgentsInColumn": "Sin agentes",
+  "noSessions": "Sin sesiones rastreadas aún",
+  "noSessionsDesc": "Inicia una sesión de Claude Code con los hooks instalados para ver las sesiones aquí.",
+  "sessionCount": "{{count}} sesión rastreada",
+  "sessionCount_plural": "{{count}} sesiones rastreadas",
+  "noSessionsInColumn": "Sin sesiones",
+  "ran": "ejecutó ",
+  "running": "ejecutando ",
+  "session": {
+    "anonymous": "Sesión sin título",
+    "agentSummary_one": "{{count}} agente",
+    "agentSummary_other": "{{count}} agentes",
+    "subagentSummary_one": "{{count}} subagente",
+    "subagentSummary_other": "{{count}} subagentes",
+    "turnSummary_one": "{{count}} turno",
+    "turnSummary_other": "{{count}} turnos"
+  },
+  "tooltip": {
+    "agent": {
+      "working": "El agente está ejecutando activamente una llamada de herramienta ahora mismo.\n\nEntra en PreToolUse o UserPromptSubmit, sale en Stop (turno finalizado).",
+      "waiting": "El agente terminó su turno y está bloqueado por el humano — o bien Claude está esperando el siguiente mensaje del usuario o ha solicitado permiso para usar una herramienta.\n\nSe limpia en el siguiente PreToolUse / PostToolUse, o cuando la sesión termina.",
+      "completed": "El agente ha finalizado completamente para esta sesión — normalmente porque se disparó SessionEnd o, para subagentes, se procesó SubagentStop.\n\nNo se registrará más actividad para este agente.",
+      "error": "El agente registró un error y no continuará. Para agentes principales, esto proviene de un Stop con stop_reason=error; para subagentes, de una ejecución fallida."
+    },
+    "session": {
+      "active": "La sesión está a mitad de turno — Claude está ejecutándose actualmente y el usuario no bloquea nada. Breve por naturaleza: una sesión pasa por Activa durante las llamadas de herramientas y vuelve a Espera al final del turno.",
+      "waiting": "La sesión está esperando al usuario. O bien Claude terminó su turno (más común) o ha presentado un aviso de permiso y está bloqueado hasta que el humano responda.\n\nBusca aquí las sesiones a las que debes responder.",
+      "completed": "La sesión se ha cerrado completamente — se disparó SessionEnd (CLI salió limpiamente) o el usuario la cerró explícitamente.\n\nTodos los agentes en esta sesión también están completados.",
+      "error": "La sesión terminó con un error — Claude devolvió stop_reason=error, ocurrió un fallo irrecuperable, o un error de API upstream terminó la ejecución.",
+      "abandoned": "La sesión quedó sin actividad sin un SessionEnd limpio. Marcada como abandonada después de 5+ minutos sin actividad (huérfana de /resume, caída de red, o la CLI fue terminada). Distinta de Completada: nunca vimos una señal de salida real."
+    }
+  }
+}

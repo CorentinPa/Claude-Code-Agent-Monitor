@@ -58,12 +58,14 @@
     "en": "English",
     "zh": "Chinese",
     "vi": "Vietnamese",
-    "ko": "Korean"
+    "ko": "Korean",
+    "es": "Spanish"
   },
   "languageShort": {
     "en": "EN",
     "zh": "中文",
     "vi": "VI",
-    "ko": "한국어"
+    "ko": "한국어",
+    "es": "ES"
   }
 }
