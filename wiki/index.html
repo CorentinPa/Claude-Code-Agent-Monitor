@@ -5390,13 +5390,20 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
           </p>
           <p>
             The same page also has a <strong>Codex</strong> switch. Its workspace shows defaults,
-            the model cache, profiles, MCP servers, projects, skills, rules, hooks, installed
-            plugins, and instruction files from <code>CODEX_HOME</code>. Plugin cards use
-            <code>codex plugin list</code> rather than exposing cache folders. Secret-like TOML and
-            JSON values are redacted in previews; an explicit local editor supports
-            <code>config.toml</code>, <code>hooks.json</code>, user rules, skills, and instruction
-            files with atomic saves and timestamped backups. It warns that syntax is not validated,
-            and <code>codex_config_changed</code> refreshes the view when those files change.
+            the full local account model catalog, profiles, MCP servers, projects, skills, rules,
+            hooks, installed plugins, and instruction files from <code>CODEX_HOME</code>. The model
+            catalog is read apart from the small redacted-preview limit, so long account instructions
+            cannot make the Models tab report zero. Create a standard named
+            <code>&lt;name&gt;.config.toml</code> profile in place; Codex overlays it only for
+            <code>codex --profile &lt;name&gt;</code>. Plugin cards use <code>codex plugin list</code>
+            rather than exposing cache folders. Secret-like TOML and JSON values are redacted in
+            previews; an explicit local editor supports <code>config.toml</code>, profile overlays,
+            <code>hooks.json</code>, user rules, skills, and instruction files with atomic saves and
+            timestamped backups. User-maintained profiles, hooks, rules, skills, and instructions also
+            have confirmed backup-backed <strong>View source / Edit / Delete</strong> actions; a skill
+            deletion preserves its whole directory, while <code>config.toml</code> stays edit-only. It
+            warns that syntax is not validated, and <code>codex_config_changed</code> refreshes the
+            view when those files change.
           </p>
 
           <div class="feature-grid">
@@ -6954,7 +6961,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=51" defer></script>
+    <script src="i18n-content.js?v=52" defer></script>
     <script src="script.js?v=42" defer></script>
     <script>
       (function () {

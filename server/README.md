@@ -611,7 +611,7 @@ Reads — and carefully gated mutations for low-risk text-file artifacts — for
 
 ### Codex Config Explorer (`/api/codex-config`)
 
-The Agent Config page also includes a **Codex configuration workspace**. It discovers defaults, the model cache, profiles, MCP servers, projects, skills, rules, hooks, installed plugins, and instruction files. Plugin cards use `codex plugin list` as the source of truth and enrich those entries from their manifests; cache directories are never presented as plugins. Normal TOML and JSON previews redact secret-like values. A separate, unredacted local editor is limited to `config.toml`, `hooks.json`, user rule files, user `SKILL.md` files, and Codex/project `AGENTS.md`; it is explicitly necessary so a redacted preview cannot overwrite real secret values. Every allowed save is capped at 256 KiB, backed up first, and atomically renamed. The dashboard does not validate Codex syntax. `lib/codex-config-watcher.js` broadcasts `codex_config_changed` on relevant config, skill, rule, or plugin changes so the page refreshes immediately.
+The Agent Config page also includes a **Codex configuration workspace**. It discovers defaults, account-visible model catalog entries, profiles, MCP servers, projects, skills, rules, hooks, installed plugins, and instruction files. The account catalog uses a dedicated bounded reader, so large cached model instructions cannot trip the 256 KiB preview cap and render the Models tab empty; base/profile model overrides remain visible without a cache. Profiles are Codex-native `<name>.config.toml` overlays (strict letters/numbers/hyphens/underscores) created without overwriting existing files and applied only by `codex --profile <name>`. Plugin cards use `codex plugin list` as the source of truth and enrich those entries from their manifests; cache directories are never presented as plugins. Normal TOML and JSON previews redact secret-like values. A separate, unredacted local editor is limited to `config.toml`, named profile overlays, `hooks.json`, user rule files, user `SKILL.md` files, and Codex/project `AGENTS.md`; it is explicitly necessary so a redacted preview cannot overwrite real secret values. Every allowed save is capped at 256 KiB, backed up first, and atomically renamed. User-maintained profiles, hooks, rules, skills, and instructions also have confirmed delete actions with timestamped backups; skill deletion backs up and removes its whole directory, while `config.toml` is permanently edit-only. The dashboard does not validate Codex syntax. `lib/codex-config-watcher.js` broadcasts `codex_config_changed` on relevant config, skill, rule, or plugin changes so the page refreshes immediately.
 
 | Method | Path | Description |
 | --- | --- | --- |
@@ -619,6 +619,8 @@ The Agent Config page also includes a **Codex configuration workspace**. It disc
 | `GET` | `/api/codex-config/file?path=…` | Redacted, size-capped file view for a file under Codex home or this project's `AGENTS.md` |
 | `GET` | `/api/codex-config/edit-file?path=…` | Unredacted content only for the narrow editable-file allowlist |
 | `PUT` | `/api/codex-config/file` | Atomically save `{ path, content }` to an allowlisted Codex file; timestamped backup before overwrite |
+| `DELETE` | `/api/codex-config/file` | Back up then delete a user-managed profile/hook/rule/skill/instruction; `config.toml` is rejected |
+| `POST` | `/api/codex-config/profiles` | Create a non-overwriting named `<name>.config.toml` overlay for `codex --profile <name>` |
 
 ### Run Agent (`/api/run`)
 

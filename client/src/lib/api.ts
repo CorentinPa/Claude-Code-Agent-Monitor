@@ -1588,6 +1588,16 @@ export const api = {
         method: "PUT",
         body: JSON.stringify(args),
       }),
+    deleteFile: (args: CodexConfigDeleteArgs) =>
+      request<CodexConfigDeleteResult>("/codex-config/file", {
+        method: "DELETE",
+        body: JSON.stringify(args),
+      }),
+    createProfile: (args: CodexConfigCreateProfileArgs) =>
+      request<CodexConfigEditableFile>("/codex-config/profiles", {
+        method: "POST",
+        body: JSON.stringify(args),
+      }),
   },
 
   // ────────────────────────────────── Run API ─────────────────────────────────
@@ -2405,6 +2415,24 @@ export interface CodexConfigWriteResult {
   created: boolean;
 }
 
+/** Deletes a user-maintained Codex artifact; the base config.toml is never allowed. */
+export interface CodexConfigDeleteArgs {
+  path: string;
+}
+
+export interface CodexConfigDeleteResult {
+  ok: true;
+  file: string;
+  backupPath: string;
+  deletedDirectory: boolean;
+}
+
+/** Request used to create a named Codex `--profile` overlay file. */
+export interface CodexConfigCreateProfileArgs {
+  /** Letters, numbers, hyphens, and underscores; becomes `<name>.config.toml`. */
+  name: string;
+}
+
 export interface CodexConfigOverview {
   home: string;
   config: CodexConfigFile & { exists: boolean };
@@ -2421,9 +2449,26 @@ export interface CodexConfigOverview {
       efforts: string[];
       contextWindow: number | null;
       visible: boolean;
+      sources: Array<"account" | "custom" | "configured">;
+      baseDefault: boolean;
+      profiles: string[];
+      providers: string[];
     }>;
   };
-  profiles: Array<{ path: string; exists: boolean; size: number; mtime: number | null }>;
+  profiles: Array<{
+    name: string;
+    path: string;
+    exists: boolean;
+    size: number;
+    mtime: number | null;
+    model: string | null;
+    reasoningEffort: string | null;
+    approvalPolicy: string | null;
+    sandboxMode: string | null;
+    serviceTier: string | null;
+    modelCatalog: string | null;
+    provider: string | null;
+  }>;
   mcp: Array<{
     name: string;
     command: string | null;
@@ -2433,7 +2478,7 @@ export interface CodexConfigOverview {
   }>;
   projects: Array<{ path: string; name: string }>;
   skills: Array<{ name: string; file: string; preview: string; mtime: number }>;
-  hooks: { file: string; items: Array<{ event: string; groups: number }> };
+  hooks: { file: string; exists: boolean; items: Array<{ event: string; groups: number }> };
   rules: Array<{ name: string; file: string; preview: string; mtime: number | null }>;
   plugins: Array<{
     id: string;

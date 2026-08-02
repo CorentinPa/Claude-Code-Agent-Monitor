@@ -1,14 +1,21 @@
 /**
  * @file Carefully mutates the small, text-only Codex configuration surface:
- * config.toml, hooks.json, user rules, user skills, and instruction files.
- * Every overwrite is size-bounded, path-whitelisted, backed up, and atomic.
+ * config.toml, profile overlays, hooks.json, user rules, user skills, and
+ * instruction files. Every overwrite and allowed deletion is path-whitelisted
+ * and backup-backed; writes are size-bounded and atomic.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
 const fs = require("node:fs");
 const path = require("node:path");
 const { getCodexHome } = require("./codex-home");
-const { MAX_FILE_BYTES, editablePath } = require("./codex-config-discovery");
+const {
+  MAX_FILE_BYTES,
+  PROFILE_NAME_RE,
+  PROFILE_SUFFIX,
+  deletablePath,
+  editablePath,
+} = require("./codex-config-discovery");
 
 function makeError(code, message) {
   const error = new Error(message);
@@ -63,6 +70,19 @@ function atomicWrite(file, content) {
     }
     throw error;
   }
+}
+
+function profileTemplate(name) {
+  return [
+    `# Codex profile: ${name}`,
+    `# Loaded after ~/.codex/config.toml when you run: codex --profile ${name}`,
+    "# Add only settings that should override your base configuration.",
+    "#",
+    '# model = "gpt-5.6-terra"',
+    '# model_reasoning_effort = "xhigh"',
+    '# approval_policy = "on-request"',
+    "",
+  ].join("\n");
 }
 
 // An allowlisted lexical path can still be a symlink into an unrelated
@@ -128,4 +148,101 @@ function writeEditableFile({ file, content }) {
   return { ok: true, file: target, backupPath, created: !existing };
 }
 
-module.exports = { readEditableFile, writeEditableFile };
+function skillDirectoryFor(file) {
+  const root = path.join(getCodexHome(), "skills");
+  const parent = path.dirname(file);
+  const relative = path.relative(root, parent);
+  if (
+    path.basename(file) === "SKILL.md" &&
+    relative &&
+    !relative.startsWith("..") &&
+    !path.isAbsolute(relative)
+  ) {
+    return parent;
+  }
+  return null;
+}
+
+/**
+ * Removes a deliberately small set of user-maintained Codex artifacts. The
+ * base config is intentionally excluded; deleting a skill removes its whole
+ * directory so bundled references cannot leave a broken, discoverable skill
+ * behind. Backups are made before the final unlink/rm operation.
+ */
+function deleteEditableFile({ file }) {
+  const target = deletablePath(file);
+  if (!target) {
+    throw makeError(
+      "EDELETE_DENIED",
+      "This Codex file cannot be deleted from the dashboard; config.toml is edit-only"
+    );
+  }
+  rejectSymlink(target);
+  let existing;
+  try {
+    existing = fs.statSync(target);
+  } catch {
+    throw makeError("ENOENT", "Configuration target does not exist");
+  }
+  if (!existing.isFile()) throw makeError("ENOTFILE", "Configuration target is not a file");
+
+  const skillDirectory = skillDirectoryFor(target);
+  const backupPath = `${backupPathFor(skillDirectory || target)}${skillDirectory ? ".dir" : ""}`;
+  fs.mkdirSync(path.dirname(backupPath), { recursive: true });
+  if (skillDirectory) {
+    fs.cpSync(skillDirectory, backupPath, { recursive: true, errorOnExist: true });
+    fs.rmSync(skillDirectory, { recursive: true, force: false });
+  } else {
+    fs.copyFileSync(target, backupPath, fs.constants.COPYFILE_EXCL);
+    fs.unlinkSync(target);
+  }
+  return { ok: true, file: target, backupPath, deletedDirectory: Boolean(skillDirectory) };
+}
+
+/** Creates an empty, documented profile overlay without ever overwriting a
+ * pre-existing configuration file. The caller then opens the normal editor to
+ * add top-level Codex settings. */
+function createProfile({ name }) {
+  if (typeof name !== "string" || !PROFILE_NAME_RE.test(name)) {
+    throw makeError(
+      "EBADPROFILE",
+      "Profile names may contain only letters, numbers, hyphens, and underscores"
+    );
+  }
+  const file = path.join(getCodexHome(), `${name}${PROFILE_SUFFIX}`);
+  rejectSymlink(file);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  let fd = null;
+  const text = profileTemplate(name);
+  try {
+    fd = fs.openSync(file, "wx");
+    fs.writeSync(fd, text);
+    try {
+      fs.fsyncSync(fd);
+    } catch {
+      // fsync is best effort on local/temporary filesystems.
+    }
+    fs.closeSync(fd);
+    fd = null;
+  } catch (error) {
+    try {
+      if (fd !== null) fs.closeSync(fd);
+    } catch {
+      // Preserve the original creation error.
+    }
+    if (error?.code === "EEXIST") {
+      throw makeError("EEXIST", `Profile \"${name}\" already exists`);
+    }
+    throw error;
+  }
+  return {
+    path: file,
+    text,
+    size: Buffer.byteLength(text, "utf8"),
+    exists: true,
+    mtime: Date.now(),
+    truncated: false,
+  };
+}
+
+module.exports = { createProfile, deleteEditableFile, readEditableFile, writeEditableFile };

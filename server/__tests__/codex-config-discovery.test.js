@@ -1,7 +1,9 @@
 /**
  * @file Tests for Codex configuration discovery and its narrow, backup-backed
- * editor allowlist. Fixtures prove that plugins are resolved as real manifests,
- * previews redact secrets, and only intended local text files are mutable.
+ * editor allowlist. Fixtures prove that oversized model catalogs are reduced
+ * safely, profiles follow Codex's overlay rules, plugins are resolved as real
+ * manifests, previews redact secrets, and only intended local text files are
+ * mutable.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -137,6 +139,94 @@ describe("codex config discovery", () => {
     assert.throws(
       () => mutate.writeEditableFile({ file: path.join(HOME, "models_cache.json"), content: "{}" }),
       /not editable/
+    );
+  });
+
+  it("reads an oversized Codex model cache without applying the editor cap", () => {
+    fs.writeFileSync(
+      path.join(HOME, "models_cache.json"),
+      JSON.stringify({
+        fetched_at: "2026-08-02T00:00:00.000Z",
+        models: [
+          {
+            slug: "gpt-5.6-sol",
+            display_name: "GPT-5.6 Sol",
+            default_reasoning_level: "medium",
+            supported_reasoning_levels: [{ effort: "medium" }, { effort: "xhigh" }],
+            context_window: 272000,
+            // The real cache includes model instructions, making it larger than
+            // the 256 KiB configuration editor limit.
+            base_instructions: "x".repeat(300 * 1024),
+          },
+        ],
+      })
+    );
+    const overview = discovery.readOverview();
+    assert.equal(overview.counts.models, 1);
+    assert.equal(overview.models.fetchedAt, "2026-08-02T00:00:00.000Z");
+    assert.deepEqual(overview.models.items[0], {
+      id: "gpt-5.6-sol",
+      name: "GPT-5.6 Sol",
+      description: null,
+      defaultEffort: "medium",
+      efforts: ["medium", "xhigh"],
+      contextWindow: 272000,
+      visible: true,
+      sources: ["account", "configured"],
+      baseDefault: true,
+      profiles: [],
+      providers: [],
+    });
+  });
+
+  it("creates, discovers, and edits top-level Codex profile overlays", () => {
+    const created = mutate.createProfile({ name: "deep-review" });
+    assert.equal(created.exists, true);
+    assert.match(created.path, /deep-review\.config\.toml$/);
+    assert.match(created.text, /codex --profile deep-review/);
+    assert.throws(() => mutate.createProfile({ name: "deep-review" }), /already exists/);
+    assert.throws(() => mutate.createProfile({ name: "not allowed" }), /letters, numbers/);
+
+    const initial = discovery.readOverview().profiles.find((item) => item.name === "deep-review");
+    assert.ok(initial);
+    assert.equal(initial.model, null);
+    assert.equal(initial.approvalPolicy, null);
+
+    mutate.writeEditableFile({
+      file: created.path,
+      content: ['model = "gpt-5.6-sol"', 'approval_policy = "on-request"'].join("\n"),
+    });
+    const configured = discovery
+      .readOverview()
+      .profiles.find((item) => item.name === "deep-review");
+    assert.equal(configured.model, "gpt-5.6-sol");
+    assert.equal(configured.approvalPolicy, "on-request");
+    assert.ok(discovery.readOverview().models.items[0].profiles.includes("deep-review"));
+  });
+
+  it("backs up and deletes only user-maintained artifacts, never config.toml", () => {
+    const profile = path.join(HOME, "deep-review.config.toml");
+    const deletedProfile = mutate.deleteEditableFile({ file: profile });
+    assert.equal(deletedProfile.ok, true);
+    assert.equal(deletedProfile.deletedDirectory, false);
+    assert.ok(fs.existsSync(deletedProfile.backupPath));
+    assert.equal(fs.existsSync(profile), false);
+
+    const skill = path.join(HOME, "skills", "demo", "SKILL.md");
+    fs.writeFileSync(path.join(HOME, "skills", "demo", "notes.md"), "skill asset\n");
+    const deletedSkill = mutate.deleteEditableFile({ file: skill });
+    assert.equal(deletedSkill.deletedDirectory, true);
+    assert.equal(fs.existsSync(path.join(HOME, "skills", "demo")), false);
+    assert.match(fs.readFileSync(path.join(deletedSkill.backupPath, "SKILL.md"), "utf8"), /Demo/);
+    assert.match(fs.readFileSync(path.join(deletedSkill.backupPath, "notes.md"), "utf8"), /asset/);
+
+    assert.throws(
+      () => mutate.deleteEditableFile({ file: path.join(HOME, "config.toml") }),
+      /cannot be deleted/
+    );
+    assert.throws(
+      () => mutate.deleteEditableFile({ file: path.join(HOME, "models_cache.json") }),
+      /cannot be deleted/
     );
   });
 

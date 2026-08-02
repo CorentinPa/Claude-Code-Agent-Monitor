@@ -95,6 +95,7 @@ const EXPECTED_API_PATHS = [
   "/api/codex-config/overview",
   "/api/codex-config/file",
   "/api/codex-config/edit-file",
+  "/api/codex-config/profiles",
   "/api/run",
   "/api/run/history",
   "/api/run/cwds",

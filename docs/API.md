@@ -1041,19 +1041,25 @@ Backup paths look like `<root>/cc-config-backups/<type>/<base>.<ISO>.bak[.dir]` 
 
 ### Codex Config Explorer
 
-The Codex half of Agent Config discovers configuration defaults, cached models, profiles, MCP servers, projects, skills, rules, hooks, installed plugins, and instruction files beneath the configured Codex home. Normal inspection is redacted server-side for secret-like TOML or JSON values. Installed plugins come from `codex plugin list`, then use manifest metadata for names and descriptions—cache directories are never reported as plugins.
+The Codex half of Agent Config discovers configuration defaults, account-visible model catalog entries, profiles, MCP servers, projects, skills, rules, hooks, installed plugins, and instruction files beneath the configured Codex home. The account model cache is read with a dedicated 4 MiB metadata cap rather than the 256 KiB preview cap, so large model instructions cannot make the Models tab falsely report zero models; base and profile model overrides are also included. Profiles are Codex-native top-level overlays named `<name>.config.toml` (letters, numbers, hyphens, and underscores only) and apply only when the CLI starts with `codex --profile <name>`. Normal inspection is redacted server-side for secret-like TOML or JSON values. Installed plugins come from `codex plugin list`, then use manifest metadata for names and descriptions—cache directories are never reported as plugins.
 
 ```http
 GET /api/codex-config/overview
 GET /api/codex-config/file?path=<absolute-path-under-codex-home>
 GET /api/codex-config/edit-file?path=<allowlisted-configuration-path>
 PUT /api/codex-config/file
+DELETE /api/codex-config/file
 Content-Type: application/json
 
 { "path": "<allowlisted-configuration-path>", "content": "..." }
+
+POST /api/codex-config/profiles
+Content-Type: application/json
+
+{ "name": "deep-review" }
 ```
 
-The normal file endpoint also accepts this repository's `AGENTS.md`, rejects every other path, and caps returned bodies at 256 KiB. The editor endpoint is stricter: only `config.toml`, `hooks.json`, user `*.rules`, user `skills/**/SKILL.md`, and the Codex or current-project `AGENTS.md` are editable. It returns unredacted local text so a user can edit without turning secret placeholders into real file contents. The dashboard does **not** validate TOML, JSON, hook, rule, skill, or instruction syntax. Every overwrite is capped at 256 KiB, takes a timestamped backup first, and is written atomically. `codex_config_changed` is emitted over WebSocket when relevant configuration, skill, rule, or plugin files change.
+The normal file endpoint also accepts this repository's `AGENTS.md`, rejects every other path, and caps returned bodies at 256 KiB. The editor endpoint is stricter: only `config.toml`, named profile overlays, `hooks.json`, user `*.rules`, user `skills/**/SKILL.md`, and the Codex or current-project `AGENTS.md` are editable. It returns unredacted local text so a user can edit without turning secret placeholders into real file contents. `POST /profiles` creates a commented, non-overwriting profile template, then the UI opens it in that editor. `DELETE /file` is narrower still: it can back up then remove a named profile, `hooks.json`, a user rule, a whole user skill directory, or a Codex/project instruction file. `config.toml` is edit-only and always rejected for deletion. The dashboard does **not** validate TOML, JSON, hook, rule, skill, or instruction syntax. Every overwrite and allowed deletion receives a timestamped backup; writes are capped at 256 KiB and atomic. `codex_config_changed` is emitted over WebSocket when relevant configuration, skill, rule, or plugin files change.
 
 ### Import History
 

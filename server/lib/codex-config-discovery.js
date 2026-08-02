@@ -1,7 +1,8 @@
 /**
  * @file Discovery helpers for the local Codex configuration explorer. They
- * enumerate safe metadata, installed-plugin state, and redacted file previews
- * beneath CODEX_HOME; a separate tightly scoped mutation helper owns edits.
+ * enumerate safe metadata, account-visible model catalogs, installed-plugin
+ * state, and redacted file previews beneath CODEX_HOME; a separate tightly
+ * scoped mutation helper owns edits.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -11,7 +12,13 @@ const { execFileSync } = require("node:child_process");
 const { getCodexHome } = require("./codex-home");
 
 const MAX_FILE_BYTES = 256 * 1024;
+// The model cache carries model instructions and can legitimately exceed the
+// editor/preview cap. We parse a bounded local copy and return only its small,
+// safe metadata fields to the browser.
+const MAX_MODEL_CATALOG_BYTES = 4 * 1024 * 1024;
 const SENSITIVE_KEY = /(token|secret|password|api[_-]?key|bearer|credential|private[_-]?key)/i;
+const PROFILE_NAME_RE = /^[A-Za-z0-9_-]+$/;
+const PROFILE_SUFFIX = ".config.toml";
 
 function stat(file) {
   try {
@@ -39,6 +46,15 @@ function safeRead(file) {
       mtime: meta.mtimeMs,
       truncated: meta.size > MAX_FILE_BYTES,
     };
+  } catch {
+    return null;
+  }
+}
+function readBoundedJson(file, maxBytes = MAX_MODEL_CATALOG_BYTES) {
+  const meta = stat(file);
+  if (!meta?.isFile() || meta.size > maxBytes) return null;
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
   } catch {
     return null;
   }
@@ -116,39 +132,164 @@ function readProjects(text) {
     return { path: value, name: path.basename(value) || value };
   });
 }
-function readModels(home) {
-  const file = path.join(home, "models_cache.json");
-  const read = safeRead(file);
-  if (!read) return { file, fetchedAt: null, items: [] };
-  try {
-    const parsed = JSON.parse(read.text);
-    return {
-      file,
-      fetchedAt: typeof parsed.fetched_at === "string" ? parsed.fetched_at : null,
-      items: Array.isArray(parsed.models)
-        ? parsed.models
-            .filter((model) => typeof model?.slug === "string")
-            .map((model) => ({
-              id: model.slug,
-              name: model.display_name || model.slug,
-              description: model.description || null,
-              defaultEffort: model.default_reasoning_level || null,
-              efforts: Array.isArray(model.supported_reasoning_levels)
-                ? model.supported_reasoning_levels.map((entry) => entry?.effort).filter(Boolean)
-                : [],
-              contextWindow: model.context_window || null,
-              visible: model.visibility !== "hidden",
-            }))
-        : [],
-    };
-  } catch {
-    return { file, fetchedAt: null, items: [] };
+function modelId(model) {
+  for (const key of ["slug", "id", "model", "name"]) {
+    if (typeof model?.[key] === "string" && model[key].trim()) return model[key].trim();
   }
+  return null;
+}
+function catalogEntries(value) {
+  if (Array.isArray(value)) return value;
+  if (!value || typeof value !== "object") return [];
+  for (const key of ["models", "items", "data"]) {
+    if (Array.isArray(value[key])) return value[key];
+  }
+  return [];
+}
+function normalizeModel(model, source) {
+  const id = modelId(model);
+  if (!id) return null;
+  const visibility = String(model.visibility || "").toLowerCase();
+  return {
+    id,
+    name:
+      (typeof model.display_name === "string" && model.display_name) ||
+      (typeof model.displayName === "string" && model.displayName) ||
+      id,
+    description:
+      (typeof model.description === "string" && model.description) ||
+      (typeof model.summary === "string" && model.summary) ||
+      null,
+    defaultEffort:
+      (typeof model.default_reasoning_level === "string" && model.default_reasoning_level) ||
+      (typeof model.defaultReasoningEffort === "string" && model.defaultReasoningEffort) ||
+      null,
+    efforts: Array.isArray(model.supported_reasoning_levels)
+      ? model.supported_reasoning_levels.map((entry) => entry?.effort || entry).filter(Boolean)
+      : Array.isArray(model.reasoning_efforts)
+        ? model.reasoning_efforts.filter((entry) => typeof entry === "string")
+        : [],
+    contextWindow:
+      (typeof model.context_window === "number" && model.context_window) ||
+      (typeof model.contextWindow === "number" && model.contextWindow) ||
+      null,
+    visible: visibility !== "hidden" && visibility !== "hide",
+    sources: [source],
+    baseDefault: false,
+    profiles: [],
+    providers: [],
+  };
+}
+function mergeModel(models, item) {
+  const existing = models.get(item.id);
+  if (!existing) {
+    models.set(item.id, item);
+    return item;
+  }
+  for (const source of item.sources || []) {
+    if (!existing.sources.includes(source)) existing.sources.push(source);
+  }
+  for (const profile of item.profiles || []) {
+    if (!existing.profiles.includes(profile)) existing.profiles.push(profile);
+  }
+  for (const provider of item.providers || []) {
+    if (!existing.providers.includes(provider)) existing.providers.push(provider);
+  }
+  existing.baseDefault ||= Boolean(item.baseDefault);
+  existing.visible ||= item.visible;
+  existing.description ||= item.description;
+  existing.defaultEffort ||= item.defaultEffort;
+  existing.contextWindow ||= item.contextWindow;
+  if (!existing.efforts.length && item.efforts.length) existing.efforts = item.efforts;
+  return existing;
+}
+function catalogPath(raw, home) {
+  if (typeof raw !== "string" || !raw.trim()) return null;
+  return path.isAbsolute(raw) ? path.resolve(raw) : path.resolve(home, raw);
+}
+function addCatalog(models, file, source) {
+  const parsed = readBoundedJson(file);
+  for (const entry of catalogEntries(parsed)) {
+    const item = normalizeModel(entry, source);
+    if (item) mergeModel(models, item);
+  }
+}
+function addConfiguredModel(models, id, { baseDefault = false, profile = null, provider = null }) {
+  if (typeof id !== "string" || !id.trim()) return;
+  const item = mergeModel(models, {
+    id: id.trim(),
+    name: id.trim(),
+    description: null,
+    defaultEffort: null,
+    efforts: [],
+    contextWindow: null,
+    visible: true,
+    sources: ["configured"],
+    baseDefault,
+    profiles: profile ? [profile] : [],
+    providers: provider ? [provider] : [],
+  });
+  item.baseDefault ||= baseDefault;
+}
+function readModels(home, config, profiles) {
+  const file = path.join(home, "models_cache.json");
+  const parsed = readBoundedJson(file);
+  const models = new Map();
+  for (const entry of catalogEntries(parsed)) {
+    const item = normalizeModel(entry, "account");
+    if (item) mergeModel(models, item);
+  }
+  const defaultProvider = tomlScalar(config, "model_provider");
+  addConfiguredModel(models, tomlScalar(config, "model"), {
+    baseDefault: true,
+    provider: defaultProvider,
+  });
+  addCatalog(models, catalogPath(tomlScalar(config, "model_catalog_json"), home), "custom");
+  for (const profile of profiles) {
+    addConfiguredModel(models, profile.model, {
+      profile: profile.name,
+      provider: profile.provider,
+    });
+    addCatalog(models, catalogPath(profile.modelCatalog, home), "custom");
+  }
+  return {
+    file,
+    fetchedAt: typeof parsed?.fetched_at === "string" ? parsed.fetched_at : null,
+    items: Array.from(models.values()).sort((a, b) => a.name.localeCompare(b.name)),
+  };
+}
+function profileNameFromPath(file) {
+  const base = path.basename(file);
+  if (!base.endsWith(PROFILE_SUFFIX)) return null;
+  const name = base.slice(0, -PROFILE_SUFFIX.length);
+  return PROFILE_NAME_RE.test(name) ? name : null;
 }
 function readProfiles(home) {
   return list(home)
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".config.toml"))
-    .map((entry) => summary(path.join(home, entry.name)));
+    .filter(
+      (entry) =>
+        entry.isFile() &&
+        PROFILE_NAME_RE.test(entry.name.slice(0, -PROFILE_SUFFIX.length)) &&
+        entry.name.endsWith(PROFILE_SUFFIX)
+    )
+    .map((entry) => {
+      const file = path.join(home, entry.name);
+      const read = safeRead(file);
+      const text = read?.text || "";
+      return {
+        ...summary(file),
+        name: profileNameFromPath(file),
+        model: tomlScalar(text, "model"),
+        reasoningEffort: tomlScalar(text, "model_reasoning_effort"),
+        approvalPolicy: tomlScalar(text, "approval_policy"),
+        sandboxMode: tomlScalar(text, "sandbox_mode"),
+        serviceTier: tomlScalar(text, "service_tier"),
+        modelCatalog: tomlScalar(text, "model_catalog_json"),
+        provider: tomlScalar(text, "model_provider"),
+      };
+    })
+    .filter((profile) => profile.name)
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 function readSkills(home) {
   const base = path.join(home, "skills");
@@ -186,11 +327,12 @@ function readRules(home) {
 function readHooks(home) {
   const file = path.join(home, "hooks.json");
   const read = safeRead(file);
-  if (!read) return { file, items: [] };
+  if (!read) return { file, exists: false, items: [] };
   try {
     const hooks = JSON.parse(read.text)?.hooks;
     return {
       file,
+      exists: true,
       items:
         hooks && typeof hooks === "object"
           ? Object.entries(hooks).map(([event, groups]) => ({
@@ -200,7 +342,7 @@ function readHooks(home) {
           : [],
     };
   } catch {
-    return { file, items: [] };
+    return { file, exists: true, items: [] };
   }
 }
 
@@ -416,11 +558,11 @@ function readOverview() {
   const home = getCodexHome();
   const { file: configPath, read } = configLines();
   const config = read?.text || "";
-  const models = readModels(home);
   const skills = readSkills(home);
   const rules = readRules(home);
   const hooks = readHooks(home);
   const profiles = readProfiles(home);
+  const models = readModels(home, config, profiles);
   const mcp = readMcp(config);
   const projects = readProjects(config);
   const plugins = readPlugins(home, config);
@@ -471,6 +613,7 @@ function editablePath(file) {
     projectInstructions,
   ]);
   if (allowedExact.has(resolved)) return resolved;
+  if (path.dirname(resolved) === home && profileNameFromPath(resolved)) return resolved;
   const skillsRoot = path.join(home, "skills");
   const rulesRoot = path.join(home, "rules");
   const skillRelative = path.relative(skillsRoot, resolved);
@@ -494,6 +637,20 @@ function editablePath(file) {
   return null;
 }
 
+/**
+ * Only user-maintained leaf artifacts may be removed from the dashboard.
+ * `config.toml` is the root of a Codex installation and must always remain a
+ * deliberate edit-only surface: deleting it would discard unrelated settings
+ * in one click. Every other supported deletion still receives a backup in the
+ * mutation layer before bytes are removed.
+ */
+function deletablePath(file) {
+  const target = editablePath(file);
+  if (!target) return null;
+  if (target === path.join(getCodexHome(), "config.toml")) return null;
+  return target;
+}
+
 function readFileSafe(file) {
   const allowed = typeof file === "string" && relativeToAllowed(file);
   if (!allowed) return { error: "File must be inside Codex home or this project's AGENTS.md" };
@@ -513,4 +670,13 @@ function readFileSafe(file) {
   return { ...read, text };
 }
 
-module.exports = { MAX_FILE_BYTES, editablePath, readOverview, readFileSafe };
+module.exports = {
+  MAX_FILE_BYTES,
+  PROFILE_NAME_RE,
+  PROFILE_SUFFIX,
+  deletablePath,
+  editablePath,
+  profileNameFromPath,
+  readOverview,
+  readFileSafe,
+};

@@ -1,7 +1,7 @@
 /**
  * @file OpenAPI fragments for the Codex configuration explorer at
- * `/api/codex-config`. It exposes redacted inspection plus a small, explicit
- * local text-file editor with automatic backups.
+ * `/api/codex-config`. It exposes redacted inspection, guarded profile
+ * creation, and small explicit local edit/delete surfaces with automatic backups.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -106,6 +106,31 @@ const schemas = {
       created: { type: "boolean" },
     },
   },
+  CodexConfigDeleteResult: {
+    type: "object",
+    required: ["ok", "file", "backupPath", "deletedDirectory"],
+    properties: {
+      ok: { type: "boolean", example: true },
+      file: { type: "string" },
+      backupPath: { type: "string" },
+      deletedDirectory: {
+        type: "boolean",
+        description: "True when removing a skill also removed its containing skill directory.",
+      },
+    },
+  },
+  CodexConfigCreateProfile: {
+    type: "object",
+    required: ["name"],
+    properties: {
+      name: {
+        type: "string",
+        pattern: "^[A-Za-z0-9_-]+$",
+        description: "Profile name; creates CODEX_HOME/<name>.config.toml.",
+        example: "deep-review",
+      },
+    },
+  },
 };
 
 const paths = {
@@ -187,6 +212,38 @@ const paths = {
         413: { description: "The file content exceeds the 256 KiB editor limit." },
       },
     },
+    delete: {
+      tags: ["CodexConfig"],
+      summary: "Delete one user-maintained Codex artifact",
+      description:
+        "Deletes only hooks.json, a valid named profile overlay, a user rule, a user skill directory, or a Codex/project AGENTS.md file. config.toml is explicitly edit-only. A timestamped backup is made before removal; skill deletion backs up and removes the whole skill directory.",
+      operationId: "codexConfigDeleteFile",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["path"],
+              properties: { path: { type: "string" } },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: "The artifact was backed up and deleted.",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CodexConfigDeleteResult" },
+            },
+          },
+        },
+        400: { description: "The path is not allowed to be deleted, including config.toml." },
+        404: { description: "The requested artifact does not exist." },
+        409: { description: "The path is not a removable file." },
+      },
+    },
   },
   "/api/codex-config/edit-file": {
     get: {
@@ -214,6 +271,35 @@ const paths = {
           },
         },
         400: { description: "The path is not editable from the dashboard." },
+      },
+    },
+  },
+  "/api/codex-config/profiles": {
+    post: {
+      tags: ["CodexConfig"],
+      summary: "Create a named Codex profile overlay",
+      description:
+        "Creates CODEX_HOME/<name>.config.toml with commented guidance. Codex applies this file over config.toml only when launched with --profile <name>; an existing profile is never overwritten.",
+      operationId: "codexConfigCreateProfile",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/CodexConfigCreateProfile" },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: "The newly created editable profile file.",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CodexConfigEditableFile" },
+            },
+          },
+        },
+        400: { description: "The profile name is invalid." },
+        409: { description: "A profile with that name already exists." },
       },
     },
   },
