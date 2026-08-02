@@ -357,6 +357,8 @@ Codex rollout 生命周期记录驱动与 Claude Code 相同的实时卡片状�
 
 Codex 的 `/rename` 标题会从原生会话索引读取，并实时更新会话和 agent 卡片。对话回放包含用户回合以及 `exec` 自定义工具调用和输出，并通过 cursor 分页在 transcript 顶部加载更早的消息。
 
+Codex 的 `response_item` 工具调用会通过独立 rollout cursor 仅索引一次，因此 Workflows 工具流、会话 drill-in、模型/Token 总计和 `context_compacted` 次数都忠实反映已记录的 Codex 数据，而不会重放生命周期或 Token 计数器。当仪表板范围仅为 Codex 时，仅适用于 Claude Code journal 的 Dynamic Workflows 面板会隐藏，而不会显示空的 Codex 数据。
+
 ### 3. 启动
 
 ```bash
@@ -1107,7 +1109,8 @@ npm run monitoring:docker:up
 
 | 方法 | 路径 | 描述 |
 | ------ | ----------------------------- | ------------------------------------------------------- |
-| `GET` | `/api/workflows` | 聚合工作流数据（编排、工具、模式）。可选 `?status=active|completed` 查询参数按会话状态筛选全部 11 个数据模块 |
+| `GET` | `/api/workflows` | 按 provider/source 聚合的工作流数据（编排、已记录工具、模式、Codex 压缩）。`?status=active|completed`、`?sources=...` 和 `?providers=claude|codex` 会筛选全部 11 个数据模块 |
+| `GET` | `/api/workflows/session/:id` | 按 provider/source 的单会话 drill-in（agent 树、已记录工具时间线、事件） |
 | `GET` | `/api/workflows/session/:id` | 按会话下钻（Agent 树、工具时间线、事件） |
 
 ### 设置

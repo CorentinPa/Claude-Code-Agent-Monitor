@@ -97,6 +97,7 @@ type StatusFilter = "all" | "active" | "completed";
 export function Workflows() {
   const { t } = useTranslation("workflows");
   const [dataScope] = useDataScope();
+  const isCodexOnly = dataScope.provider === "codex";
   const [data, setData] = useState<WorkflowData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -211,17 +212,20 @@ export function Workflows() {
       {/* Stats Row */}
       <WorkflowStats stats={data.stats} />
 
-      {/* Workflow-tool runs (issue #167) - fleets ingested from on-disk journals */}
-      <div className="card p-4 space-y-3">
-        <div>
-          <h2 className="text-sm font-semibold text-gray-200 flex items-center gap-2">
-            <Workflow className="w-4 h-4 text-violet-400" />
-            {t("runs.title")}
-          </h2>
-          <p className="text-xs text-gray-500 mt-0.5">{t("runs.subtitle")}</p>
+      {/* Workflow-tool runs are Claude-only on-disk journals. Codex has no
+          matching feature, so hide this rather than showing an empty card. */}
+      {!isCodexOnly && (
+        <div className="card p-4 space-y-3">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-200 flex items-center gap-2">
+              <Workflow className="w-4 h-4 text-violet-400" />
+              {t("runs.title")}
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">{t("runs.subtitle")}</p>
+          </div>
+          <WorkflowRunsPanel statusFilter={statusFilter} />
         </div>
-        <WorkflowRunsPanel statusFilter={statusFilter} />
-      </div>
+      )}
 
       {/* Section 1: Agent Orchestration DAG */}
       <Section

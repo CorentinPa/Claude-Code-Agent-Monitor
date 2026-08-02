@@ -357,6 +357,8 @@ Codex rollout lifecycle records drive the same live card states as Claude Code: 
 
 Codex `/rename` titles are read from its native session index and update session and agent cards in real time. Its conversation replay includes human turns plus `exec` custom-tool calls and outputs, with cursor pagination that loads older messages at the top of the transcript.
 
+Codex `response_item` tool invocations are indexed once through a dedicated rollout cursor, so its Workflows tool flow, session drill-in, model/token totals, and `context_compacted` counts reflect the recorded Codex data without replaying lifecycle or token counters. In a Codex-only dashboard scope, the Claude Code-only Dynamic Workflows journal panel is hidden rather than presented as empty Codex data.
+
 ### 3. Start
 
 ```bash
@@ -1130,8 +1132,8 @@ See [docs/API.md → Metrics](./docs/API.md#metrics) for the full metric list an
 
 | Method | Path                          | Description                                             |
 | ------ | ----------------------------- | ------------------------------------------------------- |
-| `GET`  | `/api/workflows`              | Aggregate workflow data (orchestration, tools, patterns). Optional `?status=active\|completed` query param filters all 11 data sections by session status |
-| `GET`  | `/api/workflows/session/:id`  | Per-session drill-in (agent tree, tool timeline, events) |
+| `GET`  | `/api/workflows`              | Provider/source-scoped workflow data (orchestration, recorded tools, patterns, Codex compactions). Optional `?status=active\|completed`, `?sources=...`, and `?providers=claude\|codex` filters apply to all 11 data sections |
+| `GET`  | `/api/workflows/session/:id`  | Provider/source-scoped per-session drill-in (agent tree, recorded tool timeline, events) |
 
 ### Alerts
 

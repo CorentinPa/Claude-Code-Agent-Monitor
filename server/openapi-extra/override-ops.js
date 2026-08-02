@@ -1603,9 +1603,13 @@ const paths = {
       tags: ["Workflows"],
       summary: "Get workflow intelligence aggregates",
       description:
-        "Returns the full workflow-intelligence aggregate powering the Workflows analytics page — 11 sections in one payload: `stats` (headline counters: sessions, agents, subagents, success rate, avg depth/duration, compactions, top tool flow), `orchestration` (subagent-type breakdown + delegation edges + outcomes), `toolFlow` (tool-to-tool transitions + tool counts), `effectiveness` (per-subagent-type success rate, avg duration, weekly trend), `patterns` (frequent subagent sequences + solo-session share), `modelDelegation` (model usage for main/sub agents + tokens by model), `errorPropagation` (errors by depth/type + error rate), `concurrency` (averaged agent swim-lane start/end), `complexity` (per-session agent/token/duration rows), `compaction` (compaction counts + tokens recovered), and `cooccurrence` (directed subagent-after-subagent pairs). The optional `status` query filter scopes every section to sessions of one status. Errors use the SHORT `{ error: { message } }` shape.",
+        "Returns the full workflow-intelligence aggregate powering the Workflows analytics page — 11 sections in one payload: `stats` (headline counters: sessions, agents, subagents, success rate, avg depth/duration, compactions, top tool flow), `orchestration` (subagent-type breakdown + delegation edges + outcomes), `toolFlow` (tool-to-tool transitions + tool counts), `effectiveness` (per-subagent-type success rate, avg duration, weekly trend), `patterns` (frequent subagent sequences + solo-session share), `modelDelegation` (model usage for main/sub agents + tokens by model), `errorPropagation` (errors by depth/type + error rate), `concurrency` (averaged agent swim-lane start/end), `complexity` (per-session agent/token/duration rows), `compaction` (compaction counts + tokens recovered), and `cooccurrence` (directed subagent-after-subagent pairs). `status`, `sources`, and `providers` scope every section. Codex tool flow is derived from its persisted `response_item` calls and Codex compactions from `context_compacted` events; Claude-only Workflow-tool journals are not represented as Codex runs. Errors use the SHORT `{ error: { message } }` shape.",
       operationId: "getWorkflowIntelligence",
-      parameters: [{ $ref: "#/components/parameters/WorkflowStatusQuery" }],
+      parameters: [
+        { $ref: "#/components/parameters/WorkflowStatusQuery" },
+        { $ref: "#/components/parameters/SourcesQuery" },
+        { $ref: "#/components/parameters/ProvidersQuery" },
+      ],
       responses: {
         200: {
           description: "Workflow aggregate data",
@@ -1634,9 +1638,13 @@ const paths = {
       tags: ["Workflows"],
       summary: "Get workflow drill-in for one session",
       description:
-        "Returns the workflow drill-in for a single session, used by the session-level Workflow view: `session` (the session row), `tree` (the recursive parent→child agent tree rooted at the main agent), `toolTimeline` (chronological tool events with tool_name/event_type/agent_id/summary), `swimLanes` (a flat per-agent start/end lane list for the Gantt-style view), and `events` (the chronological event stream, capped at the first 500 rows). Returns 404 with the SHORT `{ error: { message } }` shape when the session id is unknown.",
+        "Returns the workflow drill-in for a single session, used by the session-level Workflow view: `session` (the session row), `tree` (the recursive parent→child agent tree rooted at the main agent), `toolTimeline` (chronological tool events with tool_name/event_type/agent_id/summary), `swimLanes` (a flat per-agent start/end lane list for the Gantt-style view), and `events` (the chronological event stream, capped at the first 500 rows). `sources` and `providers` enforce the active dashboard scope. Returns 404 with the SHORT `{ error: { message } }` shape when the session is unknown or outside that scope.",
       operationId: "getWorkflowSession",
-      parameters: [{ $ref: "#/components/parameters/SessionIdPath" }],
+      parameters: [
+        { $ref: "#/components/parameters/SessionIdPath" },
+        { $ref: "#/components/parameters/SourcesQuery" },
+        { $ref: "#/components/parameters/ProvidersQuery" },
+      ],
       responses: {
         200: {
           description: "Workflow session detail",

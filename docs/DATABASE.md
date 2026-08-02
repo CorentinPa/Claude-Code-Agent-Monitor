@@ -473,6 +473,10 @@ Standard Codex usage whose request input is `<= 272000` tokens uses the `short_*
 
 Durable append cursor for every Codex `rollout-*.jsonl`. It stores the byte offset, incomplete-line remainder, owning session id, and latest cumulative token snapshot. This makes simultaneous hook, `fs.watch`, and 4-second poll notifications idempotent: only newly appended complete JSONL records become events or token deltas. The latest persisted `codex_user_message`, `codex_task_started`, `codex_task_complete`, or `codex_turn_aborted` event also lets restart reconciliation restore the correct Working or Waiting card state without replaying the full rollout history.
 
+### codex_tool_ingest_state
+
+Independent durable byte cursor for each Codex rollout's `response_item` records. It is transactionally advanced only after every newly discovered invocation is stored as a `codex_tool_call` event with a normalized display category and its raw tool name. This gives the Workflows tool flow and session drill-in an exact, once-only record of Codex commands, edits, reads, searches, MCP calls, and delegation tools while the separate `codex_ingest_state` cursor remains responsible for messages, lifecycle state, and cumulative token deltas. Existing rollout history is safely backfilled without replaying token accounting or changing historical session freshness.
+
 ---
 
 ### remote_sources

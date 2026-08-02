@@ -273,6 +273,17 @@ db.exec(`
     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
   );
 
+  -- A separate cursor records high-fidelity Codex response-item tool calls.
+  -- The lifecycle/token cursor above intentionally only needs event_msg records;
+  -- keeping analytics here lets existing dashboards backfill tool history once
+  -- without replaying token counters or lifecycle changes.
+  CREATE TABLE IF NOT EXISTS codex_tool_ingest_state (
+    transcript_path TEXT PRIMARY KEY,
+    session_id TEXT,
+    byte_offset INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+  );
+
   CREATE TABLE IF NOT EXISTS push_subscriptions (
     endpoint TEXT PRIMARY KEY,
     p256dh TEXT NOT NULL,
@@ -446,6 +457,15 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_workflows_session ON workflows(session_id);
   CREATE INDEX IF NOT EXISTS idx_workflows_status ON workflows(status);
 `);
+
+// Before response-item ingestion existed, Codex terminal event messages were
+// the only available approximation of a tool invocation. Those rows remain
+// useful activity events, but response items now provide the exact call, so
+// clear the old analytical tool marker once to avoid double-counting history.
+db.prepare(
+  `UPDATE events SET tool_name = NULL
+   WHERE event_type IN ('codex_exec_command_end', 'codex_mcp_tool_call_end', 'codex_web_search_end')`
+).run();
 
 // Migrate: link agent rows to a workflow run. Workflow inner-agents are already
 // ingested as subagents (same subagents/ dir); these columns add the grouping +
@@ -1342,6 +1362,9 @@ const stmts = {
   insertEvent: db.prepare(
     "INSERT INTO events (session_id, agent_id, event_type, tool_name, summary, data, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))"
   ),
+  insertEventAt: db.prepare(
+    "INSERT INTO events (session_id, agent_id, event_type, tool_name, summary, data, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  ),
   listEvents: db.prepare("SELECT * FROM events ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?"),
   listEventsBySession: db.prepare(
     "SELECT * FROM events WHERE session_id = ? ORDER BY created_at DESC, id DESC"
@@ -1463,6 +1486,17 @@ const stmts = {
       cache_write_input_tokens = excluded.cache_write_input_tokens,
       output_tokens = excluded.output_tokens,
       reasoning_output_tokens = excluded.reasoning_output_tokens,
+      updated_at = excluded.updated_at
+  `),
+  getCodexToolIngestState: db.prepare(
+    "SELECT * FROM codex_tool_ingest_state WHERE transcript_path = ?"
+  ),
+  upsertCodexToolIngestState: db.prepare(`
+    INSERT INTO codex_tool_ingest_state (transcript_path, session_id, byte_offset, updated_at)
+    VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+    ON CONFLICT(transcript_path) DO UPDATE SET
+      session_id = excluded.session_id,
+      byte_offset = excluded.byte_offset,
       updated_at = excluded.updated_at
   `),
   getTokenTotals: db.prepare(`

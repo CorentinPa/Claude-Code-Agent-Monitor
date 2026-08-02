@@ -257,6 +257,8 @@ These plugins query the Agent Monitor API at `http://localhost:4820`. Key data s
 ### Workflow Intelligence API (`/api/workflows/{sessionId}`)
 11 datasets: `stats`, `orchestration` (DAG), `toolFlow` (transitions), `effectiveness` (subagent success), `patterns` (recurring sequences), `modelDelegation`, `errorPropagation` (by depth), `concurrency` (lanes), `complexity` (score), `compaction` (impact), `cooccurrence` (agent pairs)
 
+All workflow endpoints accept the global `sources` and `providers` scope. Codex data is limited to recorded rollout facts: `response_item` tool calls, main-agent/session state, token/model totals, and `context_compacted` events; Claude Code Workflow-tool journal runs remain Claude-specific.
+
 ### Alert Rules (`/api/alerts/rules`)
 Rule types: `token_threshold` (`{ total_tokens }` — the spend-relevant guardrail), `event_pattern`, `inactivity`, `status_duration`.
 

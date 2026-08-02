@@ -3657,6 +3657,13 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             interrupted Waiting. Newest rollouts are processed first, and an unreadable historical
             file is retried without delaying the rest.
           </p>
+          <p>
+            Codex <code>response_item</code> tool calls are indexed exactly once through a separate
+            rollout cursor, so provider-scoped Workflows shows recorded tool flows, session drill-ins,
+            token/model totals, and <code>context_compacted</code> counts without replaying lifecycle
+            or token accounting. Dynamic Workflows stays hidden in a Codex-only scope because its
+            on-disk journals are a Claude Code feature.
+          </p>
 
           <div class="diagram-wrap">
             <!-- prettier-ignore -->
@@ -6943,8 +6950,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=47" defer></script>
-    <script src="script.js?v=41" defer></script>
+    <script src="i18n-content.js?v=48" defer></script>
+    <script src="script.js?v=42" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

@@ -1,8 +1,8 @@
 /**
  * @file Incrementally ingests Codex rollout JSONL transcripts into dashboard
- * sessions, events, costs, native `/rename` titles, and the active/waiting
- * lifecycle shown on dashboard cards. The byte cursor and cumulative counter
- * snapshot make watcher and hook notifications idempotent and real-time safe.
+ * sessions, events, response-item tool calls, costs, native `/rename` titles,
+ * and the active/waiting lifecycle shown on dashboard cards. Independent byte
+ * cursors make watcher and hook notifications idempotent and real-time safe.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -26,6 +26,7 @@ const EVENT_TYPES = new Set([
   "web_search_end",
   "turn_aborted",
   "context_compacted",
+  "error",
 ]);
 const LIFECYCLE_EVENT_TYPES = new Set([
   "user_message",
@@ -151,6 +152,57 @@ function eventDetails(record) {
   }
 }
 
+/**
+ * Normalize Codex's multiple tool surfaces to the dashboard's concise, visual
+ * vocabulary. The raw tool name remains in the event payload, while analytics
+ * can group equivalent shell/edit/search actions without mistaking an output
+ * record for a second invocation.
+ */
+function codexToolCategory(name) {
+  const raw = String(name || "").trim();
+  const normalized = raw.toLowerCase();
+  if (/^(exec_command|shell_command|shell|bash|write_stdin|exec)$/.test(normalized)) {
+    return "Bash";
+  }
+  if (normalized === "apply_patch" || normalized === "edit") return "Edit";
+  if (/^(read|cat|read_file)$/.test(normalized)) return "Read";
+  if (/(^|_)(grep|rg|search)(_|$)/.test(normalized)) return "Grep";
+  if (/(^|_)(glob|find)(_|$)/.test(normalized)) return "Glob";
+  if (normalized === "web_search" || normalized === "web_search_call") return "WebSearch";
+  if (normalized === "tool_search" || normalized === "tool_search_call") return "ToolSearch";
+  if (/(^|_)(spawn_agent|create_agent|delegate)(_|$)/.test(normalized)) return "Agent";
+  if (normalized.startsWith("mcp__")) return "MCP";
+  if (normalized === "wait") return "Wait";
+  return raw || "Other";
+}
+
+function responseToolDetails(record) {
+  const item = record.payload || {};
+  if (
+    item.type !== "function_call" &&
+    item.type !== "custom_tool_call" &&
+    item.type !== "web_search_call" &&
+    item.type !== "tool_search_call"
+  ) {
+    return null;
+  }
+  const rawName =
+    item.name ||
+    (item.type === "web_search_call"
+      ? "web_search"
+      : item.type === "tool_search_call"
+        ? "tool_search"
+        : null);
+  if (!rawName) return null;
+  return {
+    rawName: String(rawName),
+    tool: codexToolCategory(rawName),
+    summary: truncate(`Called ${rawName}`),
+    callId: item.call_id || null,
+    itemType: item.type,
+  };
+}
+
 function eventSpeed(record) {
   const tier =
     record?.payload?.service_tier ||
@@ -161,15 +213,46 @@ function eventSpeed(record) {
 }
 
 function persistEvent(sessionId, agentId, record) {
-  if (record.type !== "event_msg" || !EVENT_TYPES.has(record.payload?.type)) return null;
-  const { summary, tool } = eventDetails(record);
-  const info = stmts.insertEvent.run(
+  let eventType;
+  let tool;
+  let summary;
+  let data;
+  if (record.type === "event_msg" && EVENT_TYPES.has(record.payload?.type)) {
+    ({ summary, tool } = eventDetails(record));
+    eventType = `codex_${record.payload.type}`;
+    // The matching response_item is the actual invocation and owns the tool
+    // analytics row. Terminal notifications still belong in the event feed,
+    // but counting them as tools would double every command/MCP/search call.
+    if (["exec_command_end", "mcp_tool_call_end", "web_search_end"].includes(record.payload.type)) {
+      tool = null;
+    }
+    data = { provider: "codex", event: record.payload.type, timestamp: record.timestamp };
+  } else {
+    const details = responseToolDetails(record);
+    if (!details) return null;
+    eventType = "codex_tool_call";
+    tool = details.tool;
+    summary = details.summary;
+    data = {
+      provider: "codex",
+      event: "tool_call",
+      item_type: details.itemType,
+      call_id: details.callId,
+      raw_tool_name: details.rawName,
+      timestamp: record.timestamp,
+    };
+  }
+  const timestamp = Date.parse(record.timestamp || "")
+    ? new Date(record.timestamp).toISOString()
+    : new Date().toISOString();
+  const info = stmts.insertEventAt.run(
     sessionId,
     agentId,
-    `codex_${record.payload.type}`,
+    eventType,
     tool,
     summary,
-    JSON.stringify({ provider: "codex", event: record.payload.type, timestamp: record.timestamp })
+    JSON.stringify(data),
+    timestamp
   );
   return db.prepare("SELECT * FROM events WHERE id = ?").get(info.lastInsertRowid);
 }
@@ -349,6 +432,76 @@ function applyTokenSnapshot(sessionId, model, speed, tokenInfo, previous) {
 }
 
 /**
+ * Incrementally persist Codex `response_item` tool invocations. These records
+ * are richer than the low-volume terminal `event_msg` notifications and power
+ * the Workflows tool-flow view. Their own cursor lets existing histories be
+ * backfilled once without replaying token counters or lifecycle state.
+ */
+function ingestCodexToolEvents(transcriptPath) {
+  if (!isCodexTranscript(transcriptPath)) return { changed: false, events: [] };
+  rememberTranscriptPath(transcriptPath);
+  let stat;
+  try {
+    stat = fs.statSync(transcriptPath);
+  } catch {
+    return { changed: false, events: [] };
+  }
+  const state = stmts.getCodexToolIngestState.get(transcriptPath);
+  const offset = !state || stat.size < state.byte_offset ? 0 : state.byte_offset;
+  const sessionId = state?.session_id || sessionIdFromPath(transcriptPath);
+  const session = sessionId && stmts.getSession.get(sessionId);
+  if (!session) return { changed: false, events: [] };
+  const length = stat.size - offset;
+  if (length <= 0) return { changed: false, events: [] };
+
+  let body;
+  try {
+    const fd = fs.openSync(transcriptPath, "r");
+    const buffer = Buffer.alloc(length);
+    fs.readSync(fd, buffer, 0, length, offset);
+    fs.closeSync(fd);
+    body = buffer.toString("utf8");
+  } catch {
+    return { changed: false, events: [] };
+  }
+  const lastNewline = body.lastIndexOf("\n");
+  if (lastNewline < 0) return { changed: false, events: [] };
+  const complete = body.slice(0, lastNewline + 1);
+  const nextOffset = offset + Buffer.byteLength(complete);
+  const records = [];
+  for (const line of complete.split("\n")) {
+    if (!line) continue;
+    let record;
+    try {
+      record = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    if (record.type === "response_item") records.push(record);
+  }
+  const agentId = `codex:${session.id}`;
+  // A historical rollout can contain thousands of calls. Commit the whole
+  // file atomically so a crash never advances the cursor past only part of its
+  // analytics, and so cold backfill does not pay one SQLite transaction per
+  // call.
+  const events = db.transaction((responseItems) =>
+    responseItems.map((record) => persistEvent(session.id, agentId, record)).filter(Boolean)
+  )(records);
+  stmts.upsertCodexToolIngestState.run(transcriptPath, session.id, nextOffset);
+  // Do not touch `sessions.updated_at` for a historical analytics backfill:
+  // that timestamp drives card freshness and must remain the session's actual
+  // activity time. A live append reaches the main ingest path too, which
+  // touches the session after this tool cursor finishes.
+  return {
+    changed: events.length > 0,
+    created: false,
+    session: events.length > 0 ? stmts.getSession.get(session.id) : session,
+    agent: events.length > 0 ? stmts.getAgent.get(agentId) : null,
+    events,
+  };
+}
+
+/**
  * Ingest one append-only rollout file. Calling it repeatedly without appended
  * bytes produces no writes and no broadcasts, even when hooks and fs.watch
  * report the same change.
@@ -447,7 +600,10 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
     if (record.type === "event_msg" && LIFECYCLE_EVENT_TYPES.has(record.payload?.type)) {
       latestLifecycleRecord = record;
     }
-    const event = persistEvent(session.id, agentId, record);
+    // Tool invocations are owned by `ingestCodexToolEvents` below. The primary
+    // cursor records lifecycle, message, and token events only, which keeps a
+    // watcher/hook append from creating a duplicate tool row.
+    const event = record.type === "event_msg" ? persistEvent(session.id, agentId, record) : null;
     if (event) events.push(event);
   }
 
@@ -466,6 +622,11 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
   // can contain hundreds of historic turns; replaying every intermediate
   // Working/Waiting mutation is wasteful and can briefly broadcast stale state.
   applyCodexTranscriptLifecycle(session.id, latestLifecycleRecord);
+  // Tool invocations are stored through an independent cursor so initial
+  // rollout imports and all subsequent real-time appends preserve their exact
+  // order without double-counting lifecycle/token records.
+  const toolResult = ingestCodexToolEvents(transcriptPath);
+  events.push(...(toolResult.events || []));
   stmts.touchSession.run(session.id);
   // A native `/rename` lives outside the rollout, so it wins over the first
   // user prompt even when both files changed around the same time.
@@ -586,6 +747,7 @@ module.exports = {
   CONTEXT_SHORT_LIMIT,
   findCodexTranscripts,
   findCodexTranscriptForSession,
+  ingestCodexToolEvents,
   ingestCodexTranscript,
   ingestCodexHook,
   applyCodexHookLifecycle,

@@ -355,6 +355,8 @@ Codex rollout 수명 주기 레코드는 Claude Code와 같은 실시간 카드 
 
 Codex의 `/rename` 제목은 네이티브 세션 인덱스에서 읽어 세션과 agent 카드에 실시간으로 반영됩니다. 대화 재생에는 사용자 턴과 `exec` custom-tool 호출 및 출력이 포함되며, cursor 페이지네이션으로 transcript 상단에서 이전 메시지를 불러옵니다.
 
+Codex `response_item` 도구 호출은 별도 rollout 커서로 정확히 한 번 인덱싱되므로 Workflows 도구 흐름, 세션 drill-in, 모델/token 합계와 `context_compacted` 횟수가 수명 주기나 token 카운터를 재생하지 않고 기록된 Codex 데이터를 충실히 반영합니다. 대시보드 범위가 Codex 전용이면 Claude Code journal 전용 Dynamic Workflows 패널은 빈 Codex 데이터로 표시되지 않고 숨겨집니다.
+
 ### 3. 시작
 
 ```bash
@@ -1099,8 +1101,8 @@ npm run monitoring:docker:up
 
 | 메서드 | 경로                          | 설명                                                    |
 | ------ | ----------------------------- | ------------------------------------------------------- |
-| `GET`  | `/api/workflows`              | 워크플로 데이터 집계(오케스트레이션, 도구, 패턴). 선택적 `?status=active\|completed` 쿼리 매개변수는 11개 데이터 섹션 전체를 세션 상태로 필터링합니다 |
-| `GET`  | `/api/workflows/session/:id`  | 세션별 상세 드릴인(에이전트 트리, 도구 타임라인, 이벤트) |
+| `GET`  | `/api/workflows`              | provider/source 범위의 워크플로 데이터(오케스트레이션, 기록된 도구, 패턴, Codex 컴팩션)입니다. `?status=active\|completed`, `?sources=...`, `?providers=claude\|codex` 필터가 11개 데이터 섹션 전체에 적용됩니다 |
+| `GET`  | `/api/workflows/session/:id`  | provider/source 범위의 세션별 drill-in(에이전트 트리, 기록된 도구 타임라인, 이벤트) |
 
 ### 알림
 

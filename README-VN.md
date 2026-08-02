@@ -355,6 +355,8 @@ Bản ghi vòng đời rollout Codex điều khiển các trạng thái thẻ tr
 
 Tiêu đề `/rename` của Codex được đọc từ chỉ mục phiên gốc và cập nhật thẻ phiên cùng agent theo thời gian thực. Chế độ xem lại hội thoại gồm các lượt của người dùng, lời gọi và đầu ra custom tool `exec`, với phân trang bằng cursor để tải các tin nhắn cũ hơn ở đầu transcript.
 
+Các lần gọi tool `response_item` của Codex được lập chỉ mục đúng một lần bằng cursor rollout riêng, vì vậy luồng tool Workflows, drill-in phiên, tổng model/token và số lần `context_compacted` phản ánh dữ liệu Codex đã ghi mà không chạy lại bộ đếm vòng đời hoặc token. Khi phạm vi dashboard chỉ là Codex, bảng Dynamic Workflows chỉ dành cho journal Claude Code sẽ bị ẩn thay vì hiển thị dữ liệu Codex trống.
+
 ### 3. Bắt đầu
 
 ```bash
@@ -1105,8 +1107,8 @@ Xem [docs/API.md → Metrics](./docs/API.md#metrics) để biết danh sách ch�
 
 | Phương pháp | Con đường                          | Sự miêu tả                                             |
 | ------ | ----------------------------- | ------------------------------------------------------- |
-| `GET`  | `/api/workflows`              | Dữ liệu quy trình công việc tổng hợp (điều phối, công cụ, mẫu). Tùy chọn `?status=active\|thông số truy vấn đã hoàn thành lọc tất cả 11 phần dữ liệu theo trạng thái phiên |
-| `GET`  | `/api/workflows/session/:id`  | Thông tin chi tiết mỗi phiên (cây tác nhân, dòng thời gian công cụ, sự kiện) |
+| `GET`  | `/api/workflows`              | Dữ liệu quy trình theo provider/source (điều phối, tool đã ghi, mẫu, compaction Codex). Các bộ lọc `?status=active\|completed`, `?sources=...` và `?providers=claude\|codex` áp dụng cho cả 11 phần dữ liệu |
+| `GET`  | `/api/workflows/session/:id`  | Drill-in từng phiên theo provider/source (cây agent, dòng thời gian tool đã ghi, sự kiện) |
 
 ### Cài đặt
 

@@ -538,6 +538,7 @@ function startCodexSessionSync(broadcast) {
   const { getCodexHome, getCodexSessionsDir, onCodexHomeChanged } = require("./lib/codex-home");
   const {
     findCodexTranscripts,
+    ingestCodexToolEvents,
     ingestCodexTranscript,
     reconcileCodexSessionLiveness,
     refreshCodexSessionTitles,
@@ -584,16 +585,29 @@ function startCodexSessionSync(broadcast) {
           continue;
         }
         const fingerprint = `${stat.size}:${stat.mtimeMs}`;
-        if (fingerprints.get(transcriptPath) === fingerprint) continue;
+        if (fingerprints.get(transcriptPath) !== fingerprint) {
+          try {
+            // Only retain a successful fingerprint. A temporarily unreadable or
+            // malformed rollout must retry on the next sweep rather than being
+            // silently skipped until another byte happens to arrive.
+            publish(ingestCodexTranscript(transcriptPath));
+            fingerprints.set(transcriptPath, fingerprint);
+          } catch (err) {
+            console.warn(
+              `[CODEX SYNC] Failed to ingest ${path.basename(transcriptPath)}:`,
+              err.message
+            );
+          }
+        }
         try {
-          // Only retain a successful fingerprint. A temporarily unreadable or
-          // malformed rollout must retry on the next sweep rather than being
-          // silently skipped until another byte happens to arrive.
-          publish(ingestCodexTranscript(transcriptPath));
-          fingerprints.set(transcriptPath, fingerprint);
+          // This independent cursor backfills response-item tool calls from
+          // rollouts imported before Workflows understood Codex. It is a
+          // no-op after the first pass, and also catches records that arrive
+          // without one of Codex's lower-volume lifecycle event messages.
+          publish(ingestCodexToolEvents(transcriptPath));
         } catch (err) {
           console.warn(
-            `[CODEX SYNC] Failed to ingest ${path.basename(transcriptPath)}:`,
+            `[CODEX SYNC] Failed to index tools for ${path.basename(transcriptPath)}:`,
             err.message
           );
         }

@@ -73,6 +73,22 @@ describe("Codex rollout ingestor", () => {
     append(record("turn_context", { model: "gpt-5.6-terra", service_tier: "standard" }));
     append(record("event_msg", { type: "user_message", message: "Track my Codex session" }));
     append(
+      record("response_item", {
+        type: "function_call",
+        name: "exec_command",
+        call_id: "cmd-1",
+        arguments: '{"cmd":"rg session_index"}',
+      })
+    );
+    append(
+      record("response_item", {
+        type: "custom_tool_call",
+        name: "apply_patch",
+        call_id: "patch-1",
+        input: "*** Begin Patch",
+      })
+    );
+    append(
       record("event_msg", {
         type: "token_count",
         info: {
@@ -95,6 +111,14 @@ describe("Codex rollout ingestor", () => {
     assert.equal(first.session.name, "Track my Codex session");
     assert.equal(stmts.getAgent.get(`codex:${SESSION_ID}`).status, "working");
     assert.equal(findCodexTranscriptForSession(SESSION_ID), ROLLOUT);
+    const toolEvents = stmts.listEventsBySession
+      .all(SESSION_ID)
+      .filter((event) => event.event_type === "codex_tool_call");
+    assert.deepEqual(
+      toolEvents.map((event) => event.tool_name).sort(),
+      ["Bash", "Edit"],
+      "response-item calls are retained for provider-aware tool analytics"
+    );
     assert.equal(
       hooksRouter.codexTranscriptPath({ thread_id: SESSION_ID }),
       ROLLOUT,
@@ -110,6 +134,13 @@ describe("Codex rollout ingestor", () => {
     assert.equal(long.output_tokens, 1_250); // output + reasoning output
 
     assert.equal(ingestCodexTranscript(ROLLOUT).changed, false, "unchanged bytes must be free");
+    assert.equal(
+      stmts.listEventsBySession
+        .all(SESSION_ID)
+        .filter((event) => event.event_type === "codex_tool_call").length,
+      2,
+      "a repeated watcher/hook notification never double-counts response-item tools"
+    );
 
     append(
       record("event_msg", {

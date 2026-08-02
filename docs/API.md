@@ -15,6 +15,7 @@ Complete REST API and WebSocket documentation for Agent Dashboard.
   - [Tools](#tools)
   - [Metrics](#metrics)
   - [Pricing](#pricing)
+  - [Workflows](#workflows)
   - [Settings](#settings)
   - [Notifications](#notifications)
   - [Remote Data Sources](#remote-data-sources)
@@ -126,7 +127,7 @@ Returns all sessions, ordered by most recent activity.
 | `sort_by` | string | `time` | Ordering dimension: `time`, `duration`, or `price` |
 | `sort_desc` | boolean | `true` | Use descending order; set to `false` for ascending order |
 | `sources` | string | - | Comma-separated data-source ids to include (the built-in local history is `local`; remote SSH machines use their `remote_sources.id`). Omit for all sources. Also accepted on `/api/events`, `/api/agents`, `/api/stats`, `/api/analytics`, and `/api/pricing/cost`. See [Remote Data Sources](#remote-data-sources) |
-| `providers` | string | - | Comma-separated product providers: `claude`, `codex`, or both. It composes with `sources` and is accepted by the scoped list, aggregate, facet, per-session detail, cost, and workflow routes. Codex-only workflow responses are empty because Workflow-tool artifacts are Claude Code-specific. |
+| `providers` | string | - | Comma-separated product providers: `claude`, `codex`, or both. It composes with `sources` and is accepted by the scoped list, aggregate, facet, per-session detail, cost, and workflow routes. Codex workflow responses include its recorded `response_item` tool calls, token/model totals, and `context_compacted` events; only Claude Code's Workflow-tool run journals are unavailable for Codex. |
 
 **Example Request:**
 
@@ -782,6 +783,26 @@ curl -X DELETE http://localhost:4820/api/pricing/gpt-5.1-codex
 | 404 | Pattern not found |
 | 403 | Cannot delete default rule |
 | 500 | Database error |
+
+---
+
+### Workflows
+
+#### Aggregate Workflow Intelligence
+
+```http
+GET /api/workflows?status=active&sources=local&providers=codex
+```
+
+Returns the 11 workflow datasets used by the Workflows page. `status`, `sources`, and `providers` compose to scope every aggregate. For Codex, tool flow and the per-session timeline come from persisted `response_item` calls, while compaction counts come from `context_compacted` rollout events; the API never invents Claude-style subagents or Workflow-tool runs for Codex.
+
+#### Session Drill-in
+
+```http
+GET /api/workflows/session/:id?sources=local&providers=codex
+```
+
+Returns the scoped session row, agent tree, recorded tool timeline, swim lanes, and chronological events. It returns `404` when the session is absent or falls outside the requested provider/source scope.
 
 ---
 
