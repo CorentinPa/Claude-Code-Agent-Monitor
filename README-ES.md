@@ -1,11 +1,12 @@
-# Panel de control del agente para Claude Code
+# Panel de control del agente para Claude Code & Codex
 
-### Plataforma de monitoreo en tiempo real para la actividad del agente Claude Code 🚀
+### Plataforma de monitoreo en tiempo real para la actividad del agente Claude Code & Codex 🚀
 
-Un panel profesional para rastrear y visualizar sus sesiones de agente Claude Code, el uso de herramientas y la orquestación de subagentes en tiempo real. Construido con Node.js, Express, React y SQLite, se integra directamente con Claude Code a través de su sistema de ganchos nativo para un seguimiento y análisis de sesiones sin problemas.
+Un panel profesional para rastrear y visualizar sus sesiones de agente Claude Code & Codex, el uso de herramientas y la orquestación de subagentes en tiempo real. Construido con Node.js, Express, React y SQLite, se integra directamente con Claude Code & Codex a través de su sistema de ganchos nativo para un seguimiento y análisis de sesiones sin problemas.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
-![Claude Code Plugins](https://img.shields.io/badge/Claude_Code-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
+![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-blue?style=flat-square&logo=githubcopilot&logoColor=white)
+![Claude Code Plugins](https://img.shields.io/badge/Claude_Code_&_Codex-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
 ![Model Context Protocol](https://img.shields.io/badge/Model_Context_Protocol-1.0-0f766e?style=flat-square&logo=modelcontextprotocol&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-%3E%3D3.6-3776AB?style=flat-square&logo=python&logoColor=white)

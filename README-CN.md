@@ -1,11 +1,12 @@
-# Claude Code Agent Dashboard（Agent 监控面板）
+# Claude Code & Codex Agent Dashboard（Agent 监控面板）
 
-### Claude Code Agent 活动实时监控平台 🚀
+### Claude Code & Codex Agent 活动实时监控平台 🚀
 
-专业的 Dashboard，用于实时追踪和可视化你的 Claude Code Agent 会话、工具使用和子 Agent 编排。基于 Node.js、Express、React 和 SQLite 构建，通过 Claude Code 原生 Hook 系统直接集成，实现无缝的会话追踪和分析。
+专业的 Dashboard，用于实时追踪和可视化你的 Claude Code & Codex Agent 会话、工具使用和子 Agent 编排。基于 Node.js、Express、React 和 SQLite 构建，通过 Claude Code & Codex 原生 Hook 系统直接集成，实现无缝的会话追踪和分析。
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
-![Claude Code Plugins](https://img.shields.io/badge/Claude_Code-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
+![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-blue?style=flat-square&logo=githubcopilot&logoColor=white)
+![Claude Code Plugins](https://img.shields.io/badge/Claude_Code_&_Codex-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
 ![Model Context Protocol](https://img.shields.io/badge/Model_Context_Protocol-1.0-0f766e?style=flat-square&logo=modelcontextprotocol&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-%3E%3D3.6-3776AB?style=flat-square&logo=python&logoColor=white)

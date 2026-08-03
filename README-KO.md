@@ -1,11 +1,12 @@
-# Claude Code용 에이전트 대시보드
+# Claude Code & Codex용 에이전트 대시보드
 
-### Claude Code 에이전트 활동을 위한 실시간 모니터링 플랫폼 🚀
+### Claude Code & Codex 에이전트 활동을 위한 실시간 모니터링 플랫폼 🚀
 
-Claude Code 에이전트 세션, 도구 사용, 서브에이전트 오케스트레이션을 실시간으로 추적하고 시각화하는 전문 대시보드입니다. Node.js, Express, React, SQLite로 구축되었으며, Claude Code의 네이티브 Hook 시스템과 직접 통합되어 매끄러운 세션 추적과 분석을 제공합니다.
+Claude Code & Codex 에이전트 세션, 도구 사용, 서브에이전트 오케스트레이션을 실시간으로 추적하고 시각화하는 전문 대시보드입니다. Node.js, Express, React, SQLite로 구축되었으며, Claude Code & Codex의 네이티브 Hook 시스템과 직접 통합되어 매끄러운 세션 추적과 분석을 제공합니다.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
-![Claude Code Plugins](https://img.shields.io/badge/Claude_Code-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
+![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-blue?style=flat-square&logo=githubcopilot&logoColor=white)
+![Claude Code Plugins](https://img.shields.io/badge/Claude_Code_&_Codex-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
 ![Model Context Protocol](https://img.shields.io/badge/Model_Context_Protocol-1.0-0f766e?style=flat-square&logo=modelcontextprotocol&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-%3E%3D3.6-3776AB?style=flat-square&logo=python&logoColor=white)
@@ -109,7 +110,7 @@ Claude Code 에이전트 세션, 도구 사용, 서브에이전트 오케스트�
 
 ## 개요
 
-전문적인 다크 테마 웹 인터페이스를 통해 세션을 추적하고, 에이전트를 실시간으로 모니터링하며, 도구 사용을 시각화하고, 서브에이전트 오케스트레이션을 관찰하세요. Claude Code의 네이티브 Hook 시스템을 통해 직접 통합됩니다.
+Claude Code & Codex의 에이전트 활동을 실시간으로 모니터링하고 분석할 수 있는 전문적인 다크 테마 웹 인터페이스를 통해 세션을 추적하고, 에이전트를 실시간으로 모니터링하며, 도구 사용을 시각화하고, 서브에이전트 오케스트레이션을 관찰하세요. Claude Code & Codex의 네이티브 Hook 시스템을 통해 직접 통합됩니다.
 
 ```mermaid
 graph LR

@@ -1,11 +1,12 @@
-# Bảng điều khiển Agent cho Claude Code
+# Bảng điều khiển Agent cho Claude Code & Codex
 
-### Nền tảng giám sát thời gian thực cho hoạt động của Agent Claude Code 🚀
+### Nền tảng giám sát thời gian thực cho hoạt động của Agent Claude Code & Codex 🚀
 
-Bảng điều khiển chuyên nghiệp để theo dõi và trực quan hóa các phiên tác nhân Claude Code, cách sử dụng công cụ và điều phối tác nhân phụ trong thời gian thực. Được xây dựng bằng Node.js, Express, React và SQLite, nó tích hợp trực tiếp với Claude Code thông qua hệ thống hook gốc để theo dõi và phân tích phiên liền mạch.
+Bảng điều khiển chuyên nghiệp để theo dõi và trực quan hóa các phiên tác nhân Claude Code & Codex, cách sử dụng công cụ và điều phối tác nhân phụ trong thời gian thực. Được xây dựng bằng Node.js, Express, React và SQLite, nó tích hợp trực tiếp với Claude Code & Codex thông qua hệ thống hook gốc để theo dõi và phân tích phiên liền mạch.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
-![Claude Code Plugins](https://img.shields.io/badge/Claude_Code-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
+![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-blue?style=flat-square&logo=githubcopilot&logoColor=white)
+![Claude Code Plugins](https://img.shields.io/badge/Claude_Code_&_Codex-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
 ![Model Context Protocol](https://img.shields.io/badge/Model_Context_Protocol-1.0-0f766e?style=flat-square&logo=modelcontextprotocol&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-%3E%3D3.6-3776AB?style=flat-square&logo=python&logoColor=white)
