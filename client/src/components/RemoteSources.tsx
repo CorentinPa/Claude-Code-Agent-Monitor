@@ -540,16 +540,24 @@ export function RemoteSources() {
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-xs text-gray-500 mb-1">
+              <label
+                htmlFor="remote-source-claude-home"
+                className="block text-xs text-gray-500 mb-1"
+              >
                 {t("remoteSources.fieldRemoteHome", "Remote Claude home (optional)")}
               </label>
               <input
+                id="remote-source-claude-home"
                 className="input w-full font-mono"
+                aria-describedby="remote-source-claude-home-hint"
                 placeholder="~/.claude or wsl:~/.claude"
                 value={form.remote_home ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, remote_home: e.target.value }))}
               />
-              <p className="mt-1 text-[11px] text-gray-500 leading-snug">
+              <p
+                id="remote-source-claude-home-hint"
+                className="mt-1 text-[11px] text-gray-500 leading-snug"
+              >
                 {t(
                   "remoteSources.fieldRemoteHomeHint",
                   "Linux/macOS: default ~/.claude (or an absolute path like /home/you/.claude). Windows SSH + Claude in WSL: leave blank (auto-detect) or use wsl:~/.claude. Native Windows: C:/Users/you/.claude."
@@ -557,16 +565,24 @@ export function RemoteSources() {
               </p>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-xs text-gray-500 mb-1">
+              <label
+                htmlFor="remote-source-codex-home"
+                className="block text-xs text-gray-500 mb-1"
+              >
                 {t("remoteSources.fieldRemoteCodexHome", "Remote Codex home (optional)")}
               </label>
               <input
+                id="remote-source-codex-home"
                 className="input w-full font-mono"
+                aria-describedby="remote-source-codex-home-hint"
                 placeholder="~/.codex or wsl:~/.codex"
                 value={form.remote_codex_home ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, remote_codex_home: e.target.value }))}
               />
-              <p className="mt-1 text-[11px] text-gray-500 leading-snug">
+              <p
+                id="remote-source-codex-home-hint"
+                className="mt-1 text-[11px] text-gray-500 leading-snug"
+              >
                 {t(
                   "remoteSources.fieldRemoteCodexHomeHint",
                   "Defaults to ~/.codex and imports its sessions plus native renamed titles. For Windows SSH with Codex in WSL, leave blank (auto-detect) or use wsl:~/.codex."
