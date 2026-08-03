@@ -506,6 +506,7 @@ describe("/api/remote-sources CRUD", () => {
       label: "Dev",
       host: "son@dev",
       ssh_port: 22,
+      remote_home: "/srv/claude",
       remote_codex_home: "/srv/codex",
     });
     assert.equal(res.status, 201);
@@ -513,6 +514,7 @@ describe("/api/remote-sources CRUD", () => {
     assert.equal(res.body.source.host, "son@dev");
     assert.equal(res.body.source.enabled, true);
     assert.equal(res.body.source.status, "idle");
+    assert.equal(res.body.source.remote_home, "/srv/claude");
     assert.equal(res.body.source.remote_codex_home, "/srv/codex");
     assert.ok(res.body.source.id.startsWith("src_"));
     createdId = res.body.source.id;
@@ -534,6 +536,7 @@ describe("/api/remote-sources CRUD", () => {
     assert.equal(res.body.source.label, "Renamed");
     assert.equal(res.body.source.enabled, false);
     assert.equal(res.body.source.ssh_port, 22); // unchanged
+    assert.equal(res.body.source.remote_home, "/srv/claude"); // independently retained
     assert.equal(res.body.source.remote_codex_home, null);
   });
 
