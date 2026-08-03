@@ -14,7 +14,13 @@ const { findCodexTranscripts, ingestCodexTranscript } = require("./codex-ingest"
 
 const SNAPSHOT_DIR = () => path.join(getDataDir(), "codex-transcripts");
 
-function transcriptSessionId(transcriptPath) {
+/**
+ * Resolve the durable Codex thread id from a rollout filename, falling back to
+ * its session metadata when an imported archive used a non-standard filename.
+ * Remote sync uses this same resolver before tagging newly ingested sessions,
+ * so local, uploaded, and SSH-mirrored histories agree on ownership.
+ */
+function getCodexTranscriptSessionId(transcriptPath) {
   const filenameMatch = path
     .basename(transcriptPath)
     .match(/([0-9a-f]{8}-[0-9a-f-]{27,})\.jsonl$/i);
@@ -108,7 +114,7 @@ async function importCodexFromDirectory(root, options = {}) {
   for (let index = 0; index < transcripts.length; index++) {
     const sourcePath = transcripts[index];
     try {
-      const sessionId = transcriptSessionId(sourcePath);
+      const sessionId = getCodexTranscriptSessionId(sourcePath);
       // session_index.jsonl and unrelated JSONL files can coexist with a
       // Codex archive. They are not rollouts, so ignore them without calling
       // them parse errors.
@@ -177,6 +183,7 @@ function getCodexImportSnapshotDir() {
 
 module.exports = {
   getCodexImportSnapshotDir,
+  getCodexTranscriptSessionId,
   importCodexFromDirectory,
   snapshotCodexTranscript,
 };

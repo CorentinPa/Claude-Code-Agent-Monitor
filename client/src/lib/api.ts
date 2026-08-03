@@ -1938,7 +1938,7 @@ export const api = {
   },
 
   // ───────────────────────────── Remote Sources API ────────────────────────────
-  /** Remote (SSH) machines whose Claude Code history this dashboard pulls in.
+  /** Remote (SSH) machines whose Claude Code and Codex history this dashboard pulls in.
    *  Maps to `server/routes/remote-sources.js`; see also the global data-scope
    *  selector ({@link "./dataScope"}) which decides which sources are shown. */
   remoteSources: {
@@ -2698,7 +2698,7 @@ export interface ImportResult {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Remote Sources types — SSH machines whose Claude Code history is pulled in.
+// Remote Sources types — SSH machines whose Claude Code and Codex history is pulled in.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** A configured remote source with its live sync status (server response). */
@@ -2715,10 +2715,16 @@ export interface RemoteSource {
   identity_file: string | null;
   /** Optional remote CLAUDE_HOME (default `~/.claude`). */
   remote_home: string | null;
+  /** Optional remote CODEX_HOME (default `~/.codex`). */
+  remote_codex_home: string | null;
   /** Whether the background poller pulls this source. */
   enabled: boolean;
   /** Last known sync state. */
   status: "idle" | "syncing" | "ok" | "error";
+  /** Last Claude-specific discovery/sync state, or null for legacy source rows. */
+  claude_status: RemoteProviderStatus | null;
+  /** Last Codex-specific discovery/sync state, or null for legacy source rows. */
+  codex_status: RemoteProviderStatus | null;
   /** Last error message, when `status === "error"`. */
   last_error: string | null;
   /** ISO timestamp of the last successful sync, or null. */
@@ -2731,6 +2737,7 @@ export interface RemoteSource {
     errors?: number;
     sessions_seen?: number;
     sessions_tagged?: number;
+    providers?: Partial<Record<RemoteProvider, RemoteProviderSyncDetails>>;
   } | null;
   /** Live number of sessions currently attributed to this source. */
   session_count?: number;
@@ -2745,7 +2752,23 @@ export interface RemoteSourceInput {
   ssh_port?: number | null;
   identity_file?: string | null;
   remote_home?: string | null;
+  remote_codex_home?: string | null;
   enabled?: boolean;
+}
+
+export type RemoteProvider = "claude" | "codex";
+export type RemoteProviderStatus = "idle" | "syncing" | "ok" | "unavailable" | "error";
+
+export interface RemoteProviderSyncDetails {
+  status: RemoteProviderStatus;
+  imported?: number;
+  skipped?: number;
+  backfilled?: number;
+  errors?: number;
+  sessions_seen?: number;
+  sessions_tagged?: number;
+  error?: string;
+  title_index_warning?: string;
 }
 
 /** Result of a connectivity probe (POST /:id/test). */
@@ -2753,6 +2776,13 @@ export interface RemoteSourceTestResult {
   ok: boolean;
   message: string;
   remoteProjects?: string;
+  remoteCodexSessions?: string;
+  providers?: Partial<
+    Record<
+      RemoteProvider,
+      { status: Exclude<RemoteProviderStatus, "idle" | "syncing">; message: string; path: string }
+    >
+  >;
 }
 
 /** Result of an on-demand sync (POST /:id/sync). */
@@ -2764,6 +2794,7 @@ export interface RemoteSourceSyncResult {
   errors?: number;
   sessions_seen?: number;
   sessions_tagged?: number;
+  providers?: Partial<Record<RemoteProvider, RemoteProviderSyncDetails>>;
   /** Present when the sync was skipped because one was already running. */
   skipped_reason?: string;
 }

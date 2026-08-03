@@ -1132,14 +1132,10 @@
                   <div class="feature-icon ic-blue">🛜</div>
                   <h3>Remote Data Sources</h3>
                   <p>
-                    Pull Claude Code history from other machines over SSH. Each remote's
-                    <code>~/.claude/projects</code> tree is mirrored via <code>scp</code> into a sandboxed staging
-                    directory, fed through the same importer as local history, and every session
-                    is tagged with its source. A background poller keeps remote data
-                    near-real-time, a global data-scope selector (Local only / All / a specific
-                    source) narrows the whole app, and sessions from a remote show a source badge.
-                    Auth defers entirely to the host's SSH stack — no passwords or secrets are
-                    stored. Managed in <b>Settings → Remote Data Sources</b>.
+                    One remote source can independently import <b>Claude Code</b>, <b>Codex</b>, or both.
+                    Codex mirrors <code>~/.codex/sessions</code> and its lightweight
+                    <code>session_index.jsonl</code> title index; the connection test and sync result show
+                    a separate state for each provider, so a missing provider never hides fresh data from the other.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1609,7 +1605,7 @@
             </div>
             <div class="screenshot-card" id="ss-remote">
               <img src="../images/remote.png" alt="Settings — Remote Data Sources" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">🛰️</span> <span><strong>Settings · Remote Data Sources</strong> — pull Claude Code activity from other machines over SSH: add sources by destination, test connectivity, sync manually or on a background poller, and switch the global data scope between local, all sources, or a specific machine with per-session source badges</span></div>
+              <div class="screenshot-caption"><span class="caption-icon">🛰️</span> <span><strong>Settings · Remote Data Sources</strong> — pull Claude Code and Codex activity from other machines over SSH: optionally set independent Remote Claude home and Remote Codex home paths, test each provider, sync manually or on a background poller, and switch the global data scope between local, all sources, or a specific machine with per-session source badges</span></div>
             </div>
             <div class="screenshot-card" id="ss-swagger">
               <img src="../images/swagger.png" alt="Swagger UI API docs" width="100%" loading="lazy" decoding="async" />
@@ -3980,19 +3976,10 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
           </div>
 
           <p>
-            Beyond local history, the dashboard can pull Claude Code activity from
-            <b>other machines over SSH</b> and fold it into the same views as your local
-            sessions. Each remote's <code>~/.claude/projects</code> tree is mirrored via
-            <code>scp</code> (or <code>wsl.exe</code> + <code>tar</code> when Claude runs in WSL
-            on a Windows SSH host) into a sandboxed staging directory, fed through the exact same
-            importer used for local history, and every imported session is tagged with the source it
-            came from. A background poller (<code>DASHBOARD_REMOTE_SYNC_MS</code>, default
-            <code>15000</code> ms) keeps remote data near-real-time — adding or re-enabling a source
-            also triggers an immediate pull — and successful syncs broadcast
-            <code>remote_data.updated</code> plus per-session <code>session_created</code> /
-            <code>session_updated</code> frames. A global <b>data scope</b> selector lets you narrow
-            the entire app to local sessions only, all sources, or a specific machine. Sources are
-            managed in <b>Settings → Remote Data Sources</b>.
+            One remote source can independently import <b>Claude Code</b>, <b>Codex</b>, or both.
+            Codex mirrors <code>~/.codex/sessions</code> and its lightweight
+            <code>session_index.jsonl</code> title index; the connection test and sync result show
+            a separate state for each provider, so a missing provider never hides fresh data from the other.
           </p>
 
           <h3>How It Works</h3>
@@ -4000,8 +3987,8 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <!-- prettier-ignore -->
             <div class="mermaid">
               flowchart LR
-                RH["Remote host\n~/.claude/projects"] -->|scp over SSH| ST["Sandboxed\nstaging dir"]
-                ST -->|same pipeline\nas local history| P["parseSessionFile +\nimportSession"]
+                RH["Remote host\nClaude projects + Codex sessions"] -->|scp over SSH| ST["Sandboxed\nprovider stages"]
+                ST -->|same provider pipeline\nas local history| P["Claude + Codex\nimporters"]
                 P -->|tagged with source| D[("SQLite\nsessions / agents / events")]
                 POLL["Background poller\nDASHBOARD_REMOTE_SYNC_MS"] -.->|periodic sync| RH
                 D -.->|remote_source.status\nremote_data.updated\nsession_created/updated| W["WebSocket /ws"]
@@ -4033,18 +4020,18 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
 
           <h3>Live Status</h3>
           <p>
-            Remote sessions never emit live hooks to this dashboard, so a healthy source remains
-            exempt from the local process-liveness reap and watchdog transcript scan. Every
-            successful sync still reconciles live status from the mirrored transcript: activity is
-            judged from the <b>newest event timestamp inside the JSONL</b> (falling back to mirror
-            mtime); within <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes)
-            keeps the session <code>active</code>, otherwise it is reconciled to
-            <code>completed</code>. If an SSH sync fails — or a source is stranded in
-            <code>syncing</code> longer than <code>DASHBOARD_STALE_MINUTES</code> — and an active
-            session is itself older than that same window, the ordinary stale-session sweep marks
-            it <code>abandoned</code> and completes its agents. A later fresh mirror reactivates a
-            session that is still writing, so unavailable remotes never leave permanent Waiting
-            cards.
+            Remote sessions never emit live hooks to this dashboard, so a healthy Claude Code or
+            Codex provider mirror remains exempt from the local process-liveness reap and watchdog
+            transcript scan. Every successful provider sync still reconciles live status from the
+            matching mirrored transcript: activity is judged from the <b>newest event timestamp
+            inside the JSONL</b> (falling back to mirror mtime); within
+            <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) keeps the session
+            <code>active</code>, otherwise it is reconciled to <code>completed</code>. If that
+            provider's SSH sync fails, is unavailable, or is stranded in <code>syncing</code> longer
+            than <code>DASHBOARD_STALE_MINUTES</code> — and an active session is itself older than
+            that same window — the ordinary stale-session sweep marks it <code>abandoned</code> and
+            completes its agents. A later fresh mirror reactivates a session that is still writing,
+            so unavailable providers never leave permanent Waiting cards.
           </p>
 
           <h3>Security Model</h3>
@@ -6980,8 +6967,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=57" defer></script>
-    <script src="script.js?v=42" defer></script>
+    <script src="i18n-content.js?v=59" defer></script>
+    <script src="script.js?v=44" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

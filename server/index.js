@@ -1106,6 +1106,7 @@ if (require.main === module) {
     const stale = cleanupDb.stmts.findStaleSessions.all(
       "__periodic__",
       STALE_MINUTES,
+      STALE_MINUTES,
       STALE_MINUTES
     );
     const now = new Date().toISOString();

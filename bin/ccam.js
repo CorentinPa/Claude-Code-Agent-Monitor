@@ -1011,8 +1011,9 @@ async function cmdWebhooks(flags, positional) {
 
 /**
  * `ccam remote-sources [list|add|test|sync|rm]` — manage the SSH machines this
- * dashboard pulls Claude Code history from (server/routes/remote-sources.js).
- * No secrets are handled here; auth defers to the host's SSH stack.
+ * dashboard pulls Claude Code and Codex history from (server/routes/remote-sources.js).
+ * One source can expose either provider or both. No secrets are handled here;
+ * auth defers to the host's SSH stack.
  */
 async function cmdRemoteSources(flags, positional) {
   const sub = positional[0] || "list";
@@ -1033,6 +1034,8 @@ async function cmdRemoteSources(flags, positional) {
       ssh_port: flags.port != null ? Number(flags.port) : null,
       identity_file: flags.identity != null ? String(flags.identity) : null,
       remote_home: flags["remote-home"] != null ? String(flags["remote-home"]) : null,
+      remote_codex_home:
+        flags["remote-codex-home"] != null ? String(flags["remote-codex-home"]) : null,
       enabled: flags.disabled ? false : true,
     };
     const r = await post("/api/remote-sources", body);
@@ -1043,23 +1046,29 @@ async function cmdRemoteSources(flags, positional) {
   if (sub === "test" && positional[1]) {
     const r = await post(`/api/remote-sources/${positional[1]}/test`);
     console.log(r.ok ? `${c.green("✔")} ${r.message}` : `${c.red("✖")} ${r.message}`);
+    for (const provider of ["claude", "codex"]) {
+      const detail = r.providers?.[provider];
+      if (!detail) continue;
+      const icon = detail.status === "ok" ? c.green("✔") : c.yellow("•");
+      console.log(
+        c.dim(
+          `  ${icon} ${provider === "codex" ? "Codex" : "Claude Code"}: ${detail.status} — ${detail.path}`
+        )
+      );
+    }
     process.exit(r.ok ? 0 : 1);
   }
 
   if (sub === "sync") {
     if (positional[1]) {
       const r = await post(`/api/remote-sources/${positional[1]}/sync`);
-      console.log(
-        `${c.green("✔")} Synced ${positional[1]}: ${r.imported ?? 0} imported, ${r.sessions_tagged ?? 0} tagged`
-      );
+      printRemoteSyncSummary(`${c.green("✔")} Synced ${positional[1]}`, r);
     } else {
       // No id → sync every source sequentially.
       const { sources = [] } = await get("/api/remote-sources");
       for (const s of sources) {
         const r = await post(`/api/remote-sources/${s.id}/sync`);
-        console.log(
-          `  ${c.bold(s.label)}: ${r.imported ?? 0} imported, ${r.sessions_tagged ?? 0} tagged`
-        );
+        printRemoteSyncSummary(`  ${c.bold(s.label)}`, r);
       }
       console.log(`${c.green("✔")} Synced ${sources.length} source(s)`);
     }
@@ -1083,7 +1092,7 @@ async function cmdRemoteSources(flags, positional) {
   const rows = sources.map((s) => [
     s.id,
     s.enabled ? c.green("on") : c.dim("off"),
-    s.status,
+    `${s.status} (${s.claude_status || "idle"}/${s.codex_status || "idle"})`,
     (s.label || "").slice(0, 24),
     `${s.host}${s.ssh_port ? `:${s.ssh_port}` : ""}`,
     String(s.session_count ?? 0),
@@ -1101,6 +1110,23 @@ async function cmdRemoteSources(flags, positional) {
   } else {
     console.log(c.dim("  No remote sources configured. Add one: ccam remote-sources add --help"));
   }
+}
+
+/** Render combined and provider-specific counters from a remote-source sync. */
+function printRemoteSyncSummary(prefix, result) {
+  const providers = ["claude", "codex"]
+    .map((provider) => {
+      const detail = result.providers?.[provider];
+      if (!detail) return null;
+      const name = provider === "codex" ? "Codex" : "Claude";
+      return detail.status === "ok"
+        ? `${name} ${detail.imported ?? 0} imported/${detail.sessions_tagged ?? 0} tagged`
+        : `${name} ${detail.status}`;
+    })
+    .filter(Boolean);
+  console.log(
+    `${prefix}: ${result.imported ?? 0} imported, ${result.sessions_tagged ?? 0} tagged${providers.length ? ` (${providers.join(", ")})` : ""}`
+  );
 }
 
 // ── Pricing ─────────────────────────────────────────────────────────────────
@@ -1540,7 +1566,7 @@ const COMMAND_GROUPS = [
       [
         "remote-sources add",
         "",
-        "--label X --host user@host [--port N --identity path --remote-home path]",
+        "--label X --host user@host [--port N --identity path --remote-home path --remote-codex-home path]",
       ],
       ["remote-sources test <id>", "", "Probe SSH connectivity to a source"],
       ["remote-sources sync [id]", "", "Pull history now (all sources if id omitted)"],

@@ -274,6 +274,32 @@ describe("ccam CLI — alerts, rules, webhooks", () => {
   });
 });
 
+describe("ccam CLI — remote sources", () => {
+  it("adds and lists an independent remote Codex home", async () => {
+    const added = await ccam(
+      "remote-sources",
+      "add",
+      "--label",
+      "Codex build host",
+      "--host",
+      "codex-host",
+      "--remote-codex-home",
+      "/srv/codex-home",
+      "--disabled"
+    );
+    assert.equal(added.code, 0, `stderr: ${added.err} stdout: ${added.out}`);
+    assert.match(added.out, /Added remote source/);
+
+    const source = db.prepare("SELECT * FROM remote_sources WHERE host = ?").get("codex-host");
+    assert.equal(source.remote_codex_home, "/srv/codex-home");
+
+    const listed = await ccam("remote-sources");
+    assert.equal(listed.code, 0);
+    assert.match(listed.out, /Codex build host/);
+    assert.match(listed.out, /idle \(idle\/idle\)/);
+  });
+});
+
 describe("ccam CLI — pricing", () => {
   it("pricing lists the default rules", async () => {
     const { code, out } = await ccam("pricing");

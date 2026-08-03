@@ -667,7 +667,12 @@ const processEvent = db.transaction((hookType, data) => {
       // Clean up orphaned sessions: when a user runs /resume inside a session,
       // the parent session never receives Stop or SessionEnd. Mark any active
       // session that hasn't seen events for STALE_MINUTES as abandoned.
-      const staleSessions = stmts.findStaleSessions.all(sessionId, STALE_MINUTES, STALE_MINUTES);
+      const staleSessions = stmts.findStaleSessions.all(
+        sessionId,
+        STALE_MINUTES,
+        STALE_MINUTES,
+        STALE_MINUTES
+      );
       const now = new Date().toISOString();
       for (const stale of staleSessions) {
         const staleAgents = stmts.listAgentsBySession.all(stale.id);

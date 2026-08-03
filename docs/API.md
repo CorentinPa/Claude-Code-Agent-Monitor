@@ -872,7 +872,7 @@ curl http://localhost:4820/api/sessions/sess_abc123/notifications
 
 ### Remote Data Sources
 
-The `/api/remote-sources/*` namespace configures **remote SSH machines** the dashboard pulls Claude Code history from, so one dashboard can consolidate sessions from several machines. **No secrets are stored** — SSH authentication defers entirely to the host's SSH stack (ssh-agent, `~/.ssh/config`, key files). Every imported session is tagged with the source's id in the `sessions.source` column (the built-in local history uses the id `local`), which powers the `sources` filter below.
+The `/api/remote-sources/*` namespace configures **remote SSH machines** the dashboard pulls Claude Code, Codex, or both histories from, so one dashboard can consolidate sessions from several machines. Each provider is mirrored and imported independently; a source succeeds when either provider is present. Codex additionally mirrors its lightweight `session_index.jsonl` so native renamed titles survive import. **No secrets are stored** — SSH authentication defers entirely to the host's SSH stack (ssh-agent, `~/.ssh/config`, key files). Every imported session is tagged with the source's id in the `sessions.source` column (the built-in local history uses the id `local`), which powers the `sources` filter below.
 
 **RemoteSource shape:**
 
@@ -884,8 +884,11 @@ The `/api/remote-sources/*` namespace configures **remote SSH machines** the das
   "ssh_port": 22,
   "identity_file": "~/.ssh/id_ed25519",
   "remote_home": "~/.claude",
+  "remote_codex_home": "~/.codex",
   "enabled": true,
   "status": "ok",
+  "claude_status": "ok",
+  "codex_status": "ok",
   "last_error": null,
   "last_sync_at": "2026-07-22T18:41:55.117Z",
   "last_sync_counts": {
@@ -894,14 +897,18 @@ The `/api/remote-sources/*` namespace configures **remote SSH machines** the das
     "backfilled": 0,
     "errors": 0,
     "sessions_seen": 50,
-    "sessions_tagged": 50
+    "sessions_tagged": 50,
+    "providers": {
+      "claude": { "status": "ok", "sessions_tagged": 32 },
+      "codex": { "status": "ok", "sessions_tagged": 18 }
+    }
   },
   "created_at": "2026-07-20T09:15:00.000Z",
   "updated_at": "2026-07-22T18:41:55.117Z"
 }
 ```
 
-`ssh_port`, `identity_file`, `remote_home`, `last_error`, `last_sync_at`, and `last_sync_counts` are nullable. `status` is one of `idle`, `syncing`, `ok`, `error`.
+`ssh_port`, `identity_file`, `remote_home`, `remote_codex_home`, `claude_status`, `codex_status`, `last_error`, `last_sync_at`, and `last_sync_counts` are nullable. `remote_home` and `remote_codex_home` are the optional **Remote Claude home** and **Remote Codex home** overrides; send `null` on `PATCH` to return either provider to its default remote home. `status` is one of `idle`, `syncing`, `ok`, `error`; provider statuses additionally use `unavailable` when that CLI's history directory is absent.
 
 #### List Remote Sources
 
@@ -926,6 +933,7 @@ POST /api/remote-sources
 | `ssh_port` | integer | No | SSH port (defers to SSH default / config when omitted) |
 | `identity_file` | string | No | Private-key path passed to ssh (`-i`) |
 | `remote_home` | string | No | Remote Claude home (defaults to remote `~/.claude`) |
+| `remote_codex_home` | string | No | Remote Codex home (defaults to remote `~/.codex`) |
 
 > **Cursor (informational):** Sessions imported from `~/.claude` include **Cursor** agent usage on that machine too — Cursor happens to use the same paths as Claude Code. CCAM does not tag which app created a session.
 
@@ -941,7 +949,7 @@ Returns `{ "source": RemoteSource }` with HTTP **201**.
 | `INVALID_HOST` | Missing/invalid `host` |
 | `INVALID_PORT` | `ssh_port` out of range |
 | `INVALID_IDENTITY_FILE` | Invalid `identity_file` value |
-| `INVALID_REMOTE_HOME` | Invalid `remote_home` value |
+| `INVALID_REMOTE_HOME` | Invalid `remote_home` or `remote_codex_home` value |
 
 #### Update Remote Source
 
@@ -971,7 +979,7 @@ Returns `{ "ok": true, "purged": <bool> }` (`purged` is `true` only when `?purge
 POST /api/remote-sources/:id/test
 ```
 
-Runs an SSH connectivity probe. Returns `{ "ok": <bool>, "message": <string>, "remoteProjects?": string[] }` — `remoteProjects` lists the discovered remote project directories on success. Does not import anything. **404** if the id is unknown.
+Runs an SSH connectivity probe. Returns `{ "ok", "message", "remoteProjects", "remoteCodexSessions", "providers" }`; `providers.claude` and `providers.codex` each report the checked path, message, and `ok` / `unavailable` / `error` status. A source passes when either provider is available. Does not import anything. **404** if the id is unknown.
 
 #### Sync Remote Source
 
@@ -979,7 +987,7 @@ Runs an SSH connectivity probe. Returns `{ "ok": <bool>, "message": <string>, "r
 POST /api/remote-sources/:id/sync
 ```
 
-Pulls Claude Code history from the remote over SSH now, through the same idempotent import pipeline used locally, tagging imported sessions with this source's id. Progress/completion is also broadcast over the WebSocket as [`remote_source.status`](#remote_sourcestatus) frames.
+Pulls Claude Code and Codex history from the remote over SSH now, through the same provider-specific idempotent import pipelines used locally. The Codex stage includes the native title index when available; each imported session is tagged with this source's id. A source succeeds when either provider is available and returns provider-specific counters. Progress/completion is also broadcast over the WebSocket as [`remote_source.status`](#remote_sourcestatus) frames.
 
 **Example Response:**
 
@@ -991,7 +999,11 @@ Pulls Claude Code history from the remote over SSH now, through the same idempot
   "backfilled": 0,
   "errors": 0,
   "sessions_seen": 50,
-  "sessions_tagged": 50
+  "sessions_tagged": 50,
+  "providers": {
+    "claude": { "status": "ok", "imported": 6, "sessions_tagged": 31 },
+    "codex": { "status": "ok", "imported": 3, "sessions_tagged": 19 }
+  }
 }
 ```
 
@@ -1339,7 +1351,7 @@ Broadcast whenever Claude Code configuration changes — either by dashboard mut
 
 #### remote_data.updated
 
-Broadcast once per successful remote sync (background poller, manual **Sync now**, or immediate pull after add/re-enable). Clients use this — and the per-session `session_created` / `session_updated` frames emitted in the same pass — to refetch sessions, costs, and analytics without polling.
+Broadcast once per successful remote sync (background poller, manual **Sync now**, or immediate pull after add/re-enable). `providers` preserves separate Claude/Codex results, so clients can show an unavailable provider without hiding successfully refreshed sibling data. Clients use this — and the per-session `session_created` / `session_updated` frames emitted in the same pass — to refetch sessions, costs, and analytics without polling.
 
 ```json
 {
@@ -1348,7 +1360,13 @@ Broadcast once per successful remote sync (background poller, manual **Sync now*
     "sourceId": "src_a1b2c3",
     "source": "src_a1b2c3",
     "label": "dev-box",
-    "counters": { "imported": 1, "skipped": 0, "sessions_tagged": 3 },
+    "counters": {
+      "imported": 1,
+      "skipped": 0,
+      "sessions_tagged": 3,
+      "providers": { "claude": { "status": "unavailable" }, "codex": { "status": "ok", "sessions_tagged": 3 } }
+    },
+    "providers": { "claude": "unavailable", "codex": "ok" },
     "last_sync_at": "2026-07-26T21:15:00.000Z"
   }
 }
@@ -1356,11 +1374,11 @@ Broadcast once per successful remote sync (background poller, manual **Sync now*
 
 #### remote_source.status
 
-Broadcast when a remote data source changes sync state (during/after `POST /api/remote-sources/:id/sync`) or is deleted. `status` is one of `idle`, `syncing`, `ok`, `error`, or `deleted`. `error` and `last_sync_at` are optional and present when relevant. See [Remote Data Sources](#remote-data-sources).
+Broadcast when a remote data source changes sync state (during/after `POST /api/remote-sources/:id/sync`) or is deleted. `status` is one of `idle`, `syncing`, `ok`, `error`, or `deleted`; when present, `providers` gives the independent Claude/Codex state (`idle`, `syncing`, `ok`, `unavailable`, or `error`). `error` and `last_sync_at` are optional and present when relevant. See [Remote Data Sources](#remote-data-sources).
 
 ```json
 { "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "syncing" } }
-{ "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "ok", "last_sync_at": "2026-07-22T18:41:55.117Z" } }
+{ "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "ok", "providers": { "claude": "unavailable", "codex": "ok" }, "last_sync_at": "2026-07-22T18:41:55.117Z" } }
 { "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "error", "error": "ssh exited with code 255" } }
 { "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "deleted" } }
 ```

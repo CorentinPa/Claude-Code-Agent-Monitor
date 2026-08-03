@@ -139,8 +139,11 @@ erDiagram
         integer ssh_port "Optional SSH port (NULL = SSH default)"
         text identity_file "Optional private-key path (NULL = SSH default)"
         text remote_home "Optional remote Claude home (NULL = remote ~/.claude)"
+        text remote_codex_home "Optional remote Codex home (NULL = remote ~/.codex)"
         integer enabled "1 = eligible for sync, 0 = disabled"
         text status "idle | syncing | ok | error"
+        text claude_status "idle | syncing | ok | error | unavailable"
+        text codex_status "idle | syncing | ok | error | unavailable"
         text last_error "Last failure message, or NULL"
         text last_sync_at "ISO8601 timestamp of last successful sync, or NULL"
         text last_sync_counts "JSON blob of last sync counters, or NULL"
@@ -199,7 +202,7 @@ CREATE TABLE sessions (
 |--------|------|----------|-------------|
 | `id` | TEXT | NO | Session UUID (assigned by Claude Code) |
 | `name` | TEXT | YES | Human-readable label. Synced from the transcript title by `routes/hooks.js` (and the 15 s watchdog) on every event: the `custom-title` line (`/rename`, `claude -n`, picker `Ctrl+R`) always wins, otherwise the auto-generated `ai-title` fills a placeholder/auto name, otherwise the session's first user prompt (60-char label) fills it. Falls back to `Session <id8>` |
-| `status` | TEXT | NO | `active`, `completed`, `error`, or `abandoned` (CHECK-constrained). Besides the `SessionEnd` hook, the 15 s watchdog's **liveness reap** also lands `active` → `completed` when no running matching local `claude` or `codex` process has the session's `cwd` (a `SessionEnd` lost while the dashboard was down); gated by `DASHBOARD_LIVENESS_IDLE_SECONDS`, disabled via `DASHBOARD_LIVENESS_PROBE=0`. Sessions with a non-`local` `source` (Remote Data Sources) are always exempt from the local process reap and transcript watchdog. Healthy remote sources also stay out of stale sweeps because `remote-sync.js` reconciles them from the SSH mirror; when a source reports `error`, or remains `syncing` longer than `DASHBOARD_STALE_MINUTES`, an active session older than that same window falls back to the ordinary stale sweep (`abandoned`, agents completed) until a fresh mirror can reactivate it |
+| `status` | TEXT | NO | `active`, `completed`, `error`, or `abandoned` (CHECK-constrained). Besides the `SessionEnd` hook, the 15 s watchdog's **liveness reap** also lands `active` → `completed` when no running matching local `claude` or `codex` process has the session's `cwd` (a `SessionEnd` lost while the dashboard was down); gated by `DASHBOARD_LIVENESS_IDLE_SECONDS`, disabled via `DASHBOARD_LIVENESS_PROBE=0`. Sessions with a non-`local` `source` (Remote Data Sources) are always exempt from the local process reap and transcript watchdog. Each remote provider has independent health: sessions stay out of stale sweeps only while their own Claude or Codex mirror is healthy. If that provider reports `error`/`unavailable`, or remains `syncing` longer than `DASHBOARD_STALE_MINUTES`, an active session older than that same window falls back to the ordinary stale sweep (`abandoned`, agents completed) until a fresh mirror can reactivate it |
 | `cwd` | TEXT | YES | Working directory the CLI was launched from |
 | `model` | TEXT | YES | Claude model ID (e.g. `claude-opus-4-7`) |
 | `provider` | TEXT | NO | Product that produced the session: `claude` (default) or `codex`. Powers the composable `providers` API scope and lets shared token buckets use the correct rate card. |
@@ -211,7 +214,7 @@ CREATE TABLE sessions (
 | `awaiting_input_since` | TEXT | YES | ISO 8601 stamp set when the session is **Waiting** (Claude Stop, SessionStart with source `startup`/`resume`/`clear`, permission Notification, watchdog user-interrupt/Esc recovery, or Codex `task_complete` / `turn_aborted`). NULL otherwise. A Claude SessionStart with source `compact` (auto-compaction fires mid-turn while Claude is working) leaves this column untouched, so a genuinely-active session is not mislabeled Waiting |
 | `awaiting_reason` | TEXT | YES | Why the row is waiting: `notification`, `stop`, `session_start`, or `interrupted`. Set/cleared in lock-step with `awaiting_input_since` (Claude SessionStart→`session_start`, Claude Stop and Codex `task_complete`→`stop`, permission/input Notification→`notification`, watchdog/Esc recovery and Codex `turn_aborted`→`interrupted`). NULL otherwise. Exception: a Claude `compact`-source SessionStart preserves the existing value (neither stamps `session_start` nor clears it) |
 | `transcript_path` | TEXT | YES | Absolute path to the session's JSONL transcript. Written by `routes/hooks.js` on the first event that carries it (subsequent events no-op via a SQL guard) and read by the periodic compaction sweep — so the sweep touches only active session rows instead of scanning the entire `events` table for `json_extract(data,'$.transcript_path')`. Backfilled once from `events` by the `db.js` migration |
-| `source` | TEXT | NO | Data source this session was captured from. `'local'` for this machine's own Claude Code history (the default); otherwise the `remote_sources.id` of the remote SSH machine it was pulled from. Powers the `sources` query filter on `/api/sessions`, `/api/events`, `/api/agents`, `/api/stats`, and `/api/analytics`, and the `sources` facet on `/api/sessions/facets`. Indexed by `idx_sessions_source` |
+| `source` | TEXT | NO | Data source this session was captured from. `'local'` for this machine's own Claude Code or Codex history (the default); otherwise the `remote_sources.id` of the remote SSH machine it was pulled from. Powers the `sources` query filter on `/api/sessions`, `/api/events`, `/api/agents`, `/api/stats`, and `/api/analytics`, and the `sources` facet on `/api/sessions/facets`. Indexed by `idx_sessions_source` |
 
 **Constraints:**
 - `status` must be one of the four enum values
@@ -483,7 +486,7 @@ Independent durable byte cursor for each Codex rollout's `response_item` records
 
 ### remote_sources
 
-Config for remote SSH machines the dashboard pulls Claude Code history from, so a single dashboard can consolidate sessions from several machines. **No secrets are stored** — SSH authentication defers entirely to the host's SSH stack (ssh-agent, `~/.ssh/config`, key files). Each row's `id` is used as the `source` value on every session imported from that machine (see `sessions.source`).
+Config for remote SSH machines the dashboard pulls Claude Code and Codex history from, so a single dashboard can consolidate sessions from several machines. **No secrets are stored** — SSH authentication defers entirely to the host's SSH stack (ssh-agent, `~/.ssh/config`, key files). The optional `remote_home` and `remote_codex_home` values are the UI's **Remote Claude home** and **Remote Codex home** overrides; each row's `id` is used as the `source` value on every session imported from that machine (see `sessions.source`).
 
 ```sql
 CREATE TABLE remote_sources (
@@ -493,8 +496,11 @@ CREATE TABLE remote_sources (
     ssh_port INTEGER,
     identity_file TEXT,
     remote_home TEXT,
+    remote_codex_home TEXT,
     enabled INTEGER NOT NULL DEFAULT 1,
-    status TEXT NOT NULL DEFAULT 'idle'
+    status TEXT NOT NULL DEFAULT 'idle',
+    claude_status TEXT,
+    codex_status TEXT
         CHECK (status IN ('idle','syncing','ok','error')),
     last_error TEXT,
     last_sync_at TEXT,
@@ -514,15 +520,18 @@ CREATE TABLE remote_sources (
 | `ssh_port` | INTEGER | YES | Optional SSH port; NULL defers to the SSH default / `~/.ssh/config` |
 | `identity_file` | TEXT | YES | Optional private-key path passed to ssh (`-i`); NULL to omit |
 | `remote_home` | TEXT | YES | Optional remote Claude home to read transcripts from; NULL defaults to remote `~/.claude` |
+| `remote_codex_home` | TEXT | YES | Optional remote Codex home; NULL defaults to remote `~/.codex` and sync imports `sessions/` plus the native title index when available |
 | `enabled` | INTEGER | NO | `1` = eligible for scheduled/manual syncs, `0` = disabled (default `1`) |
 | `status` | TEXT | NO | Last sync status: `idle`, `syncing`, `ok`, or `error` (CHECK-constrained) |
+| `claude_status` | TEXT | YES | Provider-specific Claude Code sync state: `idle`, `syncing`, `ok`, `error`, or `unavailable`; existing sources retain NULL until their first provider-aware sync |
+| `codex_status` | TEXT | YES | Provider-specific Codex sync state: `idle`, `syncing`, `ok`, `error`, or `unavailable`; lets a healthy Codex mirror remain authoritative if Claude is unavailable (and vice versa) |
 | `last_error` | TEXT | YES | Error message from the last failed sync/test, or NULL |
 | `last_sync_at` | TEXT | YES | ISO 8601 timestamp of the last successful sync, or NULL |
 | `last_sync_counts` | TEXT | YES | JSON blob of the last sync's counters (imported/skipped/backfilled/errors/sessions_seen/sessions_tagged), or NULL |
 | `created_at` | TEXT | YES | ISO 8601 creation timestamp |
 | `updated_at` | TEXT | YES | ISO 8601 timestamp of the last edit |
 
-Managed through the `/api/remote-sources/*` routes; sync/status changes are broadcast over the WebSocket as `remote_source.status` and, on success, `remote_data.updated` plus per-session `session_created` / `session_updated`. See [docs/API.md → Remote Data Sources](./API.md#remote-data-sources).
+Managed through the `/api/remote-sources/*` routes. One source may expose Claude Code, Codex, or both; its top-level `status` is healthy when either provider imports, while `claude_status` / `codex_status` control the matching provider's remote lifecycle and stale-session fallback. Sync/status changes are broadcast over the WebSocket as `remote_source.status` and, on success, `remote_data.updated` plus per-session `session_created` / `session_updated`. See [docs/API.md → Remote Data Sources](./API.md#remote-data-sources).
 
 ---
 

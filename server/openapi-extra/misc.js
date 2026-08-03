@@ -58,7 +58,7 @@ const schemas = {
   RemoteSource: {
     type: "object",
     description:
-      "A configured remote SSH machine the dashboard pulls Claude Code history from. NO secrets are stored on this record — SSH authentication defers entirely to the host's SSH stack (ssh-agent, `~/.ssh/config`, and key files). `host` is an SSH destination (`user@host`) or a `~/.ssh/config` alias.",
+      "A configured remote SSH machine the dashboard pulls Claude Code and Codex history from. NO secrets are stored on this record — SSH authentication defers entirely to the host's SSH stack (ssh-agent, `~/.ssh/config`, and key files). `host` is an SSH destination (`user@host`) or a `~/.ssh/config` alias.",
     required: [
       "id",
       "label",
@@ -66,8 +66,11 @@ const schemas = {
       "ssh_port",
       "identity_file",
       "remote_home",
+      "remote_codex_home",
       "enabled",
       "status",
+      "claude_status",
+      "codex_status",
       "last_error",
       "last_sync_at",
       "last_sync_counts",
@@ -110,6 +113,13 @@ const schemas = {
           "Optional remote Claude home to read transcripts from; null defaults to the remote `~/.claude`.",
         example: "~/.claude",
       },
+      remote_codex_home: {
+        type: "string",
+        nullable: true,
+        description:
+          "Optional remote Codex home to read rollout transcripts and native session titles from; null defaults to the remote `~/.codex`.",
+        example: "~/.codex",
+      },
       enabled: {
         type: "boolean",
         description: "Whether this source is eligible for scheduled/manual syncs.",
@@ -120,6 +130,22 @@ const schemas = {
         enum: ["idle", "syncing", "ok", "error"],
         description: "Last known sync status of the source.",
         example: "ok",
+      },
+      claude_status: {
+        type: "string",
+        nullable: true,
+        enum: ["idle", "syncing", "ok", "unavailable", "error"],
+        description:
+          "Provider-specific Claude Code mirror state. Null on legacy source rows before their first provider-aware sync.",
+        example: "ok",
+      },
+      codex_status: {
+        type: "string",
+        nullable: true,
+        enum: ["idle", "syncing", "ok", "unavailable", "error"],
+        description:
+          "Provider-specific Codex mirror state. `unavailable` means no Codex sessions directory was found on an otherwise reachable source.",
+        example: "unavailable",
       },
       last_error: {
         type: "string",
@@ -139,7 +165,7 @@ const schemas = {
         nullable: true,
         additionalProperties: true,
         description:
-          "Counters from the last sync (imported / skipped / backfilled / errors / sessions_seen / sessions_tagged), or null if never synced.",
+          "Combined counters from the last sync plus optional provider-specific results for Claude Code and Codex, or null if never synced.",
         example: {
           imported: 9,
           skipped: 41,
@@ -147,6 +173,10 @@ const schemas = {
           errors: 0,
           sessions_seen: 50,
           sessions_tagged: 50,
+          providers: {
+            claude: { status: "ok", imported: 9, sessions_tagged: 50 },
+            codex: { status: "unavailable" },
+          },
         },
       },
       created_at: {
@@ -191,6 +221,11 @@ const schemas = {
         description: "Optional remote Claude home; defaults to the remote `~/.claude`.",
         example: "~/.claude",
       },
+      remote_codex_home: {
+        type: "string",
+        description: "Optional remote Codex home; defaults to the remote `~/.codex`.",
+        example: "~/.codex",
+      },
       enabled: {
         type: "boolean",
         description: "Whether the source is enabled for syncing (default true).",
@@ -209,6 +244,7 @@ const schemas = {
       ssh_port: { type: "integer", nullable: true, example: 2222 },
       identity_file: { type: "string", nullable: true, example: "~/.ssh/id_ed25519" },
       remote_home: { type: "string", nullable: true, example: "~/.claude" },
+      remote_codex_home: { type: "string", nullable: true, example: "~/.codex" },
       enabled: { type: "boolean", example: false },
     },
   },
@@ -242,11 +278,28 @@ const schemas = {
         example: "Connected; found 24 project directories under ~/.claude/projects.",
       },
       remoteProjects: {
-        type: "array",
+        type: "string",
+        description: "Resolved remote Claude Code projects path checked by the probe.",
+        example: "~/.claude/projects",
+      },
+      remoteCodexSessions: {
+        type: "string",
+        description: "Resolved remote Codex sessions path checked by the probe.",
+        example: "~/.codex/sessions",
+      },
+      providers: {
+        type: "object",
         description:
-          "Optional list of remote project directories discovered during the probe (present on success).",
-        items: { type: "string" },
-        example: ["-Users-son-code-foo", "-Users-son-code-bar"],
+          "Per-provider probe results. A source may be successful when one provider is available and the other is absent.",
+        additionalProperties: {
+          type: "object",
+          required: ["status", "message", "path"],
+          properties: {
+            status: { type: "string", enum: ["ok", "unavailable", "error"] },
+            message: { type: "string" },
+            path: { type: "string" },
+          },
+        },
       },
     },
   },
@@ -274,6 +327,11 @@ const schemas = {
         type: "integer",
         description: "Number of imported sessions stamped with this source's id.",
         example: 50,
+      },
+      providers: {
+        type: "object",
+        description: "Provider-specific import counters and availability state.",
+        additionalProperties: true,
       },
     },
   },
@@ -585,7 +643,7 @@ const paths = {
       tags: ["Remote Sources"],
       summary: "List remote data sources",
       description:
-        "Returns every configured remote SSH source the dashboard pulls Claude Code history from. NO secrets are ever returned — these records store none (SSH auth defers to the host SSH stack). Each entry carries its last sync `status`, `last_error`, `last_sync_at`, and `last_sync_counts`. Read-only; always 200.",
+        "Returns every configured remote SSH source the dashboard pulls Claude Code and Codex history from. NO secrets are ever returned — these records store none (SSH auth defers to the host SSH stack). Each entry carries source-wide and provider-specific sync state plus last counters. Read-only; always 200.",
       operationId: "listRemoteSources",
       responses: {
         200: {
@@ -602,8 +660,11 @@ const paths = {
                     ssh_port: 22,
                     identity_file: "~/.ssh/id_ed25519",
                     remote_home: "~/.claude",
+                    remote_codex_home: "~/.codex",
                     enabled: true,
                     status: "ok",
+                    claude_status: "ok",
+                    codex_status: "ok",
                     last_error: null,
                     last_sync_at: "2026-07-22T18:41:55.117Z",
                     last_sync_counts: {
@@ -613,6 +674,10 @@ const paths = {
                       errors: 0,
                       sessions_seen: 50,
                       sessions_tagged: 50,
+                      providers: {
+                        claude: { status: "ok", imported: 9, sessions_tagged: 50 },
+                        codex: { status: "ok", imported: 2, sessions_tagged: 2 },
+                      },
                     },
                     created_at: "2026-07-20T09:15:00.000Z",
                     updated_at: "2026-07-22T18:41:55.117Z",
@@ -628,7 +693,7 @@ const paths = {
       tags: ["Remote Sources"],
       summary: "Register a remote data source",
       description:
-        "Registers a remote SSH source. `label` and `host` are required; `host` is an SSH destination (`user@host`) or a `~/.ssh/config` alias. Optional `ssh_port`, `identity_file`, `remote_home`, and `enabled` fine-tune the connection. No credentials are accepted or stored — auth defers to the host SSH stack. Returns the created source (201). Validation failures return 400 `{ error: { code, message } }` with one of the codes INVALID_LABEL, INVALID_HOST, INVALID_PORT, INVALID_IDENTITY_FILE, INVALID_REMOTE_HOME.",
+        "Registers a remote SSH source. `label` and `host` are required; `host` is an SSH destination (`user@host`) or a `~/.ssh/config` alias. Optional `ssh_port`, `identity_file`, `remote_home`, `remote_codex_home`, and `enabled` fine-tune the connection. No credentials are accepted or stored — auth defers to the host SSH stack. Returns the created source (201). Validation failures return 400 `{ error: { code, message } }` with one of the codes INVALID_LABEL, INVALID_HOST, INVALID_PORT, INVALID_IDENTITY_FILE, INVALID_REMOTE_HOME.",
       operationId: "createRemoteSource",
       requestBody: {
         required: true,
@@ -641,13 +706,14 @@ const paths = {
                 value: { label: "Work laptop", host: "studio" },
               },
               full: {
-                summary: "Full — explicit port, key, and remote home",
+                summary: "Full — explicit port, key, and both remote homes",
                 value: {
                   label: "Work laptop",
                   host: "son@studio.local",
                   ssh_port: 22,
                   identity_file: "~/.ssh/id_ed25519",
                   remote_home: "~/.claude",
+                  remote_codex_home: "~/.codex",
                   enabled: true,
                 },
               },
@@ -669,8 +735,11 @@ const paths = {
                   ssh_port: 22,
                   identity_file: "~/.ssh/id_ed25519",
                   remote_home: "~/.claude",
+                  remote_codex_home: "~/.codex",
                   enabled: true,
                   status: "idle",
+                  claude_status: null,
+                  codex_status: null,
                   last_error: null,
                   last_sync_at: null,
                   last_sync_counts: null,
@@ -759,8 +828,11 @@ const paths = {
                   ssh_port: 2222,
                   identity_file: "~/.ssh/id_ed25519",
                   remote_home: "~/.claude",
+                  remote_codex_home: "~/.codex",
                   enabled: false,
                   status: "ok",
+                  claude_status: "ok",
+                  codex_status: "unavailable",
                   last_error: null,
                   last_sync_at: "2026-07-22T18:41:55.117Z",
                   last_sync_counts: {
@@ -879,7 +951,7 @@ const paths = {
       tags: ["Remote Sources"],
       summary: "Probe SSH connectivity to a remote source",
       description:
-        "Runs an SSH connectivity probe against the source and reports the outcome synchronously. The `ok` flag carries the probe result and `message` is a human-readable summary; on success `remoteProjects` may list the remote project directories discovered under the remote Claude home. This does not import anything — use POST /{id}/sync to pull.",
+        "Runs an SSH connectivity probe against the source and checks both Claude Code and Codex history locations. A source is usable when either provider is found; `providers` identifies the exact path and result for each. This does not import anything — use POST /{id}/sync to pull.",
       operationId: "testRemoteSource",
       parameters: [
         {
@@ -902,8 +974,13 @@ const paths = {
                   summary: "Reachable",
                   value: {
                     ok: true,
-                    message: "Connected; found 24 project directories under ~/.claude/projects.",
-                    remoteProjects: ["-Users-son-code-foo", "-Users-son-code-bar"],
+                    message: "Connected. Claude Code and Codex history available.",
+                    remoteProjects: "~/.claude/projects",
+                    remoteCodexSessions: "~/.codex/sessions",
+                    providers: {
+                      claude: { status: "ok", path: "~/.claude/projects", message: "Connected." },
+                      codex: { status: "ok", path: "~/.codex/sessions", message: "Connected." },
+                    },
                   },
                 },
                 failure: {
@@ -935,9 +1012,9 @@ const paths = {
   "/api/remote-sources/{id}/sync": {
     post: {
       tags: ["Remote Sources"],
-      summary: "Pull Claude Code history from a remote source now",
+      summary: "Pull Claude Code and Codex history from a remote source now",
       description:
-        "Triggers an immediate pull of Claude Code history from the remote source over SSH, importing new transcripts through the same idempotent, baseline-preserving pipeline used for local imports and tagging imported sessions with this source's id. The response reports the per-run counters. Sync progress/completion is also broadcast over the WebSocket as `remote_source.status` frames.",
+        "Triggers an immediate pull of Claude Code and Codex history from the remote source over SSH. Each provider uses the same idempotent, baseline-preserving importer as its local path; Codex also mirrors its native rename index. A source succeeds when either provider is available, and the response reports provider-specific counters and availability. Sync progress/completion is broadcast over WebSocket frames.",
       operationId: "syncRemoteSource",
       parameters: [
         {
@@ -963,6 +1040,10 @@ const paths = {
                 errors: 0,
                 sessions_seen: 50,
                 sessions_tagged: 50,
+                providers: {
+                  claude: { status: "ok", imported: 9, sessions_tagged: 48 },
+                  codex: { status: "ok", imported: 2, sessions_tagged: 2 },
+                },
               },
             },
           },
@@ -998,7 +1079,7 @@ const paths = {
       tags: ["Remote Sources"],
       summary: "Sync all enabled remote sources now",
       description:
-        "Pulls Claude Code history from every enabled remote source over SSH, sequentially (one connection at a time). Per-source failures are isolated — one unreachable source never aborts the others — and each outcome is returned in `results`. Progress/completion is also broadcast over the WebSocket as `remote_source.status` frames. Always returns 200.",
+        "Pulls Claude Code and Codex history from every enabled remote source over SSH, sequentially (one connection at a time). Per-source failures are isolated — one unreachable source never aborts the others — and each outcome is returned in `results`. Progress/completion is also broadcast over WebSocket frames. Always returns 200.",
       operationId: "syncAllRemoteSources",
       responses: {
         200: {

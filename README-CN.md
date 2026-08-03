@@ -275,7 +275,7 @@ flowchart LR
 <p align="center">
   <img src="images/remote.png" alt="设置 — 远程数据源" width="100%">
   <br>
-  <em>🛰️ <strong>设置 · 远程数据源</strong> — 通过 SSH 从其他机器拉取 Claude Code 活动：按目标地址添加数据源、测试连通性、手动或通过后台轮询器同步，并在本地、全部数据源或指定机器之间切换全局数据范围，每个会话都带有来源徽章</em>
+  <em>🛰️ <strong>设置 · 远程数据源</strong> — 通过 SSH 从其他机器拉取 Claude Code 和 Codex 活动：可选地分别设置远程 Claude 主目录和远程 Codex 主目录，逐个测试 provider、手动或通过后台轮询器同步，并在本地、全部数据源或指定机器之间切换全局数据范围，每个会话都带有来源徽章</em>
 </p>
 
 侧边栏提供快速访问 Dashboard、看板、会话列表、活动流、分析、工作流和设置。每个页面旨在通过实时更新和丰富的可视化，为你提供对 Claude Code Agent 活动的深度洞察。
@@ -316,7 +316,7 @@ Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Ag
 | **子会话/恢复会话** | 新事件到达时自动重新激活会话,正确处理 `/resume` 和孤立会话。周期性清理(每 ¼ 个 `DASHBOARD_STALE_MINUTES`,夹在 60 秒–5 分钟之间)标记遗漏事件检测的废弃会话 |
 | **预存会话检测** | 服务器启动时已在运行的会话以"活跃"状态导入（基于近期 JSONL 文件修改时间）。Stop 事件也会重新激活已导入的完成/废弃会话，因此进行中的会话的第一个 Hook 始终会显示在 Dashboard 上 |
 | **持续项目同步** | 启动时对 `~/.claude/projects` 的自动导入是一次性的（由标记位把关），因此在首次启动**之后**才创建的项目文件夹——其会话从不经过 Hook 流入（例如 host-only Hook 被禁用）——在手动重新扫描之前都将不可见。后台同步（`startSessionSync`）通过三个共享同一个 mtime 缓存 + 单次合并扫描的触发器弥补了这个空隙：启动时的**立即**扫描、一个去抖的 **`fs.watch`**（新会话文件 / 项目文件夹一出现就触发；在 macOS/Windows 上递归监听，在 Linux 上监听根目录 + 直接子文件夹，以规避用户态递归监听器的隐患），以及一个**周期性轮询**（`DASHBOARD_SESSION_SYNC_MS`，默认 30 秒）。每次扫描只重新解析 mtime 前进过的文件，并广播 `session_created`/`session_updated`（外加主 Agent），让 UI 实时刷新；DB 中已有且未变更的会话会被跳过、不再重新解析，因此重启成本保持为 O(新增/变更文件) |
-| **远程数据源** | 通过 SSH 实时从其他机器收集 Claude Code 数据。Dashboard 通过 **scp**（Windows SSH 上 WSL 托管的 Claude 使用 `wsl.exe` + `tar`）将每台机器的 `~/.claude/projects` 镜像到按源隔离的沙箱暂存目录，经与本地历史**相同的导入器**处理，并为导入会话打上来源标签（`sessions.source`）。后台轮询器（`DASHBOARD_REMOTE_SYNC_MS`，默认 15 秒；`0` 禁用）保持近实时——新增或重新启用源也会立即拉取——成功同步会广播 `remote_data.updated` 及逐会话的 `session_created` / `session_updated` 帧，打开页面无需手动 Sync 即可刷新。全局**数据范围**选择器（仅本地 / 全部 / 指定源）可收窄整个应用。在 **Settings → Remote Data Sources** 和 `ccam remote-sources` 中管理；状态经 `remote_source.status` 推送，Sessions 行显示来源徽章。远程会话**不接收本地实时 Hook**，因此健康来源仍被排除在本地 `ps`/`lsof` 回收和看门狗 transcript 扫描之外；每次成功同步都会依据镜像 transcript 重新核对**实时状态**——JSONL 内最新事件时间戳（回退到镜像 mtime）落在 `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS`（默认 10 分钟）内则视为远程 CLI 仍在运行（⇒ `active`），否则成为 `completed`。若来源报告 SSH `error`，或在 `syncing` 状态停滞超过 `DASHBOARD_STALE_MINUTES`，且一个 `active` 会话本身也超过同一窗口，则它会落入常规陈旧扫描（`abandoned`，agents 完成）。后续的新鲜镜像会重新激活仍在写入的会话，因此不可用的远程来源不会留下永久的等待中卡片 |
+| **远程数据源** | 通过 SSH 实时从其他机器收集 Claude Code 和 Codex 数据。每个来源独立镜像 `~/.claude/projects` 与 `~/.codex/sessions`（另含 Codex 的轻量 `session_index.jsonl`，保留原生重命名标题），使用 **scp**；WSL 内 CLI 则使用 `wsl.exe` + `tar`。隔离暂存区使用各 provider 的本地导入器，并以 `sessions.source` 标记会话；一个来源可以仅有 Claude、仅有 Codex 或两者兼具。`DASHBOARD_REMOTE_SYNC_MS`（默认 15 秒）轮询会发布按 provider 划分的状态和计数。某个 provider 缺失、报错或卡住时，只有它的旧会话进入 stale 扫描，健康的兄弟 provider 仍由镜像管理。在 **Settings → Remote Data Sources** 或通过 `ccam remote-sources` 可选地配置独立的远程 Claude 主目录和远程 Codex 主目录；SSH 认证仍完全由主机负责，不保存任何秘密。 |
 | **响应式设计** | 适配移动端的布局，堆叠网格、可滚动表格和可折叠侧边栏 |
 | **界面本地化** | 内置语言切换，UI 文案与无障碍标签已覆盖英文（`en`）、中文（`zh`）、越南语（`vi`）和韩语（`ko`）及西班牙语（`es`）。覆盖范围现已贯穿 Workflows 页面的所有 tooltip：统计卡片的计算说明与按值分桶的解读、每个图表的「此图展示什么 / 如何阅读 / 为何重要」浮层、所有图形悬停 tooltip（编排 DAG、工具流、Pipeline、模型委派、并发时间线）、Workflow Patterns 详情面板的叙述与建议、设置页 → 模型定价的信息浮层、CLAUDE_HOME 面板，以及完整的 Import History 流程 |
 | **种子数据** | 内置种子脚本，用于演示和开发 |
@@ -637,8 +637,8 @@ flowchart LR
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | 持续 `~/.claude/projects` 后台同步的轮询间隔（毫秒），用于显示启动后才加入、其会话从不经过 Hook 流入的项目。无论如何 `fs.watch` 监听器都会近乎即时触发；该轮询是安全兜底（监听器可能错过事件 / 在网络文件系统上不触发）。设为 `0` 可禁用轮询，同时让监听器保持运行 |
 | `DASHBOARD_CODEX_HOME` | `CODEX_HOME` 或 `~/.codex` | 可选的本地 Codex 状态目录。在设置中保存新位置会持久化此仪表盘专用覆盖、重新启用实时监视，并立即扫描新的 `sessions/` 树。 |
 | `DASHBOARD_CODEX_SYNC_MS` | `4000` | 仅追加 Codex rollout 的安全兜底轮询间隔（毫秒）。Codex Hook 会立即触发同一个增量采集器；设为 `0` 仅禁用轮询，在可用时仍保留文件系统监听器。 |
-| `DASHBOARD_REMOTE_SYNC_MS` | `15000` | 通过 `scp` 拉取远程数据源的间隔（毫秒）。新增或重新启用数据源时会立即同步一次。设为 `0` 可禁用远程源轮询 |
-| `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000`（10 分钟） | 一个**远程数据源**会话实时状态的新鲜度窗口。每次同步时，镜像 Transcript 的 **JSONL 最后事件** 在此窗口内的远程会话会被视为仍在运行（`active`）；一旦镜像停止推进的时间超过此窗口，会话就被核对为 `completed`。远程会话不接收实时 Hook，因此本项取代了对它们跳过的本地存活性/过期扫描。链路较慢或空闲回合很长时可调大 |
+| `DASHBOARD_REMOTE_SYNC_MS` | `15000` | **远程数据源**后台同步的间隔（毫秒），会独立拉取每个已启用远程的 `~/.claude/projects` 和 `~/.codex/sessions`（另含 Codex 的轻量 `session_index.jsonl` 标题索引），再分别通过本地导入器重新导入。新增或重新启用数据源时也会立即同步一次。设为 `0` 可禁用远程源轮询 |
+| `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000`（10 分钟） | **远程数据源**会话实时状态的新鲜度窗口。每次同步时，若远程 Claude Code 或 Codex 会话对应镜像 transcript 的 **JSONL 最后事件**在此窗口内，仍视为运行中（`active`）；镜像停止推进超过该时长后，会话会被协调为 `completed`。远程会话不接收实时 Hook，因此按 provider 的镜像协调取代本地 liveness；失败、缺失或卡住的 provider 镜像会回退到常规 stale 扫描。链路较慢或空闲回合很长时可调大 |
 | `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` | `600000` | 每个远程源 `scp` 的超时时间 |
 | `DASHBOARD_REMOTE_TEST_TIMEOUT_MS` | `15000` | 到源的 SSH 连接探测超时时间 |
 | `NODE_ENV` | `development` | 设为 `production` 以提供构建后的客户端 |

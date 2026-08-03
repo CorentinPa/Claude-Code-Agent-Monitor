@@ -896,8 +896,8 @@ db.exec(
    ON dashboard_runs(provider, started_at DESC)`
 );
 
-// Remote data sources: other machines whose Claude Code history this dashboard
-// pulls in over SSH. Config only — NO secrets are stored here: authentication
+// Remote data sources: other machines whose Claude Code and Codex history this
+// dashboard pulls in over SSH. Config only — NO secrets are stored here: authentication
 // always defers to the host's own SSH stack (~/.ssh/config, ssh-agent, keys,
 // known_hosts), so `host` is an ssh destination (user@host or a config alias)
 // and `identity_file` is at most a path to a key the user already controls.
@@ -910,8 +910,11 @@ db.exec(`
     ssh_port INTEGER,
     identity_file TEXT,
     remote_home TEXT,
+    remote_codex_home TEXT,
     enabled INTEGER NOT NULL DEFAULT 1,
     status TEXT NOT NULL DEFAULT 'idle' CHECK(status IN ('idle','syncing','ok','error')),
+    claude_status TEXT,
+    codex_status TEXT,
     last_error TEXT,
     last_sync_at TEXT,
     last_sync_counts TEXT,
@@ -919,6 +922,26 @@ db.exec(`
     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
   );
 `);
+
+// Provider-specific remote homes and sync state arrived after the original
+// Claude-only source table. Keep them nullable so existing source rows retain
+// their historical, source-wide `status` as the fallback until their first
+// dual-provider sync writes the precise capability state.
+try {
+  db.prepare("SELECT remote_codex_home FROM remote_sources LIMIT 1").get();
+} catch {
+  db.prepare("ALTER TABLE remote_sources ADD COLUMN remote_codex_home TEXT").run();
+}
+try {
+  db.prepare("SELECT claude_status FROM remote_sources LIMIT 1").get();
+} catch {
+  db.prepare("ALTER TABLE remote_sources ADD COLUMN claude_status TEXT").run();
+}
+try {
+  db.prepare("SELECT codex_status FROM remote_sources LIMIT 1").get();
+} catch {
+  db.prepare("ALTER TABLE remote_sources ADD COLUMN codex_status TEXT").run();
+}
 
 // Migrate webhook_targets for first-class providers. Earlier installs created
 // the table with a 4-value `type` CHECK (slack/discord/teams/generic) and no
@@ -1173,10 +1196,25 @@ db.prepare(
         SELECT 1 FROM remote_sources rs
         WHERE rs.id = sessions.source
           AND (
-            rs.status = 'error'
+            (
+              COALESCE(sessions.provider, 'claude') = 'codex'
+              AND (
+                COALESCE(rs.codex_status, rs.status) IN ('error', 'unavailable')
+                OR (
+                  COALESCE(rs.codex_status, rs.status) = 'syncing'
+                  AND rs.updated_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 hour')
+                )
+              )
+            )
             OR (
-              rs.status = 'syncing'
-              AND rs.updated_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 hour')
+              COALESCE(sessions.provider, 'claude') != 'codex'
+              AND (
+                COALESCE(rs.claude_status, rs.status) IN ('error', 'unavailable')
+                OR (
+                  COALESCE(rs.claude_status, rs.status) = 'syncing'
+                  AND rs.updated_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 hour')
+                )
+              )
             )
           )
       )
@@ -1362,8 +1400,9 @@ const stmts = {
   ),
   getRemoteSource: db.prepare("SELECT * FROM remote_sources WHERE id = ?"),
   insertRemoteSource: db.prepare(
-    `INSERT INTO remote_sources (id, label, host, ssh_port, identity_file, remote_home, enabled)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO remote_sources (
+       id, label, host, ssh_port, identity_file, remote_home, remote_codex_home, enabled
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   ),
   updateRemoteSource: db.prepare(
     `UPDATE remote_sources SET
@@ -1372,6 +1411,7 @@ const stmts = {
        ssh_port = ?,
        identity_file = ?,
        remote_home = ?,
+       remote_codex_home = ?,
        enabled = COALESCE(?, enabled),
        updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
      WHERE id = ?`
@@ -1380,8 +1420,22 @@ const stmts = {
   setRemoteSourceStatus: db.prepare(
     `UPDATE remote_sources SET status = ?, last_error = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`
   ),
+  // A source may serve only one provider. These individual states let the
+  // stale-session sweep trust a fresh Codex mirror without leaving old Claude
+  // sessions alive when the Claude half of that source has disappeared (and
+  // vice versa). `status` remains the concise overall status shown in Settings.
+  setRemoteSourceProviderStatus: db.prepare(
+    `UPDATE remote_sources SET
+       status = ?, last_error = ?, claude_status = ?, codex_status = ?,
+       updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+     WHERE id = ?`
+  ),
   setRemoteSourceSyncResult: db.prepare(
-    `UPDATE remote_sources SET status = ?, last_error = ?, last_sync_at = ?, last_sync_counts = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`
+    `UPDATE remote_sources SET
+       status = ?, last_error = ?, last_sync_at = ?, last_sync_counts = ?,
+       claude_status = ?, codex_status = ?,
+       updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+     WHERE id = ?`
   ),
 
   getAgent: db.prepare("SELECT * FROM agents WHERE id = ?"),
@@ -1458,11 +1512,12 @@ const stmts = {
   touchSession: db.prepare(
     "UPDATE sessions SET updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?"
   ),
-  // A healthy remote source is excluded: mirror reconciliation owns its state,
-  // and import cadence is not remote activity. If the source errors, its only
-  // status authority is gone, so let the same stale rule abandon old sessions.
-  // A `syncing` state is trusted only while it is newer than the global stale
-  // window; a crash can otherwise strand a source in syncing forever.
+  // A healthy remote provider is excluded: its mirror reconciliation owns
+  // state, and import cadence is not remote activity. Claude and Codex may be
+  // independently present on one SSH source, so use the matching provider
+  // state when it exists and fall back to the legacy source-wide status for
+  // rows created before provider-aware remote sync. A stuck or failed provider
+  // falls through to the ordinary stale rule instead of leaving cards waiting.
   findStaleSessions: db.prepare(
     `SELECT s.id FROM sessions s
      LEFT JOIN remote_sources rs ON rs.id = s.source
@@ -1472,10 +1527,25 @@ const stmts = {
          s.source = 'local'
          OR s.source IS NULL
          OR rs.id IS NULL
-         OR rs.status = 'error'
          OR (
-           rs.status = 'syncing'
-           AND rs.updated_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-' || ? || ' minutes')
+           COALESCE(s.provider, 'claude') = 'codex'
+           AND (
+             COALESCE(rs.codex_status, rs.status) IN ('error', 'unavailable')
+             OR (
+               COALESCE(rs.codex_status, rs.status) = 'syncing'
+               AND rs.updated_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-' || ? || ' minutes')
+             )
+           )
+         )
+         OR (
+           COALESCE(s.provider, 'claude') != 'codex'
+           AND (
+             COALESCE(rs.claude_status, rs.status) IN ('error', 'unavailable')
+             OR (
+               COALESCE(rs.claude_status, rs.status) = 'syncing'
+               AND rs.updated_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-' || ? || ' minutes')
+             )
+           )
          )
        )`
   ),

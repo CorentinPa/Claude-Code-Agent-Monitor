@@ -353,7 +353,7 @@ CREATE TABLE pricing_rules (
 
 #### `remote_sources`
 
-Configured remote machines whose Claude Code history the dashboard pulls over SSH (see [Remote Data Sources](#remote-data-sources)). Config + operational status only — **no secrets** are stored; authentication defers to the host SSH stack.
+Configured remote machines whose Claude Code, Codex, or combined history the dashboard pulls over SSH (see [Remote Data Sources](#remote-data-sources)). Config + operational status only — **no secrets** are stored; authentication defers to the host SSH stack.
 
 ```sql
 CREATE TABLE remote_sources (
@@ -362,9 +362,12 @@ CREATE TABLE remote_sources (
     host TEXT NOT NULL,           -- ssh destination (user@host or ~/.ssh/config alias)
     ssh_port INTEGER,
     identity_file TEXT,           -- optional path to a key the user already controls
-    remote_home TEXT,             -- remote home holding ~/.claude/projects
+    remote_home TEXT,             -- optional Remote Claude home holding ~/.claude/projects
+    remote_codex_home TEXT,       -- optional Remote Codex home holding ~/.codex/sessions
     enabled INTEGER NOT NULL DEFAULT 1,
     status TEXT NOT NULL DEFAULT 'idle',   -- idle | syncing | ok | error
+    claude_status TEXT,           -- provider state, including unavailable
+    codex_status TEXT,            -- provider state, including unavailable
     last_error TEXT,
     last_sync_at TEXT,
     last_sync_counts TEXT,        -- JSON import counters from the last sync
@@ -527,7 +530,7 @@ Codex accounting keeps fresh input, cached input, cache writes, output, and reas
 
 ### Remote Data Sources
 
-Live remote/multi-machine data collection over SSH. The dashboard pulls Claude Code history from other machines: `server/lib/remote-sync.js` uses recursive **`scp` over SSH** (built into OpenSSH — no `rsync` or extra packages on the remote) to mirror each remote's `~/.claude/projects` into a sandboxed per-source staging dir under the data dir, feeds it through the **same** importer used for local history (`scripts/import-history.js` `importFromDirectory`), and tags every imported session with the source id (`sessions.source`). Authentication defers entirely to the host SSH stack (ssh-agent / `~/.ssh/config` / identity file) — **no secrets are stored**; every command runs via `execFile`/`spawn` argument arrays (never a shell string) and `StrictHostKeyChecking` is left at its SSH default.
+Live remote/multi-machine data collection over SSH. `server/lib/remote-sync.js` independently mirrors a source's Claude Code tree (`~/.claude/projects`) and Codex tree (`~/.codex/sessions` plus the lightweight native `session_index.jsonl` title index) into isolated staging dirs. Each uses its normal local importer — `importFromDirectory` for Claude and `importCodexFromDirectory` for Codex — then tags imported sessions with `sessions.source`. A source can be Claude-only, Codex-only, or both; either provider can keep the source healthy while provider-specific state preserves correct lifecycle fallback. Authentication defers entirely to the host SSH stack (ssh-agent / `~/.ssh/config` / identity file) — **no secrets are stored**; every command runs via `execFile`/`spawn` argument arrays (never a shell string) and `StrictHostKeyChecking` is left at its SSH default.
 
 > **Cursor on remotes (informational):** The same note applies on synced machines — if Cursor on a remote host writes to `~/.claude`, those sessions are imported too. CCAM reads the paths, not the app name.
 
@@ -541,7 +544,7 @@ Live remote/multi-machine data collection over SSH. The dashboard pulls Claude C
 | `POST`   | `/api/remote-sources/:id/sync`| Trigger an on-demand pull |
 | `POST`   | `/api/remote-sources/sync-all`| Pull every enabled source now (sequential; per-source failures isolated) |
 
-Every status transition broadcasts `remote_source.status` `{ id, status, error?, last_sync_at? }` over `/ws` (`status` one of `idle | syncing | ok | error | deleted`). A successful sync also emits `remote_data.updated` `{ sourceId, source, label?, counters?, last_sync_at? }` so open UI pages refetch sessions, costs, and analytics immediately. Enabled sources are also pulled automatically by the background sync poller (`startRemoteSourceSync` in `server/index.js`) — see [Continuous Project Sync](#continuous-project-sync) and the environment table.
+Every status transition broadcasts `remote_source.status` `{ id, status, error?, providers?, last_sync_at? }` over `/ws`; `providers` contains Claude/Codex availability, including `unavailable` for a missing history tree. A successful sync also emits `remote_data.updated` `{ sourceId, source, label?, counters?, providers?, last_sync_at? }` so open UI pages refetch sessions, costs, and analytics immediately. Enabled sources are also pulled automatically by the background sync poller (`startRemoteSourceSync` in `server/index.js`) — see [Continuous Project Sync](#continuous-project-sync) and the environment table.
 
 #### Setup & troubleshooting
 
@@ -553,18 +556,18 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
 4. **Cross-platform notes:**
    - **macOS auth (Secretive, 1Password, ssh-agent, or file keys):** leave **Identity file** blank unless you need a specific key path. CCAM mirrors your shell: `ssh -G` supplies `IdentityAgent` when your `~/.ssh/config` does; otherwise it uses `SSH_AUTH_SOCK` (including `launchctl getenv` when the dashboard is GUI-launched) or plain `~/.ssh` keys. Secretive is used only when your SSH config points at it — never forced.
    - **Windows dashboard:** OpenSSH Client optional feature; CCAM prefers `ssh`/`scp` on `PATH`, then falls back to `System32\OpenSSH\`.
-   - **Windows remote:** default `~/.claude` checks the Windows profile **and** WSL (`~/.claude` inside the default distro). If Claude Code runs only in WSL, leave remote home blank — CCAM auto-detects WSL and pulls via `wsl.exe` + `tar`, or set `wsl:~/.claude` / `wsl:/home/you/.claude` explicitly. Native Windows installs can use `C:/Users/you/.claude`; UNC paths such as `//wsl.localhost/Ubuntu/home/you/.claude` also work when `scp` can read them.
-   - **Linux/macOS remote:** default `~/.claude/projects`; custom POSIX paths (`/home/ubuntu/.claude`) also work. Prefer SSH directly into WSL/Linux rather than Windows→WSL when possible.
+   - **Windows remote:** default homes check the Windows profile **and** WSL (`~/.claude` / `~/.codex` inside the default distro). If either CLI runs only in WSL, leave that home blank — CCAM auto-detects WSL and pulls via `wsl.exe` + `tar`, or set `wsl:~/.claude` / `wsl:~/.codex` explicitly. Native Windows installs can use `C:/Users/you/.claude` / `C:/Users/you/.codex`; UNC paths also work when `scp` can read them.
+   - **Linux/macOS remote:** defaults are `~/.claude/projects` and `~/.codex/sessions`; custom POSIX roots (`/home/ubuntu/.claude`, `/home/ubuntu/.codex`) also work. Prefer SSH directly into WSL/Linux rather than Windows→WSL when possible.
 5. **Add the source** (Settings → Remote Data Sources, or `ccam remote-sources add`), click **Test**, then **Sync**.
 
 | Symptom (surfaced in `last_error` / the Test result) | Cause & fix |
 | --- | --- |
 | `Host key verification failed` | The host isn't in `known_hosts`. `ssh user@host` once to accept its key. |
 | `Permission denied (publickey)` | No usable key for non-interactive auth. `ssh-add` your key, set `IdentityFile` in `~/.ssh/config`, or set the source's `identity_file`. |
-| `… does not exist on the remote` | Claude Code's home is elsewhere on that machine. Set the source's **remote home** (default `~/.claude`). |
+| `… does not exist on the remote` | The Test result identifies Claude Code or Codex. Set that provider's optional **Remote Claude home** / **Remote Codex home** field (defaults `~/.claude` / `~/.codex`). |
 | `scp` / `ssh` not recognized (Windows) | Install the **OpenSSH Client** optional feature, restart the dashboard, or confirm `C:\Windows\System32\OpenSSH\scp.exe` exists. |
 | `Permission denied (publickey,password)` | SSH auth failed in the **dashboard process** (not necessarily your Terminal). Leave **Identity file** blank for Secretive, ssh-agent, or default `~/.ssh` keys — CCAM follows `ssh -G` / your config and does not force Secretive. Start the dashboard from the same shell as `ssh user@host`, or ensure your agent is running. Set **Identity file** only for an explicit on-disk key. |
-| Connected but directory missing | Claude Code may not be installed on the remote, or `remote_home` points at the wrong path. On Windows SSH with Claude in WSL, leave remote home blank (auto WSL) or set `wsl:~/.claude`. Default native path is `~/.claude/projects`. |
+| Connected but directory missing | Claude Code or Codex may not be installed on the remote, or its `remote_home` / `remote_codex_home` points at the wrong path. On Windows SSH with either CLI in WSL, leave the matching home blank (auto WSL) or set `wsl:~/.claude` / `wsl:~/.codex`. Default native paths are `~/.claude/projects` and `~/.codex/sessions`. |
 | Sync hangs then errors after ~10 min | Bounded by `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS`; usually a network/host issue — verify with **Test** (bounded by `DASHBOARD_REMOTE_TEST_TIMEOUT_MS`). |
 
 ### Settings / Ops
@@ -1175,9 +1178,9 @@ Each sweep parses **only** files whose mtime is new or has advanced. A cold-cach
 
 ### Remote Data Source Sync
 
-`startRemoteSourceSync` (in `server/index.js`, wired into `startBackgroundServices`) pulls history from every **enabled** [Remote Data Source](#remote-data-sources) on an interval. A cheap guard first checks whether any enabled source exists, so the poller does no SSH work at all until the user configures one. Each tick delegates to `server/lib/remote-sync.js`, which pulls the remote's `~/.claude/projects` via `scp` into a sandboxed per-source staging dir and runs it through `importFromDirectory`, tagging imported sessions with the source id. The interval is `DASHBOARD_REMOTE_SYNC_MS` (default `15000` ms; `0` disables the poller); adding or re-enabling a source also triggers an immediate pull. A per-source pull is bounded by `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` (default `600000` ms) and the connectivity test by `DASHBOARD_REMOTE_TEST_TIMEOUT_MS` (default `15000` ms). Status transitions broadcast `remote_source.status`; successful syncs also broadcast `remote_data.updated` so the client refetches sessions, costs, and analytics as soon as the mirror lands. The timer is `unref`'d and fail-safe — a hung or unreachable remote never wedges the dashboard.
+`startRemoteSourceSync` (in `server/index.js`, wired into `startBackgroundServices`) pulls history from every **enabled** [Remote Data Source](#remote-data-sources) on an interval. A cheap guard first checks whether any enabled source exists, so the poller does no SSH work at all until the user configures one. Each tick delegates to `server/lib/remote-sync.js`, which mirrors Claude projects and Codex rollouts into separate per-provider staging dirs and sends them through `importFromDirectory` / `importCodexFromDirectory`. Codex's safe `session_index.jsonl` copy preserves native renamed titles without copying configuration or credentials. The interval is `DASHBOARD_REMOTE_SYNC_MS` (default `15000` ms; `0` disables the poller); adding or re-enabling a source also triggers an immediate pull. A per-source pull is bounded by `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` (default `600000` ms) and the connectivity test by `DASHBOARD_REMOTE_TEST_TIMEOUT_MS` (default `15000` ms). Status transitions broadcast provider-specific `remote_source.status`; a source is `ok` when either provider imports, and successful syncs broadcast `remote_data.updated` so the client refetches sessions, costs, and analytics as soon as the mirror lands. The timer is `unref`'d and fail-safe — a hung or unreachable remote never wedges the dashboard.
 
-After each pull imports and tags a source's sessions, `remote-sync.js` **reconciles their live status from the fresh mirror** (`reconcileRemoteSessionStatus`). Remote sessions receive no live hooks, so a healthy source remains excluded from this host's process-liveness reap and transcript watchdog: activity is judged from the **newest event timestamp inside each transcript** (falling back to mirror mtime when the file has no parseable events). A session whose last event is within `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` (default `600000` ms = 10 min) is treated as still running (→ `active`, main agent back to `waiting`); once it stops advancing, the session lands in `completed` with its agents completed and `ended_at` stamped — the same terminal state a real `SessionEnd` produces. This keeps an already-imported remote session's status correct on every subsequent sync (the shared importer only sets status on first insert), and it self-heals any remote session a pre-fix build wrongly completed. If SSH sync fails, or a source remains `syncing` longer than `DASHBOARD_STALE_MINUTES`, an `active` session that is itself older than that window falls back to the ordinary stale-session sweep: it becomes `abandoned` and its agents complete. A later fresh mirror reactivates a session that is still writing, so an unavailable remote cannot leave a permanent Waiting card.
+After each pull imports and tags a source's sessions, `remote-sync.js` **reconciles their live status from the fresh mirror** (`reconcileRemoteSessionStatus`). Remote sessions receive no live hooks, so a healthy provider remains excluded from this host's process-liveness reap and transcript watchdog: activity is judged from the **newest event timestamp inside each provider's transcript** (falling back to mirror mtime when the file has no parseable events). A session whose last event is within `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` (default `600000` ms = 10 min) is treated as still running (→ `active`, main agent back to `waiting`); once it stops advancing, the session lands in `completed` with its agents completed and `ended_at` stamped — the same terminal state a real `SessionEnd` produces. This keeps an already-imported remote session's status correct on every subsequent sync (the shared importer only sets status on first insert), and it self-heals any remote session a pre-fix build wrongly completed. If a provider is unavailable/errors, or remains `syncing` longer than `DASHBOARD_STALE_MINUTES`, only that provider's old active sessions fall back to the ordinary stale-session sweep; a healthy sibling provider stays mirror-owned. A later fresh mirror reactivates a session that is still writing, so an unavailable remote cannot leave a permanent Waiting card.
 
 ### User-Interrupt (Esc) Recovery
 
