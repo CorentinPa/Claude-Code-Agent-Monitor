@@ -110,11 +110,11 @@ Un panel profesional para rastrear y visualizar sus sesiones de agente Claude Co
 
 ## Resumen general
 
-Realice sesiones de seguimiento, supervise a los agentes en tiempo real, visualice el uso de las herramientas y observe la orquestación de subagentes a través de una interfaz web profesional con tema oscuro. Se integra directamente con Claude Code a través de su sistema de ganchos nativo.
+Realice sesiones de seguimiento, supervise a los agentes en tiempo real, visualice el uso de las herramientas y observe la orquestación de subagentes a través de una interfaz web profesional con tema oscuro. Se integra directamente con Claude Code & Codex a través de su sistema de ganchos nativo.
 
 ```mermaid
 graph LR
-    A["Claude Code<br/>Session"] -->|hooks fire on<br/>tool use / stop| B["Hook Handler<br/>(Node.js script)"]
+    A["Claude Code & Codex<br/>Session"] -->|hooks fire on<br/>tool use / stop| B["Hook Handler<br/>(Node.js script)"]
     B -->|HTTP POST| C["Dashboard Server<br/>(Express + SQLite)"]
     C -->|WebSocket<br/>broadcast| D["Dashboard UI<br/>(React + Tailwind)"]
     style A fill:#6366f1,stroke:#818cf8,color:#fff
@@ -123,7 +123,7 @@ graph LR
     style D fill:#10b981,stroke:#34d399,color:#fff
 ```
 
-Además del panel de control de monitoreo en tiempo real, también incluye una implementación local del servidor MCP en `mcp/` que expone un catálogo de herramientas para introspeccionar y gestionar el propio panel de control, lo que facilita la integración de las operaciones del panel de control directamente en sus flujos de trabajo de Claude Code. También hay una capa de extensión de agentes, que proporciona complementos, habilidades y subagentes de Claude Code para la interacción del panel de control, el análisis y la inteligencia de los flujos de trabajo.
+Además del panel de control de monitoreo en tiempo real, también incluye una implementación local del servidor MCP en `mcp/` que expone un catálogo de herramientas para introspeccionar y gestionar el propio panel de control, lo que facilita la integración de las operaciones del panel de control directamente en sus flujos de trabajo de Claude Code & Codex. También hay una capa de extensión de agentes, que proporciona complementos, habilidades y subagentes de Claude Code & Codex para la interacción del panel de control, el análisis y la inteligencia de los flujos de trabajo.
 
 ### Internacionalización (i18n)
 

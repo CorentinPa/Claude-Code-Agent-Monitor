@@ -110,11 +110,11 @@
 
 ## 概述
 
-通过专业的暗色主题 Web 界面追踪会话、实时监控 Agent、可视化工具使用、观察子 Agent 编排。通过 Claude Code 原生 Hook 系统直接集成。
+通过专业的暗色主题 Web 界面追踪会话、实时监控 Agent、可视化工具使用、观察子 Agent 编排。通过 Claude Code & Codex 原生 Hook 系统直接集成。
 
 ```mermaid
 graph LR
-    A["Claude Code<br/>会话"] -->|Hook 触发<br/>工具使用 / 停止| B["Hook Handler<br/>(Node.js 脚本)"]
+    A["Claude Code & Codex<br/>会话"] -->|Hook 触发<br/>工具使用 / 停止| B["Hook Handler<br/>(Node.js 脚本)"]
     B -->|HTTP POST| C["Dashboard 服务器<br/>(Express + SQLite)"]
     C -->|WebSocket<br/>广播| D["Dashboard UI<br/>(React + Tailwind)"]
     style A fill:#6366f1,stroke:#818cf8,color:#fff
