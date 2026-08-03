@@ -477,6 +477,7 @@ export function Sessions() {
                       <SessionStatusBadge
                         status={effectiveSessionStatus(session)}
                         reason={sessionAwaitingReason(session)}
+                        provider={session.provider}
                       />
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-400">

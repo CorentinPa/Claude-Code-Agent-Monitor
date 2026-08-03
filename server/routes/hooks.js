@@ -1,5 +1,8 @@
 /**
- * @file Express router for handling incoming hook events from Claude CLI. It processes various hook types (PreToolUse, PostToolUse, Stop, SubagentStop, SessionStart, SessionEnd, Notification), updates session and agent states accordingly in the database, extracts token usage from transcripts, detects compaction events, and broadcasts updates to connected clients via WebSocket.
+ * @file Express router for Claude Code hook events plus a fail-safe Codex
+ * rollout hook endpoint. It updates sessions and agents, extracts usage and
+ * compact human-turn card context, and broadcasts real-time changes without
+ * blocking either CLI.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -306,6 +309,24 @@ function applyFirstUserDescriptor(sessionId, result) {
   );
   const refreshedAgent = stmts.getAgent.get(mainAgent.id);
   if (refreshedAgent) broadcast("agent_updated", refreshedAgent);
+}
+
+/**
+ * Persist a deliberately small, latest-two-turn card summary alongside the
+ * session. The complete transcript remains in its JSONL file; this value only
+ * makes the dashboard and Kanban cards equally informative for Claude and
+ * Codex after a restart or historical import. TranscriptCache has already
+ * filtered command plumbing, tool results, interruptions, and duplicates.
+ */
+function syncCardPromptPreview(sessionId, result) {
+  const prompts = Array.isArray(result?.recentUserMessages) ? result.recentUserMessages : [];
+  const preview = prompts.filter(Boolean).join("\n");
+  if (!preview) return;
+  const upd = stmts.updateSessionCardPromptPreview.run(preview, sessionId, preview);
+  if (upd.changes > 0) {
+    const refreshed = stmts.getSession.get(sessionId);
+    if (refreshed) broadcast("session_updated", refreshed);
+  }
 }
 
 const processEvent = db.transaction((hookType, data) => {
@@ -646,7 +667,12 @@ const processEvent = db.transaction((hookType, data) => {
       // Clean up orphaned sessions: when a user runs /resume inside a session,
       // the parent session never receives Stop or SessionEnd. Mark any active
       // session that hasn't seen events for STALE_MINUTES as abandoned.
-      const staleSessions = stmts.findStaleSessions.all(sessionId, STALE_MINUTES);
+      const staleSessions = stmts.findStaleSessions.all(
+        sessionId,
+        STALE_MINUTES,
+        STALE_MINUTES,
+        STALE_MINUTES
+      );
       const now = new Date().toISOString();
       for (const stale of staleSessions) {
         const staleAgents = stmts.listAgentsBySession.all(stale.id);
@@ -779,6 +805,7 @@ const processEvent = db.transaction((hookType, data) => {
       // event — live on UserPromptSubmit, and as backfill for sessions that
       // never get a title (including imported ones) on any later event.
       applyFirstUserDescriptor(sessionId, result);
+      syncCardPromptPreview(sessionId, result);
 
       // Register compaction agents and events.
       // Each isCompactSummary entry in the JSONL = one compaction that occurred.
@@ -1022,6 +1049,68 @@ const processEvent = db.transaction((hookType, data) => {
   return event;
 });
 
+function codexTranscriptPath(data) {
+  const candidates = [
+    data?.transcript_path,
+    data?.transcriptPath,
+    data?.session?.transcript_path,
+    data?.context?.transcript_path,
+  ];
+  const supplied = candidates.find((candidate) => typeof candidate === "string");
+  if (supplied) return supplied;
+
+  // Codex hook payloads are version-dependent: many include a session/thread
+  // id but omit the rollout path. Resolve that id through the same guarded
+  // discovery index as the background synchronizer so a fresh turn is ingested
+  // immediately instead of waiting for its next polling pass.
+  const sessionIdCandidates = [
+    data?.session_id,
+    data?.sessionId,
+    data?.thread_id,
+    data?.threadId,
+    data?.session?.id,
+    data?.thread?.id,
+    data?.context?.session_id,
+    data?.context?.thread_id,
+  ];
+  const sessionId = sessionIdCandidates.find(
+    (candidate) => typeof candidate === "string" && candidate.length > 0
+  );
+  if (!sessionId) return null;
+  try {
+    return require("../lib/codex-ingest").findCodexTranscriptForSession(sessionId);
+  } catch {
+    return null;
+  }
+}
+
+// Codex hooks intentionally acknowledge before parsing. The companion handler
+// is fail-safe and exits as soon as bytes are on the wire; a long historical
+// rollout must never make Codex wait. The append-only ingestor deduplicates a
+// simultaneous watcher notification by byte cursor and broadcasts the same
+// frames as Claude hooks once processing completes.
+router.post("/codex", (req, res) => {
+  const hookType = req.body?.hook_type || req.body?.event_type || "unknown";
+  const data = req.body?.data || req.body || {};
+  const transcriptPath = codexTranscriptPath(data);
+  if (!transcriptPath) {
+    return res.status(202).json({ ok: true, queued: false, reason: "No transcript path supplied" });
+  }
+  res.status(202).json({ ok: true, queued: true });
+  setImmediate(() => {
+    try {
+      const { ingestCodexHook } = require("../lib/codex-ingest");
+      const result = ingestCodexHook(transcriptPath, hookType);
+      if (!result?.changed || !result.session) return;
+      broadcast(result.created ? "session_created" : "session_updated", result.session);
+      if (result.agent) broadcast(result.created ? "agent_created" : "agent_updated", result.agent);
+      for (const event of result.events || []) broadcast("new_event", event);
+    } catch {
+      // Hook ingestion is intentionally fail-safe: polling remains the fallback.
+    }
+  });
+});
+
 router.post("/event", (req, res) => {
   const { hook_type, data } = req.body;
   if (!hook_type || !data) {
@@ -1234,6 +1323,7 @@ function watchdogCheck() {
       if (fullSess) {
         syncSessionName(fullSess, result);
         applyFirstUserDescriptor(sess.id, result);
+        syncCardPromptPreview(sess.id, result);
       }
 
       const mainAgent = db
@@ -1313,72 +1403,76 @@ function watchdogCheck() {
         continue;
       }
 
-      // Check if we already recorded these errors
-      const existingErrorCount = db
-        .prepare(
-          "SELECT COUNT(*) as cnt FROM events WHERE session_id = ? AND event_type = 'APIError'"
-        )
-        .get(sess.id).cnt;
+      // Keep distinct error summaries, not raw error count. Claude can append
+      // the same terminal API failure many times while it retries (notably an
+      // expired OAuth session). Comparing that raw count to the deliberately
+      // de-duplicated event table caused this watchdog to rewrite and broadcast
+      // an already-errored session every 15 seconds. Besides notification
+      // spam, that made `updated_at` look like fresh user activity.
+      const knownSummaries = new Set(
+        db
+          .prepare(`SELECT summary FROM events WHERE session_id = ? AND event_type = 'APIError'`)
+          .all(sess.id)
+          .map((r) => r.summary)
+      );
+      let recordedNewError = false;
 
-      if (existingErrorCount < result.errors.length) {
-        // Batch-fetch existing error summaries to avoid per-error SELECT
-        const existingSummaries = new Set(
-          db
-            .prepare(`SELECT summary FROM events WHERE session_id = ? AND event_type = 'APIError'`)
-            .all(sess.id)
-            .map((r) => r.summary)
+      for (const apiErr of result.errors) {
+        const summary = `${apiErr.type}: ${apiErr.message}`;
+        if (knownSummaries.has(summary)) continue;
+        // Add immediately so duplicate entries in this single transcript read
+        // remain one durable APIError event as well.
+        knownSummaries.add(summary);
+        const createdAt = Date.parse(apiErr.timestamp || "")
+          ? new Date(apiErr.timestamp).toISOString()
+          : new Date().toISOString();
+        stmts.insertEventAt.run(
+          sess.id,
+          mainAgentId,
+          "APIError",
+          null,
+          summary,
+          JSON.stringify(apiErr),
+          createdAt
         );
+        broadcast("new_event", {
+          session_id: sess.id,
+          agent_id: mainAgentId,
+          event_type: "APIError",
+          tool_name: null,
+          summary,
+          created_at: createdAt,
+        });
+        recordedNewError = true;
+      }
 
-        for (const apiErr of result.errors) {
-          const summary = `${apiErr.type}: ${apiErr.message}`;
-          if (existingSummaries.has(summary)) continue;
-
-          stmts.insertEvent.run(
-            sess.id,
-            mainAgentId,
-            "APIError",
-            null,
-            summary,
-            JSON.stringify(apiErr)
-          );
-          broadcast("new_event", {
-            session_id: sess.id,
-            agent_id: mainAgentId,
-            event_type: "APIError",
-            tool_name: null,
-            summary,
-            created_at: apiErr.timestamp || new Date().toISOString(),
-          });
-        }
-
-        // Flip to error only when a NEW error was detected this tick AND it is
-        // still unrecovered at the transcript tail. The events above are kept
-        // for history regardless, but a transient error the CLI already retried
-        // past (successful turns after it) must not trip the session to `error`.
-        // (The newErrorRecorded gate also stops re-reads from yanking a
-        // recovered session back into error.)
-        if (isErrorAtTail(result)) {
+      // Flip to error only when a NEW distinct error was persisted this tick
+      // AND it is still unrecovered at the transcript tail. An unchanged
+      // terminal error is already represented in the DB, so it must be a true
+      // no-op: no timestamp touch, no WebSocket frame, and no duplicate alert.
+      if (recordedNewError && isErrorAtTail(result)) {
+        const currentSession = stmts.getSession.get(sess.id);
+        if (currentSession && currentSession.status !== "error") {
           stmts.updateSession.run(null, "error", null, null, sess.id);
           broadcast("session_updated", stmts.getSession.get(sess.id));
-          if (mainAgent && mainAgent.status !== "completed" && mainAgent.status !== "error") {
-            stmts.updateAgent.run(null, "error", null, null, null, null, mainAgentId);
-            if (mainAgentId) {
-              stmts.clearAgentAwaitingInput.run(mainAgentId);
-              broadcast("agent_updated", stmts.getAgent.get(mainAgentId));
-            }
+        }
+        if (mainAgent && mainAgent.status !== "completed" && mainAgent.status !== "error") {
+          stmts.updateAgent.run(null, "error", null, null, null, null, mainAgentId);
+          if (mainAgentId) {
+            stmts.clearAgentAwaitingInput.run(mainAgentId);
+            broadcast("agent_updated", stmts.getAgent.get(mainAgentId));
           }
         }
       }
     }
 
-    // ── Liveness reap: complete sessions whose claude process is gone ──────
+    // ── Liveness reap: complete sessions whose provider CLI is gone ───────
     // SessionEnd is the ONLY signal that a session closed, and the hook that
     // carries it is fire-and-forget — if the dashboard was down when the user
     // quit (Ctrl+C, terminal closed), the event is lost forever and the
     // session sits in Waiting until the 3 h stale sweep. The probe supplies
-    // the missing ground truth: when NO running `claude` CLI process has the
-    // session's cwd as its working directory, the session cannot be alive —
-    // land it in the same `completed` state a real SessionEnd produces.
+    // the missing ground truth: when no matching provider CLI process has the
+    // session's cwd as its working directory, the session cannot be alive.
     //
     // Guards, in order:
     //   - probe must be trustworthy (`available` — false on Windows, in
@@ -1391,6 +1485,7 @@ function watchdogCheck() {
     //     completion self-heals anyway: the next hook event reactivates the
     //     session via the existing needsReactivation path.
     livenessReap();
+    livenessReap({ provider: "codex" });
   } catch (err) {
     // Watchdog is best-effort — log but never crash the server
     console.warn("[WATCHDOG] Error during check:", err?.message || err);
@@ -1398,7 +1493,9 @@ function watchdogCheck() {
 }
 
 /**
- * Complete every `active` session whose cwd has no live `claude` process.
+ * Complete every `active` provider session whose cwd has no matching live CLI
+ * process. Claude is the default for backward compatibility; Codex follows
+ * the same conservative process + idle-age guard.
  *
  * `ignoreIdleGate` (boot passes only): skip the idle-age check entirely. At
  * boot the gate is pure harm — the user's most common flow is "quit the
@@ -1411,9 +1508,10 @@ function watchdogCheck() {
  * existing reactivation path. Watchdog ticks keep the gate, where it still
  * guards long-running steady-state work against transient probe misses.
  */
-function livenessReap({ ignoreIdleGate = false } = {}) {
+function livenessReap({ ignoreIdleGate = false, provider = "claude" } = {}) {
   const fs = require("fs");
   const path = require("path");
+  const cli = provider === "codex" ? "codex" : "claude";
 
   // `source = 'local'` guard: sessions pulled from a remote machine over SSH
   // (Remote Data Sources — sessions.source = a remote source id) can NEVER be
@@ -1426,12 +1524,13 @@ function livenessReap({ ignoreIdleGate = false } = {}) {
     .prepare(
       `SELECT id, name, cwd, transcript_path, updated_at FROM sessions
        WHERE status = 'active' AND cwd IS NOT NULL AND cwd <> ''
-         AND (source = 'local' OR source IS NULL)`
+         AND (source = 'local' OR source IS NULL)
+         AND COALESCE(provider, 'claude') = ?`
     )
-    .all();
+    .all(provider);
   if (activeSessions.length === 0) return; // nothing to check — skip the ps/lsof cost
 
-  const probe = liveness.probeLiveCwds();
+  const probe = liveness.probeLiveCwds(cli);
   if (!probe.available) return;
   const now = Date.now();
   for (const sess of activeSessions) {
@@ -1497,15 +1596,15 @@ function livenessReap({ ignoreIdleGate = false } = {}) {
     stmts.updateSession.run(null, "completed", ts, null, sess.id);
 
     const label = sess.name || `Session ${sess.id.slice(0, 8)}`;
-    const summary = `Session closed: ${label} (no running claude process)`;
-    const mainAgentId = `${sess.id}-main`;
+    const summary = `Session closed: ${label} (no running ${cli} process)`;
+    const mainAgentId = provider === "codex" ? `codex:${sess.id}` : `${sess.id}-main`;
     stmts.insertEvent.run(
       sess.id,
       stmts.getAgent.get(mainAgentId) ? mainAgentId : null,
       "SessionEnd",
       null,
       summary,
-      JSON.stringify({ session_id: sess.id, source: "liveness-probe" })
+      JSON.stringify({ session_id: sess.id, provider, source: "liveness-probe" })
     );
 
     broadcast("session_updated", stmts.getSession.get(sess.id));
@@ -1522,7 +1621,9 @@ function livenessReap({ ignoreIdleGate = false } = {}) {
       summary,
       created_at: ts,
     });
-    console.log(`[WATCHDOG] Liveness reap: completed dead session ${sess.id} (${label})`);
+    console.log(
+      `[WATCHDOG] Liveness reap: completed dead ${provider} session ${sess.id} (${label})`
+    );
   }
 }
 
@@ -1533,4 +1634,6 @@ if (watchdogTimer.unref) watchdogTimer.unref();
 router.transcriptCache = transcriptCache;
 router.watchdogCheck = watchdogCheck;
 router.livenessReap = livenessReap;
+// Exposed as a narrow test seam for version-variant Codex hook payloads.
+router.codexTranscriptPath = codexTranscriptPath;
 module.exports = router;

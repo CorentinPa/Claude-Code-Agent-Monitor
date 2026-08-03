@@ -1,5 +1,6 @@
 /**
- * @file Sets up the Express server with API routes and WebSocket, serves the React client in production, and includes periodic maintenance tasks like session cleanup and compaction scanning.
+ * @file Sets up the Express server, API routes, WebSocket, production client,
+ * and non-blocking Claude/Codex transcript synchronizers and maintenance jobs.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -60,6 +61,7 @@ const pushRouter = require("./routes/push");
 const importRouter = require("./routes/import");
 const updatesRouter = require("./routes/updates");
 const ccConfigRouter = require("./routes/cc-config");
+const codexConfigRouter = require("./routes/codex-config");
 const runRouter = require("./routes/run");
 const alertsRouter = require("./routes/alerts");
 const webhooksRouter = require("./routes/webhooks");
@@ -73,6 +75,11 @@ const APP_VERSION = (() => {
     return "0.0.0";
   }
 })();
+
+// API reference pages are served by Express even in development, while the
+// dashboard favicon normally comes from Vite's public directory. Keep one
+// explicit server route so Swagger and ReDoc always share the app identity.
+const DASHBOARD_FAVICON_PATH = path.join(__dirname, "..", "client", "public", "favicon.svg");
 
 function createApp() {
   const app = express();
@@ -98,11 +105,15 @@ function createApp() {
   app.use("/api/import", importRouter);
   app.use("/api/updates", updatesRouter);
   app.use("/api/cc-config", ccConfigRouter);
+  app.use("/api/codex-config", codexConfigRouter);
   app.use("/api/run", runRouter);
   app.use("/api/alerts", alertsRouter);
   app.use("/api/webhooks", webhooksRouter);
   app.use("/api/remote-sources", remoteSourcesRouter);
   app.use("/api/metrics", metricsRouter);
+  app.get("/favicon.svg", (_req, res) => {
+    res.type("image/svg+xml").sendFile(DASHBOARD_FAVICON_PATH);
+  });
   app.get("/api/openapi.json", (_req, res) => {
     res.json(openApiSpec);
   });
@@ -111,6 +122,7 @@ function createApp() {
     swaggerUi.serve,
     swaggerUi.setup(openApiSpec, {
       customSiteTitle: "Agent Dashboard API Docs",
+      customfavIcon: "/favicon.svg",
     })
   );
 
@@ -129,7 +141,8 @@ function createApp() {
         renderRedocHtml(
           "/api/openapi.json",
           "/api/redoc/redoc.standalone.js",
-          "Agent Dashboard API Reference"
+          "Agent Dashboard API Reference",
+          "/favicon.svg"
         )
       );
   });
@@ -177,6 +190,19 @@ function startServer(app, port) {
         },
       })
     );
+    // API handlers (including Swagger and ReDoc) are registered above. Never
+    // let an unrecognised `/api/*` request fall through to the React shell:
+    // otherwise a typo or stale reference asset can mount the dashboard's
+    // first-run overlay over API documentation instead of returning a useful
+    // API-shaped 404 response.
+    app.use("/api", (req, res) => {
+      res.status(404).json({
+        error: {
+          code: "ENOTFOUND",
+          message: `API route not found: ${req.method} ${req.originalUrl}`,
+        },
+      });
+    });
     app.get("*", (_req, res) => {
       res.setHeader("Cache-Control", "no-cache, must-revalidate");
       res.sendFile(path.join(clientDist, "index.html"));
@@ -318,7 +344,9 @@ function startBackgroundServices() {
   {
     const bootReap = (label) => {
       try {
-        require("./routes/hooks").livenessReap({ ignoreIdleGate: true });
+        const { livenessReap } = require("./routes/hooks");
+        livenessReap({ ignoreIdleGate: true });
+        livenessReap({ ignoreIdleGate: true, provider: "codex" });
       } catch (err) {
         console.warn(`${label} liveness reap failed:`, err?.message || err);
       }
@@ -358,6 +386,12 @@ function startBackgroundServices() {
   } catch (err) {
     console.warn("cc-watcher failed to start:", err.message);
   }
+  try {
+    const { startCodexConfigWatcher } = require("./lib/codex-config-watcher");
+    startCodexConfigWatcher({ broadcast });
+  } catch (err) {
+    console.warn("codex-config-watcher failed to start:", err.message);
+  }
   // Near-real-time Workflow-tool run ingestion. The run journal is written when
   // a workflow finishes — which may not coincide with a hook — so a fast,
   // change-fingerprinted poll over active sessions keeps the UI fresh without
@@ -376,6 +410,14 @@ function startBackgroundServices() {
     startSessionSync(broadcast);
   } catch (err) {
     console.warn("session sync failed to start:", err.message);
+  }
+  // Codex rollouts are append-only JSONL files under ~/.codex/sessions. Hooks
+  // nudge this path immediately; this watcher + short poll closes the gap when
+  // a hook is unavailable, untrusted, or fired while the dashboard was down.
+  try {
+    startCodexSessionSync(broadcast);
+  } catch (err) {
+    console.warn("Codex session sync failed to start:", err.message);
   }
   // Pull Claude Code history from enabled remote (SSH) sources on an interval so
   // usage collected on other machines shows up here in near real time. Off by
@@ -504,6 +546,210 @@ function startWorkflowPoll(broadcast) {
     }
   }, POLL_MS);
   if (timer.unref) timer.unref();
+}
+
+/**
+ * Keep Codex rollout transcripts current with a debounced filesystem watcher
+ * plus a small safety-net poll. Codex hooks call the same incremental ingestor,
+ * so repeated notifications are harmless: its durable byte cursor means an
+ * unchanged file performs no token/event writes and emits no websocket frames.
+ * Fresh files are prioritized and the sweep yields cooperatively, which keeps
+ * a large historical rollout tree from delaying an active session's first card.
+ */
+function startCodexSessionSync(broadcast) {
+  const fs = require("fs");
+  const { getCodexHome, getCodexSessionsDir, onCodexHomeChanged } = require("./lib/codex-home");
+  const {
+    findCodexTranscripts,
+    ingestCodexToolEvents,
+    ingestCodexTranscript,
+    reconcileCodexSessionLiveness,
+    refreshCodexSessionTitles,
+  } = require("./lib/codex-ingest");
+  const fingerprints = new Map();
+  let running = false;
+  let queued = false;
+  let watcher = null;
+  let watchedSessionsDir = null;
+  let homeWatcher = null;
+  let watchedCodexHome = null;
+
+  function publish(result) {
+    if (!result?.changed || !result.session) return;
+    broadcast(result.created ? "session_created" : "session_updated", result.session);
+    if (result.agent) broadcast(result.created ? "agent_created" : "agent_updated", result.agent);
+    for (const event of result.events || []) broadcast("new_event", event);
+  }
+
+  async function runSweep() {
+    if (running) {
+      queued = true;
+      return;
+    }
+    running = true;
+    try {
+      const sessionsDir = getCodexSessionsDir();
+      // A newly selected Codex home may not contain `sessions/` yet. Retry
+      // watcher attachment on each safety-net sweep so it becomes event-driven
+      // as soon as Codex creates the directory instead of polling forever.
+      watchSessionsDir();
+      watchCodexHome();
+      // `/rename` updates Codex's root-level session index instead of adding a
+      // rollout line. Refresh those titles before evaluating transcript bytes
+      // so cards change in real time even for an otherwise idle session.
+      for (const result of refreshCodexSessionTitles()) publish(result);
+      const transcripts = findCodexTranscripts(sessionsDir);
+      for (let index = 0; index < transcripts.length; index++) {
+        const transcriptPath = transcripts[index];
+        let stat;
+        try {
+          stat = fs.statSync(transcriptPath);
+        } catch {
+          continue;
+        }
+        const fingerprint = `${stat.size}:${stat.mtimeMs}`;
+        if (fingerprints.get(transcriptPath) !== fingerprint) {
+          try {
+            // Only retain a successful fingerprint. A temporarily unreadable or
+            // malformed rollout must retry on the next sweep rather than being
+            // silently skipped until another byte happens to arrive.
+            publish(ingestCodexTranscript(transcriptPath));
+            fingerprints.set(transcriptPath, fingerprint);
+          } catch (err) {
+            console.warn(
+              `[CODEX SYNC] Failed to ingest ${path.basename(transcriptPath)}:`,
+              err.message
+            );
+          }
+        }
+        try {
+          // This independent cursor backfills response-item tool calls from
+          // rollouts imported before Workflows understood Codex. It is a
+          // no-op after the first pass, and also catches records that arrive
+          // without one of Codex's lower-volume lifecycle event messages.
+          publish(ingestCodexToolEvents(transcriptPath));
+        } catch (err) {
+          console.warn(
+            `[CODEX SYNC] Failed to index tools for ${path.basename(transcriptPath)}:`,
+            err.message
+          );
+        }
+        // Cold history can contain hundreds of large JSONL files. Yielding in
+        // modest batches lets fs.watch/hook callbacks and WebSocket delivery
+        // run between imports while preserving the single-sweep cursor guard.
+        if (index > 0 && index % 12 === 0) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+      }
+      for (const result of reconcileCodexSessionLiveness()) publish(result);
+    } catch {
+      // Codex is optional; an unreadable/missing home must not affect startup.
+    } finally {
+      running = false;
+      if (queued) {
+        queued = false;
+        setImmediate(() => void runSweep());
+      }
+    }
+  }
+
+  const initial = setTimeout(() => void runSweep(), 300);
+  if (initial.unref) initial.unref();
+
+  const pollMs = process.env.DASHBOARD_CODEX_SYNC_MS
+    ? Number(process.env.DASHBOARD_CODEX_SYNC_MS)
+    : 4_000;
+  if (Number.isFinite(pollMs) && pollMs > 0) {
+    const timer = setInterval(() => void runSweep(), pollMs);
+    if (timer.unref) timer.unref();
+  }
+
+  let debounce;
+  const schedule = () => {
+    if (debounce) return;
+    debounce = setTimeout(() => {
+      debounce = null;
+      void runSweep();
+    }, 150);
+    if (debounce.unref) debounce.unref();
+  };
+  function watchSessionsDir() {
+    const sessionsDir = getCodexSessionsDir();
+    if (sessionsDir !== watchedSessionsDir) {
+      try {
+        watcher?.close();
+      } catch {
+        // A stale watcher is optional; polling remains the real-time safety net.
+      }
+      watcher = null;
+      watchedSessionsDir = sessionsDir;
+    }
+    if (watcher) return;
+    try {
+      if (fs.existsSync(sessionsDir)) {
+        const recursive = process.platform === "darwin" || process.platform === "win32";
+        const nextWatcher = fs.watch(sessionsDir, { recursive }, schedule);
+        watcher = nextWatcher;
+        nextWatcher.on("error", () => {
+          // Only retire this watcher: an error from a recently closed previous
+          // directory must not detach a newer watch after a home change.
+          if (watcher !== nextWatcher) return;
+          try {
+            nextWatcher.close();
+          } catch {
+            // The next polling sweep retries attachment either way.
+          }
+          watcher = null;
+        });
+        if (nextWatcher.unref) nextWatcher.unref();
+      }
+    } catch {
+      // The poll remains the fallback on filesystems without watcher support.
+    }
+  }
+  function watchCodexHome() {
+    const codexHome = getCodexHome();
+    if (codexHome !== watchedCodexHome) {
+      try {
+        homeWatcher?.close();
+      } catch {
+        // Polling remains the fallback if a previous watcher cannot close.
+      }
+      homeWatcher = null;
+      watchedCodexHome = codexHome;
+    }
+    if (homeWatcher || !fs.existsSync(codexHome)) return;
+    try {
+      const nextWatcher = fs.watch(codexHome, { recursive: false }, (_event, filename) => {
+        if (!filename || path.basename(String(filename)) === "session_index.jsonl") schedule();
+      });
+      homeWatcher = nextWatcher;
+      nextWatcher.on("error", () => {
+        if (homeWatcher !== nextWatcher) return;
+        try {
+          nextWatcher.close();
+        } catch {
+          // The polling sweep will retry this optional watcher.
+        }
+        homeWatcher = null;
+      });
+      if (nextWatcher.unref) nextWatcher.unref();
+    } catch {
+      // The polling sweep remains the title-sync safety net.
+    }
+  }
+  watchSessionsDir();
+  watchCodexHome();
+
+  // Settings can repoint Codex while the dashboard is running. Clear old-file
+  // fingerprints, re-arm the watcher, and schedule a fresh sweep after the
+  // response has been sent so a large history never delays the UI action.
+  onCodexHomeChanged(() => {
+    fingerprints.clear();
+    watchSessionsDir();
+    watchCodexHome();
+    setImmediate(() => void runSweep());
+  });
 }
 
 /**
@@ -857,7 +1103,12 @@ if (require.main === module) {
   const sweepWorkflowSeen = new Map();
   setInterval(() => {
     // 1. Stale session cleanup — batch agent updates to avoid N+1 queries
-    const stale = cleanupDb.stmts.findStaleSessions.all("__periodic__", STALE_MINUTES);
+    const stale = cleanupDb.stmts.findStaleSessions.all(
+      "__periodic__",
+      STALE_MINUTES,
+      STALE_MINUTES,
+      STALE_MINUTES
+    );
     const now = new Date().toISOString();
     if (stale.length > 0) {
       const staleIds = stale.map((s) => s.id);

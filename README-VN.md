@@ -1,11 +1,12 @@
-# Bảng điều khiển Agent cho Claude Code
+# Bảng điều khiển Agent cho Claude Code & Codex
 
-### Nền tảng giám sát thời gian thực cho hoạt động của Agent Claude Code 🚀
+### Nền tảng giám sát thời gian thực cho hoạt động của Agent Claude Code & Codex 🚀
 
-Bảng điều khiển chuyên nghiệp để theo dõi và trực quan hóa các phiên tác nhân Claude Code, cách sử dụng công cụ và điều phối tác nhân phụ trong thời gian thực. Được xây dựng bằng Node.js, Express, React và SQLite, nó tích hợp trực tiếp với Claude Code thông qua hệ thống hook gốc để theo dõi và phân tích phiên liền mạch.
+Bảng điều khiển chuyên nghiệp để theo dõi và trực quan hóa các phiên tác nhân Claude Code & Codex, cách sử dụng công cụ và điều phối tác nhân phụ trong thời gian thực. Được xây dựng bằng Node.js, Express, React và SQLite, nó tích hợp trực tiếp với Claude Code & Codex thông qua hệ thống hook gốc để theo dõi và phân tích phiên liền mạch.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
-![Claude Code Plugins](https://img.shields.io/badge/Claude_Code-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
+![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-blue?style=flat-square&logo=githubcopilot&logoColor=white)
+![Claude Code Plugins](https://img.shields.io/badge/Claude_Code_&_Codex-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
 ![Model Context Protocol](https://img.shields.io/badge/Model_Context_Protocol-1.0-0f766e?style=flat-square&logo=modelcontextprotocol&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-%3E%3D3.6-3776AB?style=flat-square&logo=python&logoColor=white)
@@ -109,11 +110,11 @@ Tài liệu đã bản địa hóa: [`README.md`](./README.md) · [`README-CN.md
 
 ## Tổng quan
 
-Theo dõi các phiên, giám sát tác nhân trong thời gian thực, trực quan hóa việc sử dụng công cụ và quan sát việc điều phối tác nhân phụ thông qua giao diện web có chủ đề tối chuyên nghiệp. Tích hợp trực tiếp với Claude Code thông qua hệ thống hook gốc của nó.
+Theo dõi các phiên, giám sát tác nhân trong thời gian thực, trực quan hóa việc sử dụng công cụ và quan sát việc điều phối tác nhân phụ thông qua giao diện web có chủ đề tối chuyên nghiệp. Tích hợp trực tiếp với Claude Code & Codex thông qua hệ thống hook gốc của nó.
 
 ```mermaid
 graph LR
-    A["Claude Code<br/>Session"] -->|hooks fire on<br/>tool use / stop| B["Hook Handler<br/>(Node.js script)"]
+    A["Claude Code & Codex<br/>Session"] -->|hooks fire on<br/>tool use / stop| B["Hook Handler<br/>(Node.js script)"]
     B -->|HTTP POST| C["Dashboard Server<br/>(Express + SQLite)"]
     C -->|WebSocket<br/>broadcast| D["Dashboard UI<br/>(React + Tailwind)"]
     style A fill:#6366f1,stroke:#818cf8,color:#fff
@@ -122,7 +123,7 @@ graph LR
     style D fill:#10b981,stroke:#34d399,color:#fff
 ```
 
-Ngoài bảng thông tin giám sát thời gian thực, nó còn bao gồm triển khai máy chủ MCP cục bộ trong `mcp/` hiển thị danh mục các công cụ để xem xét nội tâm và quản lý bảng thông tin, giúp dễ dàng tích hợp trực tiếp các hoạt động của bảng thông tin vào quy trình làm việc của Claude Code của bạn. Ngoài ra còn có một lớp mở rộng tác nhân, cung cấp các plugin, kỹ năng và tác nhân phụ của Claude Code để tương tác trên trang tổng quan, phân tích và thông tin về quy trình làm việc.
+Ngoài bảng thông tin giám sát thời gian thực, nó còn bao gồm triển khai máy chủ MCP cục bộ trong `mcp/` hiển thị danh mục các công cụ để xem xét nội tâm và quản lý bảng thông tin, giúp dễ dàng tích hợp trực tiếp các hoạt động của bảng thông tin vào quy trình làm việc của Claude Code & Codex của bạn. Ngoài ra còn có một lớp mở rộng tác nhân, cung cấp các plugin, kỹ năng và tác nhân phụ của Claude Code & Codex để tương tác trên trang tổng quan, phân tích và thông tin về quy trình làm việc.
 
 ### Quốc tế hóa (i18n)
 
@@ -228,9 +229,15 @@ flowchart LR
 </p>
 
 <p align="center">
-  <img src="images/config.png" alt="Trình khám phá cấu hình Claude" width="100%">
+  <img src="images/config.png" alt="Cấu hình Agent — trình khám phá Claude Code và Codex" width="100%">
   <br>
-  <em>🧰 <strong>Trình khám phá cấu hình Claude</strong> — Trình kiểm tra 12-tab cho mọi thứ Claude Code biết: skills, subagents, lệnh slash, output styles, plugin (kèm số đóng góp của từng plugin), marketplaces, máy chủ MCP, hooks, settings (ẩn key bí mật), memory (các tệp `CLAUDE.md` của user + project cùng kho memory dựa-trên-tệp theo từng dự án — mọi `*.md` dưới `~/.claude/projects/<slug>/memory/`, nhóm theo dự án và tìm kiếm được), keybindings (kèm trình chỉnh sửa có cấu trúc ngay trong giao diện) và statusline. Hỗ trợ tạo / sửa / xoá trên các bề mặt rủi ro thấp — các tệp văn bản, các tệp auto-memory theo từng dự án, và `keybindings.json` — với sao lưu dấu thời gian bắt buộc</em>
+  <em>🧰 <strong>Cấu hình Agent</strong> — chuyển giữa trình khám phá Claude Code đầy đủ và không gian làm việc Codex trực tiếp cho mặc định, model, profile, MCP, dự án, skill, rule, hook, plugin và hướng dẫn. Bản xem trước Codex che bí mật; config, hook, rule, skill và hướng dẫn do người dùng quản lý có thể được chỉnh sửa an toàn kèm sao lưu.</em>
+</p>
+
+<p align="center">
+  <img src="images/config-codex.png" alt="Trình khám phá cấu hình Codex — tổng quan, nguồn cấu hình và các tab không gian làm việc" width="100%">
+  <br>
+  <em>🧰 <strong>Trình khám phá cấu hình Codex</strong> — không gian làm việc Codex tập hợp <code>config.toml</code>, model tài khoản, profile, máy chủ MCP, dự án, skill, hook, rule, plugin và tệp hướng dẫn. Chỉnh sửa các tệp do người dùng quản lý được hỗ trợ với bản sao lưu có dấu thời gian; <code>config.toml</code> chỉ có thể chỉnh sửa.</em>
 </p>
 
 <p align="center">
@@ -240,15 +247,15 @@ flowchart LR
 </p>
 
 <p align="center">
-  <img src="images/run.png" alt="Chạy Claude — cấu hình trước khi chạy" width="100%">
+  <img src="images/run.png" alt="Chạy Agent — chọn Claude Code hoặc Codex" width="100%">
   <br>
-  <em>▶️ <strong>Chạy Claude</strong> — Khởi chạy tiến trình con <code>claude</code> ngay trong dashboard. Chọn chế độ (Hội thoại / Một lần), nguồn (phiên mới vs tiếp tục từ lịch sử đầy đủ), thư mục làm việc (autocomplete với cwd gần đây), model, permission mode và mức suy nghĩ. Same-origin guard trên route ngăn drive-by spawn từ trình duyệt</em>
+  <em>▶️ <strong>Chạy Agent</strong> — chọn Claude Code hoặc Codex mỗi khi mở trình khởi chạy. Claude giữ chế độ Hội thoại / Một lần; Codex khởi tạo thread tương tác native với các tùy chọn approval và sandbox riêng. Danh sách model Codex đến trực tiếp từ CLI đã đăng nhập.</em>
 </p>
 
 <p align="center">
-  <img src="images/run-results.png" alt="Chạy Claude — luồng đầu ra trực tiếp" width="100%">
+  <img src="images/run-results.png" alt="Chạy Agent — luồng đầu ra trực tiếp" width="100%">
   <br>
-  <em>💬 <strong>Chạy Claude · luồng trực tiếp</strong> — đầu ra streaming kiểu chat với render từng ký tự thực sự nhờ <code>--include-partial-messages</code>. Tool uses, tool results và thinking blocks đều có thể thu gọn. Bộ chuyển đổi run đang chạy ở header cho phép để run chạy nền và gắn lại sau. "View session →" sẽ deep-link tới UI Sessions ngay khi có session ID</em>
+  <em>💬 <strong>Chạy Agent · luồng trực tiếp</strong> — stream-json của Claude và sự kiện app-server của Codex đều hiển thị như chat, gồm reasoning, command, thay đổi tệp và hoạt động tool. Dashboard Runs cho phép để agent chạy nền rồi gắn lại sau.</em>
 </p>
 
 <p align="center">
@@ -266,30 +273,30 @@ flowchart LR
 <p align="center">
   <img src="images/remote.png" alt="Cài đặt — Nguồn dữ liệu từ xa" width="100%">
   <br>
-  <em>🛰️ <strong>Cài đặt · Nguồn dữ liệu từ xa</strong> — kéo hoạt động Claude Code từ các máy khác qua SSH: thêm nguồn theo đích đến, kiểm tra kết nối, đồng bộ thủ công hoặc theo bộ hẹn giờ nền, và chuyển phạm vi dữ liệu toàn cục giữa cục bộ, tất cả nguồn, hoặc một máy cụ thể, với huy hiệu nguồn cho từng phiên</em>
+  <em>🛰️ <strong>Cài đặt · Nguồn dữ liệu từ xa</strong> — kéo hoạt động Claude Code và Codex từ các máy khác qua SSH: tùy chọn cấu hình riêng đường dẫn Home Claude từ xa và Home Codex từ xa, kiểm tra từng provider, đồng bộ thủ công hoặc theo bộ hẹn giờ nền, và chuyển phạm vi dữ liệu toàn cục giữa cục bộ, tất cả nguồn, hoặc một máy cụ thể, với huy hiệu nguồn cho từng phiên</em>
 </p>
 
-Thanh bên cung cấp quyền truy cập nhanh vào Trang tổng quan, Bảng Kanban, danh sách Phiên, Nguồn cấp dữ liệu hoạt động, Phân tích, Quy trình công việc và Cài đặt. Mỗi trang được thiết kế để cung cấp cho bạn những hiểu biết sâu sắc về hoạt động Agent Claude Code của bạn với các cập nhật theo thời gian thực và hình ảnh trực quan phong phú.
+Thanh bên cung cấp quyền truy cập nhanh vào Trang tổng quan, Bảng Kanban, danh sách Phiên, Nguồn cấp dữ liệu hoạt động, Phân tích, Quy trình công việc và Cài đặt. Mỗi trang được thiết kế để cung cấp cho bạn những hiểu biết sâu sắc về hoạt động Agent Claude Code & Codex của bạn với các cập nhật theo thời gian thực và hình ảnh trực quan phong phú.
 
 ---
 
 ## Tính Năng
 
-Bảng điều khiển cung cấp một bộ tính năng toàn diện để giám sát và phân tích các phiên và Agent Claude Code của bạn:
+Bảng điều khiển cung cấp một bộ tính năng toàn diện để giám sát và phân tích các phiên và Agent Claude Code & Codex của bạn:
 
-> **Phiên Cursor (chỉ mang tính thông tin):** CCAM nhập mọi transcript agent nằm trong `~/.claude` — trên máy này và trên các máy từ xa đã đồng bộ. **Cursor** cũng được tính tương tự: Cursor tình cờ lưu phiên agent ở cùng các đường dẫn với Claude Code. CCAM không phân biệt ứng dụng nào ghi file.
+> **Phiên Cursor (chỉ mang tính thông tin):** CCAM nhập mọi transcript agent nằm trong `~/.claude` — trên máy này và trên các máy từ xa đã đồng bộ. **Cursor** cũng được tính tương tự: Cursor tình cờ lưu phiên agent ở cùng các đường dẫn với Claude Code & Codex. CCAM không phân biệt ứng dụng nào ghi file.
 
 | Tính năng                            | Sự miêu tả                                                                                                                                                                                                                                                                  |
 |------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Bảng điều khiển**                      | Hai tab lưu trong `localStorage`: **Monitor** — số liệu thống kê tổng quan (6 thẻ), thẻ Agent đang hoạt động với hệ thống phân cấp Subagent có thể thu gọn, nguồn cấp dữ liệu hoạt động gần đây với số mục hiển thị tự động lấp đầy chiều cao viewport qua `ResizeObserver`. **Health** — vòng điểm sức khỏe hệ thống tổng hợp (trọng số: 0,4 × tỷ lệ thành công + 0,25 × tỷ lệ cache hit + 0,25 × (100 − tỷ lệ lỗi) + 0,1 × (100 − heap %)), biểu đồ donut phân bổ bản ghi, thước đo hiệu suất cache / tỷ lệ lỗi / tỷ lệ thành công, biểu đồ thanh ngang top 8 công cụ, thanh hiệu quả subagent, phân bổ token theo mô hình, và thống kê nén. Tự làm mới mỗi 5 giây từ `/api/settings/info` và `/api/workflows`. Tooltip theo con trỏ với phát hiện cạnh viewport trên mọi biểu đồ |
-| **Bảng Kanban**                   | Hai chế độ với nút chuyển ở đầu trang (lưu trong `localStorage`): **Agent** — 4 cột (Đang làm / Đang chờ / Hoàn tất / Lỗi), và **Phiên** — 5 cột (Hoạt động / Đang chờ / Hoàn tất / Lỗi / Bỏ dở). Cột **Đang chờ** ánh xạ trực tiếp trạng thái lưu trữ `waiting` của Agent — được đặt khi Claude Code đang ngồi ở dòng nhập (phiên mới, giữa các lượt, hoặc đang bị chặn bởi Notification xin quyền) và chuyển sang `working` ngay khi người dùng tiếp tục (UserPromptSubmit / PreToolUse). Mỗi tiêu đề cột có biểu tượng `?` với tooltip giải thích vòng đời. Mỗi cột tìm nạp theo trạng thái từ máy chủ (không giới hạn thực tế mỗi cột), sau đó phân trang phía client với 10 thẻ mỗi cột kèm nút "Hiện thêm". Đăng ký WebSocket bám theo chế độ đang xem (`agent_*` so với `session_*`) nên cập nhật khác chế độ không gây tải lại. Huy hiệu Đang chờ hiển thị `awaiting_reason` của hàng dưới dạng tooltip khi hover — **Cần phản hồi** (`notification`), **Xong lượt** (`stop`), **Chờ prompt** (`session_start`), **Bị ngắt** (`interrupted`) — chỉ giữ ở dạng tooltip trên các thẻ nhỏ gọn để tiêu đề giữ nguyên không gian; các bề mặt rộng hơn (bảng Phiên, đầu trang chi tiết phiên) hiển thị thêm lý do ngay trên dòng dưới dạng chip lồng bên trong, với các lý do khẩn cấp (lời nhắc xin quyền, bị ngắt) dùng sắc hổ phách nóng hơn |
+| **Bảng Kanban**                   | Hai chế độ với nút chuyển ở đầu trang (lưu trong `localStorage`): **Agent** — 4 cột (Đang làm / Đang chờ / Hoàn tất / Lỗi), và **Phiên** — 5 cột (Hoạt động / Đang chờ / Hoàn tất / Lỗi / Bỏ dở). Cột **Đang chờ** ánh xạ trực tiếp trạng thái lưu trữ `waiting` của Agent — được đặt khi Claude Code & Codex đang ngồi ở dòng nhập (phiên mới, giữa các lượt, hoặc đang bị chặn bởi Notification xin quyền) và chuyển sang `working` ngay khi người dùng tiếp tục (UserPromptSubmit / PreToolUse). Mỗi tiêu đề cột có biểu tượng `?` với tooltip giải thích vòng đời. Mỗi cột tìm nạp theo trạng thái từ máy chủ (không giới hạn thực tế mỗi cột), sau đó phân trang phía client với 10 thẻ mỗi cột kèm nút "Hiện thêm". Đăng ký WebSocket bám theo chế độ đang xem (`agent_*` so với `session_*`) nên cập nhật khác chế độ không gây tải lại. Huy hiệu Đang chờ hiển thị `awaiting_reason` của hàng dưới dạng tooltip khi hover — **Cần phản hồi** (`notification`), **Xong lượt** (`stop`), **Chờ prompt** (`session_start`), **Bị ngắt** (`interrupted`) — chỉ giữ ở dạng tooltip trên các thẻ nhỏ gọn để tiêu đề giữ nguyên không gian; các bề mặt rộng hơn (bảng Phiên, đầu trang chi tiết phiên) hiển thị thêm lý do ngay trên dòng dưới dạng chip lồng bên trong, với các lý do khẩn cấp (lời nhắc xin quyền, bị ngắt) dùng sắc hổ phách nóng hơn |
 | **Phiên**                       | Bảng toàn bộ phiên có tìm kiếm, bộ lọc và **phân trang phía máy chủ**. Mỗi lần đổi trang gọi `/api/sessions?status=&q=&limit=10&offset=…`, nên tính toán chi phí chỉ chạy trên trang đang hiển thị — không phụ thuộc số phiên trong CSDL. Ô tìm kiếm (`q=`) thực hiện so khớp không phân biệt hoa thường trên `id` / `name` / `cwd` ở máy chủ với debounce 300 ms; phản hồi kèm `total` cho bộ phân trang. Bộ lọc trạng thái, tìm kiếm và phân trang kết hợp với nhau. Tên dễ đọc của mỗi phiên được đọc từ bản ghi và đồng bộ thời gian thực — tiêu đề rõ ràng do người dùng đặt qua `/rename`, `claude -n` hoặc `Ctrl+R` trong picker (dòng `custom-title` của JSONL) luôn thắng, nếu không thì dùng `ai-title` tự sinh, nếu vẫn chưa có thì **prompt đầu tiên của người dùng** (được cắt ngắn, bỏ qua nhiễu tool-result / lệnh slash) sẽ điền tên placeholder của phiên cùng tên/nhiệm vụ placeholder của main agent — nhờ đó các phiên không bao giờ có tiêu đề (kể cả phiên được nhập) vẫn cho biết mình đang làm gì; dashboard hiển thị tên đó (lùi về ID rút gọn khi chưa đặt) trên thẻ tác nhân, Dashboard, Activity Feed và picker tiếp tục của trang Run |
 | **Chi tiết phiên**                 | Bảng tổng quan thời gian thực mỗi phiên với banner tác nhân đang hoạt động (công cụ + tác vụ hiện tại), sáu ô đếm (sự kiện kèm tốc độ sự kiện/phút, lượt gọi công cụ, subagent, lần nén, lỗi, thời lượng đang đếm), thanh sử dụng top công cụ, phân tích theo loại subagent, dải dòng chảy token, và đám mây chip loại sự kiện — tất cả được làm mới trực tiếp theo sự kiện hook. Bên dưới: cây phân cấp tác nhân, dòng thời gian sự kiện đầy đủ với bộ lọc đa chiều, nhóm Pre/Post theo `tool_use_id`, khối tóm tắt dễ đọc, bộ kết xuất nhận biết công cụ (terminal cho Bash, diff cho Edit, code có số dòng cho Read/Write, danh sách kết quả khớp cho Grep, thẻ key/value cho công cụ MCP), và tab Conversation hiển thị bản ghi — bao gồm tin nhắn gõ giữa lượt (xếp hàng khi Claude còn đang làm việc), đặt đúng vị trí Claude thực sự nhận được, và thông báo từ harness được gán cho System — với markdown (tiêu đề, danh sách, blockquote, bảng, danh sách công việc), khối code có syntax highlight (js/ts, python, json, bash, html, css, sql, yaml, diff) kèm số dòng và nút sao chép, cùng các khối tool call có style theo từng công cụ (Bash → terminal, Edit → cũ/mới song song, Write → nhãn file, Read → chip đường dẫn, Grep → thẻ pattern). Khi phiên đang bị chặn chờ người dùng, một **banner chờ phản hồi** màu vàng dưới đầu trang nêu rõ `awaiting_reason`, lời giải thích của nó, và phiên đã chờ trong bao lâu (chấm nhấp nháy + thời gian tương đối); huy hiệu Đang chờ ở đầu trang mang cùng lý do dưới dạng chip lồng bên trong |
 | **Nguồn cấp dữ liệu hoạt động**                  | Nhật ký sự kiện phát trực tuyến theo thời gian thực với tính năng tạm dừng/tiếp tục và phân trang; nhấp vào bất kỳ hàng sự kiện nào để mở rộng nội dung hook payload ngay tại chỗ (bảng EventDetail nội tuyến); nút "Phiên →" chuyên biệt ở cuối mỗi hàng điều hướng trực tiếp đến chi tiết phiên mà không thu gọn feed                                                                   |
 | **Phân tích**                      | Mức sử dụng mã thông báo, tần suất công cụ, bản đồ nhiệt hoạt động (trung tâm, căn chỉnh ngày trong tuần bắt đầu từ Chủ nhật, chú thích công cụ tên ngày), xu hướng phiên, chỉ báo kết nối trực tiếp/ngoại tuyến. Khi đang tải, vùng biểu đồ hiển thị các khung xương (skeleton) nhấp nháy chứ không chỉ các ô thống kê đầu trang |
 | **Cập nhật trực tiếp**                   | Đẩy WebSocket -- không bỏ phiếu, cập nhật giao diện người dùng tức thì                                                                                                                                                                                                                             |
 | **Tự động khám phá**                 | Phiên và tác nhân được tạo tự động từ các sự kiện hook                                                                                                                                                                                                               |
-| **Nhập lịch sử**                 | Nhập phiên từ `~/.claude/` khi khởi động. Trích xuất JSONL nâng cao: Lỗi API (hạn ngạch/tỷ lệ/không hợp lệ_request), thời lượng lượt, điểm truy cập (cli/sdk-ts), chế độ cấp phép, số khối suy nghĩ, tính năng bổ sung sử dụng (service_tier, tốc độ, inference_geo), lỗi kết quả công cụ và tệp JSONL tác nhân phụ (`subagents/agent-*.jsonl` với `.meta.json`). Chèn lấp các phiên hiện có khi nhập lại. Các tệp JSONL gần đây (< 10 phút) được nhập dưới dạng "hoạt động" |
+| **Nhập lịch sử**                 | Import History theo nhà cung cấp nhập transcript Claude Code từ `~/.claude/` và rollout JSONL Codex từ `~/.codex/sessions`. Mỗi tab có đường dẫn mặc định, hướng dẫn, quét thư mục và tải lên riêng; cả hai dùng lại logic ingest thời gian thực, giữ đúng token/chi phí/tool và bảo đảm bất biến. Rollout Codex từ bên ngoài được snapshot vào bộ nhớ dashboard để hội thoại vẫn mở được sau khi archive hoặc thư mục nguồn bị xóa. |
 | **Phân cấp Subagent**             | Cây tác nhân cha-con có thể thu gọn trên Bảng điều khiển và Chi tiết phiên. Các Agent có các Subagent hiển thị các chữ V mở rộng/thu gọn; tác nhân lá hiển thị một chỉ báo dấu chấm. Tự động mở rộng khi các tác nhân phụ đang hoạt động                                                                           |
 | **Agent nền**              | Theo dõi chính xác các tác nhân phụ có nền mà không cần hoàn thành sớm                                                                                                                                                                                                         |
 | **Quy kết tool của Subagent** | Các tool call nội bộ của subagent (Read, Bash, Edit, Grep, …) chỉ tồn tại trong các tệp JSONL riêng của từng subagent — Claude Code không phát hook cho chúng. Mỗi lần `SubagentStop`, dashboard chạy fire-and-forget `scanAndImportSubagents`: phân tích từng `subagents/agent-*.jsonl`, ghép cặp khối `tool_use` với `tool_result` tương ứng theo `tool_use_id`, và phát các sự kiện `PreToolUse` + `PostToolUse` dưới `agent_id` của chính subagent đó. Có cơ chế idempotent (kiểm tra trùng bằng `data LIKE '%"tool_use_id":"X"%'`) và hợp nhất với row live do hook tạo trước đó khi khớp loại + thời điểm bắt đầu trong vòng 30 giây, nên không sinh row trùng `<sid>-jsonl-*`. Cùng đường này chạy trên import khởi động `npm run setup` để backfill toàn bộ — các phiên cũ trước khi cài dashboard đều có timeline tool đầy đủ cho từng subagent. Activity Feed và Chi tiết phiên hiển thị chuỗi cha-con dạng `main › coder › explorer` cho subagent lồng nhau. Chuỗi cha-con đó được dựng lại chính xác bởi `reconcileSubagentParents`: mỗi row subagent ban đầu được chèn phẳng dưới main agent (một hook đơn lẻ hay tệp JSONL không mang danh tính của agent đã spawn), sau đó agent spawn được khôi phục từ kết quả tool Task trong transcript của từng subagent (`toolUseResult.agentId`, thu thập dưới dạng `spawnedChildren`), nên subagent tự spawn subagent con sẽ lồng dưới **đúng** agent cha thay vì dồn phẳng về một cấp dưới main. Idempotent và chỉ bổ sung — chỉ trỏ lại `parent_agent_id`, không chèn hay xóa row — và chạy trong cùng lần quét `SubagentStop`, vốn trả về số đếm `reparented` để dashboard fetch lại ngay cả khi chỉ có thay đổi cấu trúc cây do reparent |
@@ -298,13 +305,16 @@ Bảng điều khiển cung cấp một bộ tính năng toàn diện để giá
 | **Thông báo**                  | Hệ thống Web Push (VAPID) đầy đủ để phân phối đáng tin cậy. Thông báo đến ngay cả khi tab ở chế độ nền hoặc trình duyệt đã đóng. Được cấu hình đặc biệt để hỗ trợ âm thanh trên macOS. Có thể định cấu hình chuyển đổi theo sự kiện với quản lý đăng ký |
 | **Thông báo cập nhật**         | Máy chủ định kỳ chạy `git fetch` không chặn và so sánh checkout cục bộ với nhánh mặc định của remote chuẩn được chọn. **Nhận biết nhánh và fork:** nếu có cả `upstream` và `origin`, ưu tiên `upstream` (quy ước chuẩn cho fork); lệnh cũng tự điều chỉnh theo tình huống — chỉ đề xuất `git pull --ff-only` khi nhánh cục bộ thực sự theo dõi ref chuẩn, ngược lại đưa `git fetch` (kèm fast-forward merge ở trường hợp fork) để lệnh không bao giờ nói dối. Thanh bên cũng có nút "Kiểm tra cập nhật" thường trực kèm badge trạng thái. Bảng điều khiển **không bao giờ** tự pull hoặc tự khởi động lại — người dùng chạy lệnh trong terminal — nên cơ chế này không phá vỡ phiên dev, tiến trình dưới pm2/systemd/Docker, và không để lại tiến trình mồ côi |
 | **Cài đặt**                       | Thông tin hệ thống, trạng thái hook, quản lý giá mô hình, tùy chọn thông báo, xuất dữ liệu **và khôi phục** (chế độ **Restore backup** của bảng Import History nhập lại một tệp xuất `.json` — idempotent và không phá hủy, nên có thể hợp nhất lịch sử từ nhiều máy vào một bảng điều khiển), dọn dẹp phiên. Mục **Định giá mô hình** có một popover thông tin (biểu tượng `i` cạnh tiêu đề) giải thích cách tra cứu quy tắc (mẫu khớp đầu tiên thắng), cú pháp wildcard `%` kiểu SQL kèm ví dụ cụ thể (`claude-opus-4-7%`, `claude-%-haiku`, id chính xác), và nhắc nhở rằng giá phải được cập nhật thủ công khi Anthropic công bố giá mới — phiên đã lưu vẫn giữ nguyên giá tại thời điểm nạp. Trình chỉnh sửa của mỗi quy tắc cũng có một khối Introductory rates có thể thu gọn (một ngày kết thúc khuyến mãi dạng YYYY-MM-DD + giá giới thiệu theo từng hạng mục); để trống ngày nghĩa là không có khuyến mãi, và ngày trống sẽ xóa mọi mức giá giới thiệu đã lưu. Khung CLAUDE_HOME và bảng Import History đã được i18n đầy đủ ở en/vi/zh |
+> **Phạm vi nhà cung cấp và vị trí dữ liệu:** Cài đặt giữ lựa chọn Claude Code / Codex / Cả hai nhất quán trên toàn ứng dụng và cho phép đổi từng thư mục dữ liệu phiên mà không cần khởi động lại dashboard.
+
+| **Cấu hình Agent Codex**             | Nửa Codex của Agent Config đọc đầy đủ danh mục model tài khoản cục bộ mà không bị giới hạn preview chung làm tab Models hiển thị sai là 0, đồng thời luôn gồm các override cơ sở/profile. Tạo trực tiếp các lớp phủ `<name>.config.toml` chuẩn của Codex trong ứng dụng; mỗi thẻ sao chép lệnh chính xác `codex --profile <name>` bằng một cú nhấp và mở trình chỉnh sửa có bảo vệ. Profile, hook, rule, skill và hướng dẫn dùng chung thao tác kiểu Claude **View source / Copy path / Edit / Delete**. Mọi lần xóa được phép đều cần xác nhận và sao lưu trước (skill giữ toàn bộ thư mục); `config.toml` luôn chỉ có thể chỉnh sửa. |
 | **Máy chủ MCP (Cục bộ)**             | Máy chủ MCP cục bộ cấp doanh nghiệp trong `mcp/` với ba chế độ truyền tải (stdio, HTTP+SSE, REPL tương tác), 25 công cụ được nhập trên 6 miền, lược đồ đầu vào nghiêm ngặt, thử lại/ngăn chặn, thực thi API chỉ dành cho máy chủ cục bộ và các cổng an toàn đột biến/phá hủy theo cấp bậc. Chế độ HTTP phục vụ HTTP có thể phát trực tuyến (25/11/2025) và SSE cũ (2024-11-05) trên cổng có thể định cấu hình. Chế độ REPL cung cấp lệnh gọi công cụ tương tác hoàn thành theo tab với đầu ra có màu |
 | **Quy trình làm việc**                      | Trang trực quan hóa được hỗ trợ bởi D3.js với 11 phần tương tác: điều phối tác nhân DAG, thực thi công cụ Sơ đồ Sankey, mạng cộng tác, hiệu quả của tác nhân phụ (sparkline ngày trong tuần với tooltip render qua portal — thoát khỏi `overflow:hidden` của thẻ và bám trong viewport nên không bao giờ bị cắt), mẫu quy trình làm việc được phát hiện, luồng ủy quyền mô hình, bản đồ lan truyền lỗi (thanh ngang với huy hiệu tỷ lệ, phân tích loại tác nhân, thẻ lỗi API/phiên), dòng thời gian đồng thời, độ phức tạp phân tán phiên, phân tích tác động nén và thông tin chi tiết về mỗi phiên. **Tooltip phong phú, đa ngôn ngữ ở mọi nơi:** mỗi tiêu đề biểu đồ có một biểu tượng `i` mở popover có cấu trúc "Biểu đồ thể hiện điều gì / Cách đọc / Vì sao quan trọng"; hover vào node, cạnh, thanh hay bong bóng đều hiển thị tooltip nhiều phần với diễn giải xác định, phụ thuộc giá trị (ví dụ tỷ trọng nguồn/đích, các mức sức khỏe của tỷ lệ thành công, mô tả họ Opus / Sonnet / Haiku, mẫu thời gian dồn-trước / giữa-phiên / dồn-cuối). Mỗi trong 6 thẻ thống kê đầu trang có popover thông tin ở góc dưới-phải giải thích cách tính chỉ số và ý nghĩa của giá trị hiện tại bằng ngôn ngữ tự nhiên. Tooltip được cập nhật trực tiếp qua một ref DOM duy nhất cho mỗi biểu đồ kèm fallback `mouseleave` ở cấp container, nên không bao giờ giật theo con trỏ hoặc dính lại sau khi re-render. Bấm vào một dòng trong **Mẫu quy trình phát hiện được** sẽ mở rộng tại chỗ một bảng chi tiết với chuỗi bước đầy đủ, lưới thống kê, mô tả xác định (phát hiện vòng lặp, mức tần suất) và một gợi ý thực tiễn. Các tab lọc trạng thái (Chỉ hoạt động / Đã hoàn thành / Tất cả) lọc tất cả 11 phần. Lọc chéo, xuất JSON và tự động làm mới WebSocket theo thời gian thực với khả năng gỡ lỗi trong 3 giây. Bảng **Lần chạy quy trình** hiển thị các "quy trình động" — những nhóm sub-agent do công cụ `Workflow` (và `/loop` tự định nhịp) tạo ra — vốn không phát ra hook, nên được dựng lại từ nhật ký chạy trên đĩa (`workflows/wf_<runId>.json`): mỗi lần chạy hiển thị các giai đoạn và bảng phân tích token / lệnh gọi công cụ / thời lượng theo từng agent, kèm phát hiện `running` theo thời gian thực trước khi nhật ký được ghi và một mục liên kết trên mỗi trang Chi tiết phiên. Biểu đồ **Tác động nén** đã được thiết kế lại thành biểu đồ tần suất "số phiên theo số lần nén" với nhãn trục, các ô thống kê (tổng / số phiên bị ảnh hưởng / trung bình / cao nhất), dòng giải thích và tooltip phong phú khi hover |
 | **Theo dõi quá trình nén**            | Phát hiện các sự kiện `/compact` từ bản ghi JSONL, tạo tác nhân và sự kiện nén. Chèn lấp các nén cũ khi khởi động. Máy quét định kỳ (tần suất được dẫn xuất từ `DASHBOARD_STALE_MINUTES`) phát hiện các vết nén ngay cả khi không có hook nào kích hoạt. Chia sẻ transcript cache để không xảy ra tình trạng đọc tệp trùng lặp |
 | **Phiên đăng ký/Phiên tiếp tục**   | Tự động kích hoạt lại các phiên khi có sự kiện mới, xử lý chính xác các phiên `/resume` và phiên mồ côi. Quét định kỳ (mỗi ¼ của `DASHBOARD_STALE_MINUTES`, kẹp giữa 60s–5 phút) đánh dấu các phiên bị bỏ qua vượt qua khả năng phát hiện dựa trên sự kiện                                                                     |
 | **Phát hiện phiên có sẵn** | Các phiên đã chạy khi máy chủ khởi động được nhập dưới dạng "hoạt động" (dựa trên sửa đổi tệp JSONL gần đây). Các sự kiện dừng cũng kích hoạt lại các phiên đã hoàn thành/bị bỏ rơi đã nhập, do đó, móc đầu tiên từ phiên đang diễn ra luôn hiển thị trên bảng điều khiển     |
 | **Đồng bộ dự án liên tục**        | Việc tự động nhập `~/.claude/projects` khi khởi động chỉ chạy một lần (được kiểm soát bằng marker), nên một thư mục dự án được tạo **sau** lần khởi chạy đầu tiên — mà các phiên của nó không bao giờ đi qua hook (ví dụ hook chỉ-trên-host bị tắt) — sẽ vẫn vô hình cho đến khi quét lại thủ công. Một tiến trình đồng bộ nền (`startSessionSync`) lấp khoảng trống đó qua ba kích hoạt cùng chia sẻ một mtime cache + một lần quét gộp duy nhất: một lần quét **ngay lập tức** khi khởi động, một **`fs.watch`** có debounce kích hoạt ngay khoảnh khắc một tệp phiên/thư mục dự án mới xuất hiện (đệ quy trên macOS/Windows; thư mục gốc + các thư mục con trực tiếp trên Linux để tránh rủi ro recursive-watcher ở userland), và một **lần poll định kỳ** (`DASHBOARD_SESSION_SYNC_MS`, mặc định 30 giây). Mỗi lần quét chỉ parse lại các tệp có mtime tăng lên và phát `session_created`/`session_updated` (cùng agent chính) để UI làm mới trực tiếp; một phiên đã được nhập mà không thay đổi sẽ được bỏ qua không cần parse lại, nên chi phí khởi động lại giữ ở mức O(số tệp mới/đã thay đổi) |
-| **Nguồn dữ liệu từ xa**            | Thu thập dữ liệu Claude Code từ các máy khác qua SSH theo thời gian thực. Dashboard mirror `~/.claude/projects` của mỗi máy qua **scp** (hoặc `wsl.exe` + `tar` khi Claude chạy trong WSL trên máy chủ SSH Windows) vào thư mục dàn dựng theo từng nguồn, đưa qua **cùng bộ nhập** dùng cho lịch sử cục bộ, và gắn thẻ phiên theo nguồn (`sessions.source`). Bộ thăm dò nền (`DASHBOARD_REMOTE_SYNC_MS`, mặc định 15 giây; `0` tắt) giữ gần thời gian thực — thêm hoặc bật lại nguồn cũng kích hoạt kéo ngay — và đồng bộ thành công phát `remote_data.updated` cùng khung `session_created` / `session_updated` để trang mở tự làm mới. Bộ chọn **phạm vi dữ liệu** toàn cục (Chỉ cục bộ / Tất cả / nguồn cụ thể) thu hẹp toàn bộ ứng dụng. Quản lý trong **Settings → Remote Data Sources** và qua `ccam remote-sources`; trạng thái phát qua `remote_source.status`, và hàng Sessions hiển thị huy hiệu nguồn. Các phiên từ xa **không nhận hook cục bộ trực tiếp**, nên bị loại khỏi mọi heuristic liveness/stale cục bộ; thay vào đó **trạng thái live được đối chiếu từ transcript đã mirror ở mỗi lần đồng bộ** — dấu thời gian sự kiện JSONL mới nhất (dự phòng mtime mirror) trong `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` (mặc định 10 phút) nghĩa là CLI từ xa vẫn chạy (⇒ `active`), còn khi mirror ngừng tiến triển thì chuyển sang `completed` |
+| **Nguồn dữ liệu từ xa**            | Thu thập Claude Code và Codex theo thời gian thực từ các máy khác qua SSH. Mỗi nguồn mirror độc lập `~/.claude/projects` và `~/.codex/sessions` (cùng `session_index.jsonl` nhẹ của Codex để giữ tiêu đề đã đổi tên) qua **scp**, hoặc `wsl.exe` + `tar` khi CLI chạy trong WSL. Các vùng dàn dựng riêng dùng bộ nhập chuẩn của từng provider và gắn phiên bằng `sessions.source`; một nguồn có thể chỉ có Claude, chỉ Codex hoặc cả hai. Bộ thăm dò `DASHBOARD_REMOTE_SYNC_MS` (mặc định 15 giây) phát trạng thái và bộ đếm theo provider. Khi một provider không có, lỗi hoặc bị kẹt, chỉ các phiên cũ của provider đó đi vào quét stale; provider còn lại khỏe mạnh vẫn do mirror quản lý. Tùy chọn cấu hình riêng Home Claude từ xa và Home Codex từ xa trong **Settings → Remote Data Sources** hoặc qua `ccam remote-sources`; SSH vẫn dùng xác thực của máy chủ và không lưu secret. |
 | **Thiết kế đáp ứng**              | Bố cục thân thiện với thiết bị di động với lưới xếp chồng, bảng có thể cuộn và thanh bên có thể thu gọn                                                                                                                                                                                      |
 | **Bản địa hóa giao diện người dùng**                | Chuyển đổi ngôn ngữ tích hợp với bản sao giao diện người dùng được dịch và nhãn trợ năng cho tiếng Anh (`en`), tiếng Trung (`zh`), tiếng Việt (`vi`) và tiếng Hàn (`ko`) và tiếng Tây Ban Nha (`es`). Phạm vi đa ngôn ngữ trải dài hết toàn bộ tooltip ở trang Workflows: cách tính của các thẻ thống kê và các diễn giải theo bucket giá trị, popover "Cái gì / Cách đọc / Vì sao" cho mỗi biểu đồ, mọi tooltip hover trên đồ thị (orchestration, tool flow, pipeline, model delegation, concurrency), bảng chi tiết Workflow Patterns với mô tả và gợi ý, popover thông tin Settings → Định giá mô hình, khung CLAUDE_HOME và toàn bộ luồng Import History                                                                                                                                                                       |
 | **Dữ liệu hạt giống**                      | Tập lệnh hạt giống tích hợp cho các bản demo và phát triển                                                                                                                                                                                                                               |
@@ -337,13 +347,25 @@ cd Claude-Code-Agent-Monitor
 npm run setup
 ```
 
-### 2. Cấu hình móc Claude Code
+### 2. Cấu hình móc Claude Code & Codex
 
 ```bash
 npm run install-hooks
 ```
 
-Điều này thêm các mục hook vào `~/.claude/settings.json` để chuyển tiếp các sự kiện tới bảng điều khiển. Các móc hiện có được bảo tồn.
+Trình cài đặt mở bộ chọn đa lựa chọn tương tác: dùng phím mũi tên, <kbd>Space</kbd> và <kbd>Enter</kbd> để chọn **Claude Code**, **Codex (beta)** hoặc cả hai (Claude Code được chọn sẵn). Mục Claude Code nằm trong `~/.claude/settings.json`; mục Codex nằm trong `~/.codex/hooks.json`. Nếu bộ hook dashboard đã tồn tại cho lựa chọn đó, trình cài đặt sẽ cảnh báo trước khi chỉ thay thế các mục của dashboard này — các hook không liên quan được giữ nguyên. Bạn cũng có thể chọn tương tự trong **Settings → Hook Configuration → Install hooks**.
+
+Khi vào dashboard lần đầu, hãy chọn nguồn dữ liệu; ứng dụng sẽ mở cổng thiết lập giám sát trực tiếp theo nguồn đã chọn. Bạn có thể cài hook ngay tại đó với cảnh báo ghi đè và kết quả lệnh, hoặc xác nhận rõ rằng hook đã được cài trước khi vào dashboard.
+
+Các rollout Codex trong `~/.codex/sessions` cũng được phát hiện liên tục. Dashboard đọc JSONL chỉ-ghi-nối thêm theo kiểu tăng dần, ưu tiên rollout mới nhất và cô lập tệp lịch sử lỗi để thử lại, vì vậy phiên, token, chi phí, hàng hội thoại và cập nhật WebSocket luôn mới ngay cả khi bỏ lỡ một thông báo hook.
+
+Bản ghi vòng đời rollout Codex điều khiển các trạng thái thẻ trực tiếp giống Claude Code: `user_message` và `task_started` đánh dấu agent chính là **Đang làm việc**; `task_complete` giữ phiên ở trạng thái active nhưng hiển thị **Đang chờ**; và `turn_aborted` hiển thị **Đang chờ** với lý do bị gián đoạn. Một bản ghi rollout mới sẽ tự khôi phục phiên bị đánh dấu completed sai, trong khi cơ chế kiểm tra tiến trình chỉ hoàn tất phiên Codex cục bộ sau khi CLI tương ứng đã kết thúc.
+
+Tiêu đề `/rename` của Codex được đọc từ chỉ mục phiên gốc và cập nhật thẻ phiên cùng agent theo thời gian thực. Chế độ xem lại hội thoại gồm các lượt của người dùng, lời gọi và đầu ra custom tool `exec`, với phân trang bằng cursor để tải các tin nhắn cũ hơn ở đầu transcript.
+
+Các thẻ Claude Code và Codex hiển thị lịch sử gọn hai dòng của các lời nhắc người dùng khác nhau gần nhất bên dưới tiêu đề riêng của từng nhà cung cấp, vì vậy tên ngắn gọn hoặc câu theo dõi ngắn không che khuất tác vụ đang hoạt động. Claude làm mới ngữ cảnh này từ bộ nhớ đệm transcript cục bộ trong hook trực tiếp, quá trình nhập và các lượt watchdog; Codex làm mới từ bản ghi rollout và dự phòng bằng các sự kiện `user_message` đã lưu cho các lần nhập cũ. Transcript hiển thị tệp đính kèm PNG/JPEG/GIF/WebP đã lưu của cả Claude Code và Codex khi có sẵn, đồng thời gộp bản sao response/event trùng lặp của Codex thành một lượt người dùng.
+
+Các lần gọi tool `response_item` của Codex được lập chỉ mục đúng một lần bằng cursor rollout riêng, vì vậy luồng tool Workflows, drill-in phiên, tổng model/token và số lần `context_compacted` phản ánh dữ liệu Codex đã ghi mà không chạy lại bộ đếm vòng đời hoặc token. Khi phạm vi dashboard chỉ là Codex, bảng Dynamic Workflows chỉ dành cho journal Claude Code sẽ bị ẩn thay vì hiển thị dữ liệu Codex trống.
 
 ### 3. Bắt đầu
 
@@ -528,9 +550,10 @@ lưu trữ thực sự.
 ```mermaid
 stateDiagram-v2
     [*] --> waiting: ensureSession (hook đầu tiên)
-    waiting --> working: PreToolUse / UserPromptSubmit
+    waiting --> working: PreToolUse / UserPromptSubmit / Codex task_started / user_message
     working --> working: PostToolUse (tool hoàn tất)
-    working --> waiting: Stop, không lỗi
+    working --> waiting: Stop, không lỗi / Codex task_complete
+    working --> waiting: Codex turn_aborted (interrupted)
     working --> waiting: Notification (yêu cầu input)
     working --> waiting: Esc cancel (watchdog marker hoặc idle timeout)
     waiting --> error: Stop có lỗi
@@ -557,8 +580,9 @@ Trạng thái lưu trữ: `active | completed | error | abandoned`. Trạng thá
 stateDiagram-v2
     [*] --> waiting: SessionStart startup/resume/clear (status=active + cờ)
     active --> active: SessionStart compact (giữa lượt — giữ nguyên trạng thái, không cờ)
-    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse
-    active --> waiting: Stop, không lỗi (cờ được đóng dấu lại)
+    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse / Codex task_started / user_message
+    active --> waiting: Stop, không lỗi / Codex task_complete (cờ được đóng dấu lại)
+    active --> waiting: Codex turn_aborted (interrupted)
     active --> waiting: Notification xin quyền (agent → waiting)
     active --> waiting: Esc cancel (watchdog marker hoặc idle timeout)
     active --> error: Stop, stop_reason=error
@@ -607,11 +631,13 @@ flowchart LR
 | `NODE_ENV`              | `development` | Đặt thành `production` để phục vụ ứng dụng khách đã xây dựng |
 | `DASHBOARD_STALE_MINUTES` | `180` (3 giờ) | Số phút không hoạt động trước khi một phiên vẫn `active` (kể cả phiên đang **Đang chờ** người dùng — "Đang chờ" là lớp phủ UI trên một hàng `active`, không phải trạng thái lưu trữ) bị tự động đánh dấu **abandoned** và rời khỏi danh sách hoạt động. Được thực thi bởi watchdog 15 giây và lượt quét bảo trì định kỳ (chạy mỗi ¼ giá trị này, kẹp giữa 60s – 5 phút). Giảm giá trị (ví dụ `60`) để có idle timeout ngắn hơn |
 | `DASHBOARD_WORKING_IDLE_SECONDS` | `120` | Idle-working timeout để khôi phục một lượt bị hủy bằng `Esc` **trước khi có bất kỳ output nào** (việc này không để lại dấu nào trong transcript). Khi Agent chính đã ở `working` mà không có tool nào đang chạy và cả sự kiện hook lẫn transcript đều không tiến triển trong khoảng thời gian này, watchdog chuyển phiên sang **Đang chờ**. Giảm giá trị để khôi phục nhanh hơn, đổi lại đôi khi có lần lật cờ sai trên các lượt suy nghĩ im lặng kéo dài (sẽ tự phục hồi) |
-| `DASHBOARD_LIVENESS_PROBE` | `1` (bật) | Đặt `0` để tắt **cơ chế thu dọn phiên đã chết** của watchdog (probe dựa trên `ps`/`lsof` hoàn tất các phiên `active` mà tiến trình `claude` không còn tồn tại — khôi phục một `SessionEnd` bị mất khi dashboard không chạy). Các phiên được chuyển tiếp từ **máy khác** (household hooks) báo cáo `cwd` không phải POSIX và được cơ chế thu dọn tự động bỏ qua, nên một triển khai hỗn hợp cục bộ + chuyển tiếp không còn cần tắt tùy chọn này; chỉ tắt nó cho cấu hình thuần từ xa nơi tiến trình cục bộ không chứng minh được gì. Tự động tắt trên Windows và trong container |
+| `DASHBOARD_LIVENESS_PROBE` | `1` (bật) | Đặt `0` để tắt **cơ chế thu dọn phiên đã chết** của watchdog (probe dựa trên `ps`/`lsof` hoàn tất các phiên local `active` của Claude Code hoặc Codex khi tiến trình CLI tương ứng không còn tồn tại — khôi phục một `SessionEnd` bị mất khi dashboard không chạy). Các phiên được chuyển tiếp từ **máy khác** (household hooks) báo cáo `cwd` không phải POSIX và được cơ chế thu dọn tự động bỏ qua, nên một triển khai hỗn hợp cục bộ + chuyển tiếp không còn cần tắt tùy chọn này; chỉ tắt nó cho cấu hình thuần từ xa nơi tiến trình cục bộ không chứng minh được gì. Tự động tắt trên Windows và trong container |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | Ngưỡng nhàn rỗi cho cơ chế thu dọn **ở nhịp watchdog**: phiên chỉ bị hoàn tất khi transcript của nó không được ghi trong ít nhất khoảng này (lần ghi hook cuối là đồng hồ dự phòng khi không có transcript trên đĩa), nên phiên đang giữa lượt hoặc vừa resume không bao giờ biến mất do một lần probe trượt thoáng qua. Các lượt thu dọn lúc khởi động bỏ qua ngưỡng này — lúc boot chỉ probe quyết định, nên phiên thoát ngay trước khi mở app được dọn tức thì |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | Khoảng poll (ms) cho tiến trình đồng bộ nền `~/.claude/projects` liên tục, làm hiện ra các dự án được thêm sau khi khởi động mà các phiên của chúng không bao giờ đi qua hook. Watcher `fs.watch` vẫn kích hoạt gần như tức thì bất kể giá trị này; lần poll này là lưới an toàn (watcher có thể bỏ lỡ sự kiện / không kích hoạt trên hệ thống tệp mạng). Đặt thành `0` để tắt poll mà vẫn giữ watcher chạy |
-| `DASHBOARD_REMOTE_SYNC_MS` | `15000` | Khoảng thời gian (ms) để kéo dữ liệu từ các nguồn từ xa qua `scp`. Thêm hoặc bật lại nguồn cũng kích hoạt đồng bộ ngay. Đặt `0` để tắt việc poll nguồn từ xa |
-| `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000` (10 phút) | Cửa sổ độ mới cho trạng thái live của một phiên **Nguồn dữ liệu từ xa**. Ở mỗi lần đồng bộ, một phiên từ xa có **sự kiện JSONL cuối cùng** trong transcript đã mirror nằm trong cửa sổ này sẽ được giữ ở `active`; khi bản sao ngừng tiến triển lâu hơn ngưỡng này, phiên được đối chiếu về `completed`. Các phiên từ xa không nhận hook trực tiếp, nên tùy chọn này thay thế các lượt quét liveness/stale cục bộ (vốn bỏ qua chúng). Tăng giá trị này cho các kết nối chậm hoặc các lượt nghỉ (idle) dài |
+| `DASHBOARD_CODEX_HOME` | `CODEX_HOME` hoặc `~/.codex` | Thư mục trạng thái Codex cục bộ tùy chọn. Lưu vị trí mới trong Cài đặt sẽ duy trì override chỉ dành cho dashboard này, kích hoạt lại theo dõi trực tiếp và quét ngay cây `sessions/` mới. |
+| `DASHBOARD_CODEX_SYNC_MS` | `4000` | Khoảng poll an toàn (ms) cho rollout Codex chỉ-ghi-nối thêm. Hook Codex kích hoạt cùng bộ nạp tăng dần ngay lập tức; đặt `0` để chỉ tắt poll và vẫn giữ watcher hệ thống tệp khi có thể. |
+| `DASHBOARD_REMOTE_SYNC_MS` | `15000` | Khoảng thời gian (ms) để đồng bộ nền của **Nguồn dữ liệu từ xa** kéo độc lập `~/.claude/projects` và `~/.codex/sessions` (cùng chỉ mục tiêu đề `session_index.jsonl` nhẹ của Codex) của từng remote bật, rồi nạp lại qua bộ nhập cục bộ tương ứng. Thêm hoặc bật lại nguồn cũng kích hoạt đồng bộ ngay. Đặt `0` để tắt việc poll nguồn từ xa |
+| `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000` (10 phút) | Cửa sổ độ mới cho trạng thái live của một phiên **Nguồn dữ liệu từ xa**. Ở mỗi lần đồng bộ, phiên Claude Code hoặc Codex có **sự kiện JSONL cuối cùng** trong transcript mirror tương ứng nằm trong cửa sổ này sẽ được giữ ở `active`; khi bản sao ngừng tiến triển lâu hơn ngưỡng này, phiên được đối chiếu về `completed`. Các phiên từ xa không nhận hook trực tiếp, nên đối chiếu mirror theo provider thay thế liveness cục bộ; mirror provider lỗi, không có, hoặc bị kẹt sẽ quay về quét stale thông thường. Tăng giá trị này cho các kết nối chậm hoặc các lượt nghỉ (idle) dài |
 | `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` | `600000` | Thời gian chờ tối đa cho lần `scp` của mỗi nguồn từ xa |
 | `DASHBOARD_REMOTE_TEST_TIMEOUT_MS` | `15000` | Thời gian chờ tối đa cho lượt kiểm tra kết nối SSH tới nguồn |
 
@@ -1091,8 +1117,8 @@ Xem [docs/API.md → Metrics](./docs/API.md#metrics) để biết danh sách ch�
 
 | Phương pháp | Con đường                          | Sự miêu tả                                             |
 | ------ | ----------------------------- | ------------------------------------------------------- |
-| `GET`  | `/api/workflows`              | Dữ liệu quy trình công việc tổng hợp (điều phối, công cụ, mẫu). Tùy chọn `?status=active\|thông số truy vấn đã hoàn thành lọc tất cả 11 phần dữ liệu theo trạng thái phiên |
-| `GET`  | `/api/workflows/session/:id`  | Thông tin chi tiết mỗi phiên (cây tác nhân, dòng thời gian công cụ, sự kiện) |
+| `GET`  | `/api/workflows`              | Dữ liệu quy trình theo provider/source (điều phối, tool đã ghi, mẫu, compaction Codex). Các bộ lọc `?status=active\|completed`, `?sources=...` và `?providers=claude\|codex` áp dụng cho cả 11 phần dữ liệu |
+| `GET`  | `/api/workflows/session/:id`  | Drill-in từng phiên theo provider/source (cây agent, dòng thời gian tool đã ghi, sự kiện) |
 
 ### Cài đặt
 
@@ -1102,7 +1128,8 @@ Xem [docs/API.md → Metrics](./docs/API.md#metrics) để biết danh sách ch�
 | `POST` | `/api/settings/clear-data`     | Xóa tất cả các phiên, Agent, sự kiện, sử dụng token |
 | `POST` | `/api/settings/reimport`       | Nhập lại các phiên kế thừa từ `~/.claude/`      |
 | `POST` | `/api/settings/reinstall-hooks`| Cài đặt lại móc Claude Code                      |
-| `POST` | `/api/settings/reset-pricing`  | Đặt lại giá về mặc định                        |
+| `POST` | `/api/settings/install-hooks` | Cài hook Claude Code, Codex hoặc cả hai; giữ nguyên hook không liên quan |
+| `POST` | `/api/settings/reset-pricing`  | Đặt lại bảng giá Claude và GPT về mặc định                        |
 | `GET`  | `/api/settings/export`         | Xuất tất cả dữ liệu dưới dạng tải xuống JSON                 |
 | `POST` | `/api/settings/import`         | Khôi phục bản xuất từ `/export` (multipart `file` hoặc JSON `{ path }`). Idempotent + không phá hủy — phiên đã có được bỏ qua toàn bộ |
 | `POST` | `/api/settings/cleanup`        | Bỏ các phiên cũ, xóa dữ liệu cũ           |
@@ -1120,14 +1147,15 @@ Xem [docs/API.md → Metrics](./docs/API.md#metrics) để biết danh sách ch�
 
 ### Nhập lịch sử (Import History)
 
-Đưa các phiên Claude Code hiện có vào dashboard từ ba nguồn khác nhau,
-tất cả đều đi qua cùng một bộ phân tích mà máy chủ sử dụng để thu nhận
-thời gian thực — nhờ đó, số token, chi phí theo mô hình, compactions,
-subagents, lần dùng công cụ và thời lượng lượt được tính giống hệt với
-dữ liệu được bắt trực tiếp. Nhập lại là bất biến: phiên được khóa theo
-UUID và các cột `baseline_*` ở bảng `token_usage` giữ nguyên tổng token
-trước khi compact, nên chạy lại trình nhập không bao giờ nhân đôi token
-hay chi phí.
+Nhập lịch sử **Claude Code** hoặc **Codex** qua các tab nhà cung cấp trong
+**Settings → Import History**. Claude Code dùng parser JSONL chung cho
+`~/.claude/projects`; Codex dùng chính bộ ingest rollout append-only của
+theo dõi thời gian thực cho `~/.codex/sessions`, gồm snapshot token, tool
+response-item, trạng thái vòng đời và tiêu đề `/rename` khi có
+`session_index.jsonl`. Nhập lại là bất biến: Claude giữ baseline compaction
+còn Codex giữ byte cursor, nên không nhà cung cấp nào tính đôi mức dùng hoặc
+chi phí. Lịch sử Codex từ thư mục hay upload được sao chép vào vùng lưu trữ
+của dashboard trước khi tệp tạm bị dọn dẹp.
 
 ```mermaid
 flowchart LR
@@ -1164,10 +1192,10 @@ flowchart LR
 
 | Phương pháp | Đường dẫn               | Mô tả                                                                            |
 | ----------- | ----------------------- | -------------------------------------------------------------------------------- |
-| `GET`       | `/api/import/guide`     | Đường dẫn theo hệ điều hành, lệnh tạo archive, phần mở rộng hỗ trợ, hướng dẫn    |
-| `POST`      | `/api/import/rescan`    | Quét lại thư mục mặc định `~/.claude/projects`                                   |
-| `POST`      | `/api/import/scan-path` | Quét một thư mục tuyệt đối bất kỳ (body `{ path }`); đi đệ quy                   |
-| `POST`      | `/api/import/upload`    | Tải lên đa phần `.jsonl`, `.meta.json`, `.zip`, `.tar(.gz)`, `.gz`               |
+| `GET`       | `/api/import/guide`     | Đường dẫn, lệnh archive và hướng dẫn theo nhà cung cấp (`?provider=claude\|codex`) |
+| `POST`      | `/api/import/rescan`    | Quét lại đường dẫn mặc định đã chọn (`{ provider }`) |
+| `POST`      | `/api/import/scan-path` | Quét thư mục tuyệt đối với `{ path, provider }`; đi đệ quy |
+| `POST`      | `/api/import/upload`    | Tải multipart với trường `provider`; tệp Codex được snapshot |
 
 **Đầu vào hỗ trợ.** Tệp JSONL rời (`.jsonl`), tệp phụ `.meta.json`, và
 các archive (`.zip`, `.tar`, `.tar.gz`/`.tgz`, `.gz`) chứa bất kỳ cấu

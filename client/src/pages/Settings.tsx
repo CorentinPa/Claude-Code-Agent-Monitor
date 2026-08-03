@@ -1,6 +1,6 @@
 /**
  * @file Settings.tsx
- * @description Provides a settings page for managing model pricing rules, notification preferences, and system information with real-time updates and actionable controls for data management and hook configuration.
+ * @description Provides product-scoped dashboard display controls, Claude and GPT pricing editors, live hook setup, session storage locations, notification preferences, and system management actions.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -121,7 +121,8 @@ import { ImportHistory } from "../components/ImportHistory";
 import { RemoteSources } from "../components/RemoteSources";
 import { Skeleton } from "../components/Skeleton";
 import { AlertsNotifications } from "../components/AlertsNotifications";
-import type { ModelPricing, WSMessage } from "../lib/types";
+import type { GptModelPricing, ModelPricing, WSMessage } from "../lib/types";
+import { useDataScope, type ProviderScope } from "../lib/dataScope";
 
 // In-page navigation for the (dense) Settings screen. Each entry maps to a
 // `<section id>` rendered below; the TOC scroll-spies the active one.
@@ -131,9 +132,11 @@ const SETTINGS_SECTIONS: {
   fallback?: string;
   Icon: typeof DollarSign;
 }[] = [
-  { id: "pricing", labelKey: "pricing.title", Icon: DollarSign },
+  { id: "data-display", labelKey: "display.title", Icon: Layers },
+  { id: "claude-pricing", labelKey: "pricing.navClaude", Icon: DollarSign },
+  { id: "gpt-pricing", labelKey: "pricing.navGpt", Icon: DollarSign },
   { id: "hooks", labelKey: "hooks.title", Icon: Plug },
-  { id: "claude-home", labelKey: "claudeHome.title", Icon: FolderOpen },
+  { id: "session-homes", labelKey: "homes.title", Icon: FolderOpen },
   { id: "import", labelKey: "import.title", fallback: "Import", Icon: History },
   {
     id: "remote-sources",
@@ -222,9 +225,22 @@ const emptyRow: EditRow = {
   intro_cache_write_1h_per_mtok: "0",
 };
 
+interface HookProviderStatus {
+  installed: boolean;
+  has_dashboard_hooks?: boolean;
+  has_existing_hooks?: boolean;
+  path: string;
+  hooks: Record<string, boolean>;
+}
+
 interface SystemInfo {
   db: { path: string; size: number; counts: Record<string, number> };
-  hooks: { installed: boolean; path: string; hooks: Record<string, boolean> };
+  hooks: {
+    installed: boolean;
+    path: string;
+    hooks: Record<string, boolean>;
+    providers?: Record<"claude" | "codex", HookProviderStatus>;
+  };
   server: {
     version: string;
     uptime: number;
@@ -260,6 +276,17 @@ function formatUptime(seconds: number): string {
   if (d > 0) return `${d}d ${h}h ${m}m`;
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
+}
+
+/** Format a published USD-per-million-token rate without exposing float noise. */
+function formatUsdRate(rate: number): string {
+  if (!Number.isFinite(rate) || rate <= 0) return "—";
+  return new Intl.NumberFormat(getCurrentLocale(), {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4,
+  }).format(rate);
 }
 
 function useCountUp(end: number | null, durationMs = 1000) {
@@ -435,6 +462,467 @@ function PricingInfoTooltip() {
   );
 }
 
+const GPT_RATE_FIELDS = [
+  "short_input_per_mtok",
+  "short_cached_input_per_mtok",
+  "short_cache_write_per_mtok",
+  "short_output_per_mtok",
+  "long_input_per_mtok",
+  "long_cached_input_per_mtok",
+  "long_cache_write_per_mtok",
+  "long_output_per_mtok",
+  "fast_input_per_mtok",
+  "fast_cached_input_per_mtok",
+  "fast_cache_write_per_mtok",
+  "fast_output_per_mtok",
+] as const;
+type GptRateField = (typeof GPT_RATE_FIELDS)[number];
+type GptDraft = Record<"model_pattern" | "display_name" | GptRateField, string>;
+
+function emptyGptDraft(): GptDraft {
+  return Object.fromEntries([
+    ["model_pattern", ""],
+    ["display_name", ""],
+    ...GPT_RATE_FIELDS.map((field) => [field, "0"]),
+  ]) as GptDraft;
+}
+
+function GptPricingTable() {
+  const { t } = useTranslation("settings");
+  const [rules, setRules] = useState<GptModelPricing[]>([]);
+  const [draft, setDraft] = useState<GptDraft>(emptyGptDraft);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const addRowRef = useRef<HTMLTableRowElement>(null);
+  const reload = useCallback(() => {
+    // Older embedded/test API facades can predate the Codex endpoint. Keep the
+    // rest of Settings usable during a rolling upgrade; production API always
+    // supplies this method.
+    if (typeof api.pricing.listGpt !== "function") return Promise.resolve();
+    return api.pricing.listGpt().then((result) => setRules(result.pricing));
+  }, []);
+
+  useEffect(() => {
+    reload().catch((err) =>
+      setError(err instanceof Error ? err.message : t("messages.failedLoad"))
+    );
+  }, [reload, t]);
+
+  // Match the Claude pricing editor: adding a model takes the operator straight
+  // to the new row instead of leaving it below a long, horizontally-scrollable
+  // rate card. The first field retains autoFocus for immediate typing.
+  useEffect(() => {
+    if (!adding) return;
+    const frame = requestAnimationFrame(() => {
+      addRowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [adding]);
+
+  const edit = (rule: GptModelPricing) => {
+    const next = emptyGptDraft();
+    next.model_pattern = rule.model_pattern;
+    next.display_name = rule.display_name;
+    for (const field of GPT_RATE_FIELDS) next[field] = String(rule[field]);
+    setDraft(next);
+    setEditing(rule.model_pattern);
+    setAdding(false);
+    setError(null);
+  };
+  const cancel = () => {
+    setEditing(null);
+    setAdding(false);
+    setError(null);
+  };
+  const save = async () => {
+    if (!draft.model_pattern.trim() || !draft.display_name.trim()) {
+      setError(t("pricing.validationRequired"));
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await api.pricing.upsertGpt({
+        model_pattern: draft.model_pattern.trim(),
+        display_name: draft.display_name.trim(),
+        ...Object.fromEntries(
+          GPT_RATE_FIELDS.map((field) => [field, Math.max(0, Number(draft[field]) || 0)])
+        ),
+      } as Omit<GptModelPricing, "updated_at">);
+      await reload();
+      cancel();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("messages.failedSave"));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const remove = async (pattern: string) => {
+    if (!window.confirm(t("pricing.gpt.deleteConfirm"))) return;
+    try {
+      await api.pricing.deleteGpt(pattern);
+      await reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("messages.failedDelete"));
+    }
+  };
+  const input = (field: keyof GptDraft, className = "") => {
+    const isRate = field.endsWith("_mtok");
+    return (
+      <div className={isRate ? "relative min-w-[5.5rem]" : undefined}>
+        {isRate && (
+          <span className="pointer-events-none absolute inset-y-0 left-2 flex items-center text-xs text-gray-500">
+            $
+          </span>
+        )}
+        <input
+          value={draft[field]}
+          onChange={(event) => setDraft((current) => ({ ...current, [field]: event.target.value }))}
+          className={`w-full rounded border border-border bg-surface-1 px-2 py-1 text-xs text-gray-200 ${isRate ? "pl-5 text-right font-mono" : ""} ${className}`}
+          type={isRate ? "number" : "text"}
+          min={isRate ? 0 : undefined}
+          step={isRate ? "any" : undefined}
+          autoFocus={adding && field === "model_pattern"}
+        />
+      </div>
+    );
+  };
+  const editingRow = adding || !!editing;
+
+  return (
+    <div>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h4 className="text-sm font-medium text-gray-200">{t("pricing.gpt.title")}</h4>
+          <p className="mt-1 max-w-3xl text-xs leading-relaxed text-gray-500">
+            {t("pricing.gpt.description")}
+          </p>
+          <p className="mt-1 text-[11px] font-medium uppercase tracking-wider text-emerald-300/80">
+            {t("pricing.gpt.unit")}
+          </p>
+        </div>
+        <button
+          type="button"
+          className="btn-ghost text-xs"
+          disabled={editingRow}
+          onClick={() => {
+            setDraft(emptyGptDraft());
+            setAdding(true);
+          }}
+        >
+          <Plus className="h-3.5 w-3.5" />
+          {t("pricing.addModel")}
+        </button>
+      </div>
+      {error && <p className="mb-3 rounded bg-red-500/10 p-2 text-xs text-red-300">{error}</p>}
+      <div className="mb-3 flex gap-2 rounded-lg border border-sky-500/20 bg-sky-500/[0.05] px-3 py-2.5 text-xs leading-relaxed text-gray-400">
+        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-300" />
+        <span>{t("pricing.gpt.unavailableNote")}</span>
+      </div>
+      <div className="card overflow-x-auto">
+        <table className="w-full min-w-[1260px] text-left text-xs">
+          <thead className="bg-surface-3 text-[10px] uppercase tracking-wide text-gray-500">
+            <tr>
+              <th rowSpan={2} className="px-3 py-2">
+                {t("pricing.pattern")}
+              </th>
+              <th rowSpan={2} className="px-3 py-2">
+                {t("pricing.gpt.name")}
+              </th>
+              <th colSpan={4} className="border-l border-border px-2 py-2 text-center">
+                {t("pricing.gpt.short")}
+              </th>
+              <th colSpan={4} className="border-l border-border px-2 py-2 text-center">
+                {t("pricing.gpt.long")}
+              </th>
+              <th colSpan={4} className="border-l border-border px-2 py-2 text-center">
+                {t("pricing.gpt.fast")}
+              </th>
+              <th rowSpan={2} className="px-3 py-2">
+                {t("common:actions")}
+              </th>
+            </tr>
+            <tr>
+              {Array.from({ length: 3 }).flatMap((_, group) =>
+                ["input", "cached", "write", "output"].map((label) => (
+                  <th
+                    key={`${group}-${label}`}
+                    className="border-l border-border px-2 py-1.5 text-right"
+                  >
+                    {t(`pricing.gpt.${label}`)}
+                  </th>
+                ))
+              )}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border/60">
+            {rules.map((rule) =>
+              editing === rule.model_pattern ? (
+                <tr key={rule.model_pattern} className="bg-surface-2">
+                  <td className="px-2 py-2">{input("model_pattern")}</td>
+                  <td className="px-2 py-2">{input("display_name")}</td>
+                  {GPT_RATE_FIELDS.map((field) => (
+                    <td key={field} className="px-1 py-2">
+                      {input(field)}
+                    </td>
+                  ))}
+                  <td className="px-2 py-2 whitespace-nowrap">
+                    <button
+                      type="button"
+                      className="btn-primary mr-1 text-xs"
+                      onClick={save}
+                      disabled={busy}
+                    >
+                      <Check className="h-3 w-3" />
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-ghost text-xs"
+                      onClick={cancel}
+                      disabled={busy}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </td>
+                </tr>
+              ) : (
+                <tr key={rule.model_pattern} className="text-gray-400 hover:bg-surface-2/60">
+                  <td className="px-3 py-2 font-mono text-gray-300">{rule.model_pattern}</td>
+                  <td className="px-3 py-2 text-gray-200">{rule.display_name}</td>
+                  {GPT_RATE_FIELDS.map((field) => (
+                    <td
+                      key={field}
+                      className="border-l border-border/50 px-2 py-2 text-right font-mono"
+                    >
+                      {formatUsdRate(rule[field])}
+                    </td>
+                  ))}
+                  <td className="px-2 py-2 whitespace-nowrap">
+                    <button
+                      type="button"
+                      className="p-1 text-gray-400 hover:text-gray-100"
+                      onClick={() => edit(rule)}
+                      disabled={editingRow}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      className="p-1 text-gray-400 hover:text-red-400"
+                      onClick={() => remove(rule.model_pattern)}
+                      disabled={editingRow}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </td>
+                </tr>
+              )
+            )}
+            {adding && (
+              <tr ref={addRowRef} className="bg-surface-2">
+                <td className="px-2 py-2">{input("model_pattern")}</td>
+                <td className="px-2 py-2">{input("display_name")}</td>
+                {GPT_RATE_FIELDS.map((field) => (
+                  <td key={field} className="px-1 py-2">
+                    {input(field)}
+                  </td>
+                ))}
+                <td className="px-2 py-2 whitespace-nowrap">
+                  <button
+                    type="button"
+                    className="btn-primary mr-1 text-xs"
+                    onClick={save}
+                    disabled={busy}
+                  >
+                    <Check className="h-3 w-3" />
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-ghost text-xs"
+                    onClick={cancel}
+                    disabled={busy}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function HookInstallModal({
+  open,
+  status,
+  onClose,
+  onInstalled,
+}: {
+  open: boolean;
+  status?: SystemInfo["hooks"];
+  onClose: () => void;
+  onInstalled: () => void;
+}) {
+  const { t } = useTranslation("settings");
+  const [selected, setSelected] = useState<Array<"claude" | "codex">>(["claude"]);
+  const [busy, setBusy] = useState(false);
+  const [output, setOutput] = useState<string[]>([]);
+  const [failure, setFailure] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setSelected(["claude"]);
+    setOutput([]);
+    setFailure(null);
+  }, [open]);
+
+  if (!open) return null;
+  const toggle = (provider: "claude" | "codex") => {
+    setSelected((current) =>
+      current.includes(provider)
+        ? current.filter((entry) => entry !== provider)
+        : [...current, provider]
+    );
+  };
+  const installed = (provider: "claude" | "codex") => status?.providers?.[provider]?.installed;
+  const hasExistingHooks = (provider: "claude" | "codex") =>
+    status?.providers?.[provider]?.has_existing_hooks || installed(provider);
+  const install = async () => {
+    if (selected.length === 0) return;
+    setBusy(true);
+    setFailure(null);
+    try {
+      const result = await api.settings.installHooks(selected);
+      const lines = selected.flatMap((provider) => result.results[provider]?.output || []);
+      setOutput(lines);
+      onInstalled();
+    } catch (err) {
+      setFailure(err instanceof Error ? err.message : t("hooks.modal.failed"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4"
+      role="presentation"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="install-hooks-title"
+        className="w-full max-w-xl rounded-xl border border-border bg-surface-1 shadow-2xl shadow-black/50"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
+          <div>
+            <h3 id="install-hooks-title" className="text-base font-semibold text-gray-100">
+              {t("hooks.modal.title")}
+            </h3>
+            <p className="mt-1 text-xs leading-relaxed text-gray-400">
+              {t("hooks.modal.description")}
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn-ghost p-1"
+            onClick={onClose}
+            disabled={busy}
+            aria-label={t("common:close")}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="space-y-3 p-5">
+          {(["claude", "codex"] as const).map((provider) => {
+            const checked = selected.includes(provider);
+            const isInstalled = installed(provider);
+            return (
+              <button
+                key={provider}
+                type="button"
+                onClick={() => toggle(provider)}
+                disabled={busy}
+                className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors ${
+                  checked
+                    ? "border-accent bg-accent/10"
+                    : "border-border bg-surface-2 hover:border-gray-600"
+                }`}
+              >
+                <span
+                  className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded border ${checked ? "border-accent bg-accent text-white" : "border-gray-600"}`}
+                >
+                  {checked && <Check className="h-3.5 w-3.5" />}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2 text-sm font-medium text-gray-200">
+                    {provider === "claude" ? "Claude Code" : "Codex"}
+                    {provider === "codex" && (
+                      <span className="rounded bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-amber-300">
+                        Beta
+                      </span>
+                    )}
+                    {isInstalled && (
+                      <span className="rounded bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-amber-300">
+                        {t("hooks.modal.installed")}
+                      </span>
+                    )}
+                  </span>
+                  <span className="mt-1 block text-xs text-gray-500">
+                    {t(`hooks.modal.${provider}`)}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+
+          {selected.some(hasExistingHooks) && (
+            <div className="flex gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-200">
+              <AlertTriangle className="h-4 w-4 flex-none" />
+              {t("hooks.modal.overrideWarning")}
+            </div>
+          )}
+          {output.length > 0 && (
+            <pre className="max-h-32 overflow-auto rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs leading-relaxed text-emerald-200 whitespace-pre-wrap">
+              {output.join("\n")}
+            </pre>
+          )}
+          {failure && (
+            <p className="rounded-lg bg-red-500/10 p-3 text-xs text-red-300">{failure}</p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between gap-3 border-t border-border px-5 py-4">
+          <span className="text-xs text-gray-500">{t("hooks.modal.preserveNote")}</span>
+          <div className="flex gap-2">
+            <button type="button" className="btn-ghost text-xs" onClick={onClose} disabled={busy}>
+              {output.length ? t("common:close") : t("common:cancel")}
+            </button>
+            <button
+              type="button"
+              className="btn-primary text-xs disabled:opacity-50"
+              onClick={install}
+              disabled={busy || selected.length === 0}
+            >
+              {busy ? (
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Plug className="h-3.5 w-3.5" />
+              )}
+              {t("hooks.modal.install")}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main component ───
 
 export function Settings() {
@@ -467,11 +955,17 @@ export function Settings() {
   const [claudeHomeInput, setClaudeHomeInput] = useState("");
   const [claudeHomeSaving, setClaudeHomeSaving] = useState(false);
   const [claudeHomeError, setClaudeHomeError] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<string>("pricing");
+  const [codexHome, setCodexHomeState] = useState("");
+  const [codexHomeInput, setCodexHomeInput] = useState("");
+  const [codexHomeSaving, setCodexHomeSaving] = useState(false);
+  const [codexHomeError, setCodexHomeError] = useState<string | null>(null);
+  const [hookModalOpen, setHookModalOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("data-display");
   const tocRef = useRef<HTMLDivElement | null>(null);
   const [tocOverflow, setTocOverflow] = useState({ left: false, right: false });
 
   const wsConnected = useSyncExternalStore(eventBus.onConnection, () => eventBus.connected);
+  const [dataScope, setDataScope] = useDataScope();
   const animatedTotalCost = useCountUp(totalCost);
 
   // Scroll-spy: highlight the TOC entry for the section nearest the top.
@@ -521,30 +1015,44 @@ export function Settings() {
     };
   }, [loading, recomputeTocOverflow]);
 
+  // Scroll the active chip into the horizontal TOC viewport too. Without this,
+  // scrolling the long Settings page can correctly update the highlight while
+  // leaving the highlighted section hidden behind the overflow affordance.
+  useEffect(() => {
+    const nav = tocRef.current;
+    const active = nav?.querySelector<HTMLButtonElement>(
+      `[data-settings-section="${activeSection}"]`
+    );
+    active?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [activeSection]);
+
   const scrollTocBy = useCallback((delta: number) => {
     tocRef.current?.scrollBy({ left: delta, behavior: "smooth" });
   }, []);
 
   const load = useCallback(async () => {
     try {
-      const [pricingRes, costRes, infoRes, claudeHomeRes] = await Promise.all([
+      const [pricingRes, costRes, infoRes, claudeHomeRes, codexHomeRes] = await Promise.all([
         api.pricing.list(),
         api.pricing.totalCost(),
         api.settings.info(),
         api.settings.claudeHome.get(),
+        api.settings.codexHome.get(),
       ]);
       setPricing(pricingRes.pricing);
       setTotalCost(costRes.total_cost);
       setSysInfo(infoRes);
       setClaudeHomeState(claudeHomeRes.claude_home);
       setClaudeHomeInput(claudeHomeRes.claude_home);
+      setCodexHomeState(codexHomeRes.codex_home);
+      setCodexHomeInput(codexHomeRes.codex_home);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("messages.failedLoad"));
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, dataScope]);
 
   useEffect(() => {
     load();
@@ -716,12 +1224,6 @@ export function Settings() {
       return t("danger.clearedResult", { count: total });
     });
 
-  const handleReinstallHooks = () =>
-    runAction("hooks", async () => {
-      const res = await api.settings.reinstallHooks();
-      return res.ok ? t("hooks.success") : t("hooks.failed");
-    });
-
   const handleResetPricing = () =>
     runAction("reset-pricing", async () => {
       const res = await api.settings.resetPricing();
@@ -757,6 +1259,25 @@ export function Settings() {
       setClaudeHomeError(err instanceof Error ? err.message : t("claudeHome.saveFailed"));
     } finally {
       setClaudeHomeSaving(false);
+    }
+  };
+
+  const handleSaveCodexHome = async () => {
+    if (codexHomeInput === codexHome) return;
+    setCodexHomeSaving(true);
+    setCodexHomeError(null);
+    try {
+      const res = await api.settings.codexHome.set(codexHomeInput);
+      setCodexHomeState(res.codex_home);
+      setCodexHomeInput(res.codex_home);
+      // Refresh hook paths/status immediately — they follow the active Codex
+      // home, and the backend has simultaneously triggered a fresh rollout scan.
+      const info = await api.settings.info();
+      setSysInfo(info);
+    } catch (err) {
+      setCodexHomeError(err instanceof Error ? err.message : t("codexHome.saveFailed"));
+    } finally {
+      setCodexHomeSaving(false);
     }
   };
 
@@ -1036,6 +1557,7 @@ export function Settings() {
               <button
                 key={id}
                 type="button"
+                data-settings-section={id}
                 onClick={() =>
                   document
                     .getElementById(id)
@@ -1094,8 +1616,65 @@ export function Settings() {
         </div>
       </div>
 
-      {/* ─── MODEL PRICING ─── */}
-      <section id="pricing" className="scroll-mt-24">
+      {/* ─── PRODUCT DATA DISPLAY ─── */}
+      <section id="data-display" className="scroll-mt-24">
+        <div className="mb-4">
+          <h3 className="flex items-center gap-2 text-sm font-medium text-gray-300">
+            <Layers className="h-4 w-4 text-gray-500" />
+            {t("display.title")}
+          </h3>
+          <p className="mt-0.5 text-xs text-gray-500">{t("display.description")}</p>
+        </div>
+        <div className="card p-4">
+          <div
+            className="grid grid-cols-1 gap-2 sm:grid-cols-3"
+            role="radiogroup"
+            aria-label={t("display.title")}
+          >
+            {(["claude", "codex", "both"] as ProviderScope[]).map((provider) => {
+              const selected = (dataScope.provider || "claude") === provider;
+              const title =
+                provider === "claude"
+                  ? "Claude Code"
+                  : provider === "codex"
+                    ? "Codex"
+                    : t("display.both");
+              return (
+                <button
+                  key={provider}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setDataScope({ ...dataScope, provider })}
+                  className={`rounded-lg border p-3 text-left transition-colors ${
+                    selected
+                      ? "border-accent bg-accent/10 shadow-[0_0_0_1px_rgba(129,140,248,0.14)]"
+                      : "border-border bg-surface-2 hover:border-gray-600"
+                  }`}
+                >
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <span className="text-sm font-medium text-gray-200">{title}</span>
+                      {provider === "codex" && (
+                        <span className="rounded bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-amber-300">
+                          {t("display.beta")}
+                        </span>
+                      )}
+                    </span>
+                    {selected && <Check className="h-4 w-4 flex-none text-accent" />}
+                  </span>
+                  <span className="mt-1 block text-xs leading-relaxed text-gray-500">
+                    {t(`display.${provider}Description`)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CLAUDE PRICING ─── */}
+      <section id="claude-pricing" className="scroll-mt-24">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
@@ -1129,7 +1708,8 @@ export function Settings() {
               disabled={isEditing}
               className="btn-primary text-xs disabled:opacity-50"
             >
-              <Plus className="w-3.5 h-3.5" /> {t("pricing.addModel")}
+              <Plus className="w-3.5 h-3.5" />
+              {t("pricing.addModel")}
             </button>
           </div>
         </div>
@@ -1292,6 +1872,11 @@ export function Settings() {
         )}
       </section>
 
+      {/* ─── OPENAI GPT PRICING ─── */}
+      <section id="gpt-pricing" className="scroll-mt-24">
+        <GptPricingTable />
+      </section>
+
       {/* ─── HOOK CONFIGURATION ─── */}
       <section id="hooks" className="scroll-mt-24">
         <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2 mb-1">
@@ -1305,7 +1890,7 @@ export function Settings() {
             <div className="flex items-center gap-3">
               {sysInfo?.hooks.installed ? (
                 <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-                  <CheckCircle className="w-3.5 h-3.5" /> {t("hooks.allInstalled")}
+                  <CheckCircle className="w-3.5 h-3.5" /> {t("hooks.someInstalled")}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">
@@ -1313,80 +1898,126 @@ export function Settings() {
                 </span>
               )}
             </div>
-            <button
-              onClick={handleReinstallHooks}
-              disabled={actionLoading !== null}
-              className="btn-ghost text-xs disabled:opacity-50"
-            >
-              {actionLoading === "hooks" ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <RotateCcw className="w-3.5 h-3.5" />
-              )}
-              {t("hooks.reinstall")}
+            <button onClick={() => setHookModalOpen(true)} className="btn-ghost text-xs">
+              <Plug className="w-3.5 h-3.5" />
+              {t("hooks.configure")}
             </button>
           </div>
 
-          {actionBanner(["hooks"])}
-
           {sysInfo && (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-                {Object.entries(sysInfo.hooks.hooks).map(([hook, active]) => (
-                  <div
-                    key={hook}
-                    className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md bg-surface-2"
-                  >
-                    {active ? (
-                      <CheckCircle className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                    ) : (
-                      <XCircle className="w-3 h-3 text-red-400 flex-shrink-0" />
-                    )}
-                    <span className="text-gray-400 truncate">{hook}</span>
-                  </div>
-                ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {(["claude", "codex"] as const).map((provider) => {
+                  const providerStatus = sysInfo.hooks.providers?.[provider];
+                  const active =
+                    providerStatus?.installed ?? (provider === "claude" && sysInfo.hooks.installed);
+                  return (
+                    <div key={provider} className="rounded-md bg-surface-2 px-3 py-2">
+                      <div className="flex items-center gap-1.5 text-xs">
+                        {active ? (
+                          <CheckCircle className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <XCircle className="w-3 h-3 text-red-400" />
+                        )}
+                        <span className="font-medium text-gray-300">
+                          {provider === "claude" ? "Claude Code" : "Codex"}
+                        </span>
+                        {provider === "codex" && (
+                          <span className="text-[10px] text-amber-300">Beta</span>
+                        )}
+                      </div>
+                      <p className="mt-1 truncate text-[10px] text-gray-600">
+                        {providerStatus?.path || "Not configured"}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
-              <p className="text-[11px] text-gray-600 font-mono truncate">{sysInfo.hooks.path}</p>
             </>
           )}
         </div>
       </section>
 
-      {/* ─── CLAUDE HOME ─── */}
-      <section id="claude-home" className="scroll-mt-24">
+      {/* ─── SESSION DATA LOCATIONS ─── */}
+      <section id="session-homes" className="scroll-mt-24">
         <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2 mb-1">
           <FolderOpen className="w-4 h-4 text-gray-500" />
-          {t("claudeHome.title")}
+          {t("homes.title")}
         </h3>
-        <p className="text-xs text-gray-500 mb-1">{t("claudeHome.description")}</p>
+        <p className="text-xs text-gray-500 mb-1">{t("homes.description")}</p>
         <p className="text-[11px] text-gray-600 italic mb-4 leading-snug">{t("cursorPathsNote")}</p>
 
-        <div className="card p-5 space-y-4">
-          <div className="flex items-center gap-3">
-            <input
-              type="text"
-              value={claudeHomeInput}
-              onChange={(e) => {
-                setClaudeHomeInput(e.target.value);
-                setClaudeHomeError(null);
-              }}
-              className="flex-1 bg-surface-4 border border-surface-3 rounded-lg px-3 py-2 text-sm text-gray-200 font-mono focus:outline-none focus:border-violet-500/50"
-              placeholder={t("claudeHome.placeholder")}
-            />
-            <button
-              onClick={handleSaveClaudeHome}
-              disabled={claudeHomeSaving || claudeHomeInput === claudeHome}
-              className="btn-primary px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {claudeHomeSaving ? t("claudeHome.saving") : t("claudeHome.save")}
-            </button>
+        <div className="card p-5 space-y-5">
+          <div>
+            <div className="mb-2 flex items-center gap-2">
+              <p className="text-sm font-medium text-gray-200">{t("claudeHome.title")}</p>
+              <code className="rounded bg-surface-3 px-1.5 py-0.5 text-[10px] text-gray-500">
+                CLAUDE_HOME
+              </code>
+            </div>
+            <p className="mb-3 text-xs text-gray-500">{t("claudeHome.description")}</p>
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                value={claudeHomeInput}
+                onChange={(e) => {
+                  setClaudeHomeInput(e.target.value);
+                  setClaudeHomeError(null);
+                }}
+                className="flex-1 bg-surface-4 border border-surface-3 rounded-lg px-3 py-2 text-sm text-gray-200 font-mono focus:outline-none focus:border-violet-500/50"
+                placeholder={t("claudeHome.placeholder")}
+              />
+              <button
+                onClick={handleSaveClaudeHome}
+                disabled={claudeHomeSaving || claudeHomeInput === claudeHome}
+                className="btn-primary px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {claudeHomeSaving ? t("claudeHome.saving") : t("claudeHome.save")}
+              </button>
+            </div>
+            {claudeHomeError && <p className="text-xs text-red-400">{claudeHomeError}</p>}
+            {claudeHome && (
+              <p className="text-xs text-gray-500">
+                {t("claudeHome.current")}
+                <code className="ml-1 text-gray-400">{claudeHome}</code>
+              </p>
+            )}
           </div>
-          {claudeHomeError && <p className="text-xs text-red-400">{claudeHomeError}</p>}
-          {claudeHome && (
-            <p className="text-xs text-gray-500">
-              {t("claudeHome.current")} <code className="text-gray-400">{claudeHome}</code>
-            </p>
-          )}
+          <div className="border-t border-border pt-5">
+            <div className="mb-2 flex items-center gap-2">
+              <p className="text-sm font-medium text-gray-200">{t("codexHome.title")}</p>
+              <code className="rounded bg-surface-3 px-1.5 py-0.5 text-[10px] text-gray-500">
+                DASHBOARD_CODEX_HOME
+              </code>
+            </div>
+            <p className="mb-3 text-xs text-gray-500">{t("codexHome.description")}</p>
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                value={codexHomeInput}
+                onChange={(e) => {
+                  setCodexHomeInput(e.target.value);
+                  setCodexHomeError(null);
+                }}
+                className="flex-1 bg-surface-4 border border-surface-3 rounded-lg px-3 py-2 text-sm text-gray-200 font-mono focus:outline-none focus:border-violet-500/50"
+                placeholder={t("codexHome.placeholder")}
+              />
+              <button
+                onClick={handleSaveCodexHome}
+                disabled={codexHomeSaving || codexHomeInput === codexHome}
+                className="btn-primary px-4 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {codexHomeSaving ? t("codexHome.saving") : t("codexHome.save")}
+              </button>
+            </div>
+            {codexHomeError && <p className="mt-2 text-xs text-red-400">{codexHomeError}</p>}
+            {codexHome && (
+              <p className="mt-2 text-xs text-gray-500">
+                {t("codexHome.current")}
+                <code className="ml-1 text-gray-400">{codexHome}</code>
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
@@ -1856,6 +2487,17 @@ export function Settings() {
           <p className="text-xs text-gray-500">{t("about.loadingInfo")}</p>
         )}
       </section>
+      <HookInstallModal
+        open={hookModalOpen}
+        status={sysInfo?.hooks}
+        onClose={() => setHookModalOpen(false)}
+        onInstalled={() => {
+          api.settings
+            .info()
+            .then(setSysInfo)
+            .catch(() => {});
+        }}
+      />
     </div>
   );
 }

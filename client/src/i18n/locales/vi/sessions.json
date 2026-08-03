@@ -25,7 +25,7 @@
   "sessionCount_plural": "Đã ghi nhận {{count}} phiên",
   "noSessions": "Không tìm thấy phiên",
   "noSessionsDesc": "Hãy thử điều chỉnh tìm kiếm hoặc bộ lọc.",
-  "noSessionsHint": "Bắt đầu một phiên Claude Code với hooks đã cài để theo dõi.",
+  "noSessionsHint": "Bắt đầu một phiên Agent được theo dõi với hooks đã cài để bắt đầu theo dõi.",
   "tableSession": "Phiên",
   "tableStatus": "Trạng thái",
   "tableLastActive": "Hoạt động gần nhất",
@@ -37,7 +37,7 @@
   "detail": {
     "waitingBanner": {
       "title": "Đang chờ phản hồi của bạn",
-      "generic": "Claude Code đang tạm dừng trong phiên này cho đến khi bạn phản hồi trong terminal."
+      "generic": "Phiên này đang tạm dừng cho đến khi bạn phản hồi trong terminal."
     },
     "failedLoad": "Không thể tải phiên",
     "loading": "Đang tải phiên...",
@@ -51,6 +51,9 @@
     "noEvents": "Chưa có sự kiện được ghi nhận.",
     "conversation": "Hội thoại",
     "timeline": "Dòng thời gian ({{shown}}/{{total}})",
-    "transcriptNotFound": "Không tìm thấy bản ghi hội thoại cho agent này. Tệp transcript có thể bị thiếu hoặc chưa được liên kết."
+    "transcriptNotFound": "Không tìm thấy bản ghi hội thoại cho agent này. Tệp transcript có thể bị thiếu hoặc chưa được liên kết.",
+    "transcript": {
+      "loadOlder": "↑ Tải các tin nhắn cũ hơn"
+    }
   }
 }

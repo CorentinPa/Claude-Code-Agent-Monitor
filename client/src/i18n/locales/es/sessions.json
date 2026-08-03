@@ -11,7 +11,7 @@
   "sessionCount_plural": "{{count}} sesiones registradas",
   "noSessions": "No se encontraron sesiones",
   "noSessionsDesc": "Intenta ajustar tu búsqueda o los filtros.",
-  "noSessionsHint": "Inicia una sesión de Claude Code con los hooks instalados para comenzar el seguimiento.",
+  "noSessionsHint": "Inicia una sesión de agente supervisada con los hooks instalados para comenzar el seguimiento.",
   "tableSession": "Sesión",
   "tableStatus": "Estado",
   "tableLastActive": "Última Actividad",
@@ -23,7 +23,7 @@
   "detail": {
     "waitingBanner": {
       "title": "Esperando tu entrada",
-      "generic": "Claude Code está pausado en esta sesión hasta que respondas en la terminal."
+      "generic": "Esta sesión está en pausa hasta que respondas en la terminal."
     },
     "failedLoad": "No se pudo cargar la sesión",
     "loading": "Cargando sesión...",
@@ -37,7 +37,10 @@
     "noEvents": "No se registraron eventos.",
     "conversation": "Conversación",
     "timeline": "Línea de tiempo ({{shown}}/{{total}})",
-    "transcriptNotFound": "No se encontró la transcripción de la conversación para este agente. El archivo de transcripción puede estar ausente o aún no vinculado."
+    "transcriptNotFound": "No se encontró la transcripción de la conversación para este agente. El archivo de transcripción puede estar ausente o aún no vinculado.",
+    "transcript": {
+      "loadOlder": "↑ Cargar mensajes anteriores"
+    }
   },
   "remoteSourceBadgeTitle": "Recopilado desde una máquina remota"
 }

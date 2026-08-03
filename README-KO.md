@@ -1,11 +1,12 @@
-# Claude Code용 에이전트 대시보드
+# Claude Code & Codex용 에이전트 대시보드
 
-### Claude Code 에이전트 활동을 위한 실시간 모니터링 플랫폼 🚀
+### Claude Code & Codex 에이전트 활동을 위한 실시간 모니터링 플랫폼 🚀
 
-Claude Code 에이전트 세션, 도구 사용, 서브에이전트 오케스트레이션을 실시간으로 추적하고 시각화하는 전문 대시보드입니다. Node.js, Express, React, SQLite로 구축되었으며, Claude Code의 네이티브 Hook 시스템과 직접 통합되어 매끄러운 세션 추적과 분석을 제공합니다.
+Claude Code & Codex 에이전트 세션, 도구 사용, 서브에이전트 오케스트레이션을 실시간으로 추적하고 시각화하는 전문 대시보드입니다. Node.js, Express, React, SQLite로 구축되었으며, Claude Code & Codex의 네이티브 Hook 시스템과 직접 통합되어 매끄러운 세션 추적과 분석을 제공합니다.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
-![Claude Code Plugins](https://img.shields.io/badge/Claude_Code-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
+![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-blue?style=flat-square&logo=githubcopilot&logoColor=white)
+![Claude Code Plugins](https://img.shields.io/badge/Claude_Code_&_Codex-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
 ![Model Context Protocol](https://img.shields.io/badge/Model_Context_Protocol-1.0-0f766e?style=flat-square&logo=modelcontextprotocol&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-%3E%3D3.6-3776AB?style=flat-square&logo=python&logoColor=white)
@@ -109,11 +110,11 @@ Claude Code 에이전트 세션, 도구 사용, 서브에이전트 오케스트�
 
 ## 개요
 
-전문적인 다크 테마 웹 인터페이스를 통해 세션을 추적하고, 에이전트를 실시간으로 모니터링하며, 도구 사용을 시각화하고, 서브에이전트 오케스트레이션을 관찰하세요. Claude Code의 네이티브 Hook 시스템을 통해 직접 통합됩니다.
+Claude Code & Codex의 에이전트 활동을 실시간으로 모니터링하고 분석할 수 있는 전문적인 다크 테마 웹 인터페이스를 통해 세션을 추적하고, 에이전트를 실시간으로 모니터링하며, 도구 사용을 시각화하고, 서브에이전트 오케스트레이션을 관찰하세요. Claude Code & Codex의 네이티브 Hook 시스템을 통해 직접 통합됩니다.
 
 ```mermaid
 graph LR
-    A["Claude Code<br/>Session"] -->|hooks fire on<br/>tool use / stop| B["Hook Handler<br/>(Node.js script)"]
+    A["Claude Code & Codex<br/>Session"] -->|hooks fire on<br/>tool use / stop| B["Hook Handler<br/>(Node.js script)"]
     B -->|HTTP POST| C["Dashboard Server<br/>(Express + SQLite)"]
     C -->|WebSocket<br/>broadcast| D["Dashboard UI<br/>(React + Tailwind)"]
     style A fill:#6366f1,stroke:#818cf8,color:#fff
@@ -122,7 +123,7 @@ graph LR
     style D fill:#10b981,stroke:#34d399,color:#fff
 ```
 
-실시간 모니터링 대시보드 외에도, `mcp/`에 대시보드 자체를 조사하고 관리하기 위한 도구 카탈로그를 노출하는 로컬 MCP 서버 구현이 포함되어 있어 대시보드 작업을 Claude Code 워크플로에 직접 통합하기 쉽습니다. 또한 대시보드 상호작용, 분석, 워크플로 인텔리전스를 위한 Claude Code 플러그인, 스킬, 서브에이전트를 제공하는 에이전트 확장 레이어도 있습니다.
+실시간 모니터링 대시보드 외에도, `mcp/`에 대시보드 자체를 조사하고 관리하기 위한 도구 카탈로그를 노출하는 로컬 MCP 서버 구현이 포함되어 있어 대시보드 작업을 Claude Code & Codex 워크플로에 직접 통합하기 쉽습니다. 또한 대시보드 상호작용, 분석, 워크플로 인텔리전스를 위한 Claude Code & Codex 플러그인, 스킬, 서브에이전트를 제공하는 에이전트 확장 레이어도 있습니다.
 
 ### 국제화 (i18n)
 
@@ -228,9 +229,15 @@ flowchart LR
 </p>
 
 <p align="center">
-  <img src="images/config.png" alt="Claude Config Explorer" width="100%">
+  <img src="images/config.png" alt="에이전트 구성 — Claude Code 및 Codex 탐색기" width="100%">
   <br>
-  <em>🧰 <strong>Claude 설정 탐색기</strong> — Claude Code가 알고 있는 모든 것을 위한 12탭 인스펙터: 스킬, 서브에이전트, 슬래시 명령, 출력 스타일, 플러그인(플러그인별 기여 항목 포함), 마켓플레이스, MCP 서버, Hook, 설정(비밀 키 마스킹 포함), 메모리(사용자 + 프로젝트 `CLAUDE.md` 파일과 프로젝트별 파일 기반 메모리 저장소 — `~/.claude/projects/<slug>/memory/` 아래의 모든 `*.md` 파일을 프로젝트별로 그룹화하고 검색 가능), 키바인딩(인라인 구조화 편집기 포함), Statusline. 저위험 표면 — 텍스트 파일 아티팩트, 프로젝트별 자동 메모리 파일, `keybindings.json` — 에서 필수 타임스탬프 백업과 함께 생성 / 편집 / 삭제 가능</em>
+  <em>🧰 <strong>에이전트 구성</strong> — 전체 Claude Code 탐색기와 기본값, 모델, 프로필, MCP, 프로젝트, 스킬, 규칙, 훅, 플러그인, 지침을 위한 실시간 Codex 작업 공간 사이를 전환합니다. Codex 미리보기는 비밀 값을 마스킹하며, 사용자가 관리하는 구성, 훅, 규칙, 스킬, 지침은 백업과 함께 안전하게 편집할 수 있습니다.</em>
+</p>
+
+<p align="center">
+  <img src="images/config-codex.png" alt="Codex 구성 탐색기 — 개요, 구성 원본 및 작업 공간 탭" width="100%">
+  <br>
+  <em>🧰 <strong>Codex 구성 탐색기</strong> — Codex 작업 공간은 <code>config.toml</code>, 계정 모델, 프로필, MCP 서버, 프로젝트, 스킬, 훅, 규칙, 플러그인 및 지침을 한데 모읍니다. 지원되는 사용자 관리 파일은 타임스탬프 백업과 함께 편집할 수 있으며, <code>config.toml</code>은 편집 전용입니다.</em>
 </p>
 
 <p align="center">
@@ -240,15 +247,15 @@ flowchart LR
 </p>
 
 <p align="center">
-  <img src="images/run.png" alt="Run Claude — pre-run config" width="100%">
+  <img src="images/run.png" alt="에이전트 실행 — Claude Code 또는 Codex 선택" width="100%">
   <br>
-  <em>▶️ <strong>Run Claude</strong> — 대시보드 안에서 바로 <code>claude</code> 서브프로세스를 생성합니다. 모드(대화 / 원샷), 소스(새 세션 vs 전체 기록에서 재개), 작업 디렉터리(최근 cwd 자동완성), 모델, 권한 모드, thinking effort를 선택하세요. 동일 출처 가드가 브라우저 드라이브바이 생성을 방지합니다</em>
+  <em>▶️ <strong>에이전트 실행</strong> — 실행기를 열 때마다 Claude Code 또는 Codex를 선택합니다. Claude는 대화 / 원샷 모드를 유지하고, Codex는 고유한 승인 및 샌드박스 제어가 있는 네이티브 대화형 스레드를 시작합니다. Codex 모델은 로그인된 CLI 카탈로그에서 동적으로 가져옵니다.</em>
 </p>
 
 <p align="center">
-  <img src="images/run-results.png" alt="Run Claude — live streaming output" width="100%">
+  <img src="images/run-results.png" alt="에이전트 실행 — 라이브 스트리밍 출력" width="100%">
   <br>
-  <em>💬 <strong>Run Claude · 라이브 스트림</strong> — <code>--include-partial-messages</code>를 통한 실제 문자 단위 렌더링의 채팅 스타일 스트리밍 출력. 도구 사용, 도구 결과, thinking 블록 모두 접을 수 있습니다. 헤더의 활성 실행 전환기로 실행을 백그라운드에 두고 나중에 다시 연결할 수 있습니다. 세션 ID가 확인되는 즉시 "세션 보기 →"가 일반 세션 UI로 딥링크합니다</em>
+  <em>💬 <strong>에이전트 실행 · 라이브 스트림</strong> — Claude stream-json과 Codex app-server 이벤트가 추론, 명령, 파일 변경, 도구 활동을 포함한 채팅으로 표시됩니다. Dashboard Runs를 통해 에이전트를 백그라운드에서 실행하고 나중에 다시 연결할 수 있습니다.</em>
 </p>
 
 <p align="center">
@@ -266,7 +273,7 @@ flowchart LR
 <p align="center">
   <img src="images/remote.png" alt="설정 — 원격 데이터 소스" width="100%">
   <br>
-  <em>🛰️ <strong>설정 · 원격 데이터 소스</strong> — SSH로 다른 머신의 Claude Code 활동을 가져옵니다: 대상별로 소스 추가, 연결 테스트, 수동 또는 백그라운드 폴러로 동기화, 그리고 전역 데이터 범위를 로컬 · 전체 소스 · 특정 머신 사이에서 전환하며 세션별 소스 배지 표시</em>
+  <em>🛰️ <strong>설정 · 원격 데이터 소스</strong> — SSH로 다른 머신의 Claude Code 및 Codex 활동을 가져옵니다: 선택적으로 별도 원격 Claude 홈과 원격 Codex 홈 경로를 설정하고 각 provider를 테스트한 뒤, 수동 또는 백그라운드 폴러로 동기화하며 전역 데이터 범위를 로컬 · 전체 소스 · 특정 머신 사이에서 전환하고 세션별 소스 배지를 표시합니다</em>
 </p>
 
 사이드바에서 대시보드, Kanban 보드, 세션 목록, 활동 피드, 분석, 워크플로, 설정에 빠르게 접근할 수 있습니다. 각 페이지는 실시간 업데이트와 풍부한 시각화로 Claude Code 에이전트 활동에 대한 깊이 있는 인사이트를 제공하도록 설계되었습니다.
@@ -299,13 +306,16 @@ flowchart LR
 | **알림**                          | 규칙 기반 알림 엔진 — 전적으로 **설정 → 알림 및 푸시 알림**에서 구성되는, 탭 형태의 **규칙 / 채널 / 활동** 컨트롤 센터입니다(별도 페이지 없음). 네 가지 조건 유형으로 알림 규칙을 정의합니다 — **이벤트 패턴**(이벤트 유형 / 도구 이름 / 요약 텍스트를 매칭하며, 선택적으로 시간 창 안에 N개의 매칭 이벤트를 요구, 예: "2분 안에 오류 5개 초과"), **비활성**(N분 동안 이벤트가 없는 활성 세션), **멈춘 에이전트**(N분 동안 활동 없이 `working`/`waiting`에 머무는 에이전트), **토큰 임계값**(세션 총 토큰이 한도를 초과). 이벤트 기반 규칙은 모든 Hook 수집 시 서버 측에서 평가되고(수집 트랜잭션 이후 — 알림이 Hook 전달을 느리게 하거나 실패시킬 수 없음), 시간 기반 규칙은 60초 주기의 스윕으로 실행됩니다. 발동된 알림은 규칙별 + 세션별 **쿨다운 중복 제거**(기본 300초)와 함께 `alert_events`에 저장되고, `alert_triggered` WebSocket 메시지로 브로드캐스트되며, **활동** 탭의 실시간 피드에 확인 / 모두 확인, 미확인 전용 필터, 알림별 "세션 보기" 링크와 함께 표시됩니다. 규칙은 활성화/비활성화 토글을 지원하며 삭제 시 그 이력도 연쇄 삭제됩니다. 발동된 알림은 **채널** 탭에서 구성한 **범용 웹훅 대상**으로도 전파됩니다 — **14개의 퍼스트클래스 제공자**와 범용 엔드포인트: **Slack**, **Discord**, **Microsoft Teams**, **Google Chat**, **Mattermost**, **Rocket.Chat**(네이티브 채팅 페이로드); **Telegram**(Bot API), **PagerDuty**(Events API v2), **Opsgenie**(Alert API + GenieKey 인증), **Splunk On-Call**(VictorOps REST); 그리고 **Zapier**, **Make**, **n8n**, **Pipedream**, 또는 임의의 **범용** 엔드포인트(선택적 **HMAC-SHA256** 서명과 사용자 지정 헤더가 있는 깔끔한 JSON 봉투). 각 제공자는 페이로드 포매터, URL 결정 방식(일부는 자격 증명에서 도출 — 예: Telegram은 봇 토큰에서, Opsgenie는 리전에서 — 나머지는 기본값 사용), UI가 렌더링할 자격 증명 필드를 선언하는 서버 측 레지스트리로 기술됩니다. 대상은 선택적 규칙별 범위 지정, 동기식 "테스트 전송" 프로브, 기록되는 전달 로그를 지원합니다. 전달은 요청 타임아웃과 제한된 재시도/백오프와 함께 알림 경로와 분리되어 실행되므로 모니터링을 느리게 하거나 차단할 수 없습니다. 대상 URL, 비밀 값, 자격 증명 필드는 서버 측에 저장되며 API가 절대 반환하지 않습니다(모든 응답에서 마스킹/삭제 처리) |
 | **업데이트 알리미**               | 서버가 주기적으로 논블로킹 `git fetch`를 실행하여 로컬 체크아웃을 `origin/master`/`origin/main`/`origin/HEAD`와 비교합니다. 업스트림이 앞서 있으면 UI에 정확한 `git pull && npm run setup` 명령과 원클릭 **복사** 버튼이 있는 모달이 표시되고, 사이드바에는 실시간 배지가 있는 영구적인 "업데이트 확인" 버튼이 생깁니다. 대시보드는 스스로 풀하거나 재시작하지 않습니다 — 사용자가 터미널에서 명령을 실행합니다 — 따라서 이 메커니즘은 개발 세션이나 pm2/systemd/Docker 감독을 깨뜨리거나 고아 프로세스를 남길 수 없습니다 |
 | **설정**                          | 시스템 정보, Hook 상태, 모델 가격 책정 관리, 알림 기본 설정, 데이터 내보내기 **및 복원**(Import History 패널의 **Restore backup** 모드가 전체 내보내기 `.json`을 다시 가져옵니다 — 멱등이며 비파괴적이라 여러 컴퓨터의 기록을 하나의 대시보드로 통합 가능), 세션 정리. 모델 가격 책정 섹션에는 규칙 조회 방식(첫 번째로 일치하는 패턴이 우선), 구체적인 예시가 있는 SQL 스타일 `%` 와일드카드 구문(`claude-opus-4-7%`, `claude-%-haiku`, 정확한 id), 그리고 Anthropic이 새 요금을 발표하면 가격을 수동으로 업데이트해야 한다는 점 — 이미 저장된 세션은 수집 시점에 적용된 가격을 유지 — 을 설명하는 정보 팝오버(제목 옆 `i` 아이콘)가 있습니다. 각 규칙의 편집기에는 접을 수 있는 **프로모션 요금** 블록(`YYYY-MM-DD` 프로모션 마감일 + 카테고리별 프로모션 가격)도 있습니다. 날짜를 비워 두면 프로모션이 없다는 의미이며, 빈 날짜는 저장된 프로모션 요금을 지웁니다. CLAUDE_HOME 상자와 가져오기 기록 패널은 en/vi/zh 전반에 걸쳐 완전히 i18n 기반입니다 |
+> **공급자 범위와 데이터 위치:** 설정은 Claude Code / Codex / 둘 다 선택을 앱 전체에서 일관되게 유지하며, 대시보드를 재시작하지 않고도 각 세션 데이터 디렉터리를 변경할 수 있습니다.
+
+| **Codex 에이전트 구성**            | Agent Config의 Codex 쪽은 일반 미리보기 제한에 걸리지 않고 전체 로컬 계정 모델 카탈로그를 읽으므로 Models 탭이 잘못 0을 표시하지 않으며 기본/프로필 재정의도 항상 포함합니다. 앱에서 표준 Codex `<name>.config.toml` 오버레이를 직접 만들 수 있고, 각 카드는 정확한 `codex --profile <name>` 명령을 한 번에 복사하고 보호된 편집기를 엽니다. 프로필, Hook, 규칙, 스킬, 지침은 Claude 스타일의 **View source / Copy path / Edit / Delete** 작업을 공유합니다. 허용된 삭제는 모두 확인과 사전 백업을 거치며(스킬은 전체 디렉터리 보존), `config.toml`은 영구적으로 편집 전용입니다. |
 | **MCP 서버(로컬)**                | 세 가지 전송 모드(stdio, HTTP+SSE, 인터랙티브 REPL), 6개 도메인에 걸친 25개의 타입 지정 도구, 엄격한 입력 스키마, 재시도/백오프, localhost 전용 API 강제, 계층화된 변경/파괴적 작업 안전 게이트를 갖춘 `mcp/`의 엔터프라이즈급 로컬 MCP 서버. HTTP 모드는 구성 가능한 포트에서 Streamable HTTP(2025-11-25)와 레거시 SSE(2024-11-05)를 제공합니다. REPL 모드는 색상 출력과 함께 탭 완성 인터랙티브 도구 호출을 제공합니다 |
 | **워크플로**                      | 11개의 인터랙티브 섹션이 있는 D3.js 기반 시각화 페이지: 에이전트 오케스트레이션 DAG, 도구 실행 Sankey 다이어그램, 협업 네트워크, 서브에이전트 효과성(카드의 `overflow:hidden`을 벗어나 뷰포트에 맞춰 고정되어 절대 잘리지 않는 포털 렌더링 툴팁이 있는 요일별 스파크라인), 감지된 워크플로 패턴, 모델 위임 흐름, 오류 전파 맵(비율 배지가 있는 가로 막대, 에이전트 유형 분석, API/세션 오류 카드), 동시성 타임라인, 세션 복잡도 산점도, 컴팩션 영향 분석(축 제목, 통계 타일 — 총계 / 영향받은 세션 / 평균 / 최대 —, 설명 도움말 줄, 막대별 호버 툴팁이 있는 명확한 "컴팩션 횟수별 세션" 히스토그램으로 재설계), 세션별 드릴인. 각 섹션의 오른쪽 정렬 부제목은 한 줄로 고정되므로(말줄임표 + 호버 제목) 긴 번역이 헤더를 줄바꿈시키지 않습니다. **전체에 걸친 풍부한 i18n 인식 툴팁:** 모든 차트의 섹션 제목에는 구조화된 "무엇을 보여주는가 / 어떻게 읽는가 / 왜 중요한가" 팝오버를 여는 `i` 아이콘이 있습니다. 노드, 엣지, 막대, 버블에 호버하면 결정론적이고 값에 따라 달라지는 해석(예: 소스 점유율 / 대상 점유율 백분율, 성공률 상태 버킷, Opus / Sonnet / Haiku 제품군 설명, front-loaded / mid-session / back-loaded 같은 타이밍 패턴)이 있는 다중 섹션 툴팁이 표시됩니다. 6개의 헤드라인 통계 카드마다 오른쪽 아래에 지표 계산 방식과 현재 값의 의미를 쉬운 말로 설명하는 정보 팝오버가 있습니다. 툴팁은 차트당 단일 ref를 통해 DOM 변경되며 컨테이너 수준 `mouseleave` 폴백이 있어, 커서를 뒤늦게 따라가거나 재렌더링 후 남아 있는 일이 없습니다. **감지된 워크플로 패턴**의 행을 클릭하면 전체 단계 시퀀스, 통계 그리드, 결정론적 서사(루프 감지, 빈도 버킷), 실용적인 제안이 있는 인플레이스 상세 패널이 펼쳐집니다. 상태 필터 탭(활성만 / 완료 / 전체)이 11개 섹션 전체를 필터링합니다. 교차 필터링, JSON 내보내기, 3초 디바운스의 실시간 WebSocket 자동 새로고침. **워크플로 실행** 패널은 "동적 워크플로"를 표시합니다 — `Workflow` 도구(및 자체 페이스 `/loop`)가 생성한 서브에이전트 플릿으로, Hook을 발생시키지 않고 대신 디스크의 실행 저널(`workflows/wf_<runId>.json`)에서 재구성됩니다: 각 실행은 단계와 에이전트별 토큰 / 도구 호출 / 소요 시간 분석을 보여주며, 저널이 기록되기 전의 실시간 `running` 감지와 각 세션 상세 페이지의 연결된 하위 섹션이 있습니다 |
 | **컴팩션 추적**                   | JSONL 트랜스크립트에서 `/compact` 이벤트를 감지하여 컴팩션 에이전트와 이벤트를 생성합니다. 시작 시 레거시 컴팩션을 백필합니다. 주기적 스캐너(`DASHBOARD_STALE_MINUTES`에서 도출되는 주기)가 Hook이 전혀 발생하지 않을 때도 컴팩션을 포착합니다. 전체 events 테이블에 대해 `SELECT DISTINCT json_extract(events.data, '$.transcript_path')`를 실행하는 대신 각 활성 세션의 트랜스크립트 경로를 `sessions.transcript_path`(경로를 담은 첫 이벤트에서 Hook 핸들러가 채우고, `events`에서 일회성 백필)에서 직접 읽으므로 — 스윕은 O(활성 세션)이며 성숙한 데이터베이스에서도 저렴하게 유지됩니다. 트랜스크립트 캐시를 공유하므로 중복 파일 읽기가 발생하지 않습니다. 합성 컴팩션 행은 `started_at`과 `ended_at` 모두에 트랜스크립트 타임스탬프가 찍혀 소요 시간이 정확히 0이 되고(컴팩션은 즉각적임), 시작 시 복구 마이그레이션이 `ended_at < started_at`인 기존 행도 치유합니다(issue #156) |
 | **서브세션/재개된 세션**          | 새 이벤트가 도착하면 세션을 자동으로 재활성화하고, `/resume`과 고아 세션을 올바르게 처리합니다. 주기적 스윕(`DASHBOARD_STALE_MINUTES`의 ¼마다, 60초 – 5분으로 제한)이 이벤트 기반 감지를 벗어난 버려진 세션을 표시합니다                                                                     |
 | **기존 세션 감지**                | 서버 시작 시 이미 실행 중인 세션은 (최근 JSONL 파일 수정 기준으로) "활성"으로 가져옵니다. Stop 이벤트도 가져온 완료/버려진 세션을 재활성화하므로, 진행 중인 세션의 첫 Hook이 항상 해당 세션을 대시보드에 표시합니다     |
 | **지속적인 프로젝트 동기화**      | `~/.claude/projects`의 시작 시 자동 가져오기는 일회성(마커로 게이트)이므로, 최초 실행 **이후** 생성된 프로젝트 폴더 — 세션이 Hook을 통해 전혀 흐르지 않는 경우(예: 호스트 전용 Hook 비활성화) — 는 수동 재스캔 전까지 보이지 않게 됩니다. 백그라운드 동기화(`startSessionSync`)가 하나의 mtime 캐시 + 하나로 합쳐진 스윕을 공유하는 세 가지 트리거로 그 간극을 메웁니다: 시작 시의 **즉시** 스윕, 새 세션 파일/프로젝트 폴더가 나타나는 즉시 발동하는 디바운스된 **`fs.watch`**(macOS/Windows에서는 재귀적; Linux에서는 사용자 공간 재귀 감시자 위험을 피하기 위해 루트 + 직계 자식만), 그리고 **주기적 폴링**(`DASHBOARD_SESSION_SYNC_MS`, 기본 30초). 각 스윕은 mtime이 증가한 파일만 다시 파싱하고 `session_created`/`session_updated`(그리고 메인 에이전트)를 브로드캐스트하여 UI가 실시간으로 새로고침됩니다; 이미 DB에 있는 변경되지 않은 세션은 재파싱 없이 건너뛰므로 재시작 비용은 O(새/변경된 파일)로 유지됩니다 |
-| **원격 데이터 소스**             | SSH를 통한 실시간 원격/다중 머신 데이터 수집. 대시보드는 구성된 각 머신의 `~/.claude/projects`를 **scp**(Windows SSH에서 WSL Claude는 `wsl.exe` + `tar`)로 소스별 샌드박스 스테이징 디렉터리에 미러링하고, 로컬 기록과 **동일한 임포터**로 처리하며 가져온 세션에 출처(`sessions.source`)를 태그합니다. 백그라운드 폴러(`DASHBOARD_REMOTE_SYNC_MS`, 기본 15초; `0` 비활성화)가 준실시간을 유지합니다 — 소스 추가/재활성화 시 즉시 동기화 — 성공한 동기화는 `remote_data.updated`와 세션별 `session_created` / `session_updated` 프레임을 브로드캐스트해 열린 페이지가 수동 Sync 없이 새로고침됩니다. 전역 **데이터 범위** 선택기(로컬만 / 전체 / 특정 소스)로 앱 전체를 좁힙니다. **Settings → Remote Data Sources** 및 `ccam remote-sources`에서 관리하며, 상태는 `remote_source.status`로 스트리밍되고 Sessions 행에 소스 배지가 표시됩니다. 원격 세션은 **실시간 로컬 Hook을 받지 않으므로** 모든 로컬 liveness/stale 휴리스틱에서 제외되며, 대신 **매 동기화마다 미러 transcript로 실시간 상태를 조정**합니다 — JSONL 최신 이벤트 타임스탬프(미러 mtime 폴백)가 `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS`(기본 10분) 이내면 원격 CLI가 아직 실행 중(⇒ `active`), 미러가 멈추면 `completed`로 전환됩니다 |
+| **원격 데이터 소스**             | SSH를 통해 다른 머신의 Claude Code와 Codex 데이터를 실시간으로 수집합니다. 각 소스는 `~/.claude/projects`와 `~/.codex/sessions`를 독립적으로 미러링하며, Codex의 가벼운 `session_index.jsonl`도 가져와 네이티브 이름 변경 제목을 보존합니다. 기본 전송은 **scp**이고 WSL의 CLI에는 `wsl.exe` + `tar`를 사용합니다. 격리된 스테이징은 각 provider의 일반 임포터를 사용하고 세션에 `sessions.source`를 태그합니다. 한 소스는 Claude 전용, Codex 전용 또는 둘 다일 수 있습니다. `DASHBOARD_REMOTE_SYNC_MS`(기본 15초) 폴러는 provider별 상태와 카운터를 보냅니다. 한 provider가 없거나 오류/정지 상태가 되면 그 provider의 오래된 세션만 stale 스윕으로 넘어가며, 정상인 다른 provider는 계속 미러가 관리합니다. **Settings → Remote Data Sources** 또는 `ccam remote-sources`에서 별도의 선택적 원격 Claude 홈과 원격 Codex 홈을 설정하며 SSH 인증은 호스트가 맡고 비밀은 저장하지 않습니다. |
 | **반응형 디자인**                 | 쌓이는 그리드, 스크롤 가능한 테이블, 접을 수 있는 사이드바가 있는 모바일 친화적 레이아웃                                                                                                                                                                                      |
 | **UI 현지화**                     | 영어(`en`), 중국어(`zh`), 베트남어(`vi`), 한국어(`ko`), 스페인어(`es`)에 대해 번역된 UI 문구와 접근성 레이블을 갖춘 내장 언어 전환. 커버리지는 이제 워크플로 툴팁까지 엔드투엔드로 확장됩니다: 통계 카드 계산과 값 버킷 해석, 차트별 "무엇을 / 어떻게 읽는가 / 왜" 팝오버, 모든 그래프의 호버 툴팁(오케스트레이션, 도구 흐름, 파이프라인, 모델 위임, 동시성), 워크플로 패턴 상세 패널의 서사와 제안, 설정 → 모델 가격 책정 정보 팝오버, CLAUDE_HOME 패널, 전체 가져오기 기록 흐름                                                                                                                                                                       |
 | **시드 데이터**                   | 데모와 개발을 위한 내장 시드 스크립트                                                                                                                                                                                                                               |
@@ -343,7 +353,19 @@ npm run setup
 npm run install-hooks
 ```
 
-이 명령은 이벤트를 대시보드로 전달하는 Hook 항목을 `~/.claude/settings.json`에 추가합니다. 기존 Hook은 보존됩니다.
+설치 프로그램은 대화형 다중 선택기를 엽니다. 화살표 키, <kbd>Space</kbd>, <kbd>Enter</kbd>로 **Claude Code**, **Codex (beta)** 또는 둘 다를 선택하세요(Claude Code가 기본 선택됨). Claude Code 항목은 `~/.claude/settings.json`에, Codex 항목은 `~/.codex/hooks.json`에 있습니다. 선택한 제품의 대시보드 Hook이 이미 있으면 이 대시보드의 항목만 교체하기 전에 경고하며 관련 없는 Hook은 보존됩니다. 이후 **Settings → Hook Configuration → Install hooks**에서도 같은 선택을 할 수 있습니다.
+
+대시보드를 처음 열면 데이터 제공자를 선택한 뒤 제공자별 실시간 모니터링 설정 화면이 열립니다. 여기에서 덮어쓰기 경고와 명령 출력을 확인하며 선택한 Hook을 설치하거나, 이미 설치했다는 사실을 명시적으로 확인한 뒤 대시보드로 이동할 수 있습니다.
+
+`~/.codex/sessions`의 Codex rollout도 지속적으로 검색됩니다. 대시보드는 append-only JSONL을 증분으로 읽고 최신 rollout을 우선 처리하며 손상된 과거 파일은 따로 재시도하므로 Hook 알림 하나를 놓쳐도 세션, 토큰, 비용, 대화 행, WebSocket 업데이트가 최신 상태로 유지됩니다.
+
+Codex rollout 수명 주기 레코드는 Claude Code와 같은 실시간 카드 상태를 구동합니다. `user_message`와 `task_started`는 메인 에이전트를 **작업 중**으로 표시하고, `task_complete`는 세션을 active로 유지한 채 **대기 중**으로 표시하며, `turn_aborted`는 중단 사유와 함께 **대기 중**으로 표시합니다. 새 rollout 레코드는 잘못 completed 처리된 세션을 자동 복구하고, 프로세스 활성 상태 회수는 일치하는 로컬 Codex CLI가 사라진 뒤에만 세션을 완료합니다.
+
+Codex의 `/rename` 제목은 네이티브 세션 인덱스에서 읽어 세션과 agent 카드에 실시간으로 반영됩니다. 대화 재생에는 사용자 턴과 `exec` custom-tool 호출 및 출력이 포함되며, cursor 페이지네이션으로 transcript 상단에서 이전 메시지를 불러옵니다.
+
+Claude Code와 Codex 카드는 각 제공자의 네이티브 제목 아래에 최근의 서로 다른 사용자 프롬프트를 두 줄로 간결하게 표시하므로, 짧고 친숙한 이름이나 짧은 후속 요청이 진행 중인 작업을 가리지 않습니다. Claude는 실시간 Hook, 가져오기 및 watchdog 스윕 중 로컬 transcript 캐시에서 이 컨텍스트를 새로 고치고, Codex는 rollout 레코드에서 새로 고치며 오래된 가져오기는 저장된 `user_message` 이벤트로 대체합니다. Transcript는 가능한 경우 Claude Code와 Codex에 저장된 PNG/JPEG/GIF/WebP 첨부 파일을 렌더링하고, 중복된 Codex response/event 사본은 하나의 사용자 턴으로 합칩니다.
+
+Codex `response_item` 도구 호출은 별도 rollout 커서로 정확히 한 번 인덱싱되므로 Workflows 도구 흐름, 세션 drill-in, 모델/token 합계와 `context_compacted` 횟수가 수명 주기나 token 카운터를 재생하지 않고 기록된 Codex 데이터를 충실히 반영합니다. 대시보드 범위가 Codex 전용이면 Claude Code journal 전용 Dynamic Workflows 패널은 빈 Codex 데이터로 표시되지 않고 숨겨집니다.
 
 ### 3. 시작
 
@@ -527,9 +549,10 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
     [*] --> waiting: ensureSession (first hook)
-    waiting --> working: PreToolUse / UserPromptSubmit
+    waiting --> working: PreToolUse / UserPromptSubmit / Codex task_started / user_message
     working --> working: PostToolUse (tool completed)
-    working --> waiting: Stop, non-error
+    working --> waiting: Stop, non-error / Codex task_complete
+    working --> waiting: Codex turn_aborted (interrupted)
     working --> waiting: Notification (input prompt)
     working --> waiting: Esc cancel (watchdog marker or idle timeout)
     waiting --> error: Stop with error
@@ -556,8 +579,9 @@ stateDiagram-v2
 stateDiagram-v2
     [*] --> waiting: SessionStart startup/resume/clear (status=active + flag)
     active --> active: SessionStart compact (턴 도중 — 상태 유지, 플래그 없음)
-    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse
-    active --> waiting: Stop, non-error (flag re-stamped)
+    waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse / Codex task_started / user_message
+    active --> waiting: Stop, non-error / Codex task_complete (flag re-stamped)
+    active --> waiting: Codex turn_aborted (interrupted)
     active --> waiting: Permission Notification (agent → waiting)
     active --> waiting: Esc cancel (watchdog marker or idle timeout)
     active --> error: Stop, stop_reason=error
@@ -608,11 +632,13 @@ flowchart LR
 | `DASHBOARD_UPDATE_CHECK_INTERVAL_MS` | `300000` (5분) | 자동 확인 사이의 간격; 하한 60 000 ms. 사용자는 업데이트 모달이나 사이드바에서 **지금 확인**을 클릭하여 온디맨드로 한 번 실행할 수도 있습니다. |
 | `DASHBOARD_STALE_MINUTES` | `180` (3시간) | 여전히 `active`인 세션(사용자 입력을 기다리며 **Waiting**에 앉아 있는 세션 포함 — "Waiting"은 저장된 상태가 아니라 `active` 행 위의 UI 오버레이)이 자동으로 **abandoned**로 표시되어 활성 목록에서 빠지기까지의 비활동 시간(분). 15초 워치독과 주기적 유지 관리 스윕(이 값의 ¼마다 실행되며 60초 – 5분으로 제한)에 의해 적용됩니다. 더 짧은 유휴 타임아웃을 원하면 낮추십시오(예: `60`) |
 | `DASHBOARD_WORKING_IDLE_SECONDS` | `120` | **어떤 출력도 나오기 전에** `Esc`로 취소된 턴(트랜스크립트 마커를 남기지 않음)을 복구하기 위한 유휴 working 타임아웃. 메인 에이전트가 진행 중인 도구 없이 `working` 상태이고 Hook 이벤트도 트랜스크립트도 이 시간 동안 진전이 없으면, 워치독이 세션을 **Waiting**으로 이동시킵니다. 더 빠른 복구를 원하면 낮추십시오. 다만 긴 무음 사고 턴에서 간혹 잘못된 전환이 발생할 수 있습니다(자가 복구됨) |
-| `DASHBOARD_LIVENESS_PROBE` | `1` (켜짐) | 워치독의 **죽은 세션 활성 상태 회수**(`claude` 프로세스가 더 이상 존재하지 않는 `active` 세션을 완료 처리하는 `ps`/`lsof` 기반 프로브 — 대시보드가 꺼져 있는 동안 유실된 `SessionEnd`를 복구)를 비활성화하려면 `0`으로 설정. **다른 머신**(household Hook)에서 전달된 세션은 비-POSIX `cwd`를 보고하여 회수가 자동으로 건너뛰므로, 혼합 로컬 + 전달 배포에서는 더 이상 이것을 끌 필요가 없습니다; 로컬 프로세스가 아무것도 증명하지 못하는 순수 원격 설정에서만 비활성화하십시오. Windows 및 컨테이너 내부에서는 자동으로 비활성화됩니다 |
+| `DASHBOARD_LIVENESS_PROBE` | `1` (켜짐) | 워치독의 **죽은 세션 활성 상태 회수**(일치하는 로컬 Claude Code 또는 Codex CLI 프로세스가 더 이상 존재하지 않는 `active` 세션을 완료 처리하는 `ps`/`lsof` 기반 프로브 — 대시보드가 꺼져 있는 동안 유실된 `SessionEnd`를 복구)를 비활성화하려면 `0`으로 설정. **다른 머신**(household Hook)에서 전달된 세션은 비-POSIX `cwd`를 보고하여 회수가 자동으로 건너뛰므로, 혼합 로컬 + 전달 배포에서는 더 이상 이것을 끌 필요가 없습니다; 로컬 프로세스가 아무것도 증명하지 못하는 순수 원격 설정에서만 비활성화하십시오. Windows 및 컨테이너 내부에서는 자동으로 비활성화됩니다 |
 | `DASHBOARD_LIVENESS_IDLE_SECONDS` | `60` | **워치독 틱** 활성 상태 회수를 위한 유휴 게이트: 세션의 트랜스크립트가 최소 이 시간 동안 기록되지 않았을 때에만 완료 처리되므로(디스크에 트랜스크립트가 없을 때는 마지막 Hook 기록이 폴백 시계), 턴 진행 중이거나 방금 재개된 세션이 일시적인 프로브 실패로 깜빡이며 사라지는 일이 없습니다. 시작 패스는 이 게이트를 무시합니다 — 부팅 시에는 프로브 단독으로 결정하므로, 실행 직전에 종료된 세션은 즉시 정리됩니다 |
 | `DASHBOARD_SESSION_SYNC_MS` | `30000` | 시작 후 추가되어 세션이 Hook을 통해 흐르지 않는 프로젝트를 표면화하는 지속적 `~/.claude/projects` 백그라운드 동기화의 폴링 간격(ms). `fs.watch` 워처는 이와 무관하게 거의 즉시 발동합니다; 이 폴링은 안전망입니다(워처는 이벤트를 놓치거나 네트워크 파일시스템에서 발동하지 않을 수 있음). 워처는 계속 실행하면서 폴링만 비활성화하려면 `0`으로 설정하십시오 |
-| `DASHBOARD_REMOTE_SYNC_MS` | `15000` | 원격 소스를 `scp`로 가져오는 간격(ms). 새 소스 추가/활성화 시 즉시 1회 동기화. `0`으로 설정하면 원격 소스 폴링이 비활성화됩니다 |
-| `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000` (10분) | **원격 데이터 소스** 세션의 실시간 상태에 대한 신선도 윈도우. 각 동기화 시, 미러 transcript의 **마지막 JSONL 이벤트**가 이 윈도우 내에 있으면 원격 세션은 여전히 실행 중(`active`)으로 취급되고, 미러가 이보다 오래 진행을 멈추면 세션은 `completed`로 조정됩니다. 원격 세션은 실시간 Hook을 받지 않으므로 이것이 로컬 활성 상태/오래됨 스윕(이들을 건너뜀)을 대체합니다. 느린 링크나 매우 긴 유휴 턴에는 값을 높이십시오 |
+| `DASHBOARD_CODEX_HOME` | `CODEX_HOME` 또는 `~/.codex` | 선택적 로컬 Codex 상태 디렉터리입니다. 설정에서 새 위치를 저장하면 이 대시보드 전용 재정의를 유지하고 실시간 감시를 다시 시작하며 새 `sessions/` 트리를 즉시 스캔합니다. |
+| `DASHBOARD_CODEX_SYNC_MS` | `4000` | append-only Codex rollout을 위한 안전망 폴링 간격(ms)입니다. Codex Hook은 같은 증분 수집을 즉시 실행합니다; `0`으로 설정하면 폴링만 끄고 가능한 경우 파일 시스템 워처는 유지합니다. |
+| `DASHBOARD_REMOTE_SYNC_MS` | `15000` | **원격 데이터 소스** 백그라운드 동기화 간격(ms)입니다. 활성 원격마다 `~/.claude/projects`와 `~/.codex/sessions`(Codex의 가벼운 `session_index.jsonl` 제목 인덱스 포함)를 독립적으로 가져와 각 로컬 임포터로 다시 가져옵니다. 새 소스 추가/활성화 시 즉시 1회 동기화됩니다. `0`으로 설정하면 원격 소스 폴링이 비활성화됩니다 |
+| `DASHBOARD_REMOTE_ACTIVE_WINDOW_MS` | `600000` (10분) | **원격 데이터 소스** 세션의 실시간 상태에 대한 신선도 윈도우입니다. 각 동기화 시 Claude Code 또는 Codex 세션의 해당 미러 transcript에 **마지막 JSONL 이벤트**가 이 윈도우 내에 있으면 여전히 실행 중(`active`)으로 취급되고, 미러가 더 오래 진행을 멈추면 세션은 `completed`로 조정됩니다. 원격 세션은 실시간 Hook을 받지 않으므로 provider별 미러 조정이 로컬 liveness를 대체하며, 오류·부재·정지 상태 provider 미러는 일반 stale 스윕으로 폴백합니다. 느린 링크나 매우 긴 유휴 턴에는 값을 높이십시오 |
 | `DASHBOARD_REMOTE_SYNC_TIMEOUT_MS` | `600000` | 원격 소스별 `scp` 타임아웃 |
 | `DASHBOARD_REMOTE_TEST_TIMEOUT_MS` | `15000` | 소스로의 SSH 연결 프로브 타임아웃 |
 | `DASHBOARD_HOST`        | `127.0.0.1`   | 서버가 바인딩하는 인터페이스. 기본값은 루프백(네트워크에서 접근 불가). LAN에 노출하려면 `0.0.0.0`으로 설정(시작 시 경고를 로깅) |
@@ -1085,8 +1111,8 @@ npm run monitoring:docker:up
 
 | 메서드 | 경로                          | 설명                                                    |
 | ------ | ----------------------------- | ------------------------------------------------------- |
-| `GET`  | `/api/workflows`              | 워크플로 데이터 집계(오케스트레이션, 도구, 패턴). 선택적 `?status=active\|completed` 쿼리 매개변수는 11개 데이터 섹션 전체를 세션 상태로 필터링합니다 |
-| `GET`  | `/api/workflows/session/:id`  | 세션별 상세 드릴인(에이전트 트리, 도구 타임라인, 이벤트) |
+| `GET`  | `/api/workflows`              | provider/source 범위의 워크플로 데이터(오케스트레이션, 기록된 도구, 패턴, Codex 컴팩션)입니다. `?status=active\|completed`, `?sources=...`, `?providers=claude\|codex` 필터가 11개 데이터 섹션 전체에 적용됩니다 |
+| `GET`  | `/api/workflows/session/:id`  | provider/source 범위의 세션별 drill-in(에이전트 트리, 기록된 도구 타임라인, 이벤트) |
 
 ### 알림
 
@@ -1120,7 +1146,8 @@ npm run monitoring:docker:up
 | `POST` | `/api/settings/clear-data`     | 모든 세션, 에이전트, 이벤트, 토큰 사용량 삭제    |
 | `POST` | `/api/settings/reimport`       | `~/.claude/`에서 레거시 세션 다시 가져오기       |
 | `POST` | `/api/settings/reinstall-hooks`| Claude Code Hook 재설치                          |
-| `POST` | `/api/settings/reset-pricing`  | 가격 책정을 기본값으로 재설정                    |
+| `POST` | `/api/settings/install-hooks` | Claude Code, Codex 또는 둘 모두의 Hook 설치; 관련 없는 Hook은 유지 |
+| `POST` | `/api/settings/reset-pricing`  | Claude 및 GPT 가격표를 기본값으로 재설정                    |
 | `GET`  | `/api/settings/export`         | 모든 데이터를 JSON 다운로드로 내보내기           |
 | `POST` | `/api/settings/import`         | `/export` 백업 복원 (multipart `file` 또는 JSON `{ path }`). 멱등 + 비파괴적 — 이미 있는 세션은 통째로 건너뜀 |
 | `POST` | `/api/settings/cleanup`        | 오래된 세션을 중단 처리하고 오래된 데이터 정리   |
@@ -1181,13 +1208,16 @@ Claude Code의 모든 설정 표면을 읽기 전용으로 검사할 수 있으�
 
 ### 히스토리 가져오기
 
-기존 Claude Code 세션을 세 가지 서로 다른 소스에서 대시보드로
-가져올 수 있으며, 모두 서버가 실시간 수집에 사용하는 것과 동일한
-파서를 거치므로 가져온 토큰, 모델별 비용, 컴팩션, 서브에이전트,
-도구 사용, 턴 소요 시간이 실시간 캡처와 비트 단위로 일치합니다.
-재가져오기는 멱등합니다. 세션은 ID로 키가 지정되고 컴팩션 기준선이
-컴팩션 이전의 토큰 합계를 보존하므로, 가져오기를 두 번 실행해도
-사용량이나 비용이 이중으로 계산되지 않습니다.
+**Settings → Import History**의 공급자 탭으로 기존 **Claude Code** 또는
+**Codex** 기록을 가져옵니다. Claude Code는 `~/.claude/projects`의
+공유 JSONL 파서를 사용하고, Codex는 `~/.codex/sessions`에서 실시간
+모니터링과 같은 append-only rollout 수집기를 사용합니다. 여기에는 토큰
+스냅샷, response-item 도구, 수명 주기 상태 및 `session_index.jsonl`이
+포함될 때의 네이티브 `/rename` 제목이 포함됩니다. 재가져오기는
+멱등적입니다. Claude는 compaction 기준선을, Codex는 바이트 커서를
+보존하므로 어느 공급자도 사용량이나 비용을 이중 계산하지 않습니다.
+폴더 또는 브라우저 업로드 Codex 기록은 임시 파일을 정리하기 전에
+대시보드 전용 저장소로 복사됩니다.
 
 ```mermaid
 flowchart LR
@@ -1224,10 +1254,10 @@ flowchart LR
 
 | 메서드 | 경로                    | 설명                                                                     |
 | ------ | ----------------------- | ------------------------------------------------------------------------ |
-| `GET`  | `/api/import/guide`     | OS에 맞춘 경로, 아카이브 명령, 지원 확장자, 단계별 안내                  |
-| `POST` | `/api/import/rescan`    | 기본 `~/.claude/projects` 디렉터리 재스캔                                |
-| `POST` | `/api/import/scan-path` | 절대 경로 디렉터리 스캔(본문 `{ path }`); 재귀적으로 순회                |
-| `POST` | `/api/import/upload`    | `.jsonl`, `.meta.json`, `.zip`, `.tar(.gz)`, `.gz`의 멀티파트 업로드     |
+| `GET`  | `/api/import/guide`     | 공급자별 경로, 아카이브 명령 및 안내(`?provider=claude\|codex`) |
+| `POST` | `/api/import/rescan`    | 선택한 기본 경로 재스캔(`{ provider }`) |
+| `POST` | `/api/import/scan-path` | `{ path, provider }`로 절대 경로 스캔; 재귀 순회 |
+| `POST` | `/api/import/upload`    | `provider` 필드가 있는 멀티파트 업로드; Codex 파일은 스냅샷 저장 |
 
 **지원되는 입력.** 개별 JSONL(`.jsonl`) 세션 트랜스크립트, 이에
 동반되는 `.meta.json` 사이드카 파일, 그리고 어떤 중첩 디렉터리

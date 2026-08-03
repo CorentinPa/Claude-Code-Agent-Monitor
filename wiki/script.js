@@ -1569,6 +1569,8 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "Bounded Cache Memory": "Memoria de caché limitada",
       "Browser Notifications": "Notificaciones del navegador",
       "Claude + Codex Extensions": "Extensión de Claude + Codex",
+      "Agent Config — Claude Code and Codex explorers":
+        "Configuración de agentes — exploradores de Claude Code y Codex",
       "Claude Config Explorer": "Explorador de configuración de Claude",
       "Clear Quarantine": "Liberación de cuarentena",
       "Clear SmartScreen": "Borrar SmartScreen",
@@ -1802,8 +1804,9 @@ document.querySelectorAll(".diagram-toggle").forEach((toggle) => {
       "ReDoc API reference": "Referencia de API de ReDoc",
       "ReDoc rendering the dashboard's OpenAPI 3.0 spec as a read-optimized three-panel reference, served self-hosted and fully offline":
         "ReDoc representa la especificación OpenAPI 3.0 del panel como una referencia de tres paneles optimizada para lectura, alojada localmente y totalmente sin conexión",
-      "Run Claude — live streaming output": "Ejecutar Claude — salida en streaming en tiempo real",
-      "Run Claude — pre-run configuration": "Ejecutar Claude — configuración previa a la ejecución",
+      "Run Agent — live streaming output": "Ejecutar agente — salida en streaming en tiempo real",
+      "Run Agent — Claude Code and Codex launch selection":
+        "Ejecutar agente — selección de Claude Code y Codex",
       "Search docs...": "Buscar documentación...",
       "Select language": "Seleccionar idioma",
       "Session Detail — Agents tab": "Detalle de sesión — pestaña Agentes",

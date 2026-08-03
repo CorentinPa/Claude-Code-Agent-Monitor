@@ -9,6 +9,38 @@
   "sub1": "Observabilidad en tiempo real para cada sesión de Claude Code.",
   "sub2": "Tokens, herramientas, costos y flujos, todo en vivo.",
   "brand": "Claude Code Monitor",
+  "provider": {
+    "title": "¿Qué te gustaría monitorizar?",
+    "description": "Elige la fuente de datos que se muestra en todo el panel. Puedes cambiarla más tarde en Configuración.",
+    "claude": { "description": "Tus sesiones, agentes y costos de Claude Code." },
+    "codex": { "description": "Sesiones de Codex, uso de tokens GPT y costos." },
+    "both": {
+      "label": "Ambos",
+      "description": "Todas las sesiones, el uso y los costos de Claude Code y Codex."
+    },
+    "beta": "Beta",
+    "continue": "Continuar al panel"
+  },
+  "hookGate": {
+    "kicker": "Seguimiento en vivo",
+    "title": "Configura la monitorización en vivo",
+    "description": "Instala hooks locales ligeros para que las nuevas sesiones y eventos aparezcan en cuanto ocurran.",
+    "selectedProviders": "Proveedores seleccionados",
+    "realTime": "Los hooks envían eventos del ciclo de vida a este panel local en tiempo real. Tus datos permanecen en esta máquina.",
+    "checking": "Comprobando la configuración de hooks existente...",
+    "installed": "Hooks instalados y listos para la monitorización en vivo",
+    "existing": "Se detectaron hooks de panel existentes",
+    "ready": "Listo para instalar los hooks seleccionados",
+    "overrideWarning": "Ya existen hooks del panel para un proveedor seleccionado. La instalación solo actualiza las entradas del panel. Tus hooks no relacionados se conservan.",
+    "output": "Salida de la instalación",
+    "failure": "No se pudieron instalar todos los hooks seleccionados. Revisa la salida, vuelve a intentarlo o continúa si terminaste la configuración de otra manera.",
+    "checkFailed": "No se pudo comprobar tu configuración de hooks actual. Aún puedes instalar los hooks seleccionados.",
+    "preserveNote": "Esto solo administra los hooks del panel. Tus otros hooks no cambian.",
+    "alreadyInstalled": "Ya he instalado los hooks",
+    "install": "Instalar hooks",
+    "installing": "Instalando hooks...",
+    "continue": "Continuar al panel"
+  },
   "taglines": [
     "Nada de lo que hacen tus agentes queda en la oscuridad.",
     "Ve cada movimiento que hacen tus agentes.",

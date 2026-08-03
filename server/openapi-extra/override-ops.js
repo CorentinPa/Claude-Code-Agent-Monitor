@@ -212,7 +212,7 @@ const RESET_PRICING_EXAMPLE = {
 
 const EXPORT_EXAMPLE = {
   format: "ccam-export",
-  version: 1,
+  version: 2,
   exported_at: "2026-06-26T01:12:44.913Z",
   sessions: [
     {
@@ -267,6 +267,24 @@ const EXPORT_EXAMPLE = {
     },
   ],
   model_pricing: RESET_PRICING_EXAMPLE.pricing,
+  gpt_model_pricing: [
+    {
+      model_pattern: "gpt-5.6-terra%",
+      display_name: "GPT-5.6 Terra",
+      short_input_per_mtok: 2,
+      short_cached_input_per_mtok: 0.2,
+      short_cache_write_per_mtok: 2.5,
+      short_output_per_mtok: 12,
+      long_input_per_mtok: 4,
+      long_cached_input_per_mtok: 0.4,
+      long_cache_write_per_mtok: 5,
+      long_output_per_mtok: 18,
+      fast_input_per_mtok: 4,
+      fast_cached_input_per_mtok: 0.4,
+      fast_cache_write_per_mtok: 5,
+      fast_output_per_mtok: 24,
+    },
+  ],
 };
 
 const CLEANUP_EXAMPLE = {
@@ -278,6 +296,7 @@ const CLEANUP_EXAMPLE = {
 };
 
 const IMPORT_GUIDE_EXAMPLE = {
+  provider: "claude",
   platform: "darwin",
   default_projects_dir: "/Users/son/.claude/projects",
   default_projects_dir_display: "~/.claude/projects",
@@ -313,6 +332,7 @@ const IMPORT_GUIDE_EXAMPLE = {
 
 const IMPORT_RESCAN_EXAMPLE = {
   ok: true,
+  provider: "claude",
   source: "default",
   imported: 14,
   skipped: 298,
@@ -324,6 +344,7 @@ const IMPORT_RESCAN_EXAMPLE = {
 
 const IMPORT_SCAN_PATH_EXAMPLE = {
   ok: true,
+  provider: "claude",
   source: "path",
   path: "/Users/son/Downloads/claude-history/projects",
   imported: 9,
@@ -336,6 +357,7 @@ const IMPORT_SCAN_PATH_EXAMPLE = {
 
 const IMPORT_UPLOAD_EXAMPLE = {
   ok: true,
+  provider: "claude",
   source: "upload",
   files_received: 3,
   rejected_files: ["notes.txt"],
@@ -988,7 +1010,7 @@ const paths = {
       tags: ["Settings"],
       summary: "Delete all dashboard data",
       description:
-        "⚠ DESTRUCTIVE — IRREVERSIBLE. Deletes ALL sessions, agents, events, token_usage rows, the fired-alert feed (alert_events), and the webhook delivery log. There is no confirmation step and no undo — export first via GET /api/settings/export if you need a backup. User CONFIGURATION survives: alert *rules*, webhook *targets*, and model_pricing are preserved (they're settings, not captured data). The response echoes the row counts that existed BEFORE the wipe so the UI can report what was removed.",
+        "⚠ DESTRUCTIVE — IRREVERSIBLE. Deletes ALL sessions, agents, events, token_usage rows, the fired-alert feed (alert_events), and the webhook delivery log. There is no confirmation step and no undo — export first via GET /api/settings/export if you need a backup. User CONFIGURATION survives: alert *rules*, webhook *targets*, model_pricing, and gpt_model_pricing are preserved (they're settings, not captured data). The response echoes the row counts that existed BEFORE the wipe so the UI can report what was removed.",
       operationId: "clearData",
       responses: {
         200: {
@@ -1080,7 +1102,7 @@ const paths = {
       tags: ["Settings"],
       summary: "Reset pricing table to defaults",
       description:
-        "⚠ DESTRUCTIVE to pricing customizations. Deletes EVERY row in the model_pricing table and re-seeds it from the dashboard's built-in DEFAULT_PRICING list. Any custom rates or custom model patterns you added are permanently lost — there is no undo. Captured session/token data is untouched (only the pricing rules used to *compute* cost change). The response returns the full freshly-seeded pricing table.",
+        "⚠ DESTRUCTIVE to pricing customizations. Deletes EVERY row in both model_pricing and gpt_model_pricing, then re-seeds the dashboard's built-in Claude and GPT rate cards. Any custom rates or custom model patterns you added are permanently lost — there is no undo. Captured session/token data is untouched (only the pricing rules used to *compute* cost change). The response returns the freshly-seeded tables.",
       operationId: "resetPricing",
       responses: {
         200: {
@@ -1101,7 +1123,7 @@ const paths = {
       tags: ["Settings"],
       summary: "Export all dashboard data as JSON",
       description:
-        'Exports the entire dataset as a single versioned JSON document — all sessions, agents, events, token_usage rows, workflows, dashboard_runs, alert_rules, and model_pricing — stamped with `format: "ccam-export"`, `version`, and `exported_at`. Served with a `Content-Disposition: attachment` header (filename `agent-monitor-export-YYYY-MM-DD.json`) so browsers download it. Use it to back up before a destructive operation (clear-data / cleanup with purge_days) or to migrate/consolidate data across machines — the bundle is re-importable via POST /api/settings/import. Read-only; nothing is modified.',
+        'Exports the entire dataset as a single versioned JSON document — all sessions, agents, events, token_usage rows, workflows, dashboard_runs, alert_rules, model_pricing, and gpt_model_pricing — stamped with `format: "ccam-export"`, `version`, and `exported_at`. Served with a `Content-Disposition: attachment` header (filename `agent-monitor-export-YYYY-MM-DD.json`) so browsers download it. Use it to back up before a destructive operation (clear-data / cleanup with purge_days) or to migrate/consolidate data across machines — the bundle is re-importable via POST /api/settings/import. Read-only; nothing is modified.',
       operationId: "exportData",
       responses: {
         200: {
@@ -1122,7 +1144,7 @@ const paths = {
       tags: ["Settings"],
       summary: "Restore (import) a previously exported data bundle",
       description:
-        'Restores a bundle produced by GET /api/settings/export. Supply it either as `multipart/form-data` with a single `file` field (browser upload) or as a JSON body `{ "path": "<absolute path>" }` (the server reads the file from disk — used by the `ccam import-data` CLI, and it also sidesteps the global 1 MB JSON body cap for large bundles). The restore is idempotent and NON-DESTRUCTIVE: it is session-atomic, so a session already present (matched by its UUID) is skipped whole together with its agents/events/token_usage/workflows, and independent config rows (dashboard_runs, alert_rules, model_pricing) are inserted only when absent. Nothing existing is overwritten — ideal for consolidating several machines into one dashboard. The response reports per-table counts.',
+        'Restores a bundle produced by GET /api/settings/export. Supply it either as `multipart/form-data` with a single `file` field (browser upload) or as a JSON body `{ "path": "<absolute path>" }` (the server reads the file from disk — used by the `ccam import-data` CLI, and it also sidesteps the global 1 MB JSON body cap for large bundles). The restore is idempotent and NON-DESTRUCTIVE: it is session-atomic, so a session already present (matched by its UUID) is skipped whole together with its agents/events/token_usage/workflows, and independent config rows (dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) are inserted only when absent. Nothing existing is overwritten — ideal for consolidating several machines into one dashboard. The response reports per-table counts.',
       operationId: "importData",
       requestBody: {
         required: true,
@@ -1170,6 +1192,7 @@ const paths = {
                 dashboard_runs: 11,
                 alert_rules: 2,
                 model_pricing: 0,
+                gpt_model_pricing: 0,
                 errors: 0,
               },
             },
@@ -1225,10 +1248,19 @@ const paths = {
   "/api/import/guide": {
     get: {
       tags: ["Import"],
-      summary: "Import guide with OS-aware defaults and step-by-step instructions",
+      summary: "Provider-aware import guide with OS-aware defaults and step-by-step instructions",
       description:
-        "Returns the OS-aware import guide the Import page renders verbatim: the detected `platform`, the default `~/.claude/projects` directory (raw + display form), whether it exists and how many projects/JSONL files it holds, an OS-specific `archive_command` for bundling history off another machine, the supported file extensions, the upload size/count limits, and four ordered `steps` (locate → archive → choose mode → verify). Read-only; performs no import.",
+        "Returns the OS-aware guide for the selected `provider` (`claude` or `codex`): its default transcript directory, existence and folder/file counts, an archive command, supported extensions, upload limits, and four ordered steps. Read-only; performs no import.",
       operationId: "importGuide",
+      parameters: [
+        {
+          name: "provider",
+          in: "query",
+          required: false,
+          schema: { type: "string", enum: ["claude", "codex"], default: "claude" },
+          description: "History provider to describe.",
+        },
+      ],
       responses: {
         200: {
           description: "Guide payload",
@@ -1246,10 +1278,23 @@ const paths = {
   "/api/import/rescan": {
     post: {
       tags: ["Import"],
-      summary: "Rescan the default ~/.claude/projects directory",
+      summary: "Rescan the selected provider's default transcript directory",
       description:
-        'Re-scans the default `~/.claude/projects` directory and imports anything new through the live ingestion pipeline. IDEMPOTENT and ADDITIVE — re-running is always safe, already-imported sessions are deduplicated (`skipped`), and token/compaction baselines are preserved so cost never double-counts. Progress is broadcast over the WebSocket as `import.progress` frames while it runs. The response reports `imported` / `skipped` / `backfilled` / `errors` plus `sessions_seen` and `files_scanned`, with `source: "default"`.',
+        "Re-scans the selected provider’s default transcript directory (`~/.claude/projects` or `~/.codex/sessions`) through its live ingestion pipeline. IDEMPOTENT and ADDITIVE — re-running is safe, previously processed entries are skipped, and provider-specific accounting prevents duplicate costs. Progress is broadcast as `import.progress` with the selected provider.",
       operationId: "importRescan",
+      requestBody: {
+        required: false,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                provider: { type: "string", enum: ["claude", "codex"], default: "claude" },
+              },
+            },
+          },
+        },
+      },
       responses: {
         200: {
           description: "Import result",
@@ -1280,7 +1325,7 @@ const paths = {
       tags: ["Import"],
       summary: "Import transcripts from an arbitrary absolute directory",
       description:
-        'Imports transcripts from an arbitrary directory you point the dashboard at (e.g. history extracted from another machine). The `path` must resolve to an existing directory: a leading `~` is expanded to the home directory, the result must be absolute, and subdirectories are walked recursively for `.jsonl` files. Same idempotent, baseline-preserving pipeline as the default rescan; progress is broadcast as `import.progress`. The response echoes the resolved `path` and the per-run counters with `source: "path"`.',
+        "Imports Claude Code transcripts or Codex rollout files from an arbitrary directory (for example, history extracted from another machine). The `path` must resolve to an existing directory; a leading `~` is expanded and subdirectories are walked recursively. External Codex inputs are snapshotted into dashboard-owned storage so their Conversation view remains available after the source folder is removed. Progress is broadcast as provider-tagged `import.progress` frames.",
       operationId: "importScanPath",
       requestBody: {
         required: true,
@@ -1295,16 +1340,22 @@ const paths = {
                   description:
                     "Absolute directory path. Tilde (~) is expanded. Walks subdirectories recursively.",
                 },
+                provider: {
+                  type: "string",
+                  enum: ["claude", "codex"],
+                  default: "claude",
+                  description: "Transcript format and ingestion pipeline to use.",
+                },
               },
             },
             examples: {
               absolute: {
                 summary: "Absolute directory",
-                value: { path: "/Users/son/Downloads/claude-history/projects" },
+                value: { path: "/Users/son/Downloads/claude-history/projects", provider: "claude" },
               },
               tilde: {
                 summary: "Tilde expanded to home directory",
-                value: { path: "~/Downloads/claude-history/projects" },
+                value: { path: "~/Downloads/codex-history", provider: "codex" },
               },
             },
           },
@@ -1375,7 +1426,7 @@ const paths = {
       tags: ["Import"],
       summary: "Upload JSONL files or archives (.zip, .tar, .tar.gz, .tgz, .gz)",
       description:
-        'Imports history uploaded directly from the browser as `multipart/form-data` under the `files` field. Accepts raw `.jsonl` / `.meta.json` transcripts and/or archives (`.zip`, `.tar`, `.tar.gz`, `.tgz`, `.gz`), which are extracted into a temp dir and walked for JSONL content. Unsupported extensions are silently rejected and reported in `rejected_files`. Extraction is bounded to defend against zip bombs — exceeding the limit returns 413. Same idempotent import pipeline; progress is broadcast as `import.progress`. On success the response carries `source: "upload"` plus `files_received`, `rejected_files`, `entries_extracted`, `entries_skipped`, and the standard import counters. (Requires the optional `multer` dependency; a missing install yields a 500.)',
+        "Imports selected Claude Code transcripts or Codex rollout files uploaded as `multipart/form-data` under `files`, with a `provider` field. Raw JSONL files and archives are extracted into a temporary directory; Codex uploads are copied to dashboard-owned storage before the temporary files are reclaimed. Unsupported extensions are reported in `rejected_files`; bounded extraction protects against archive bombs. Progress is broadcast as provider-tagged `import.progress` frames.",
       operationId: "importUpload",
       requestBody: {
         required: true,
@@ -1390,9 +1441,18 @@ const paths = {
                   description:
                     "Files to import. Supports .jsonl, .meta.json, .zip, .tar, .tar.gz, .tgz, .gz.",
                 },
+                provider: {
+                  type: "string",
+                  enum: ["claude", "codex"],
+                  default: "claude",
+                  description: "Transcript provider for the uploaded files.",
+                },
               },
             },
-            example: { files: ["claude-history.tar.gz", "session-extra.jsonl"] },
+            example: {
+              provider: "codex",
+              files: ["codex-history.tar.gz", "rollout-session.jsonl"],
+            },
           },
         },
       },
@@ -1584,9 +1644,13 @@ const paths = {
       tags: ["Workflows"],
       summary: "Get workflow intelligence aggregates",
       description:
-        "Returns the full workflow-intelligence aggregate powering the Workflows analytics page — 11 sections in one payload: `stats` (headline counters: sessions, agents, subagents, success rate, avg depth/duration, compactions, top tool flow), `orchestration` (subagent-type breakdown + delegation edges + outcomes), `toolFlow` (tool-to-tool transitions + tool counts), `effectiveness` (per-subagent-type success rate, avg duration, weekly trend), `patterns` (frequent subagent sequences + solo-session share), `modelDelegation` (model usage for main/sub agents + tokens by model), `errorPropagation` (errors by depth/type + error rate), `concurrency` (averaged agent swim-lane start/end), `complexity` (per-session agent/token/duration rows), `compaction` (compaction counts + tokens recovered), and `cooccurrence` (directed subagent-after-subagent pairs). The optional `status` query filter scopes every section to sessions of one status. Errors use the SHORT `{ error: { message } }` shape.",
+        "Returns the full workflow-intelligence aggregate powering the Workflows analytics page — 11 sections in one payload: `stats` (headline counters: sessions, agents, subagents, success rate, avg depth/duration, compactions, top tool flow), `orchestration` (subagent-type breakdown + delegation edges + outcomes), `toolFlow` (tool-to-tool transitions + tool counts), `effectiveness` (per-subagent-type success rate, avg duration, weekly trend), `patterns` (frequent subagent sequences + solo-session share), `modelDelegation` (model usage for main/sub agents + tokens by model), `errorPropagation` (errors by depth/type + error rate), `concurrency` (averaged agent swim-lane start/end), `complexity` (per-session agent/token/duration rows), `compaction` (compaction counts + tokens recovered), and `cooccurrence` (directed subagent-after-subagent pairs). `status`, `sources`, and `providers` scope every section. Codex tool flow is derived from its persisted `response_item` calls and Codex compactions from `context_compacted` events; Claude-only Workflow-tool journals are not represented as Codex runs. Errors use the SHORT `{ error: { message } }` shape.",
       operationId: "getWorkflowIntelligence",
-      parameters: [{ $ref: "#/components/parameters/WorkflowStatusQuery" }],
+      parameters: [
+        { $ref: "#/components/parameters/WorkflowStatusQuery" },
+        { $ref: "#/components/parameters/SourcesQuery" },
+        { $ref: "#/components/parameters/ProvidersQuery" },
+      ],
       responses: {
         200: {
           description: "Workflow aggregate data",
@@ -1615,9 +1679,13 @@ const paths = {
       tags: ["Workflows"],
       summary: "Get workflow drill-in for one session",
       description:
-        "Returns the workflow drill-in for a single session, used by the session-level Workflow view: `session` (the session row), `tree` (the recursive parent→child agent tree rooted at the main agent), `toolTimeline` (chronological tool events with tool_name/event_type/agent_id/summary), `swimLanes` (a flat per-agent start/end lane list for the Gantt-style view), and `events` (the chronological event stream, capped at the first 500 rows). Returns 404 with the SHORT `{ error: { message } }` shape when the session id is unknown.",
+        "Returns the workflow drill-in for a single session, used by the session-level Workflow view: `session` (the session row), `tree` (the recursive parent→child agent tree rooted at the main agent), `toolTimeline` (chronological tool events with tool_name/event_type/agent_id/summary), `swimLanes` (a flat per-agent start/end lane list for the Gantt-style view), and `events` (the chronological event stream, capped at the first 500 rows). `sources` and `providers` enforce the active dashboard scope. Returns 404 with the SHORT `{ error: { message } }` shape when the session is unknown or outside that scope.",
       operationId: "getWorkflowSession",
-      parameters: [{ $ref: "#/components/parameters/SessionIdPath" }],
+      parameters: [
+        { $ref: "#/components/parameters/SessionIdPath" },
+        { $ref: "#/components/parameters/SourcesQuery" },
+        { $ref: "#/components/parameters/ProvidersQuery" },
+      ],
       responses: {
         200: {
           description: "Workflow session detail",

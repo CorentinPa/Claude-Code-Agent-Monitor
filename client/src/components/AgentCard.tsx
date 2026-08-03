@@ -1,6 +1,9 @@
 /**
  * @file AgentCard.tsx
- * @description Defines the AgentCard component that displays a summary of an agent's information, including its name, status, task, current tool, and timestamps. The card is clickable and navigates to the agent's session details when clicked. It also visually distinguishes active agents with a border highlight.
+ * @description Defines the AgentCard component that displays a summary of an
+ * agent's name, status, task, current tool, timestamps, and native Codex
+ * title plus a latest-two-human-turn context. The card is clickable and
+ * navigates to session details while visually distinguishing active agents.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -77,6 +80,23 @@ function mainAgentDisplayName(agentName: string, realSessionName: string): strin
   return sep >= 0 ? `${agentName.slice(0, sep)} - ${realSessionName}` : agentName;
 }
 
+/** Keep a compact card's history legible: at most two distinct human turns,
+ * one visual row each. This intentionally preserves a title-matching first
+ * request when a terse follow-up depends on it for context. */
+function promptPreviewLines(value: string | null | undefined): string[] {
+  const seen = new Set<string>();
+  return String(value || "")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter((line) => {
+      const key = line.toLocaleLowerCase();
+      if (!line || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(-2);
+}
+
 interface AgentCardProps {
   agent: Agent;
   /** Optional session data for richer main-agent rendering (model, cwd,
@@ -115,10 +135,26 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
     : typeof agent.cost === "number"
       ? agent.cost
       : 0;
-  // Real (user-given) session name - the auto-generated "Session <id8>"
-  // fallback carries no extra info next to the ID, so it is suppressed.
+  // Real (user-given) session name - auto-generated Claude/Codex fallbacks
+  // carry no extra info next to the ID, so they are suppressed.
   const sessionName = session?.name?.trim() || "";
-  const realSessionName = /^Session [0-9a-f]{8}$/i.test(sessionName) ? "" : sessionName;
+  const realSessionName = /^(Session [0-9a-f]{8}|Codex session)$/i.test(sessionName)
+    ? ""
+    : sessionName;
+  const isCodexMain = isMain && session?.provider === "codex" && agent.name.trim() === "Codex";
+  const displayName = isCodexMain
+    ? `Codex · ${realSessionName || agent.session_id.slice(0, 8)}`
+    : isMain
+      ? mainAgentDisplayName(agent.name, realSessionName)
+      : agent.name;
+  // Session titles and requests are intentionally independent: Claude and
+  // Codex both persist two recent real human turns on the session, while a
+  // main-agent task remains the truthful fallback for pre-preview history.
+  // Subagents keep their own assigned task instead of inheriting the parent.
+  const taskPreview = isMain
+    ? session?.prompt_preview?.trim() || agent.task?.trim() || null
+    : agent.task?.trim() || null;
+  const taskPreviewLines = promptPreviewLines(taskPreview);
   // A subagent's own model lives in its metadata (resolved from its transcript,
   // not the parent session's — see issue #185). Use it everywhere this card
   // shows a model so a Haiku QA agent under an Opus orchestrator reads as
@@ -198,20 +234,36 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
             <p className="text-sm font-medium text-gray-200 truncate">
               {/* Auto-generated main-agent titles (e.g. "Main Agent - Session
                   229d93fd" or "Main Agent - work - e3f8e613") swap the
-                  placeholder for the real session name when one exists; custom
-                  (sub)agent names are left untouched. */}
-              {isMain ? mainAgentDisplayName(agent.name, realSessionName) : agent.name}
+                  placeholder for the real session name when one exists. Codex
+                  main agents use their native renamed title (or short ID) so
+                  a board never shows a bare, indistinguishable "Codex". */}
+              {displayName}
             </p>
             {subtitle && <p className="text-[11px] text-gray-500 truncate">{subtitle}</p>}
           </div>
         </div>
         {/* compact: cards are narrow — inline reason chip would squeeze the
             title, so the reason stays hover-tooltip-only here. */}
-        <AgentStatusBadge status={status} reason={agentAwaitingReason(agent)} compact />
+        <AgentStatusBadge
+          status={status}
+          reason={agentAwaitingReason(agent)}
+          provider={session?.provider}
+          compact
+        />
       </div>
 
-      {agent.task && (
-        <p className="text-xs text-gray-400 mb-3 line-clamp-2 leading-relaxed">{agent.task}</p>
+      {taskPreviewLines.length > 0 && (
+        <div className="mb-3 space-y-1 border-l-2 border-accent/25 pl-2.5">
+          {taskPreviewLines.map((prompt, index) => (
+            <p
+              key={`${index}-${prompt}`}
+              className="text-xs text-gray-400 leading-relaxed line-clamp-1"
+              title={prompt}
+            >
+              {prompt}
+            </p>
+          ))}
+        </div>
       )}
 
       <div className="flex items-center gap-3 text-[11px] text-gray-500 min-w-0 overflow-hidden flex-wrap">
@@ -249,11 +301,13 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
         ) : (
           <span className="flex items-center gap-1 flex-shrink-0">
             <Clock className="w-3 h-3" />
-            {timeAgo(agent.updated_at || agent.started_at)}
+            {timeAgo(agent.last_activity || agent.updated_at || agent.started_at)}
           </span>
         )}
         <span className="ml-auto flex items-center gap-1 min-w-0 opacity-50">
-          {realSessionName && <span className="truncate max-w-[10rem]">{realSessionName} ·</span>}
+          {realSessionName && !isCodexMain && (
+            <span className="truncate max-w-[10rem]">{realSessionName} ·</span>
+          )}
           <span className="font-mono flex-shrink-0">{agent.session_id.slice(0, 8)}</span>
         </span>
       </div>

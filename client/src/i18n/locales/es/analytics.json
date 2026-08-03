@@ -1,6 +1,6 @@
 {
   "title": "Analíticas",
-  "subtitle": "Monitoreo y analíticas en tiempo real para sesiones de Claude Code",
+  "subtitle": "Monitoreo y analíticas en tiempo real para sesiones de agentes",
   "export": "Exportar",
   "totalSessions": "Total de Sesiones",
   "totalAgents": "Total de Agentes",
@@ -27,7 +27,7 @@
   "tokenMix": "Mezcla de Tokens",
   "cacheEfficiency": "Eficiencia de caché",
   "tokenBreakdown": "Desglose de Tokens",
-  "tokenInfo": "Datos de tokens capturados de los eventos Stop de Claude Code.",
+  "tokenInfo": "Datos de tokens capturados de eventos de sesión registrados.",
   "costByModel": "Costo por Modelo",
   "dailyCostTrends": "Tendencias de Costo Diario",
   "costByWeekday": "Costo por Día de la Semana",

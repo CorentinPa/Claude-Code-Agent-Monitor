@@ -1,6 +1,7 @@
 /**
  * @file AgentCard.test.tsx
- * @description Unit tests for the AgentCard component, which displays information about an agent in the application. The tests cover rendering of agent details such as name, status, subagent type, task, and current tool, as well as interaction handling like click events. The tests use React Testing Library and Vitest for assertions and mocking.
+ * @description Unit tests for the AgentCard component, including Codex-native
+ * titles and transcript-derived prompt context alongside standard agent details.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -201,6 +202,87 @@ describe("AgentCard", () => {
     );
     // "Session <id8>" is suppressed as a non-name, so nothing to swap in.
     expect(screen.getByText("Main Agent - work - e3f8e613")).toBeInTheDocument();
+  });
+
+  it("uses a native Codex title instead of a bare Codex agent name", () => {
+    renderCard(
+      <AgentCard
+        agent={makeAgent({ name: "Codex", session_id: "019fbb99-bd87-7c80-afec-ee65e2ebbe1c" })}
+        session={
+          {
+            id: "019fbb99-bd87-7c80-afec-ee65e2ebbe1c",
+            name: "hehe",
+            provider: "codex",
+            status: "active",
+          } as never
+        }
+      />
+    );
+    expect(screen.getByText("Codex · hehe")).toBeInTheDocument();
+    expect(screen.queryByText("Codex")).not.toBeInTheDocument();
+  });
+
+  it("uses the stable Codex session ID while a native title is unavailable", () => {
+    renderCard(
+      <AgentCard
+        agent={makeAgent({ name: "Codex", session_id: "019fbb99-bd87-7c80-afec-ee65e2ebbe1c" })}
+        session={
+          {
+            id: "019fbb99-bd87-7c80-afec-ee65e2ebbe1c",
+            name: "Codex session",
+            provider: "codex",
+            status: "active",
+          } as never
+        }
+      />
+    );
+    expect(screen.getByText("Codex · 019fbb99")).toBeInTheDocument();
+  });
+
+  it("uses the session prompt fallback to make an imported renamed Codex card informative", () => {
+    renderCard(
+      <AgentCard
+        agent={makeAgent({ name: "Codex", session_id: "019fbb99-bd87-7c80-afec-ee65e2ebbe1c" })}
+        session={
+          {
+            id: "019fbb99-bd87-7c80-afec-ee65e2ebbe1c",
+            name: "hehe",
+            provider: "codex",
+            status: "active",
+            prompt_preview:
+              "Fix the real-time Codex discovery path and add coverage.\nThen include the missing edge case.",
+          } as never
+        }
+      />
+    );
+
+    expect(screen.getByText("Codex · hehe")).toBeInTheDocument();
+    expect(
+      screen.getByText("Fix the real-time Codex discovery path and add coverage.")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Then include the missing edge case.")).toBeInTheDocument();
+  });
+
+  it("uses the same compact two-turn session context for a Claude main agent", () => {
+    renderCard(
+      <AgentCard
+        agent={makeAgent({ name: "Main Agent - live sync", task: "original task" })}
+        session={
+          {
+            id: "claude-two-turn-context",
+            name: "Live sync investigation",
+            provider: "claude",
+            status: "active",
+            prompt_preview:
+              "Investigate the live sync delay.\nThen cover the remote source retry path.",
+          } as never
+        }
+      />
+    );
+
+    expect(screen.getByText("Investigate the live sync delay.")).toBeInTheDocument();
+    expect(screen.getByText("Then cover the remote source retry path.")).toBeInTheDocument();
+    expect(screen.queryByText("original task")).not.toBeInTheDocument();
   });
 
   it("should not render subagent_type when null", () => {

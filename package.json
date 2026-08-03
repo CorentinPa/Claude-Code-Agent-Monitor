@@ -1,6 +1,6 @@
 {
   "name": "agent-dashboard",
-  "version": "1.4.8",
+  "version": "2.0.0",
   "bin": {
     "ccam": "bin/ccam.js"
   },

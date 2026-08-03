@@ -206,14 +206,14 @@ When the server is down, **read-only commands automatically fall back to reading
 
 ### Remote Sources
 
-Manage the remote (SSH) machines this dashboard pulls Claude Code history from — the terminal equivalent of **Settings → Remote Data Sources**. Authentication defers entirely to your SSH stack (`~/.ssh/config`, ssh-agent, keys, known_hosts); **no secrets are passed or stored**. `remotes` is an alias for `remote-sources`.
+Manage the remote (SSH) machines this dashboard pulls Claude Code, Codex, or both histories from — the terminal equivalent of **Settings → Remote Data Sources**. Authentication defers entirely to your SSH stack (`~/.ssh/config`, ssh-agent, keys, known_hosts); **no secrets are passed or stored**. `remotes` is an alias for `remote-sources`.
 
 | Command | Description |
 | ------- | ----------- |
 | `ccam remote-sources` (alias `remotes`) | List configured sources with id, auto-sync on/off, status, label, host, **session count**, and last-sync time, followed by a totals line (sources / auto-syncing / sessions collected) |
-| `ccam remote-sources add --label <name> --host <user@host> [--port N] [--identity <path>] [--remote-home <path>] [--disabled]` | Add a source. `--host` is an ssh destination (`user@host`) or a `~/.ssh/config` alias; `--disabled` skips it in the background poller |
-| `ccam remote-sources test <id>` | Probe SSH connectivity and check the remote `~/.claude/projects` exists; exits non-zero on failure |
-| `ccam remote-sources sync [id]` | Pull history now — one source by id, or **all** sources when the id is omitted. Prints imported / tagged counts |
+| `ccam remote-sources add --label <name> --host <user@host> [--port N] [--identity <path>] [--remote-home <path>] [--remote-codex-home <path>] [--disabled]` | Add a source. `--host` is an ssh destination (`user@host`) or a `~/.ssh/config` alias; provider homes default to `~/.claude` and `~/.codex`; `--disabled` skips it in the background poller |
+| `ccam remote-sources test <id>` | Probe SSH connectivity and report Claude Code / Codex history availability; exits non-zero only when neither provider is available |
+| `ccam remote-sources sync [id]` | Pull history now — one source by id, or **all** sources when the id is omitted. Prints combined and per-provider imported / tagged counts |
 | `ccam remote-sources rm <id> [--purge]` | Remove a source (its imported sessions are detached back to `local` by default; `--purge` also **deletes** them) |
 
 ### Administration

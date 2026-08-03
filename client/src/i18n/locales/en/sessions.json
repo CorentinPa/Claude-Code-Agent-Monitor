@@ -25,7 +25,7 @@
   "sessionCount_plural": "{{count}} sessions recorded",
   "noSessions": "No sessions found",
   "noSessionsDesc": "Try adjusting your search or filters.",
-  "noSessionsHint": "Start a Claude Code session with hooks installed to begin tracking.",
+  "noSessionsHint": "Start a monitored agent session with hooks installed to begin tracking.",
   "tableSession": "Session",
   "tableStatus": "Status",
   "tableLastActive": "Last Active",
@@ -37,7 +37,7 @@
   "detail": {
     "waitingBanner": {
       "title": "Waiting for your input",
-      "generic": "Claude Code is paused in this session until you respond in the terminal."
+      "generic": "This session is paused until you respond in the terminal."
     },
     "failedLoad": "Failed to load session",
     "loading": "Loading session...",
@@ -51,7 +51,10 @@
     "noEvents": "No events recorded.",
     "conversation": "Conversation",
     "timeline": "Timeline ({{shown}}/{{total}})",
-    "transcriptNotFound": "Conversation transcript not found for this agent. The transcript file may be missing or not yet linked."
+    "transcriptNotFound": "Conversation transcript not found for this agent. The transcript file may be missing or not yet linked.",
+    "transcript": {
+      "loadOlder": "↑ Load older messages"
+    }
   },
   "remoteSourceBadgeTitle": "Collected from a remote machine"
 }

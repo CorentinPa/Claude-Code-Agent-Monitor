@@ -94,4 +94,59 @@ describe("i18n resources", () => {
     expect(i18n.t("kanban:session.subagentSummary", { count: 1 })).toBe("1 subagent");
     expect(i18n.t("kanban:session.subagentSummary", { count: 3 })).toBe("3 subagents");
   });
+
+  it("ships every first-run hook setup control in each supported locale", () => {
+    const keys = [
+      "provider.both.label",
+      "provider.both.description",
+      "hookGate.kicker",
+      "hookGate.title",
+      "hookGate.description",
+      "hookGate.selectedProviders",
+      "hookGate.realTime",
+      "hookGate.checking",
+      "hookGate.installed",
+      "hookGate.existing",
+      "hookGate.ready",
+      "hookGate.overrideWarning",
+      "hookGate.output",
+      "hookGate.failure",
+      "hookGate.checkFailed",
+      "hookGate.preserveNote",
+      "hookGate.alreadyInstalled",
+      "hookGate.install",
+      "hookGate.installing",
+      "hookGate.continue",
+    ];
+
+    for (const language of ["en", "zh", "vi", "ko", "es"]) {
+      for (const key of keys) {
+        expect(i18n.getResource(language, "splash", key)).toBeTruthy();
+      }
+    }
+  });
+
+  it("ships the global provider and session-home settings in every supported locale", () => {
+    const keys = [
+      "display.title",
+      "display.claude",
+      "display.codex",
+      "display.both",
+      "display.claudeDescription",
+      "display.codexDescription",
+      "display.bothDescription",
+      "homes.title",
+      "codexHome.title",
+      "pricing.navClaude",
+      "pricing.navGpt",
+      "pricing.gpt.title",
+      "pricing.gpt.unavailableNote",
+    ];
+
+    for (const language of ["en", "zh", "vi", "ko", "es"]) {
+      for (const key of keys) {
+        expect(i18n.getResource(language, "settings", key)).toBeTruthy();
+      }
+    }
+  });
 });

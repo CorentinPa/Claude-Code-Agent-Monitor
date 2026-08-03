@@ -109,11 +109,17 @@ describe("Sidebar", () => {
     });
   });
 
-  it("should switch language from the collapsed custom dropdown", async () => {
+  it("should use an icon-only trigger and an unconstrained floating menu when collapsed", async () => {
     const user = userEvent.setup();
     renderSidebar(true, true);
 
-    await user.click(screen.getByRole("button", { name: "English" }));
+    const trigger = screen.getByRole("button", { name: "Language" });
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(trigger);
+    const menu = screen.getByRole("listbox", { name: "Language" });
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    expect(menu).toHaveClass("fixed");
     await user.click(screen.getByRole("option", { name: "Spanish ES" }));
 
     await waitFor(() => {

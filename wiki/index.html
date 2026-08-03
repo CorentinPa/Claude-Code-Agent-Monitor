@@ -1097,14 +1097,14 @@
                   <div class="feature-icon ic-emerald">🔄</div>
                   <h3>History Import</h3>
                   <p>
-                    Import existing Claude Code sessions from three sources — rescan the default
-                    <code>~/.claude/projects</code> folder, scan any absolute path on disk, or
+                    Import existing Claude Code or Codex sessions from three sources — rescan the selected
+                    default <code>~/.claude/projects</code> or <code>~/.codex/sessions</code> folder, scan any
+                    absolute path on disk, or
                     drag-drop <code>.jsonl</code>, <code>.zip</code>, <code>.tar.gz</code>, and
                     <code>.gz</code> archives through <b>Settings → Import History</b>. All paths
-                    funnel into the same ingestion pipeline the server uses for live hooks, so
-                    imported tokens and per-model cost match real-time capture exactly. Re-imports
-                    are idempotent via session-ID dedup, and archive extraction is guarded against
-                    path traversal and zip-bomb expansion.
+                    use each provider's live ingestion pipeline, so imported tokens, per-model cost,
+                    and tool data match real-time capture exactly. Codex uploads are snapshotted before
+                    temporary files are cleaned up, and re-imports are idempotent.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1132,14 +1132,10 @@
                   <div class="feature-icon ic-blue">🛜</div>
                   <h3>Remote Data Sources</h3>
                   <p>
-                    Pull Claude Code history from other machines over SSH. Each remote's
-                    <code>~/.claude/projects</code> tree is mirrored via <code>scp</code> into a sandboxed staging
-                    directory, fed through the same importer as local history, and every session
-                    is tagged with its source. A background poller keeps remote data
-                    near-real-time, a global data-scope selector (Local only / All / a specific
-                    source) narrows the whole app, and sessions from a remote show a source badge.
-                    Auth defers entirely to the host's SSH stack — no passwords or secrets are
-                    stored. Managed in <b>Settings → Remote Data Sources</b>.
+                    One remote source can independently import <b>Claude Code</b>, <b>Codex</b>, or both.
+                    Codex mirrors <code>~/.codex/sessions</code> and its lightweight
+                    <code>session_index.jsonl</code> title index; the connection test and sync result show
+                    a separate state for each provider, so a missing provider never hides fresh data from the other.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1153,6 +1149,22 @@
                     title (<code>custom-title</code> / <code>ai-title</code>) so renames surface in
                     real time, plus the first user prompt as a fallback descriptor for
                     placeholder-named sessions and agents.
+                  </p>
+                  <p>
+                    Codex also reads its native session index, so <code>/rename</code> titles reach
+                    session and agent cards in real time. Its conversation reader includes human
+                    turns plus <code>exec</code> custom-tool calls and outputs, and loads older pages
+                    when you reach the top of the transcript.
+                  </p>
+                  <p>
+                    Claude Code and Codex cards show a compact two-row history of their latest distinct
+                    human prompts beneath the provider-native title, so a short friendly name or terse
+                    follow-up never hides the active task. Claude refreshes this context from its local
+                    transcript cache during live hooks, imports, and watchdog sweeps; Codex refreshes it
+                    from rollout records and falls back to persisted <code>user_message</code> events for
+                    older imports. The transcript renders persisted PNG/JPEG/GIF/WebP attachments for
+                    Claude Code and Codex when available, while duplicate Codex response/event copies
+                    collapse into one human turn.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1202,6 +1214,12 @@
                     subagent card no longer misleadingly reads as if it cost the whole session;
                     main-agent cards still show the session total. Pricing changes retroactively
                     recalculate all stored sessions, and imports apply the same rate table.
+                  </p>
+                  <p>
+                    Codex rollouts are accounted separately with fresh, cached, cache-write,
+                    output, and reasoning-output deltas. The GPT rate card distinguishes standard
+                    short context (≤272K input tokens), long context, and Fast mode; unavailable
+                    published tiers remain explicitly unpriced until you set a rate.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1344,7 +1362,7 @@
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-emerald">▶️</div>
-                  <h3 id="feat-run-claude">Run Claude</h3>
+                  <h3 id="feat-run-claude">Run Agent</h3>
                   <p>
                     Spawn <code>claude</code> subprocesses straight from the dashboard with
                     a chat-style streaming UI — multi-turn <b>Conversation</b> or single-shot
@@ -1354,6 +1372,12 @@
                     never loses history. Slash-command autocomplete, file references, live
                     token/context-window meter, and a thinking-effort dial bring TUI parity
                     to the browser. Same-origin guard blocks drive-by spawns.
+                  </p>
+                  <p>
+                    <strong>Run Agent</strong> now begins by choosing Claude Code or Codex. Codex
+                    starts a native interactive <code>app-server</code> thread, offers provider-native
+                    approval and sandbox controls, and discovers models directly from the signed-in
+                    CLI so new releases appear without a dashboard update.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1373,7 +1397,7 @@
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-amber">🧰</div>
-                  <h3 id="feat-config-explorer">Claude Config Explorer</h3>
+                  <h3 id="feat-config-explorer">Agent Config</h3>
                   <p>
                     A 12-tab inspector at <code>/cc-config</code> for everything Claude Code
                     knows about: skills, subagents, slash commands, output styles, plugins,
@@ -1552,20 +1576,24 @@
               <div class="screenshot-caption"><span class="caption-icon">🧬</span> <span><strong>Workflow Runs · in a session</strong> — the same fleets linked to their launching session, so a session's dynamic-workflow sub-agents and their folded-in token cost are visible inline</span></div>
             </div>
             <div class="screenshot-card" id="ss-config">
-              <img src="../images/config.png" alt="Claude Config Explorer" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Claude Config Explorer</strong> — 12-tab inspector for skills, subagents, slash commands, plugins, MCP servers, hooks, settings, memory, keybindings, and statusline. Safe edits with backups</span></div>
+              <img src="../images/config.png" alt="Agent Config — Claude Code and Codex explorers" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Agent Config</strong> — switch between the editable Claude Code explorer and a live Codex workspace for defaults, models, profiles, MCP, projects, skills, rules, hooks, plugins, and instructions. Previews redact secret-like values; user-maintained files receive backup-backed edits.</span></div>
+            </div>
+            <div class="screenshot-card" id="ss-config-codex">
+              <img src="../images/config-codex.png" alt="Codex Config Explorer — overview, configuration source, and workspace tabs" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Codex Config Explorer</strong> — the Codex workspace brings together <code>config.toml</code>, account models, profiles, MCP servers, projects, skills, hooks, rules, plugins, and instructions. Edit supported user-managed files with timestamped backups; <code>config.toml</code> is edit-only.</span></div>
             </div>
             <div class="screenshot-card" id="ss-config-skills">
               <img src="../images/config-skills.png" alt="Claude Config Explorer — Skills tab" width="100%" loading="lazy" decoding="async" />
               <div class="screenshot-caption"><span class="caption-icon">🧩</span> <span><strong>Claude Config Explorer · Skills</strong> — the Skills tab lists every discovered skill (user, project, and plugin) with its description and source, is searchable across the whole set, and opens any skill file for a safe, timestamp-backed edit</span></div>
             </div>
             <div class="screenshot-card" id="ss-run">
-              <img src="../images/run.png" alt="Run Claude — pre-run configuration" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">▶️</span> <span><strong>Run Claude</strong> — spawn or resume Claude subprocesses from the browser. Pick Conversation or Headless mode, set cwd, model, permission level, and thinking effort. Same-origin guard included</span></div>
+              <img src="../images/run.png" alt="Run Agent — Claude Code and Codex launch selection" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">▶️</span> <span><strong>Run Agent</strong> — choose Claude Code or Codex each time you open the launcher. Claude supports Conversation or Headless mode; Codex starts a native interactive thread with approval and sandbox controls.</span></div>
             </div>
             <div class="screenshot-card">
-              <img src="../images/run-results.png" alt="Run Claude — live streaming output" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">💬</span> <span><strong>Run Claude · live stream</strong> — character-by-character streaming output. Tool uses, tool results, and thinking blocks are collapsible. Active runs switcher juggles multiple sessions</span></div>
+              <img src="../images/run-results.png" alt="Run Agent — live streaming output" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">💬</span> <span><strong>Run Agent · live stream</strong> — Claude stream-json and Codex app-server events render together as chat, including reasoning, commands, file changes, and tool activity. Dashboard Runs lets you re-attach later.</span></div>
             </div>
             <div class="screenshot-card" id="ss-settings">
               <img src="../images/settings.png" alt="Settings Overview" width="100%" loading="lazy" decoding="async" />
@@ -1577,7 +1605,7 @@
             </div>
             <div class="screenshot-card" id="ss-remote">
               <img src="../images/remote.png" alt="Settings — Remote Data Sources" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">🛰️</span> <span><strong>Settings · Remote Data Sources</strong> — pull Claude Code activity from other machines over SSH: add sources by destination, test connectivity, sync manually or on a background poller, and switch the global data scope between local, all sources, or a specific machine with per-session source badges</span></div>
+              <div class="screenshot-caption"><span class="caption-icon">🛰️</span> <span><strong>Settings · Remote Data Sources</strong> — pull Claude Code and Codex activity from other machines over SSH: optionally set independent Remote Claude home and Remote Codex home paths, test each provider, sync manually or on a background poller, and switch the global data scope between local, all sources, or a specific machine with per-session source badges</span></div>
             </div>
             <div class="screenshot-card" id="ss-swagger">
               <img src="../images/swagger.png" alt="Swagger UI API docs" width="100%" loading="lazy" decoding="async" />
@@ -1790,6 +1818,17 @@ npm run mcp:start:repl         # interactive CLI with tab completion
 # http://localhost:5173  (dev)
 # http://localhost:4820  (prod after npm run build && npm start)</code></pre>
 
+          <p>
+            The manual installer is interactive: Claude Code starts selected; use arrow keys,
+            <kbd>Space</kbd>, then <kbd>Enter</kbd> to choose Claude Code, Codex (beta), or both.
+            If a selected dashboard hook is already present, it warns before replacing only that
+            entry and preserves unrelated hooks. The same guided installer is available from
+            <strong>Settings → Hook Configuration</strong>. On the first dashboard visit, choose a data
+            source, then use the provider-locked live-monitoring setup gate to install the selected
+            hooks in place and review its output. You can also explicitly confirm hooks are already
+            installed before continuing.
+          </p>
+
           <h3>Alternative: Docker / Podman</h3>
           <p>
             A multi-stage <code>Dockerfile</code> and <code>docker-compose.yml</code> are included.
@@ -1967,7 +2006,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                   <td><code>DASHBOARD_LIVENESS_PROBE</code></td>
                   <td><code>1</code></td>
                   <td>
-                    Set to <code>0</code> to disable the dead-session liveness reap — the watchdog completes active sessions with no running <code>claude</code> process; auto-disabled on Windows and in containers. Sessions forwarded from another machine (household hooks) report a non-POSIX <code>cwd</code> and are auto-skipped, so a mixed local + forwarded deployment no longer needs this off.
+                    Set to <code>0</code> to disable the dead-session liveness reap — the watchdog completes active local sessions only when their matching <code>claude</code> or <code>codex</code> process is gone; auto-disabled on Windows and in containers. Sessions forwarded from another machine (household hooks) report a non-POSIX <code>cwd</code> and are auto-skipped, so a mixed local + forwarded deployment no longer needs this off.
                   </td>
                 </tr>
                 <tr>
@@ -1983,6 +2022,16 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                   <td>
                     Poll interval for the background sync of <code>~/.claude/projects</code>; <code>0</code> disables the poll but keeps the filesystem watcher
                   </td>
+                </tr>
+                <tr>
+                  <td><code>DASHBOARD_CODEX_HOME</code></td>
+                  <td><code>~/.codex</code></td>
+                  <td>Optional Codex home. Settings saves this dashboard-only override, re-arms live rollout watching, and immediately scans the new <code>sessions/</code> tree.</td>
+                </tr>
+                <tr>
+                  <td><code>DASHBOARD_CODEX_SYNC_MS</code></td>
+                  <td><code>4000</code></td>
+                  <td>Safety-net interval (ms) for incremental Codex rollout scanning. Default <code>4000</code>; <code>0</code> disables polling but keeps the watcher.</td>
                 </tr>
                 <tr>
                   <td><code>NODE_ENV</code></td>
@@ -2477,9 +2526,10 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <div class="mermaid">
               stateDiagram-v2
                 [*] --> waiting: ensureSession (first hook)
-                waiting --> working: PreToolUse / UserPromptSubmit
+                waiting --> working: PreToolUse / UserPromptSubmit / Codex task_started / user_message
                 working --> working: PostToolUse (tool completed)
-                working --> waiting: Stop (non-error)
+                working --> waiting: Stop (non-error) / Codex task_complete
+                working --> waiting: Codex turn_aborted (interrupted)
                 working --> waiting: Notification (input prompt)
                 working --> waiting: Esc cancel (watchdog marker or idle timeout)
                 waiting --> error: Stop with error
@@ -2507,8 +2557,9 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
               stateDiagram-v2
                 [*] --> waiting: SessionStart startup/resume/clear (status=active + flag)
                 active --> active: SessionStart compact (mid-turn — state preserved, no flag)
-                waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse
-                active --> waiting: Stop (non-error, flag re-stamped)
+                waiting --> active: UserPromptSubmit / PreToolUse / PostToolUse / Codex task_started / user_message
+                active --> waiting: Stop (non-error) / Codex task_complete (flag re-stamped)
+                active --> waiting: Codex turn_aborted (interrupted)
                 active --> waiting: Permission Notification (agent → waiting)
                 active --> waiting: Esc cancel (watchdog marker or idle timeout)
                 active --> error: Stop (stop_reason=error)
@@ -3609,6 +3660,20 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <code>scripts/hook-handler.js</code> is a minimal, fail-safe forwarder. It always exits
             0 so it can never block Claude Code regardless of server state.
           </p>
+          <p>
+            Codex rollout records are the source of truth for live cards: <code>user_message</code>
+            and <code>task_started</code> mark the main agent working; <code>task_complete</code>
+            keeps the session active while showing Waiting; and <code>turn_aborted</code> shows
+            interrupted Waiting. Newest rollouts are processed first, and an unreadable historical
+            file is retried without delaying the rest.
+          </p>
+          <p>
+            Codex <code>response_item</code> tool calls are indexed exactly once through a separate
+            rollout cursor, so provider-scoped Workflows shows recorded tool flows, session drill-ins,
+            token/model totals, and <code>context_compacted</code> counts without replaying lifecycle
+            or token accounting. Dynamic Workflows stays hidden in a Codex-only scope because its
+            on-disk journals are a Claude Code feature.
+          </p>
 
           <div class="diagram-wrap">
             <!-- prettier-ignore -->
@@ -3911,19 +3976,10 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
           </div>
 
           <p>
-            Beyond local history, the dashboard can pull Claude Code activity from
-            <b>other machines over SSH</b> and fold it into the same views as your local
-            sessions. Each remote's <code>~/.claude/projects</code> tree is mirrored via
-            <code>scp</code> (or <code>wsl.exe</code> + <code>tar</code> when Claude runs in WSL
-            on a Windows SSH host) into a sandboxed staging directory, fed through the exact same
-            importer used for local history, and every imported session is tagged with the source it
-            came from. A background poller (<code>DASHBOARD_REMOTE_SYNC_MS</code>, default
-            <code>15000</code> ms) keeps remote data near-real-time — adding or re-enabling a source
-            also triggers an immediate pull — and successful syncs broadcast
-            <code>remote_data.updated</code> plus per-session <code>session_created</code> /
-            <code>session_updated</code> frames. A global <b>data scope</b> selector lets you narrow
-            the entire app to local sessions only, all sources, or a specific machine. Sources are
-            managed in <b>Settings → Remote Data Sources</b>.
+            One remote source can independently import <b>Claude Code</b>, <b>Codex</b>, or both.
+            Codex mirrors <code>~/.codex/sessions</code> and its lightweight
+            <code>session_index.jsonl</code> title index; the connection test and sync result show
+            a separate state for each provider, so a missing provider never hides fresh data from the other.
           </p>
 
           <h3>How It Works</h3>
@@ -3931,8 +3987,8 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <!-- prettier-ignore -->
             <div class="mermaid">
               flowchart LR
-                RH["Remote host\n~/.claude/projects"] -->|scp over SSH| ST["Sandboxed\nstaging dir"]
-                ST -->|same pipeline\nas local history| P["parseSessionFile +\nimportSession"]
+                RH["Remote host\nClaude projects + Codex sessions"] -->|scp over SSH| ST["Sandboxed\nprovider stages"]
+                ST -->|same provider pipeline\nas local history| P["Claude + Codex\nimporters"]
                 P -->|tagged with source| D[("SQLite\nsessions / agents / events")]
                 POLL["Background poller\nDASHBOARD_REMOTE_SYNC_MS"] -.->|periodic sync| RH
                 D -.->|remote_source.status\nremote_data.updated\nsession_created/updated| W["WebSocket /ws"]
@@ -3964,17 +4020,18 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
 
           <h3>Live Status</h3>
           <p>
-            Because a remote session is pulled over SSH, it never emits live hooks to this
-            dashboard, so remote sessions (<code>source</code> ≠ <code>local</code>) are excluded
-            from every local liveness and stale sweep — the process liveness reap, the watchdog
-            transcript scan, the startup cleanup, and the periodic abandon sweep all skip them.
-            Instead, a remote session's live status is reconciled from the mirrored transcript on
-            every sync: activity is judged from the <b>newest event timestamp inside the
-            JSONL</b> (falling back to mirror mtime). If the last event is within
-            <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) the session stays
-            <code>active</code>; once the mirror stops advancing for longer than that window, the
-            session is reconciled to <code>completed</code>. This keeps a still-running remote
-            session from being wrongly shown as Completed.
+            Remote sessions never emit live hooks to this dashboard, so a healthy Claude Code or
+            Codex provider mirror remains exempt from the local process-liveness reap and watchdog
+            transcript scan. Every successful provider sync still reconciles live status from the
+            matching mirrored transcript: activity is judged from the <b>newest event timestamp
+            inside the JSONL</b> (falling back to mirror mtime); within
+            <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) keeps the session
+            <code>active</code>, otherwise it is reconciled to <code>completed</code>. If that
+            provider's SSH sync fails, is unavailable, or is stranded in <code>syncing</code> longer
+            than <code>DASHBOARD_STALE_MINUTES</code> — and an active session is itself older than
+            that same window — the ordinary stale-session sweep marks it <code>abandoned</code> and
+            completes its agents. A later fresh mirror reactivates a session that is still writing,
+            so unavailable providers never leave permanent Waiting cards.
           </p>
 
           <h3>Security Model</h3>
@@ -4017,7 +4074,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                 <tr>
                   <td><code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code></td>
                   <td><code>600000</code></td>
-                  <td>Freshness window (10 min) for a Remote Data Source session's live status — judged from the newest JSONL event timestamp in the mirror (mtime fallback); remote sessions receive no live hooks, so this replaces the local liveness and stale sweeps (which skip them)</td>
+                  <td>Freshness window (10 min) for a Remote Data Source session's live status — judged from the newest JSONL event timestamp in the mirror (mtime fallback); healthy sources stay out of local liveness/stale checks, while errored or stale-syncing sources fall back to the global abandon sweep</td>
                 </tr>
               </tbody>
             </table>
@@ -5215,6 +5272,12 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
             The <code>/settings</code> route provides a comprehensive management interface with
             six sections:
           </p>
+          <p>
+            <strong>Dashboard Data</strong> lets you switch the entire app between Claude Code,
+            Codex, or both. Sessions, agents, events, token totals, workflows, analytics, and
+            costs refetch immediately. The same page saves separate Claude Code and Codex homes;
+            saving the Codex home re-arms live rollout watching and performs a fresh scan.
+          </p>
 
           <div class="feature-grid">
             <div class="feature-card">
@@ -5301,12 +5364,16 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
         <!-- ─── Claude Config Explorer ─────────────────────────────────────── -->
         <section id="config-explorer">
           <div class="section-label">◈ Integrations</div>
-          <h2>Claude Config Explorer</h2>
+          <h2>Agent Config</h2>
 
           <div class="screenshot-gallery">
             <div class="screenshot-card">
               <img src="../images/config.png" alt="Claude Config Explorer — 12-tab inspector with overview counts, scope filter, and tab bar" width="3024" height="1722" loading="lazy" decoding="async" />
               <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Claude Config Explorer</strong> — the <code>/cc-config</code> page: 12 tabs (skills, subagents, slash commands, output styles, plugins, marketplaces, MCP servers, hooks, keybindings, settings, memory), a scope filter (user / project / all), search, and safe edit affordances on the low-risk surfaces</span></div>
+            </div>
+            <div class="screenshot-card">
+              <img src="../images/config-codex.png" alt="Codex Config Explorer — overview, configuration source, and workspace tabs" width="3024" height="1652" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Codex Config Explorer</strong> — the Codex workspace brings together <code>config.toml</code>, account models, profiles, MCP servers, projects, skills, hooks, rules, plugins, and instructions. Edit supported user-managed files with timestamped backups; <code>config.toml</code> is edit-only.</span></div>
             </div>
             <div class="screenshot-card">
               <img src="../images/config-skills.png" alt="Claude Config Explorer — Skills tab with searchable skill list and edit actions" width="3024" height="1722" loading="lazy" decoding="async" />
@@ -5325,6 +5392,24 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
             mutation. A <code>cc-watcher</code> on <code>CLAUDE_HOME</code> plus
             <code>cc_config_changed</code> WebSocket messages keep the page live when files change
             outside the dashboard.
+          </p>
+          <p>
+            The same page also has a <strong>Codex</strong> switch. Its workspace shows defaults,
+            the full local account model catalog, profiles, MCP servers, projects, skills, rules,
+            hooks, installed plugins, and instruction files from <code>CODEX_HOME</code>. The model
+            catalog is read apart from the small redacted-preview limit, so long account instructions
+            cannot make the Models tab report zero. Create a standard named
+            <code>&lt;name&gt;.config.toml</code> profile in place; Codex overlays it only for
+            <code>codex --profile &lt;name&gt;</code>, and its card copies that exact command in one
+            click. Plugin cards use <code>codex plugin list</code> rather than exposing cache folders.
+            Secret-like TOML and JSON values are redacted in previews; an explicit local editor
+            supports <code>config.toml</code>, profile overlays, <code>hooks.json</code>, user rules,
+            skills, and instruction files with atomic saves and timestamped backups. User-maintained
+            profiles, hooks, rules, skills, and instructions also have confirmed backup-backed
+            <strong>View source / Copy path / Edit / Delete</strong> actions; a skill deletion preserves
+            its whole directory, while <code>config.toml</code> stays edit-only. It warns that syntax is
+            not validated, and <code>codex_config_changed</code> refreshes the view when those files
+            change.
           </p>
 
           <div class="feature-grid">
@@ -6882,8 +6967,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=42" defer></script>
-    <script src="script.js?v=39" defer></script>
+    <script src="i18n-content.js?v=59" defer></script>
+    <script src="script.js?v=44" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

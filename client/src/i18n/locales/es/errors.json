@@ -11,11 +11,11 @@
     "sessionDefault": "Sesión ",
     "sessionError": "Error de Sesión",
     "subagentSpawned": "Subagente Iniciado",
-    "finishedResponding": "Claude Terminó de Responder",
+    "finishedResponding": "El agente terminó de responder",
     "readyForInput": "Listo para entrada",
     "sessionCompleted": "Sesión Completada",
     "sessionClosed": "Sesión cerrada",
-    "defaultTitle": "Claude Code",
+    "defaultTitle": "Panel de agentes",
     "defaultBody": "Notificación"
   },
   "toolLegend": {

@@ -49,11 +49,11 @@
   "awaitingReason": {
     "notification": {
       "label": "Necesita entrada",
-      "desc": "Bloqueado por un aviso de permiso o una solicitud de entrada — Claude no puede continuar hasta que respondas."
+      "desc": "Bloqueado por un aviso de permiso o una solicitud de entrada — {{provider}} no puede continuar hasta que respondas."
     },
     "stop": {
       "label": "Turno terminado",
-      "desc": "Claude terminó su respuesta; la sesión está inactiva hasta que envíes la siguiente instrucción."
+      "desc": "{{provider}} terminó su respuesta; la sesión está inactiva hasta que envíes la siguiente instrucción."
     },
     "session_start": {
       "label": "Esperando una instrucción",
@@ -61,7 +61,7 @@
     },
     "interrupted": {
       "label": "Interrumpido",
-      "desc": "El último turno fue interrumpido (Esc o un hook recuperado) — Claude está esperando dirección."
+      "desc": "El último turno fue interrumpido (Esc o un hook recuperado) — {{provider}} está esperando dirección."
     }
   },
   "time": {

@@ -15,6 +15,9 @@ Complete REST API and WebSocket documentation for Agent Dashboard.
   - [Tools](#tools)
   - [Metrics](#metrics)
   - [Pricing](#pricing)
+  - [Workflows](#workflows)
+  - [Settings](#settings)
+  - [Import History](#import-history)
   - [Notifications](#notifications)
   - [Remote Data Sources](#remote-data-sources)
 - [WebSocket API](#websocket-api)
@@ -111,7 +114,12 @@ https://dashboard.example.com
 GET /api/sessions
 ```
 
-Returns all sessions, ordered by most recent activity.
+Returns all sessions, ordered by most recent activity. Each row may include an optional
+`prompt_preview` for compact cards: the two newest distinct real human prompts, oldest to
+newest and newline-separated. Claude Code persists this bounded summary from the local JSONL
+cache during hooks, imports, and watchdog sweeps; Codex derives it from durable
+`codex_user_message` records. Historical rows fall back to the main-agent task. The detail route
+returns the same optional field.
 
 **Query Parameters:**
 
@@ -125,12 +133,15 @@ Returns all sessions, ordered by most recent activity.
 | `sort_by` | string | `time` | Ordering dimension: `time`, `duration`, or `price` |
 | `sort_desc` | boolean | `true` | Use descending order; set to `false` for ascending order |
 | `sources` | string | - | Comma-separated data-source ids to include (the built-in local history is `local`; remote SSH machines use their `remote_sources.id`). Omit for all sources. Also accepted on `/api/events`, `/api/agents`, `/api/stats`, `/api/analytics`, and `/api/pricing/cost`. See [Remote Data Sources](#remote-data-sources) |
+| `providers` | string | - | Comma-separated product providers: `claude`, `codex`, or both. It composes with `sources` and is accepted by the scoped list, aggregate, facet, per-session detail, cost, and workflow routes. Codex workflow responses include its recorded `response_item` tool calls, token/model totals, and `context_compacted` events; only Claude Code's Workflow-tool run journals are unavailable for Codex. |
 
 **Example Request:**
 
 ```bash
 curl http://localhost:4820/api/sessions?limit=10&status=active
 ```
+
+`last_activity` in every list row is the timestamp of the latest durable session event. It does **not** reuse the mutable `updated_at` bookkeeping timestamp, so a title, card-context, or watchdog repair cannot make an idle session appear newly active. Eventless historical rows fall back to their lifecycle timestamp.
 
 **Example Response:**
 
@@ -172,9 +183,11 @@ classDiagram
         +string status "active|completed|error|abandoned"
         +string cwd
         +string model
+        +string prompt_preview "nullable card context"
         +string started_at
         +string ended_at
         +string updated_at
+        +string last_activity "latest durable event; lifecycle fallback"
         +string awaiting_input_since "null unless Waiting"
         +string awaiting_reason "notification|stop|session_start|interrupted; null unless Waiting"
         +number cost
@@ -228,6 +241,36 @@ curl http://localhost:4820/api/sessions/sess_abc123
 |------|-------------|
 | 404 | Session not found |
 | 500 | Internal server error |
+
+---
+
+#### Get Conversation Transcript
+
+```http
+GET /api/sessions/:id/transcript
+```
+
+Returns a cursor-paginated transcript page. Pass `limit` (up to 200), `after` to
+read newer JSONL lines, or `before` to load the preceding page; responses include
+`first_line`, `last_line`, and `has_more` for the next request. Claude Code
+responses include its normal conversation and local command records. Codex
+responses include human turns, legacy `function_call` records, and the primary
+`custom_tool_call` stream (including `exec` input and paired output), so clients
+can render the actual command flow rather than only `wait` calls. Both providers
+also expose persisted PNG/JPEG/GIF/WebP user attachments as `image` content blocks;
+missing or expired files are simply omitted, and Codex's duplicated response/event
+user records are returned as one human turn.
+
+#### Read Persisted Transcript Image
+
+```http
+GET /api/sessions/:id/transcript-image?line={line}&index={index}
+```
+
+Streams a same-origin image referenced by one persisted Claude transcript line. The
+transcript response provides this opaque URL rather than its local path. Codex inline
+attachments are already returned as validated `data:image/...` block sources. Only bounded
+PNG, JPEG, GIF, and WebP images are served; unavailable files return `404`.
 
 ---
 
@@ -343,6 +386,8 @@ curl http://localhost:4820/api/sessions/sess_abc123/agents
 ```
 
 > **Note on `cost`** — `/api/agents` and `/api/sessions/:id/agents` attach a `cost` (USD) to each agent: the agent's **own** cost, computed server-side from the per-agent token buckets stored in `agents.metadata.tokens` and priced at the current pricing rules (at the agent's start date, so promo/standard cutovers apply — see [Pricing](#pricing)). It is `0` for main agents (whose cost is the session total, reported by `/api/pricing/cost/:sessionId`), for compaction pseudo-agents, and for any subagent whose transcript is unavailable. This lets a subagent card show only what that subagent spent instead of the whole session's total.
+
+> **Note on real activity time** — agent list/detail reads include `last_activity`, derived from the latest durable event attributed to that agent. Use it for user-facing time labels instead of mutable `updated_at`, which can change during status or metadata maintenance without new CLI activity.
 
 > **Note on `status` vs Waiting** — agents are persisted with one of `idle | connected | working | completed | error`. The yellow **Waiting** badge surfaced in the dashboard is a UI overlay derived from `awaiting_input_since` being non-null on a non-terminal agent (typically `idle` after a `Stop`, or `connected` right after `SessionStart`). Filter `?status=idle` on `/api/agents` and inspect `awaiting_input_since` to enumerate currently-waiting main agents.
 
@@ -697,6 +742,37 @@ curl -X PUT http://localhost:4820/api/pricing \
 
 ---
 
+#### OpenAI GPT Pricing Rules
+
+```http
+GET    /api/pricing/gpt
+PUT    /api/pricing/gpt
+DELETE /api/pricing/gpt/:pattern
+```
+
+These endpoints manage the separate GPT rate card used only for Codex sessions. Each row has four USD-per-million-token rates for each of three groups: `short_*` for standard requests at or below 272K input tokens, `long_*` for larger standard requests, and `fast_*` for Fast mode. The four rates are input, cached input, cache writes, and output. Every present rate must be a finite non-negative number. A published but unavailable tier is stored as an all-zero group and surfaced in cost responses as unpriced, rather than silently guessing a price.
+
+```json
+{
+  "model_pattern": "gpt-5.6-terra%",
+  "display_name": "GPT-5.6 Terra",
+  "short_input_per_mtok": 2,
+  "short_cached_input_per_mtok": 0.2,
+  "short_cache_write_per_mtok": 2.5,
+  "short_output_per_mtok": 12,
+  "long_input_per_mtok": 4,
+  "long_cached_input_per_mtok": 0.4,
+  "long_cache_write_per_mtok": 5,
+  "long_output_per_mtok": 18,
+  "fast_input_per_mtok": 4,
+  "fast_cached_input_per_mtok": 0.4,
+  "fast_cache_write_per_mtok": 5,
+  "fast_output_per_mtok": 24
+}
+```
+
+---
+
 #### Delete Pricing Rule
 
 ```http
@@ -733,6 +809,26 @@ curl -X DELETE http://localhost:4820/api/pricing/gpt-5.1-codex
 | 404 | Pattern not found |
 | 403 | Cannot delete default rule |
 | 500 | Database error |
+
+---
+
+### Workflows
+
+#### Aggregate Workflow Intelligence
+
+```http
+GET /api/workflows?status=active&sources=local&providers=codex
+```
+
+Returns the 11 workflow datasets used by the Workflows page. `status`, `sources`, and `providers` compose to scope every aggregate. For Codex, tool flow and the per-session timeline come from persisted `response_item` calls, while compaction counts come from `context_compacted` rollout events; the API never invents Claude-style subagents or Workflow-tool runs for Codex.
+
+#### Session Drill-in
+
+```http
+GET /api/workflows/session/:id?sources=local&providers=codex
+```
+
+Returns the scoped session row, agent tree, recorded tool timeline, swim lanes, and chronological events. It returns `404` when the session is absent or falls outside the requested provider/source scope.
 
 ---
 
@@ -776,7 +872,7 @@ curl http://localhost:4820/api/sessions/sess_abc123/notifications
 
 ### Remote Data Sources
 
-The `/api/remote-sources/*` namespace configures **remote SSH machines** the dashboard pulls Claude Code history from, so one dashboard can consolidate sessions from several machines. **No secrets are stored** — SSH authentication defers entirely to the host's SSH stack (ssh-agent, `~/.ssh/config`, key files). Every imported session is tagged with the source's id in the `sessions.source` column (the built-in local history uses the id `local`), which powers the `sources` filter below.
+The `/api/remote-sources/*` namespace configures **remote SSH machines** the dashboard pulls Claude Code, Codex, or both histories from, so one dashboard can consolidate sessions from several machines. Each provider is mirrored and imported independently; a source succeeds when either provider is present. Codex additionally mirrors its lightweight `session_index.jsonl` so native renamed titles survive import. **No secrets are stored** — SSH authentication defers entirely to the host's SSH stack (ssh-agent, `~/.ssh/config`, key files). Every imported session is tagged with the source's id in the `sessions.source` column (the built-in local history uses the id `local`), which powers the `sources` filter below.
 
 **RemoteSource shape:**
 
@@ -788,8 +884,11 @@ The `/api/remote-sources/*` namespace configures **remote SSH machines** the das
   "ssh_port": 22,
   "identity_file": "~/.ssh/id_ed25519",
   "remote_home": "~/.claude",
+  "remote_codex_home": "~/.codex",
   "enabled": true,
   "status": "ok",
+  "claude_status": "ok",
+  "codex_status": "ok",
   "last_error": null,
   "last_sync_at": "2026-07-22T18:41:55.117Z",
   "last_sync_counts": {
@@ -798,14 +897,18 @@ The `/api/remote-sources/*` namespace configures **remote SSH machines** the das
     "backfilled": 0,
     "errors": 0,
     "sessions_seen": 50,
-    "sessions_tagged": 50
+    "sessions_tagged": 50,
+    "providers": {
+      "claude": { "status": "ok", "sessions_tagged": 32 },
+      "codex": { "status": "ok", "sessions_tagged": 18 }
+    }
   },
   "created_at": "2026-07-20T09:15:00.000Z",
   "updated_at": "2026-07-22T18:41:55.117Z"
 }
 ```
 
-`ssh_port`, `identity_file`, `remote_home`, `last_error`, `last_sync_at`, and `last_sync_counts` are nullable. `status` is one of `idle`, `syncing`, `ok`, `error`.
+`ssh_port`, `identity_file`, `remote_home`, `remote_codex_home`, `claude_status`, `codex_status`, `last_error`, `last_sync_at`, and `last_sync_counts` are nullable. `remote_home` and `remote_codex_home` are the optional **Remote Claude home** and **Remote Codex home** overrides; send `null` on `PATCH` to return either provider to its default remote home. `status` is one of `idle`, `syncing`, `ok`, `error`; provider statuses additionally use `unavailable` when that CLI's history directory is absent.
 
 #### List Remote Sources
 
@@ -830,6 +933,7 @@ POST /api/remote-sources
 | `ssh_port` | integer | No | SSH port (defers to SSH default / config when omitted) |
 | `identity_file` | string | No | Private-key path passed to ssh (`-i`) |
 | `remote_home` | string | No | Remote Claude home (defaults to remote `~/.claude`) |
+| `remote_codex_home` | string | No | Remote Codex home (defaults to remote `~/.codex`) |
 
 > **Cursor (informational):** Sessions imported from `~/.claude` include **Cursor** agent usage on that machine too — Cursor happens to use the same paths as Claude Code. CCAM does not tag which app created a session.
 
@@ -845,7 +949,7 @@ Returns `{ "source": RemoteSource }` with HTTP **201**.
 | `INVALID_HOST` | Missing/invalid `host` |
 | `INVALID_PORT` | `ssh_port` out of range |
 | `INVALID_IDENTITY_FILE` | Invalid `identity_file` value |
-| `INVALID_REMOTE_HOME` | Invalid `remote_home` value |
+| `INVALID_REMOTE_HOME` | Invalid `remote_home` or `remote_codex_home` value |
 
 #### Update Remote Source
 
@@ -875,7 +979,7 @@ Returns `{ "ok": true, "purged": <bool> }` (`purged` is `true` only when `?purge
 POST /api/remote-sources/:id/test
 ```
 
-Runs an SSH connectivity probe. Returns `{ "ok": <bool>, "message": <string>, "remoteProjects?": string[] }` — `remoteProjects` lists the discovered remote project directories on success. Does not import anything. **404** if the id is unknown.
+Runs an SSH connectivity probe. Returns `{ "ok", "message", "remoteProjects", "remoteCodexSessions", "providers" }`; `providers.claude` and `providers.codex` each report the checked path, message, and `ok` / `unavailable` / `error` status. A source passes when either provider is available. Does not import anything. **404** if the id is unknown.
 
 #### Sync Remote Source
 
@@ -883,7 +987,7 @@ Runs an SSH connectivity probe. Returns `{ "ok": <bool>, "message": <string>, "r
 POST /api/remote-sources/:id/sync
 ```
 
-Pulls Claude Code history from the remote over SSH now, through the same idempotent import pipeline used locally, tagging imported sessions with this source's id. Progress/completion is also broadcast over the WebSocket as [`remote_source.status`](#remote_sourcestatus) frames.
+Pulls Claude Code and Codex history from the remote over SSH now, through the same provider-specific idempotent import pipelines used locally. The Codex stage includes the native title index when available; each imported session is tagged with this source's id. A source succeeds when either provider is available and returns provider-specific counters. Progress/completion is also broadcast over the WebSocket as [`remote_source.status`](#remote_sourcestatus) frames.
 
 **Example Response:**
 
@@ -895,7 +999,11 @@ Pulls Claude Code history from the remote over SSH now, through the same idempot
   "backfilled": 0,
   "errors": 0,
   "sessions_seen": 50,
-  "sessions_tagged": 50
+  "sessions_tagged": 50,
+  "providers": {
+    "claude": { "status": "ok", "imported": 6, "sessions_tagged": 31 },
+    "codex": { "status": "ok", "imported": 3, "sessions_tagged": 19 }
+  }
 }
 ```
 
@@ -925,7 +1033,16 @@ curl "http://localhost:4820/api/sessions?sources=local,4d1f0e2a-7b9c-4c33-8a21-9
 
 ---
 
-### Claude Config Explorer
+### Settings
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` / `PUT` | `/api/settings/claude-home` | Read or update the Claude Code transcript/configuration root |
+| `GET` / `PUT` | `/api/settings/codex-home` | Read or update the Codex rollout/hooks root; saving re-arms the live watcher and schedules an immediate session scan |
+
+Both home updates accept `{ "path": "/absolute/path" }` (a leading `~/` is expanded). The resolved path must exist and be a directory; invalid input returns `400 INVALID_PATH`. Codex changes are persisted as `DASHBOARD_CODEX_HOME` and notify the background synchronizer after the response so a large history cannot delay the Settings action.
+
+### Agent Config
 
 The `/api/cc-config/*` namespace powers the Claude Config Explorer page. All read endpoints are pure file reads under `CLAUDE_HOME` and the project's `.claude/` dir; mutations are limited to low-risk text-file artifacts (skills, subagents, slash commands, output styles, memory) and always create a timestamped backup before writing. Plugins, MCP servers, hooks-in-settings, and live `settings.json` files stay read-only because they are written concurrently by the running Claude Code CLI.
 
@@ -959,23 +1076,79 @@ DELETE /api/cc-config/file     Body: { scope, type, name? }
 
 Backup paths look like `<root>/cc-config-backups/<type>/<base>.<ISO>.bak[.dir]` — outside the directories Claude Code scans, so a deleted skill cannot resurface as a backup-named one. The Backups modal in the UI auto-builds `mv` restore commands.
 
-### Run Claude
+### Codex Config Explorer
 
-The `/api/run/*` namespace spawns and supervises `claude` subprocesses from the dashboard. Every route enforces a same-origin / loopback-Origin guard; browser requests must come from `localhost`, `127.0.0.1`, `::1`, or `0.0.0.0`. CLI / curl requests with no `Origin` header pass through. When `DASHBOARD_TOKEN` is set, a valid token is also required here (like the rest of `/api/*` — see [Authentication](#authentication)).
+The Codex half of Agent Config discovers configuration defaults, account-visible model catalog entries, profiles, MCP servers, projects, skills, rules, hooks, installed plugins, and instruction files beneath the configured Codex home. The account model cache is read with a dedicated 4 MiB metadata cap rather than the 256 KiB preview cap, so large model instructions cannot make the Models tab falsely report zero models; base and profile model overrides are also included. Profiles are Codex-native top-level overlays named `<name>.config.toml` (letters, numbers, hyphens, and underscores only) and apply only when the CLI starts with `codex --profile <name>`; their cards expose that exact command with a one-click copy action. Normal inspection is redacted server-side for secret-like TOML or JSON values. Installed plugins come from `codex plugin list`, then use manifest metadata for names and descriptions—cache directories are never reported as plugins.
+
+```http
+GET /api/codex-config/overview
+GET /api/codex-config/file?path=<absolute-path-under-codex-home>
+GET /api/codex-config/edit-file?path=<allowlisted-configuration-path>
+PUT /api/codex-config/file
+DELETE /api/codex-config/file
+Content-Type: application/json
+
+{ "path": "<allowlisted-configuration-path>", "content": "..." }
+
+POST /api/codex-config/profiles
+Content-Type: application/json
+
+{ "name": "deep-review" }
+```
+
+The normal file endpoint also accepts this repository's `AGENTS.md`, rejects every other path, and caps returned bodies at 256 KiB. The editor endpoint is stricter: only `config.toml`, named profile overlays, `hooks.json`, user `*.rules`, user `skills/**/SKILL.md`, and the Codex or current-project `AGENTS.md` are editable. It returns unredacted local text so a user can edit without turning secret placeholders into real file contents. `POST /profiles` creates a commented, non-overwriting profile template, then the UI opens it in that editor. The UI also exposes a one-click **Copy path** control for every managed artifact. `DELETE /file` is narrower still: it can back up then remove a named profile, `hooks.json`, a user rule, a whole user skill directory, or a Codex/project instruction file. `config.toml` is edit-only and always rejected for deletion. The dashboard does **not** validate TOML, JSON, hook, rule, skill, or instruction syntax. Every overwrite and allowed deletion receives a timestamped backup; writes are capped at 256 KiB and atomic. `codex_config_changed` is emitted over WebSocket when relevant configuration, skill, rule, or plugin files change.
+
+### Import History
+
+The Import History endpoints accept a `provider` of `"claude"` (default) or
+`"codex"`. Claude Code reads project transcripts; Codex reads rollout JSONL
+through its live incremental ingestor, retaining token cursors, response-item
+tools, lifecycle events, and an optional native title from `session_index.jsonl`.
+External and browser-uploaded Codex files are copied into dashboard-owned
+storage before temporary extraction directories are removed.
+
+```http
+GET  /api/import/guide?provider=codex
+POST /api/import/rescan
+Content-Type: application/json
+
+{ "provider": "codex" }
+
+POST /api/import/scan-path
+Content-Type: application/json
+
+{ "path": "/absolute/path/to/codex-history", "provider": "codex" }
+
+POST /api/import/upload
+Content-Type: multipart/form-data
+
+files=@rollout-…jsonl&provider=codex
+```
+
+Every success response includes `{ ok, provider, source, imported, skipped,
+backfilled, errors }`; path scans also return the resolved `path` and scan
+counts. Provider-tagged `import.progress` WebSocket messages report live
+`start`, `scan`, `extract`, `parse`, `complete`, and `error` phases. Invalid
+providers return `400 INVALID_PROVIDER`.
+
+### Run Agent
+
+The `/api/run/*` namespace spawns and supervises Claude Code subprocesses **and native interactive Codex app-server threads** from the dashboard. Every route enforces a same-origin / loopback-Origin guard; browser requests must come from `localhost`, `127.0.0.1`, `::1`, or `0.0.0.0`. CLI / curl requests with no `Origin` header pass through. When `DASHBOARD_TOKEN` is set, a valid token is also required here (like the rest of `/api/*` — see [Authentication](#authentication)).
 
 ```http
 GET    /api/run                       List all handles + concurrency state
-GET    /api/run/binary                { found, path } for the `claude` binary
+GET    /api/run/binary?provider=…     { found, path, provider } for `claude` or `codex`
+GET    /api/run/models?provider=…     Dynamic provider model choices
 GET    /api/run/cwds                  Suggested cwds (dashboard, home, recent)
 GET    /api/run/files?cwd=&q=         Fuzzy file search inside cwd for the @-file autocomplete
                                        (skips node_modules, .git, dist, build, .next, .cache, coverage, vendor)
-POST   /api/run                       Spawn — Body: { prompt, mode, cwd?, model?, permissionMode?, resumeSessionId?, effort? }
-POST   /api/run/:id/message           Send follow-up turn — Body: { text }
+POST   /api/run                       Spawn — Body: { provider?, prompt, mode?, cwd?, model?, permissionMode?, sandbox?, resumeSessionId?, effort? }
+POST   /api/run/:id/message           Send follow-up turn — Body: { text, provider? }
 GET    /api/run/:id[?envelopes=1]     Handle state; ?envelopes=1 includes the in-memory envelope log
 DELETE /api/run/:id                   Stop (SIGTERM → SIGKILL after 5 s)
 ```
 
-`mode` is `"headless"` (single-shot, stdin closed after spawn, prompt in argv via `-p`) or `"conversation"` (multi-turn, stdin stays open, prompt and follow-ups piped as stream-json envelopes). `resumeSessionId` requires conversation mode and adds `--resume <id>` so the run continues an existing Claude Code session — the cwd is locked to the original session's cwd. **When `resumeSessionId` is set, `prompt` may be empty** — the spawner skips the initial stdin write and `claude --resume` idles on the resumed conversation until the user posts a follow-up via `POST /api/run/:id/message`. Headless mode and fresh conversations still require a non-empty prompt (`EBADPROMPT` otherwise). `effort` (`"low"` / `"medium"` / `"high"`) maps to `--effort` and tunes the model's thinking budget. The spawner always passes `--output-format stream-json --verbose --include-partial-messages` so output streams over the existing dashboard WebSocket as `run_stream` (parsed envelopes, including `stream_event` deltas for character-by-character rendering), `run_status` (status transitions), and `run_input_ack` (stdin write confirmed). Concurrency is effectively uncapped (default ceiling 10000, override with `RUN_MAX_CONCURRENT`) — the terminal TUI has no cap and neither does the dashboard; the ceiling exists only to prevent fork-bomb footguns from a buggy client.
+`provider` defaults to `"claude"`. Claude keeps `"headless"` (single-shot, prompt in argv via `-p`) and `"conversation"` modes, including `resumeSessionId` support. Codex always uses a real multi-turn app-server thread; its `permissionMode` is an approval policy (`"untrusted"`, `"on-request"`, or `"never"`) and its `sandbox` is `"read-only"`, `"workspace-write"`, or `"danger-full-access"`. Codex's model list is retrieved from the signed-in local app server, while Claude returns its supported aliases plus locally observed models because the Claude CLI has no model-list command. `run_stream` carries parsed Claude stream-json envelopes or normalized Codex app-server events; `run_status` and `run_input_ack` cover both providers. Concurrency is effectively uncapped (default ceiling 10000, override with `RUN_MAX_CONCURRENT`) — the ceiling exists only to prevent fork-bomb footguns from a buggy client.
 
 Spawned `claude` processes fire the dashboard's hooks like any other CLI session, so they show up in `/api/sessions`, the analytics, the Kanban board, and the Workflows page automatically — the Run page itself just owns the live streaming UX.
 
@@ -1178,7 +1351,7 @@ Broadcast whenever Claude Code configuration changes — either by dashboard mut
 
 #### remote_data.updated
 
-Broadcast once per successful remote sync (background poller, manual **Sync now**, or immediate pull after add/re-enable). Clients use this — and the per-session `session_created` / `session_updated` frames emitted in the same pass — to refetch sessions, costs, and analytics without polling.
+Broadcast once per successful remote sync (background poller, manual **Sync now**, or immediate pull after add/re-enable). `providers` preserves separate Claude/Codex results, so clients can show an unavailable provider without hiding successfully refreshed sibling data. Clients use this — and the per-session `session_created` / `session_updated` frames emitted in the same pass — to refetch sessions, costs, and analytics without polling.
 
 ```json
 {
@@ -1187,7 +1360,13 @@ Broadcast once per successful remote sync (background poller, manual **Sync now*
     "sourceId": "src_a1b2c3",
     "source": "src_a1b2c3",
     "label": "dev-box",
-    "counters": { "imported": 1, "skipped": 0, "sessions_tagged": 3 },
+    "counters": {
+      "imported": 1,
+      "skipped": 0,
+      "sessions_tagged": 3,
+      "providers": { "claude": { "status": "unavailable" }, "codex": { "status": "ok", "sessions_tagged": 3 } }
+    },
+    "providers": { "claude": "unavailable", "codex": "ok" },
     "last_sync_at": "2026-07-26T21:15:00.000Z"
   }
 }
@@ -1195,11 +1374,11 @@ Broadcast once per successful remote sync (background poller, manual **Sync now*
 
 #### remote_source.status
 
-Broadcast when a remote data source changes sync state (during/after `POST /api/remote-sources/:id/sync`) or is deleted. `status` is one of `idle`, `syncing`, `ok`, `error`, or `deleted`. `error` and `last_sync_at` are optional and present when relevant. See [Remote Data Sources](#remote-data-sources).
+Broadcast when a remote data source changes sync state (during/after `POST /api/remote-sources/:id/sync`) or is deleted. `status` is one of `idle`, `syncing`, `ok`, `error`, or `deleted`; when present, `providers` gives the independent Claude/Codex state (`idle`, `syncing`, `ok`, `unavailable`, or `error`). `error` and `last_sync_at` are optional and present when relevant. See [Remote Data Sources](#remote-data-sources).
 
 ```json
 { "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "syncing" } }
-{ "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "ok", "last_sync_at": "2026-07-22T18:41:55.117Z" } }
+{ "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "ok", "providers": { "claude": "unavailable", "codex": "ok" }, "last_sync_at": "2026-07-22T18:41:55.117Z" } }
 { "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "error", "error": "ssh exited with code 255" } }
 { "type": "remote_source.status", "data": { "id": "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11", "status": "deleted" } }
 ```
