@@ -1,6 +1,6 @@
 /**
  * @file Codex configuration workspace with a parity navigation model, live
- * overview metrics, account-visible models, copyable profile launch commands,
+ * overview metrics, resilient copyable profile commands and artifact paths,
  * redacted previews, and backup-backed edit/delete actions for Codex's
  * user-maintained profiles, hooks, rules, skills, and instruction files. The
  * base config stays explicitly edit-only.
@@ -1204,12 +1204,9 @@ function FileActions({
   const [copied, setCopied] = useState(false);
 
   const copyPath = async () => {
-    try {
-      await navigator.clipboard.writeText(path);
+    if (await copyText(path)) {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard access can be unavailable in non-secure browser contexts.
     }
   };
 
@@ -1285,12 +1282,9 @@ function ProfileLaunchCommand({ name, t }: { name: string; t: TFunction }) {
   const [copied, setCopied] = useState(false);
 
   const copyCommand = async () => {
-    try {
-      await navigator.clipboard.writeText(command);
+    if (await copyText(command)) {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard access can be unavailable in non-secure browser contexts.
     }
   };
 
@@ -1313,6 +1307,34 @@ function ProfileLaunchCommand({ name, t }: { name: string; t: TFunction }) {
       </button>
     </div>
   );
+}
+
+/** Copy from secure contexts with the native Clipboard API, while keeping the
+ * dashboard's local HTTP and remote-browser sessions usable through a safe,
+ * short-lived textarea fallback. */
+async function copyText(value: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+      return true;
+    }
+  } catch {
+    // Some embedded or non-secure browser contexts reject Clipboard API access.
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = value;
+  textarea.setAttribute("readonly", "");
+  textarea.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+  try {
+    document.body.appendChild(textarea);
+    textarea.select();
+    return document.execCommand("copy");
+  } catch {
+    return false;
+  } finally {
+    textarea.remove();
+  }
 }
 
 function CreateProfileModal({
