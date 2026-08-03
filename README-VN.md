@@ -356,6 +356,8 @@ Bản ghi vòng đời rollout Codex điều khiển các trạng thái thẻ tr
 
 Tiêu đề `/rename` của Codex được đọc từ chỉ mục phiên gốc và cập nhật thẻ phiên cùng agent theo thời gian thực. Chế độ xem lại hội thoại gồm các lượt của người dùng, lời gọi và đầu ra custom tool `exec`, với phân trang bằng cursor để tải các tin nhắn cũ hơn ở đầu transcript.
 
+Các thẻ Codex kết hợp tiêu đề `/rename` rõ ràng với lời nhắc người dùng được ghi gần nhất, vì vậy một tên ngắn gọn thân thiện không che khuất tác vụ đang hoạt động. Các lượt rollout mới làm mới ngữ cảnh này theo thời gian thực; rollout đã nhập sẽ dự phòng bằng sự kiện `user_message` đã lưu.
+
 Các lần gọi tool `response_item` của Codex được lập chỉ mục đúng một lần bằng cursor rollout riêng, vì vậy luồng tool Workflows, drill-in phiên, tổng model/token và số lần `context_compacted` phản ánh dữ liệu Codex đã ghi mà không chạy lại bộ đếm vòng đời hoặc token. Khi phạm vi dashboard chỉ là Codex, bảng Dynamic Workflows chỉ dành cho journal Claude Code sẽ bị ẩn thay vì hiển thị dữ liệu Codex trống.
 
 ### 3. Bắt đầu

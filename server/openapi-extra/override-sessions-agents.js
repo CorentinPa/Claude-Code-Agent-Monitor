@@ -50,6 +50,7 @@ const exampleSession = {
   started_at: "2026-06-25T14:02:11.004Z",
   ended_at: null,
   metadata: '{"source":"hook","git_branch":"feat/spend-budgets"}',
+  prompt_preview: "Refactor the pricing route and add the cost endpoint.",
   updated_at: "2026-06-25T14:31:50.119Z",
   agent_count: 4,
   last_activity: "2026-06-25T14:31:50.119Z",
@@ -67,6 +68,7 @@ const exampleCompletedSession = {
   started_at: "2026-06-24T09:12:00.000Z",
   ended_at: "2026-06-24T09:48:32.501Z",
   metadata: null,
+  prompt_preview: "Fix the flaky transcript pagination test.",
   updated_at: "2026-06-24T09:48:32.501Z",
   agent_count: 1,
   last_activity: "2026-06-24T09:48:32.501Z",
@@ -128,7 +130,7 @@ const paths = {
       tags: ["Sessions"],
       summary: "List sessions",
       description:
-        "Returns a paginated list of sessions, newest activity first, each enriched with a SQL `agent_count` (LEFT JOIN onto agents), a `last_activity` alias of `updated_at`, and a `cost` computed from the session's token usage against the current pricing rules. The `status`, `q`, and repeatable `cwd` filters compose (AND), while repeated `cwd` values include any matching project directory; `q` is a case-insensitive LIKE across `id`, `name`, and `cwd`. `total` reflects all rows matching the filters independent of `limit`/`offset` so paginators stay accurate, while `cost` is only calculated for the rows on the returned page (when `sort_by=price` it is computed across all matching rows so the price sort is correct). The endpoint is read-only with no side effects; `metadata` on each session is returned as a raw JSON-encoded string, not a parsed object.",
+        "Returns a paginated list of sessions, newest activity first, each enriched with a SQL `agent_count` (LEFT JOIN onto agents), a `last_activity` alias of `updated_at`, a card-ready optional `prompt_preview` (the main task, with a persisted Codex user-message fallback for older imports), and a `cost` computed from the session's token usage against the current pricing rules. The `status`, `q`, and repeatable `cwd` filters compose (AND), while repeated `cwd` values include any matching project directory; `q` is a case-insensitive LIKE across `id`, `name`, and `cwd`. `total` reflects all rows matching the filters independent of `limit`/`offset` so paginators stay accurate, while `cost` is only calculated for the rows on the returned page (when `sort_by=price` it is computed across all matching rows so the price sort is correct). The endpoint is read-only with no side effects; `metadata` on each session is returned as a raw JSON-encoded string, not a parsed object.",
       operationId: "listSessions",
       parameters: [
         { $ref: "#/components/parameters/SessionStatusQuery", example: "active" },

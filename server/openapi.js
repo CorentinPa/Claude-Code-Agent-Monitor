@@ -250,6 +250,12 @@ function createOpenApiSpec() {
               nullable: true,
               description: "JSON-encoded session metadata",
             },
+            prompt_preview: {
+              type: "string",
+              nullable: true,
+              description:
+                "Latest concise main-agent task for card context. Derived from the main agent task, with a Codex user-message fallback for historical rollouts.",
+            },
             updated_at: { type: "string", format: "date-time" },
             agent_count: { type: "integer", nullable: true },
             last_activity: { type: "string", format: "date-time", nullable: true },

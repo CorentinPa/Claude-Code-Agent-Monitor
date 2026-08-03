@@ -3,8 +3,8 @@
  * @description Compact session card for the Kanban board's "Sessions" view.
  * Mirrors AgentCard's information hierarchy (icon · title · meta line) but
  * surfaces session-relevant fields: model, agent count, cost, last activity,
- * and a meaningful Codex title or stable short session ID. Clicking the card
- * navigates to the session detail page.
+ * and a meaningful Codex title with its latest human-prompt context (or a
+ * stable short session ID). Clicking the card navigates to the detail page.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -101,6 +101,11 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
   const agentCount = session.agent_count ?? 0;
   const model = formatModelName(session.model);
   const lastActivity = session.last_activity || session.ended_at || session.started_at;
+  // Titles and tasks are intentionally separate. A Codex `/rename` becomes the
+  // title, while prompt_preview tells the reader what that session is doing.
+  // Avoid duplicating the automatic first-prompt title on an unnamed session.
+  const promptPreview = session.prompt_preview?.trim() || null;
+  const showPromptPreview = Boolean(promptPreview && promptPreview !== rawTitle);
 
   function handleClick() {
     if (onClick) onClick();
@@ -139,6 +144,15 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
           compact
         />
       </div>
+
+      {showPromptPreview && promptPreview && (
+        <p
+          className="text-xs text-gray-400 mb-2 line-clamp-2 leading-relaxed"
+          title={promptPreview}
+        >
+          {promptPreview}
+        </p>
+      )}
 
       {session.cwd && (
         <p className="text-xs text-gray-400 mb-3 truncate font-mono leading-relaxed">

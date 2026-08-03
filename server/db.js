@@ -1,5 +1,7 @@
 /**
- * @file Database setup and access layer using SQLite for storing sessions, agents, events, token usage, and model pricing. Handles schema creation, migrations, and provides prepared statements for all database operations.
+ * @file Database setup and access layer using SQLite for sessions, agents,
+ * events, token usage, and model pricing. Handles schema/migrations and
+ * exposes prepared statements, including card-ready task/prompt previews.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -1210,12 +1212,20 @@ db.prepare(
 const stmts = {
   getSession: db.prepare("SELECT * FROM sessions WHERE id = ?"),
   listSessions: db.prepare(
-    `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity
+    `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity,
+            COALESCE(
+              NULLIF((SELECT main.task FROM agents main WHERE main.session_id = s.id AND main.type = 'main' AND main.task IS NOT NULL AND trim(main.task) != '' ORDER BY main.updated_at DESC LIMIT 1), ''),
+              (SELECT e.summary FROM events e WHERE e.session_id = s.id AND e.event_type = 'codex_user_message' AND e.summary IS NOT NULL AND trim(e.summary) != '' ORDER BY e.created_at DESC, e.id DESC LIMIT 1)
+            ) AS prompt_preview
      FROM sessions s LEFT JOIN agents a ON a.session_id = s.id
      GROUP BY s.id ORDER BY s.updated_at DESC LIMIT ? OFFSET ?`
   ),
   listSessionsByStatus: db.prepare(
-    `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity
+    `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity,
+            COALESCE(
+              NULLIF((SELECT main.task FROM agents main WHERE main.session_id = s.id AND main.type = 'main' AND main.task IS NOT NULL AND trim(main.task) != '' ORDER BY main.updated_at DESC LIMIT 1), ''),
+              (SELECT e.summary FROM events e WHERE e.session_id = s.id AND e.event_type = 'codex_user_message' AND e.summary IS NOT NULL AND trim(e.summary) != '' ORDER BY e.created_at DESC, e.id DESC LIMIT 1)
+            ) AS prompt_preview
      FROM sessions s LEFT JOIN agents a ON a.session_id = s.id
      WHERE s.status = ? GROUP BY s.id ORDER BY s.updated_at DESC LIMIT ? OFFSET ?`
   ),

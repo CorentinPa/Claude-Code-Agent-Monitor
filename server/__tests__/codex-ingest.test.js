@@ -1,7 +1,7 @@
 /**
  * @file Verifies incremental Codex rollout ingestion: session metadata, token
- * deltas, context bands, duplicate safety, and transcript-driven card
- * lifecycle transitions.
+ * deltas, context bands, duplicate safety, transcript-derived prompt context,
+ * and transcript-driven card lifecycle transitions.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -110,6 +110,20 @@ describe("Codex rollout ingestor", () => {
     assert.equal(first.session.transcript_path, ROLLOUT);
     assert.equal(first.session.name, "Track my Codex session");
     assert.equal(stmts.getAgent.get(`codex:${SESSION_ID}`).status, "working");
+    assert.equal(
+      stmts.getAgent.get(`codex:${SESSION_ID}`).task,
+      "Track my Codex session",
+      "a real Codex user message becomes the main-card task context"
+    );
+    // Historical sessions from an earlier dashboard build do not have that
+    // promoted task yet. The list query still makes their persisted human turn
+    // available to cards immediately, before another live Codex prompt arrives.
+    db.prepare("UPDATE agents SET task = NULL WHERE id = ?").run(`codex:${SESSION_ID}`);
+    assert.equal(
+      stmts.listSessions.all(20, 0).find((row) => row.id === SESSION_ID).prompt_preview,
+      "Track my Codex session",
+      "the session-list fallback reads the existing Codex user-message event"
+    );
     assert.equal(findCodexTranscriptForSession(SESSION_ID), ROLLOUT);
     const toolEvents = stmts.listEventsBySession
       .all(SESSION_ID)
@@ -182,6 +196,11 @@ describe("Codex rollout ingestor", () => {
     assert.equal(session.awaiting_input_since, null);
     assert.equal(agent.status, "working");
     assert.equal(agent.awaiting_input_since, null);
+    assert.equal(
+      agent.task,
+      "Continue the session",
+      "the newest human prompt replaces stale card text"
+    );
 
     append(record("event_msg", { type: "turn_aborted" }));
     ingestCodexTranscript(ROLLOUT);

@@ -1,8 +1,9 @@
 /**
  * @file Incrementally ingests Codex rollout JSONL transcripts into dashboard
  * sessions, events, response-item tool calls, costs, native `/rename` titles,
- * and the active/waiting lifecycle shown on dashboard cards. Independent byte
- * cursors make watcher and hook notifications idempotent and real-time safe.
+ * latest human-prompt card context, and the active/waiting lifecycle shown on
+ * dashboard cards. Independent byte cursors make watcher/hook notifications
+ * idempotent and real-time safe.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -134,11 +135,21 @@ function truncate(value) {
   return text.length > MAX_EVENT_SUMMARY ? `${text.slice(0, MAX_EVENT_SUMMARY - 1)}…` : text;
 }
 
+/**
+ * A Codex user-message event is the provider's closest equivalent to Claude's
+ * main-agent task. Keep the exact human-authored text (within the same safe
+ * preview limit used by the activity feed) so cards can explain what a renamed
+ * Codex session is actually working on without inventing an AI-generated title.
+ */
+function userMessagePreview(payload) {
+  return truncate(extractText(payload?.message));
+}
+
 function eventDetails(record) {
   const payload = record.payload || {};
   switch (payload.type) {
     case "user_message":
-      return { summary: truncate(payload.message), tool: null };
+      return { summary: userMessagePreview(payload), tool: null };
     case "exec_command_end":
       return {
         summary: truncate(payload.command || payload.output || "Command completed"),
@@ -633,9 +644,18 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
       counters = applyTokenSnapshot(session.id, model, speed, record.payload.info || {}, counters);
     }
     if (record.type === "event_msg" && record.payload?.type === "user_message") {
-      const title = truncate(record.payload.message);
-      if (title && (!session.name || session.name === "Codex session")) {
-        stmts.updateSessionName.run(title, session.id, title);
+      const prompt = userMessagePreview(record.payload);
+      if (prompt) {
+        if (!session.name || session.name === "Codex session") {
+          stmts.updateSessionName.run(prompt, session.id, prompt);
+        }
+        // Claude main agents already receive their task through hooks. Codex
+        // rollouts expose the same information as user_message records, so
+        // promote the newest real prompt into the shared card field. This is
+        // deliberately independent of the native /rename title: a concise
+        // user title stays in the heading while the latest request explains
+        // the current work below it.
+        stmts.updateAgent.run(null, null, prompt, null, null, null, agentId);
       }
     }
     if (record.type === "event_msg" && LIFECYCLE_EVENT_TYPES.has(record.payload?.type)) {

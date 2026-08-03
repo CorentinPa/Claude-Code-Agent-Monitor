@@ -299,6 +299,8 @@ The client uses **local component state** and **React hooks** for state manageme
 
 **Settings data and homes:** the **Dashboard Data** cards select Claude Code, Codex, or both through the same global `dataScope` store used by Remote Data Sources. Every scoped sessions, agents, events, workflow, analytics, token, and cost request re-fetches as soon as the selection changes. The Session Data Locations section independently saves the Claude Code root and the dashboard-specific Codex root; saving the latter asks the server to re-arm its live rollout watcher and scan the new `sessions/` tree immediately. **Import History** uses matching Claude Code / Codex tabs: switching tabs reloads source-specific instructions and paths, then sends the selected provider with rescan, folder, and upload actions while provider-tagged WebSocket progress keeps concurrent work isolated.
 
+**Provider-aware card context:** Dashboard agent cards and Kanban session cards show a task preview beneath a meaningful title. Codex keeps its native `/rename` title in the heading and shows the latest real human prompt below it; new rollout turns update this through the ordinary real-time agent refresh, while historical imports fall back to their persisted `codex_user_message` event.
+
 ### State Strategy
 
 ```mermaid

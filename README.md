@@ -358,6 +358,8 @@ Codex rollout lifecycle records drive the same live card states as Claude Code: 
 
 Codex `/rename` titles are read from its native session index and update session and agent cards in real time. Its conversation replay includes human turns plus `exec` custom-tool calls and outputs, with cursor pagination that loads older messages at the top of the transcript.
 
+Codex cards pair an explicit `/rename` title with the latest recorded human prompt, so a short friendly name never hides the active task. New rollout turns refresh this context in real time; imported rollouts fall back to their persisted `user_message` event.
+
 Codex `response_item` tool invocations are indexed once through a dedicated rollout cursor, so its Workflows tool flow, session drill-in, model/token totals, and `context_compacted` counts reflect the recorded Codex data without replaying lifecycle or token counters. In a Codex-only dashboard scope, the Claude Code-only Dynamic Workflows journal panel is hidden rather than presented as empty Codex data.
 
 ### 3. Start

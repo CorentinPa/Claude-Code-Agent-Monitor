@@ -1,6 +1,7 @@
 /**
  * @file AgentCard.test.tsx
- * @description Unit tests for the AgentCard component, which displays information about an agent in the application. The tests cover rendering of agent details such as name, status, subagent type, task, and current tool, as well as interaction handling like click events. The tests use React Testing Library and Vitest for assertions and mocking.
+ * @description Unit tests for the AgentCard component, including Codex-native
+ * titles and transcript-derived prompt context alongside standard agent details.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -236,6 +237,28 @@ describe("AgentCard", () => {
       />
     );
     expect(screen.getByText("Codex · 019fbb99")).toBeInTheDocument();
+  });
+
+  it("uses the session prompt fallback to make an imported renamed Codex card informative", () => {
+    renderCard(
+      <AgentCard
+        agent={makeAgent({ name: "Codex", session_id: "019fbb99-bd87-7c80-afec-ee65e2ebbe1c" })}
+        session={
+          {
+            id: "019fbb99-bd87-7c80-afec-ee65e2ebbe1c",
+            name: "hehe",
+            provider: "codex",
+            status: "active",
+            prompt_preview: "Fix the real-time Codex discovery path and add coverage.",
+          } as never
+        }
+      />
+    );
+
+    expect(screen.getByText("Codex · hehe")).toBeInTheDocument();
+    expect(
+      screen.getByText("Fix the real-time Codex discovery path and add coverage.")
+    ).toBeInTheDocument();
   });
 
   it("should not render subagent_type when null", () => {

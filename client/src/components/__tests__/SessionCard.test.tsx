@@ -1,7 +1,8 @@
 /**
  * @file SessionCard.test.tsx
  * @description Regression tests for the compact Kanban session card, including
- * preserving a Codex session's meaningful title without a redundant ID badge.
+ * preserving a Codex session's meaningful title, human task context, and no
+ * redundant ID badge.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -39,5 +40,23 @@ describe("SessionCard", () => {
     expect(screen.getByText("Ship real-time session discovery")).toBeInTheDocument();
     expect(screen.getByText("019fbe8f-b60")).toBeInTheDocument();
     expect(screen.queryByText("Codex · 019fbe8f")).not.toBeInTheDocument();
+  });
+
+  it("shows a renamed Codex session's latest prompt below its native title", () => {
+    render(
+      <MemoryRouter>
+        <SessionCard
+          session={makeSession({
+            name: "hehe",
+            prompt_preview: "Add live card context for renamed Codex sessions.",
+          })}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("hehe")).toBeInTheDocument();
+    expect(
+      screen.getByText("Add live card context for renamed Codex sessions.")
+    ).toBeInTheDocument();
   });
 });

@@ -1,6 +1,9 @@
 /**
  * @file AgentCard.tsx
- * @description Defines the AgentCard component that displays a summary of an agent's information, including its name, status, task, current tool, timestamps, and a native Codex session title when available. The card is clickable and navigates to the agent's session details when clicked. It also visually distinguishes active agents with a border highlight.
+ * @description Defines the AgentCard component that displays a summary of an
+ * agent's name, status, task, current tool, timestamps, and native Codex
+ * title plus latest human-prompt context. The card is clickable and navigates
+ * to session details while visually distinguishing active agents.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -127,6 +130,14 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
     : isMain
       ? mainAgentDisplayName(agent.name, realSessionName)
       : agent.name;
+  // Codex titles may be an intentional `/rename` rather than a task. The
+  // ingestor promotes the latest real user prompt into agent.task, while the
+  // session preview gives old imported rollouts the same context immediately.
+  // Suppress a literal duplicate when Codex's auto-title is exactly that first
+  // prompt; subsequent prompts and renamed sessions remain fully informative.
+  const taskPreview =
+    agent.task?.trim() || (isCodexMain ? session?.prompt_preview?.trim() || null : null);
+  const showTaskPreview = Boolean(taskPreview && taskPreview !== sessionName);
   // A subagent's own model lives in its metadata (resolved from its transcript,
   // not the parent session's — see issue #185). Use it everywhere this card
   // shows a model so a Haiku QA agent under an Opus orchestrator reads as
@@ -224,8 +235,10 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
         />
       </div>
 
-      {agent.task && (
-        <p className="text-xs text-gray-400 mb-3 line-clamp-2 leading-relaxed">{agent.task}</p>
+      {showTaskPreview && taskPreview && (
+        <p className="text-xs text-gray-400 mb-3 line-clamp-2 leading-relaxed" title={taskPreview}>
+          {taskPreview}
+        </p>
       )}
 
       <div className="flex items-center gap-3 text-[11px] text-gray-500 min-w-0 overflow-hidden flex-wrap">

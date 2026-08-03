@@ -1,8 +1,8 @@
 /**
  * @file Express router for session endpoints, allowing creation, retrieval, and
  * updating of sessions with pagination plus status, search, and multi-directory
- * filtering. It computes session costs from token usage and pricing rules, and
- * broadcasts session changes to connected WebSocket clients in real time.
+ * filtering. It computes costs, adds card-ready main-task/Codex prompt context,
+ * and broadcasts session changes to connected WebSocket clients in real time.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -27,6 +27,34 @@ const {
 } = require("../lib/claude-home");
 
 const router = Router();
+
+// Compact cards need enough context to distinguish a meaningful task from a
+// renamed session title. Claude supplies it through the main agent's `task`;
+// older Codex imports may only have their persisted user-message event. The
+// correlated fallback keeps those existing sessions informative immediately,
+// while new Codex rollouts also promote this prompt into agents.task at ingest.
+const SESSION_PROMPT_PREVIEW_SQL = `COALESCE(
+  NULLIF((
+    SELECT a.task
+    FROM agents a
+    WHERE a.session_id = s.id
+      AND a.type = 'main'
+      AND a.task IS NOT NULL
+      AND trim(a.task) != ''
+    ORDER BY a.updated_at DESC
+    LIMIT 1
+  ), ''),
+  (
+    SELECT e.summary
+    FROM events e
+    WHERE e.session_id = s.id
+      AND e.event_type = 'codex_user_message'
+      AND e.summary IS NOT NULL
+      AND trim(e.summary) != ''
+    ORDER BY e.created_at DESC, e.id DESC
+    LIMIT 1
+  )
+)`;
 
 function sessionIsInScope(session, req) {
   const sources = parseSources(req);
@@ -184,7 +212,8 @@ router.get("/", (req, res) => {
   if (sortBy === "price") {
     const allRows = db
       .prepare(
-        `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity
+        `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity,
+                ${SESSION_PROMPT_PREVIEW_SQL} AS prompt_preview
          FROM sessions s LEFT JOIN agents a ON a.session_id = s.id
          ${whereSql}
          GROUP BY s.id`
@@ -247,7 +276,8 @@ router.get("/", (req, res) => {
 
     rows = db
       .prepare(
-        `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity
+        `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity,
+                ${SESSION_PROMPT_PREVIEW_SQL} AS prompt_preview
          FROM sessions s LEFT JOIN agents a ON a.session_id = s.id
          ${whereSql}
          GROUP BY s.id ORDER BY ${orderSql} LIMIT ? OFFSET ?`
@@ -316,7 +346,12 @@ router.get("/facets", (req, res) => {
 });
 
 router.get("/:id", (req, res) => {
-  const session = stmts.getSession.get(req.params.id);
+  const session = db
+    .prepare(
+      `SELECT s.*, ${SESSION_PROMPT_PREVIEW_SQL} AS prompt_preview
+       FROM sessions s WHERE s.id = ?`
+    )
+    .get(req.params.id);
   if (!session) {
     return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
   }

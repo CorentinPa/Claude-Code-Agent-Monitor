@@ -671,6 +671,11 @@ export interface Session {
   /** Opaque JSON string of extra session metadata; parse before use. May be
    *  null. Maps to `sessions.metadata`. `JSON.parse` before reading any keys. */
   metadata: string | null;
+  /** Latest concise main-agent task available for card rendering. List and
+   * detail responses derive it from the main agent's task; Codex safely falls
+   * back to its latest recorded human prompt so historical sessions are useful
+   * before their next live turn. Null when no user-authored task was captured. */
+  prompt_preview?: string | null;
   /** Count of `Agent` rows (main + subagents) belonging to this session.
    *  Only present on list/detail responses that join agent counts (a computed
    *  column, not a stored one). Undefined ≠ zero: it means "not joined here". */

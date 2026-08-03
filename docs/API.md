@@ -114,7 +114,10 @@ https://dashboard.example.com
 GET /api/sessions
 ```
 
-Returns all sessions, ordered by most recent activity.
+Returns all sessions, ordered by most recent activity. Each row may include an optional
+`prompt_preview` for compact cards: it is the main agent task when available, or for
+pre-existing Codex imports the latest persisted `codex_user_message` summary. The detail
+route returns the same optional field.
 
 **Query Parameters:**
 
@@ -176,6 +179,7 @@ classDiagram
         +string status "active|completed|error|abandoned"
         +string cwd
         +string model
+        +string prompt_preview "nullable card context"
         +string started_at
         +string ended_at
         +string updated_at

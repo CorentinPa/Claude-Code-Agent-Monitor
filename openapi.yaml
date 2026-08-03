@@ -232,6 +232,10 @@ components:
           type: string
           nullable: true
           description: JSON-encoded session metadata
+        prompt_preview:
+          type: string
+          nullable: true
+          description: Latest concise main-agent task for card context. Derived from the main agent task, with a Codex user-message fallback for historical rollouts.
         updated_at:
           type: string
           format: date-time
@@ -3177,6 +3181,34 @@ components:
           nullable: true
         created:
           type: boolean
+    CodexConfigDeleteResult:
+      type: object
+      required:
+        - ok
+        - file
+        - backupPath
+        - deletedDirectory
+      properties:
+        ok:
+          type: boolean
+          example: true
+        file:
+          type: string
+        backupPath:
+          type: string
+        deletedDirectory:
+          type: boolean
+          description: True when removing a skill also removed its containing skill directory.
+    CodexConfigCreateProfile:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          pattern: ^[A-Za-z0-9_-]+$
+          description: Profile name; creates CODEX_HOME/<name>.config.toml.
+          example: deep-review
     RunProvider:
       type: string
       enum:
@@ -4355,7 +4387,7 @@ paths:
       tags:
         - Sessions
       summary: List sessions
-      description: Returns a paginated list of sessions, newest activity first, each enriched with a SQL `agent_count` (LEFT JOIN onto agents), a `last_activity` alias of `updated_at`, and a `cost` computed from the session's token usage against the current pricing rules. The `status`, `q`, and repeatable `cwd` filters compose (AND), while repeated `cwd` values include any matching project directory; `q` is a case-insensitive LIKE across `id`, `name`, and `cwd`. `total` reflects all rows matching the filters independent of `limit`/`offset` so paginators stay accurate, while `cost` is only calculated for the rows on the returned page (when `sort_by=price` it is computed across all matching rows so the price sort is correct). The endpoint is read-only with no side effects; `metadata` on each session is returned as a raw JSON-encoded string, not a parsed object.
+      description: Returns a paginated list of sessions, newest activity first, each enriched with a SQL `agent_count` (LEFT JOIN onto agents), a `last_activity` alias of `updated_at`, a card-ready optional `prompt_preview` (the main task, with a persisted Codex user-message fallback for older imports), and a `cost` computed from the session's token usage against the current pricing rules. The `status`, `q`, and repeatable `cwd` filters compose (AND), while repeated `cwd` values include any matching project directory; `q` is a case-insensitive LIKE across `id`, `name`, and `cwd`. `total` reflects all rows matching the filters independent of `limit`/`offset` so paginators stay accurate, while `cost` is only calculated for the rows on the returned page (when `sort_by=price` it is computed across all matching rows so the price sort is correct). The endpoint is read-only with no side effects; `metadata` on each session is returned as a raw JSON-encoded string, not a parsed object.
       operationId: listSessions
       parameters:
         - $ref: '#/components/parameters/SessionStatusQuery'
@@ -4419,6 +4451,7 @@ paths:
                     started_at: '2026-06-25T14:02:11.004Z'
                     ended_at: null
                     metadata: '{"source":"hook","git_branch":"feat/spend-budgets"}'
+                    prompt_preview: Refactor the pricing route and add the cost endpoint.
                     updated_at: '2026-06-25T14:31:50.119Z'
                     agent_count: 4
                     last_activity: '2026-06-25T14:31:50.119Z'
@@ -4433,6 +4466,7 @@ paths:
                     started_at: '2026-06-24T09:12:00.000Z'
                     ended_at: '2026-06-24T09:48:32.501Z'
                     metadata: null
+                    prompt_preview: Fix the flaky transcript pagination test.
                     updated_at: '2026-06-24T09:48:32.501Z'
                     agent_count: 1
                     last_activity: '2026-06-24T09:48:32.501Z'
@@ -4479,6 +4513,7 @@ paths:
                   started_at: '2026-06-25T14:02:11.004Z'
                   ended_at: null
                   metadata: '{"source":"hook","git_branch":"feat/spend-budgets"}'
+                  prompt_preview: Refactor the pricing route and add the cost endpoint.
                   updated_at: '2026-06-25T14:31:50.119Z'
                   agent_count: 4
                   last_activity: '2026-06-25T14:31:50.119Z'
@@ -4502,6 +4537,7 @@ paths:
                   started_at: '2026-06-25T14:02:11.004Z'
                   ended_at: null
                   metadata: '{"source":"hook","git_branch":"feat/spend-budgets"}'
+                  prompt_preview: Refactor the pricing route and add the cost endpoint.
                   updated_at: '2026-06-25T14:02:11.004Z'
                   agent_count: 0
                   last_activity: '2026-06-25T14:02:11.004Z'
@@ -4546,6 +4582,7 @@ paths:
                   started_at: '2026-06-25T14:02:11.004Z'
                   ended_at: null
                   metadata: '{"source":"hook","git_branch":"feat/spend-budgets"}'
+                  prompt_preview: Refactor the pricing route and add the cost endpoint.
                   updated_at: '2026-06-25T14:31:50.119Z'
                   agent_count: 4
                   last_activity: '2026-06-25T14:31:50.119Z'
@@ -4641,6 +4678,7 @@ paths:
                   started_at: '2026-06-25T14:02:11.004Z'
                   ended_at: '2026-06-25T15:07:44.220Z'
                   metadata: '{"source":"hook","git_branch":"feat/spend-budgets","outcome":"merged"}'
+                  prompt_preview: Refactor the pricing route and add the cost endpoint.
                   updated_at: '2026-06-25T15:07:44.220Z'
                   agent_count: 4
                   last_activity: '2026-06-25T15:07:44.220Z'
@@ -8674,6 +8712,36 @@ paths:
           description: The path is not in the editable allowlist or content is invalid.
         '413':
           description: The file content exceeds the 256 KiB editor limit.
+    delete:
+      tags:
+        - CodexConfig
+      summary: Delete one user-maintained Codex artifact
+      description: Deletes only hooks.json, a valid named profile overlay, a user rule, a user skill directory, or a Codex/project AGENTS.md file. config.toml is explicitly edit-only. A timestamped backup is made before removal; skill deletion backs up and removes the whole skill directory.
+      operationId: codexConfigDeleteFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - path
+              properties:
+                path:
+                  type: string
+      responses:
+        '200':
+          description: The artifact was backed up and deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodexConfigDeleteResult'
+        '400':
+          description: The path is not allowed to be deleted, including config.toml.
+        '404':
+          description: The requested artifact does not exist.
+        '409':
+          description: The path is not a removable file.
   /api/codex-config/edit-file:
     get:
       tags:
@@ -8697,6 +8765,30 @@ paths:
                 $ref: '#/components/schemas/CodexConfigEditableFile'
         '400':
           description: The path is not editable from the dashboard.
+  /api/codex-config/profiles:
+    post:
+      tags:
+        - CodexConfig
+      summary: Create a named Codex profile overlay
+      description: Creates CODEX_HOME/<name>.config.toml with commented guidance. Codex applies this file over config.toml only when launched with --profile <name>; an existing profile is never overwritten.
+      operationId: codexConfigCreateProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CodexConfigCreateProfile'
+      responses:
+        '201':
+          description: The newly created editable profile file.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodexConfigEditableFile'
+        '400':
+          description: The profile name is invalid.
+        '409':
+          description: A profile with that name already exists.
   /api/run/models:
     get:
       tags:
