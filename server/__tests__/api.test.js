@@ -206,6 +206,7 @@ describe("OpenAPI / Swagger", () => {
     assert.equal(res.status, 200);
     assert.match(res.headers["content-type"], /text\/html/);
     assert.match(res.body, /swagger/i);
+    assert.match(res.body, /rel="icon" href="\/favicon\.svg"/i);
     assert.doesNotMatch(res.body, /What would you like to monitor\?/i);
   });
 
@@ -216,6 +217,7 @@ describe("OpenAPI / Swagger", () => {
     // References the spec and the locally-served bundle (no CDN).
     assert.match(res.body, /spec-url="\/api\/openapi\.json"/);
     assert.match(res.body, /src="\/api\/redoc\/redoc\.standalone\.js"/);
+    assert.match(res.body, /rel="icon" type="image\/svg\+xml" href="\/favicon\.svg"/i);
     assert.doesNotMatch(res.body, /What would you like to monitor\?/i);
   });
 
@@ -223,6 +225,13 @@ describe("OpenAPI / Swagger", () => {
     const res = await fetch("/api/redoc/redoc.standalone.js");
     assert.equal(res.status, 200);
     assert.match(res.headers["content-type"], /javascript/);
+  });
+
+  it("should serve the dashboard favicon for both API references", async () => {
+    const res = await fetch("/favicon.svg");
+    assert.equal(res.status, 200);
+    assert.match(res.headers["content-type"], /image\/svg\+xml/);
+    assert.match(res.body, /<svg\b/i);
   });
 });
 

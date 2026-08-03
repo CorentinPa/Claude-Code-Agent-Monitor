@@ -76,6 +76,11 @@ const APP_VERSION = (() => {
   }
 })();
 
+// API reference pages are served by Express even in development, while the
+// dashboard favicon normally comes from Vite's public directory. Keep one
+// explicit server route so Swagger and ReDoc always share the app identity.
+const DASHBOARD_FAVICON_PATH = path.join(__dirname, "..", "client", "public", "favicon.svg");
+
 function createApp() {
   const app = express();
   const openApiSpec = createOpenApiSpec();
@@ -106,6 +111,9 @@ function createApp() {
   app.use("/api/webhooks", webhooksRouter);
   app.use("/api/remote-sources", remoteSourcesRouter);
   app.use("/api/metrics", metricsRouter);
+  app.get("/favicon.svg", (_req, res) => {
+    res.type("image/svg+xml").sendFile(DASHBOARD_FAVICON_PATH);
+  });
   app.get("/api/openapi.json", (_req, res) => {
     res.json(openApiSpec);
   });
@@ -114,6 +122,7 @@ function createApp() {
     swaggerUi.serve,
     swaggerUi.setup(openApiSpec, {
       customSiteTitle: "Agent Dashboard API Docs",
+      customfavIcon: "/favicon.svg",
     })
   );
 
@@ -132,7 +141,8 @@ function createApp() {
         renderRedocHtml(
           "/api/openapi.json",
           "/api/redoc/redoc.standalone.js",
-          "Agent Dashboard API Reference"
+          "Agent Dashboard API Reference",
+          "/favicon.svg"
         )
       );
   });

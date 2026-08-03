@@ -63,7 +63,7 @@ The client is a single-page application (SPA) built with modern web technologies
 
 ### First-run hook setup
 
-`SplashScreen.tsx` asks which provider data to display (Claude Code, Codex, or both) before dashboard routes render. Continuing opens a provider-locked live-monitoring setup gate. It checks the existing hook state, warns before refreshing dashboard-owned entries, calls `POST /api/settings/install-hooks`, and shows command output in place. Users can continue only after that in-app install succeeds or by explicitly confirming that hooks were already installed. This prevents a first dashboard visit from silently looking inactive when live hook capture has not been configured. API paths are deliberately excluded, so Swagger, ReDoc, and the raw OpenAPI document remain unobstructed.
+`SplashScreen.tsx` asks which provider data to display (Claude Code, Codex, or both) before dashboard routes render. Continuing opens a provider-locked live-monitoring setup gate. It checks the existing hook state, warns before refreshing dashboard-owned entries, calls `POST /api/settings/install-hooks`, and shows command output in place. Users can continue only after that in-app install succeeds or by explicitly confirming that hooks were already installed. This prevents a first dashboard visit from silently looking inactive when live hook capture has not been configured. API paths are deliberately excluded, so Swagger, ReDoc, and the raw OpenAPI document remain unobstructed and retain the dashboard favicon.
 
 ### Run Agent and Agent Config
 
