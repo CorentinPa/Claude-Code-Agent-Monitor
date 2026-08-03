@@ -234,6 +234,12 @@ flowchart LR
 </p>
 
 <p align="center">
+  <img src="images/config-codex.png" alt="Codex 구성 탐색기 — 개요, 구성 원본 및 작업 공간 탭" width="100%">
+  <br>
+  <em>🧰 <strong>Codex 구성 탐색기</strong> — Codex 작업 공간은 <code>config.toml</code>, 계정 모델, 프로필, MCP 서버, 프로젝트, 스킬, 훅, 규칙, 플러그인 및 지침을 한데 모읍니다. 지원되는 사용자 관리 파일은 타임스탬프 백업과 함께 편집할 수 있으며, <code>config.toml</code>은 편집 전용입니다.</em>
+</p>
+
+<p align="center">
   <img src="images/config-skills.png" alt="Claude 설정 탐색기 — 스킬 탭" width="100%">
   <br>
   <em>🧩 <strong>Claude 설정 탐색기 · 스킬</strong> — 스킬 탭은 발견된 모든 스킬(사용자, 프로젝트, 플러그인)을 설명과 출처와 함께 나열하고, 전체 목록에서 검색할 수 있으며, 안전한 타임스탬프 백업과 함께 스킬 파일을 열어 편집할 수 있습니다</em>

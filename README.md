@@ -234,6 +234,12 @@ Comes with a sleek dark theme, responsive design, and intuitive navigation to ex
 </p>
 
 <p align="center">
+  <img src="images/config-codex.png" alt="Codex Config Explorer — overview, configuration source, and workspace tabs" width="100%">
+  <br>
+  <em>🧰 <strong>Codex Config Explorer</strong> — the Codex workspace brings together <code>config.toml</code>, account models, profiles, MCP servers, projects, skills, hooks, rules, plugins, and instructions. Edit supported user-managed files with timestamped backups; <code>config.toml</code> is edit-only.</em>
+</p>
+
+<p align="center">
   <img src="images/config-skills.png" alt="Claude Config Explorer — Skills tab" width="100%">
   <br>
   <em>🧩 <strong>Claude Config Explorer · Skills</strong> — the Skills tab lists every discovered skill (user, project, and plugin) with its description and source, is searchable across the whole set, and opens any skill file for a safe, timestamp-backed edit</em>

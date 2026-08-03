@@ -234,6 +234,12 @@ flowchart LR
 </p>
 
 <p align="center">
+  <img src="images/config-codex.png" alt="Trình khám phá cấu hình Codex — tổng quan, nguồn cấu hình và các tab không gian làm việc" width="100%">
+  <br>
+  <em>🧰 <strong>Trình khám phá cấu hình Codex</strong> — không gian làm việc Codex tập hợp <code>config.toml</code>, model tài khoản, profile, máy chủ MCP, dự án, skill, hook, rule, plugin và tệp hướng dẫn. Chỉnh sửa các tệp do người dùng quản lý được hỗ trợ với bản sao lưu có dấu thời gian; <code>config.toml</code> chỉ có thể chỉnh sửa.</em>
+</p>
+
+<p align="center">
   <img src="images/config-skills.png" alt="Trình khám phá cấu hình Claude — tab Skills" width="100%">
   <br>
   <em>🧩 <strong>Trình khám phá cấu hình Claude · Skills</strong> — tab Skills liệt kê mọi skill được phát hiện (user, project và plugin) kèm mô tả và nguồn, có thể tìm kiếm trên toàn bộ danh sách, và mở bất kỳ tệp skill nào để chỉnh sửa an toàn với sao lưu dấu thời gian</em>

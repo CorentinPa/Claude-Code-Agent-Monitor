@@ -1583,6 +1583,10 @@
               <img src="../images/config.png" alt="Agent Config — Claude Code and Codex explorers" width="100%" loading="lazy" decoding="async" />
               <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Agent Config</strong> — switch between the editable Claude Code explorer and a live Codex workspace for defaults, models, profiles, MCP, projects, skills, rules, hooks, plugins, and instructions. Previews redact secret-like values; user-maintained files receive backup-backed edits.</span></div>
             </div>
+            <div class="screenshot-card" id="ss-config-codex">
+              <img src="../images/config-codex.png" alt="Codex Config Explorer — overview, configuration source, and workspace tabs" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Codex Config Explorer</strong> — the Codex workspace brings together <code>config.toml</code>, account models, profiles, MCP servers, projects, skills, hooks, rules, plugins, and instructions. Edit supported user-managed files with timestamped backups; <code>config.toml</code> is edit-only.</span></div>
+            </div>
             <div class="screenshot-card" id="ss-config-skills">
               <img src="../images/config-skills.png" alt="Claude Config Explorer — Skills tab" width="100%" loading="lazy" decoding="async" />
               <div class="screenshot-caption"><span class="caption-icon">🧩</span> <span><strong>Claude Config Explorer · Skills</strong> — the Skills tab lists every discovered skill (user, project, and plugin) with its description and source, is searchable across the whole set, and opens any skill file for a safe, timestamp-backed edit</span></div>
@@ -5381,6 +5385,10 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
               <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Claude Config Explorer</strong> — the <code>/cc-config</code> page: 12 tabs (skills, subagents, slash commands, output styles, plugins, marketplaces, MCP servers, hooks, keybindings, settings, memory), a scope filter (user / project / all), search, and safe edit affordances on the low-risk surfaces</span></div>
             </div>
             <div class="screenshot-card">
+              <img src="../images/config-codex.png" alt="Codex Config Explorer — overview, configuration source, and workspace tabs" width="3024" height="1652" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">🧰</span> <span><strong>Codex Config Explorer</strong> — the Codex workspace brings together <code>config.toml</code>, account models, profiles, MCP servers, projects, skills, hooks, rules, plugins, and instructions. Edit supported user-managed files with timestamped backups; <code>config.toml</code> is edit-only.</span></div>
+            </div>
+            <div class="screenshot-card">
               <img src="../images/config-skills.png" alt="Claude Config Explorer — Skills tab with searchable skill list and edit actions" width="3024" height="1722" loading="lazy" decoding="async" />
               <div class="screenshot-caption"><span class="caption-icon">🧩</span> <span><strong>Claude Config Explorer · Skills</strong> — the Skills tab lists every discovered skill (user, project, and plugin) with description and source, is searchable, and opens any <code>SKILL.md</code> for a timestamp-backed edit via the shared editor modal</span></div>
             </div>
@@ -6972,7 +6980,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=56" defer></script>
+    <script src="i18n-content.js?v=57" defer></script>
     <script src="script.js?v=42" defer></script>
     <script>
       (function () {

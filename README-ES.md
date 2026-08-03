@@ -234,6 +234,12 @@ Vino con un elegante tema oscuro, diseño responsive y navegación intuitiva par
 </p>
 
 <p align="center">
+<img src="images/config-codex.png" alt="Explorador de configuración de Codex — resumen, origen de configuración y pestañas del espacio de trabajo" width="100%">
+<br>
+<em>🧰 <strong>Explorador de configuración de Codex</strong> — el espacio de trabajo de Codex reúne <code>config.toml</code>, modelos de la cuenta, perfiles, servidores MCP, proyectos, habilidades, hooks, reglas, complementos e instrucciones. Edita los archivos compatibles gestionados por el usuario con copias de seguridad con marca de tiempo; <code>config.toml</code> es solo editable.</em>
+</p>
+
+<p align="center">
 <img src="images/config-skills.png" alt="Explorador de Configuración de Claude — Pestaña Habilidades" width="100%">
 <br>
 <em>🧩 <strong>Explorador de Configuración de Claude · Habilidades</strong> — la pestaña Habilidades enumera todas las habilidades descubiertas (usuario, proyecto y complemento) con su descripción y fuente, se puede buscar en todo el conjunto y abre cualquier archivo de habilidad para una edición segura respaldada por una hora y fecha</em>

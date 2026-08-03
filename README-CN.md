@@ -236,6 +236,12 @@ flowchart LR
 </p>
 
 <p align="center">
+  <img src="images/config-codex.png" alt="Codex 配置浏览器 — 概览、配置来源和工作区标签" width="100%">
+  <br>
+  <em>🧰 <strong>Codex 配置浏览器</strong> — Codex 工作区集中提供 <code>config.toml</code>、账户模型、配置文件、MCP 服务器、项目、技能、Hook、规则、插件和指令。支持编辑用户维护的文件，并自动创建带时间戳的备份；<code>config.toml</code> 始终仅可编辑。</em>
+</p>
+
+<p align="center">
   <img src="images/config-skills.png" alt="Claude 配置浏览器 — 技能标签页" width="100%">
   <br>
   <em>🧩 <strong>Claude 配置浏览器 · 技能</strong> — 技能标签页列出所有已发现的技能（用户、项目与插件），显示其描述与来源，可在整个集合中搜索，并可打开任意技能文件进行带时间戳备份的安全编辑</em>
