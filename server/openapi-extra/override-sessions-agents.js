@@ -24,6 +24,7 @@
  *   - GET   /api/sessions/{id}/stats            (getSessionStats)
  *   - GET   /api/sessions/{id}/transcripts      (listSessionTranscripts)
  *   - GET   /api/sessions/{id}/transcript       (getSessionTranscript)
+ *   - GET   /api/sessions/{id}/transcript-image (getTranscriptImage)
  *   - GET   /api/agents                         (listAgents)
  *   - POST  /api/agents                         (createAgent)
  *   - GET   /api/agents/{id}                     (getAgent)
@@ -130,7 +131,7 @@ const paths = {
       tags: ["Sessions"],
       summary: "List sessions",
       description:
-        "Returns a paginated list of sessions, newest activity first, each enriched with a SQL `agent_count` (LEFT JOIN onto agents), a `last_activity` alias of `updated_at`, a card-ready optional `prompt_preview` (the main task, with a persisted Codex user-message fallback for older imports), and a `cost` computed from the session's token usage against the current pricing rules. The `status`, `q`, and repeatable `cwd` filters compose (AND), while repeated `cwd` values include any matching project directory; `q` is a case-insensitive LIKE across `id`, `name`, and `cwd`. `total` reflects all rows matching the filters independent of `limit`/`offset` so paginators stay accurate, while `cost` is only calculated for the rows on the returned page (when `sort_by=price` it is computed across all matching rows so the price sort is correct). The endpoint is read-only with no side effects; `metadata` on each session is returned as a raw JSON-encoded string, not a parsed object.",
+        "Returns a paginated list of sessions, newest activity first, each enriched with a SQL `agent_count` (LEFT JOIN onto agents), a `last_activity` alias of `updated_at`, a card-ready optional `prompt_preview` (up to two newest distinct real human prompts, oldest to newest and newline-separated; Claude persists this bounded summary from local JSONL, Codex derives it from durable user-message events, and historical rows fall back to the main task), and a `cost` computed from the session's token usage against the current pricing rules. The `status`, `q`, and repeatable `cwd` filters compose (AND), while repeated `cwd` values include any matching project directory; `q` is a case-insensitive LIKE across `id`, `name`, and `cwd`. `total` reflects all rows matching the filters independent of `limit`/`offset` so paginators stay accurate, while `cost` is only calculated for the rows on the returned page (when `sort_by=price` it is computed across all matching rows so the price sort is correct). The endpoint is read-only with no side effects; `metadata` on each session is returned as a raw JSON-encoded string, not a parsed object.",
       operationId: "listSessions",
       parameters: [
         { $ref: "#/components/parameters/SessionStatusQuery", example: "active" },
@@ -591,6 +592,59 @@ const paths = {
               example: { error: { code: "NOT_FOUND", message: "Session not found" } },
             },
           },
+        },
+      },
+    },
+  },
+  "/api/sessions/{id}/transcript-image": {
+    get: {
+      tags: ["Sessions"],
+      summary: "Read one persisted transcript image",
+      description:
+        "Streams a bounded PNG, JPEG, GIF, or WebP image only when it is explicitly referenced by the selected Claude transcript line. Transcript JSON exposes an opaque same-origin URL instead of the local file path. Codex inline images are already delivered as validated data URLs in the transcript response, so this route is primarily for persisted Claude CLI image wrappers. Read-only, no side effects.",
+      operationId: "getTranscriptImage",
+      parameters: [
+        { $ref: "#/components/parameters/SessionIdPath" },
+        {
+          name: "line",
+          in: "query",
+          required: true,
+          schema: { type: "integer", minimum: 1 },
+          description: "Raw JSONL line number that contains the image wrapper.",
+        },
+        {
+          name: "index",
+          in: "query",
+          required: true,
+          schema: { type: "integer", minimum: 0 },
+          description: "Zero-based image wrapper index within that transcript line.",
+        },
+        {
+          name: "agent_id",
+          in: "query",
+          schema: { type: "string" },
+          description: "Optional selected subagent or compaction transcript id.",
+        },
+        {
+          name: "run_id",
+          in: "query",
+          schema: { type: "string" },
+          description: "Optional workflow run id for a nested subagent transcript.",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Image bytes",
+          content: {
+            "image/png": { schema: { type: "string", format: "binary" } },
+            "image/jpeg": { schema: { type: "string", format: "binary" } },
+            "image/gif": { schema: { type: "string", format: "binary" } },
+            "image/webp": { schema: { type: "string", format: "binary" } },
+          },
+        },
+        400: { description: "The line or image index is invalid." },
+        404: {
+          description: "Session, transcript, persisted image, or allowed image type was not found.",
         },
       },
     },

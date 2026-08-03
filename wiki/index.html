@@ -1161,10 +1161,14 @@
                     when you reach the top of the transcript.
                   </p>
                   <p>
-                    Codex cards pair an explicit <code>/rename</code> title with the latest recorded
-                    human prompt, so a short friendly name never hides the active task. New rollout
-                    turns refresh this context in real time; imported rollouts fall back to their
-                    persisted <code>user_message</code> event.
+                    Claude Code and Codex cards show a compact two-row history of their latest distinct
+                    human prompts beneath the provider-native title, so a short friendly name or terse
+                    follow-up never hides the active task. Claude refreshes this context from its local
+                    transcript cache during live hooks, imports, and watchdog sweeps; Codex refreshes it
+                    from rollout records and falls back to persisted <code>user_message</code> events for
+                    older imports. The transcript renders persisted PNG/JPEG/GIF/WebP attachments for
+                    Claude Code and Codex when available, while duplicate Codex response/event copies
+                    collapse into one human turn.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -6968,7 +6972,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=54" defer></script>
+    <script src="i18n-content.js?v=56" defer></script>
     <script src="script.js?v=42" defer></script>
     <script>
       (function () {

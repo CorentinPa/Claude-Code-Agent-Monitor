@@ -2401,7 +2401,7 @@ export interface TranscriptContent {
   /** Block kind; selects which of the optional fields below are populated.
    *  "thinking" is the model's extended-reasoning trace; "text" is normal prose;
    *  "tool_use"/"tool_result" are the two halves of a tool round-trip. */
-  type: "text" | "tool_use" | "tool_result" | "thinking";
+  type: "text" | "tool_use" | "tool_result" | "thinking" | "image";
   /** Present for "text"/"thinking" blocks: the rendered prose (or reasoning). */
   text?: string;
   /** Present for "tool_use" blocks: the invoked tool's name. Example: `"Bash"`. */
@@ -2416,6 +2416,12 @@ export interface TranscriptContent {
   output?: string;
   /** Present for "tool_result" blocks: whether the tool call errored. */
   is_error?: boolean;
+  /** A same-origin transcript-image endpoint or a validated inline image data
+   * URL. Present only for persisted user attachments that can be rendered
+   * without exposing a local file path. */
+  src?: string;
+  /** Accessible description for an attached transcript image. */
+  alt?: string;
 }
 
 /** Who actually sent a transcript message. A JSONL `type:"user"` line can be the

@@ -201,6 +201,11 @@ describe("Codex rollout ingestor", () => {
       "Continue the session",
       "the newest human prompt replaces stale card text"
     );
+    assert.equal(
+      stmts.listSessions.all(20, 0).find((row) => row.id === SESSION_ID).prompt_preview,
+      "Track my Codex session\nContinue the session",
+      "Codex cards keep the last two human turns so terse follow-ups retain context"
+    );
 
     append(record("event_msg", { type: "turn_aborted" }));
     ingestCodexTranscript(ROLLOUT);

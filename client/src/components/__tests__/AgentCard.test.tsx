@@ -249,7 +249,8 @@ describe("AgentCard", () => {
             name: "hehe",
             provider: "codex",
             status: "active",
-            prompt_preview: "Fix the real-time Codex discovery path and add coverage.",
+            prompt_preview:
+              "Fix the real-time Codex discovery path and add coverage.\nThen include the missing edge case.",
           } as never
         }
       />
@@ -259,6 +260,29 @@ describe("AgentCard", () => {
     expect(
       screen.getByText("Fix the real-time Codex discovery path and add coverage.")
     ).toBeInTheDocument();
+    expect(screen.getByText("Then include the missing edge case.")).toBeInTheDocument();
+  });
+
+  it("uses the same compact two-turn session context for a Claude main agent", () => {
+    renderCard(
+      <AgentCard
+        agent={makeAgent({ name: "Main Agent - live sync", task: "original task" })}
+        session={
+          {
+            id: "claude-two-turn-context",
+            name: "Live sync investigation",
+            provider: "claude",
+            status: "active",
+            prompt_preview:
+              "Investigate the live sync delay.\nThen cover the remote source retry path.",
+          } as never
+        }
+      />
+    );
+
+    expect(screen.getByText("Investigate the live sync delay.")).toBeInTheDocument();
+    expect(screen.getByText("Then cover the remote source retry path.")).toBeInTheDocument();
+    expect(screen.queryByText("original task")).not.toBeInTheDocument();
   });
 
   it("should not render subagent_type when null", () => {

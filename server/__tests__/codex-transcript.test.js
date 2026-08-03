@@ -1,6 +1,6 @@
 /**
- * @file Verifies Codex rollout transcript parsing for human turns, custom exec
- * tool calls, paired outputs, and backward cursor pagination.
+ * @file Verifies Codex rollout transcript parsing for human turns, persisted
+ * images, custom exec tool calls, paired outputs, and backward pagination.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -128,5 +128,43 @@ describe("Codex transcript reader", () => {
       ["tool_result", "tool_use"]
     );
     assert.equal(older.messages[1].content[0].name, "wait");
+  });
+
+  it("renders a persisted image once and drops its duplicate durable user event", async () => {
+    const image =
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADElEQVR42mNk+M/wHwAF/gL+4JQhWQAAAABJRU5ErkJggg==";
+    const caption = "The contrast on this card is too low.";
+    const records = [
+      record("response_item", {
+        type: "message",
+        role: "user",
+        content: [
+          { type: "input_text", text: '<image name="card" path="/tmp/card.png">' },
+          { type: "input_image", image_url: image, detail: "high" },
+          { type: "input_text", text: "</image>" },
+          { type: "input_text", text: caption },
+        ],
+      }),
+      record("event_msg", { type: "user_message", message: caption }),
+    ];
+    fs.writeFileSync(ROLLOUT, records.map((entry) => JSON.stringify(entry)).join("\n") + "\n");
+
+    const result = await readCodexTranscript(ROLLOUT, {
+      limit: 20,
+      afterLine: null,
+      beforeLine: null,
+      offset: 0,
+    });
+    const humanTurns = result.messages.filter((message) => message.sender === "user");
+    assert.equal(humanTurns.length, 1, "the response/event pair is one real human turn");
+    assert.equal(humanTurns[0].content.find((content) => content.type === "text").text, caption);
+    const imageBlock = humanTurns[0].content.find((content) => content.type === "image");
+    assert.ok(imageBlock?.src?.startsWith("data:image/png;base64,"));
+    assert.ok(
+      !humanTurns[0].content.some(
+        (content) => content.type === "text" && /<image|\/tmp\/card/.test(content.text || "")
+      ),
+      "the transcript never exposes the CLI's raw image path wrapper"
+    );
   });
 });

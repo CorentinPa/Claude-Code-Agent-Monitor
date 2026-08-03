@@ -3,8 +3,9 @@
  * @description Compact session card for the Kanban board's "Sessions" view.
  * Mirrors AgentCard's information hierarchy (icon · title · meta line) but
  * surfaces session-relevant fields: model, agent count, cost, last activity,
- * and a meaningful Codex title with its latest human-prompt context (or a
- * stable short session ID). Clicking the card navigates to the detail page.
+ * and a meaningful provider-native title with its latest two human prompts
+ * (or a stable short session ID). Clicking the card navigates to the detail
+ * page.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -82,6 +83,22 @@ function formatCost(cost: number): string {
   return `$${cost.toFixed(4)}`;
 }
 
+/** Two compact, distinct request rows give terse Claude and Codex follow-ups
+ * surrounding context without allowing a session card to grow unbounded. */
+function promptPreviewLines(value: string | null | undefined): string[] {
+  const seen = new Set<string>();
+  return String(value || "")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter((line) => {
+      const key = line.toLocaleLowerCase();
+      if (!line || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(-2);
+}
+
 export function SessionCard({ session, onClick }: SessionCardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation("kanban");
@@ -101,11 +118,10 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
   const agentCount = session.agent_count ?? 0;
   const model = formatModelName(session.model);
   const lastActivity = session.last_activity || session.ended_at || session.started_at;
-  // Titles and tasks are intentionally separate. A Codex `/rename` becomes the
-  // title, while prompt_preview tells the reader what that session is doing.
-  // Avoid duplicating the automatic first-prompt title on an unnamed session.
-  const promptPreview = session.prompt_preview?.trim() || null;
-  const showPromptPreview = Boolean(promptPreview && promptPreview !== rawTitle);
+  // Titles and requests are intentionally separate. Claude and Codex keep
+  // their own native title while the latest two durable human turns explain
+  // what the session is doing.
+  const promptPreviewLinesForCard = promptPreviewLines(session.prompt_preview);
 
   function handleClick() {
     if (onClick) onClick();
@@ -145,13 +161,18 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
         />
       </div>
 
-      {showPromptPreview && promptPreview && (
-        <p
-          className="text-xs text-gray-400 mb-2 line-clamp-2 leading-relaxed"
-          title={promptPreview}
-        >
-          {promptPreview}
-        </p>
+      {promptPreviewLinesForCard.length > 0 && (
+        <div className="mb-2 space-y-1 border-l-2 border-accent/25 pl-2.5">
+          {promptPreviewLinesForCard.map((prompt, index) => (
+            <p
+              key={`${index}-${prompt}`}
+              className="text-xs text-gray-400 leading-relaxed line-clamp-1"
+              title={prompt}
+            >
+              {prompt}
+            </p>
+          ))}
+        </div>
       )}
 
       {session.cwd && (

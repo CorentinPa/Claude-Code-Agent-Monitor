@@ -184,6 +184,7 @@ CREATE TABLE sessions (
     started_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
     ended_at TEXT,
     metadata TEXT,
+    card_prompt_preview TEXT,                                        -- newest two distinct human prompts
     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
     awaiting_input_since TEXT,                                        -- NULL unless Waiting
     awaiting_reason TEXT,                                             -- notification|stop|session_start|interrupted, or NULL
@@ -205,6 +206,7 @@ CREATE TABLE sessions (
 | `started_at` | TEXT | NO | ISO 8601 timestamp |
 | `ended_at` | TEXT | YES | ISO 8601 timestamp on terminal transition |
 | `metadata` | TEXT | YES | JSON blob for extras (turn duration totals, thinking blocks, …) |
+| `card_prompt_preview` | TEXT | YES | Newline-separated, bounded card-only context containing the two newest distinct human prompts. Claude Code derives it from the shared transcript cache during hooks, imports, and watchdog sweeps; Codex reads equivalent durable `codex_user_message` events when list/detail responses are built. It is not a transcript copy: full conversation content remains in JSONL, and historical rows fall back to their main-agent task. |
 | `updated_at` | TEXT | NO | Bumped on every event for staleness detection |
 | `awaiting_input_since` | TEXT | YES | ISO 8601 stamp set when the session is **Waiting** (Claude Stop, SessionStart with source `startup`/`resume`/`clear`, permission Notification, watchdog user-interrupt/Esc recovery, or Codex `task_complete` / `turn_aborted`). NULL otherwise. A Claude SessionStart with source `compact` (auto-compaction fires mid-turn while Claude is working) leaves this column untouched, so a genuinely-active session is not mislabeled Waiting |
 | `awaiting_reason` | TEXT | YES | Why the row is waiting: `notification`, `stop`, `session_start`, or `interrupted`. Set/cleared in lock-step with `awaiting_input_since` (Claude SessionStart→`session_start`, Claude Stop and Codex `task_complete`→`stop`, permission/input Notification→`notification`, watchdog/Esc recovery and Codex `turn_aborted`→`interrupted`). NULL otherwise. Exception: a Claude `compact`-source SessionStart preserves the existing value (neither stamps `session_start` nor clears it) |

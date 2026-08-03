@@ -33,6 +33,7 @@ const EXPECTED_API_PATHS = [
   "/api/sessions/{id}/stats",
   "/api/sessions/{id}/transcripts",
   "/api/sessions/{id}/transcript",
+  "/api/sessions/{id}/transcript-image",
   "/api/agents",
   "/api/agents/{id}",
   "/api/events",

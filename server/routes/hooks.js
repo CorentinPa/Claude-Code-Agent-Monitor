@@ -1,7 +1,8 @@
 /**
  * @file Express router for Claude Code hook events plus a fail-safe Codex
- * rollout hook endpoint. It updates sessions and agents, extracts usage, and
- * broadcasts real-time changes without blocking either CLI.
+ * rollout hook endpoint. It updates sessions and agents, extracts usage and
+ * compact human-turn card context, and broadcasts real-time changes without
+ * blocking either CLI.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -308,6 +309,24 @@ function applyFirstUserDescriptor(sessionId, result) {
   );
   const refreshedAgent = stmts.getAgent.get(mainAgent.id);
   if (refreshedAgent) broadcast("agent_updated", refreshedAgent);
+}
+
+/**
+ * Persist a deliberately small, latest-two-turn card summary alongside the
+ * session. The complete transcript remains in its JSONL file; this value only
+ * makes the dashboard and Kanban cards equally informative for Claude and
+ * Codex after a restart or historical import. TranscriptCache has already
+ * filtered command plumbing, tool results, interruptions, and duplicates.
+ */
+function syncCardPromptPreview(sessionId, result) {
+  const prompts = Array.isArray(result?.recentUserMessages) ? result.recentUserMessages : [];
+  const preview = prompts.filter(Boolean).join("\n");
+  if (!preview) return;
+  const upd = stmts.updateSessionCardPromptPreview.run(preview, sessionId, preview);
+  if (upd.changes > 0) {
+    const refreshed = stmts.getSession.get(sessionId);
+    if (refreshed) broadcast("session_updated", refreshed);
+  }
 }
 
 const processEvent = db.transaction((hookType, data) => {
@@ -781,6 +800,7 @@ const processEvent = db.transaction((hookType, data) => {
       // event — live on UserPromptSubmit, and as backfill for sessions that
       // never get a title (including imported ones) on any later event.
       applyFirstUserDescriptor(sessionId, result);
+      syncCardPromptPreview(sessionId, result);
 
       // Register compaction agents and events.
       // Each isCompactSummary entry in the JSONL = one compaction that occurred.
@@ -1298,6 +1318,7 @@ function watchdogCheck() {
       if (fullSess) {
         syncSessionName(fullSess, result);
         applyFirstUserDescriptor(sess.id, result);
+        syncCardPromptPreview(sess.id, result);
       }
 
       const mainAgent = db

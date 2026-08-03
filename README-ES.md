@@ -357,7 +357,7 @@ Los registros de ciclo de vida de los rollouts de Codex impulsan los mismos esta
 
 Los títulos de `/rename` de Codex se leen desde su índice de sesiones nativo y actualizan las tarjetas de sesión y agente en tiempo real. La repetición de conversaciones incluye turnos humanos, llamadas y salidas de herramientas personalizadas `exec`, con paginación por cursor que carga mensajes anteriores al llegar a la parte superior de la transcripción.
 
-Las tarjetas de Codex emparejan un título explícito de `/rename` con la última indicación humana registrada, por lo que un nombre breve y amigable nunca oculta la tarea activa. Los nuevos turnos de rollout actualizan este contexto en tiempo real; los rollouts importados recurren a su evento `user_message` conservado.
+Las tarjetas de Claude Code y Codex muestran un historial compacto de dos líneas de sus últimas indicaciones humanas distintas bajo el título nativo del proveedor, de modo que un nombre breve o un seguimiento conciso nunca oculten la tarea activa. Claude actualiza este contexto desde su caché local de transcripciones durante los hooks en vivo, las importaciones y los barridos del watchdog; Codex lo actualiza desde los registros de rollout y recurre a eventos `user_message` conservados para las importaciones antiguas. La transcripción renderiza adjuntos PNG/JPEG/GIF/WebP persistidos de Claude Code y Codex cuando están disponibles, y las copias response/event duplicadas de Codex se contraen en un único turno humano.
 
 ### 3. inicio
 

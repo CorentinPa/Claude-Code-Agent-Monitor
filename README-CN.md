@@ -358,7 +358,7 @@ Codex rollout 生命周期记录驱动与 Claude Code 相同的实时卡片状�
 
 Codex 的 `/rename` 标题会从原生会话索引读取，并实时更新会话和 agent 卡片。对话回放包含用户回合以及 `exec` 自定义工具调用和输出，并通过 cursor 分页在 transcript 顶部加载更早的消息。
 
-Codex 卡片会将明确的 `/rename` 标题与最新记录的用户提示配对，因此简短友好的名称不会隐藏当前任务。新的 rollout 回合会实时刷新此上下文；导入的 rollout 会回退到其持久化的 `user_message` 事件。
+Claude Code 和 Codex 卡片都会在各自提供方原生标题下显示最近不同用户提示的紧凑两行历史，因此简短友好的名称或简短跟进都不会隐藏当前任务。Claude 会在实时 Hook、导入和 watchdog 扫描期间从本地 transcript 缓存刷新该上下文；Codex 会从 rollout 记录刷新，并为旧导入回退到持久化的 `user_message` 事件。Transcript 会在可用时渲染 Claude Code 和 Codex 已持久化的 PNG/JPEG/GIF/WebP 附件，并将 Codex 重复的 response/event 副本合并为一条用户回合。
 
 Codex 的 `response_item` 工具调用会通过独立 rollout cursor 仅索引一次，因此 Workflows 工具流、会话 drill-in、模型/Token 总计和 `context_compacted` 次数都忠实反映已记录的 Codex 数据，而不会重放生命周期或 Token 计数器。当仪表板范围仅为 Codex 时，仅适用于 Claude Code journal 的 Dynamic Workflows 面板会隐藏，而不会显示空的 Codex 数据。
 

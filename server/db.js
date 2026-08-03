@@ -144,7 +144,11 @@ db.exec(`
     model TEXT,
     started_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
     ended_at TEXT,
-    metadata TEXT
+    metadata TEXT,
+    -- Two most recent distinct human prompts, newline-separated. This is a
+    -- deliberately small card-only cache derived from the local transcript;
+    -- it keeps list views informative without storing whole conversations.
+    card_prompt_preview TEXT
   );
 
   CREATE TABLE IF NOT EXISTS agents (
@@ -868,6 +872,12 @@ try {
 }
 db.exec(`CREATE INDEX IF NOT EXISTS idx_sessions_provider ON sessions(provider)`);
 
+try {
+  db.prepare("SELECT card_prompt_preview FROM sessions LIMIT 1").get();
+} catch {
+  db.prepare("ALTER TABLE sessions ADD COLUMN card_prompt_preview TEXT").run();
+}
+
 // Dashboard run records predate provider-aware launching. Keep existing rows
 // as Claude Code runs and add the Codex-specific sandbox metadata without
 // rebuilding the table, preserving installed users' run history.
@@ -1209,23 +1219,62 @@ db.prepare(
 `
 ).run();
 
+// Shared compact-card context: both providers persist their two most recent
+// distinct human turns (newline-separated). Claude fills that compact cache
+// from its JSONL scanner; Codex's append-only user-message events are already
+// durable. Main-agent task remains a safe fallback for historical data.
+const CARD_PROMPT_PREVIEW_SQL = `COALESCE(
+  NULLIF(s.card_prompt_preview, ''),
+  CASE WHEN s.provider = 'codex' THEN (
+    SELECT group_concat(prompt, char(10))
+    FROM (
+      SELECT prompt
+      FROM (
+        SELECT e.summary AS prompt, e.created_at, e.id
+        FROM events e
+        WHERE e.session_id = s.id
+          AND e.event_type = 'codex_user_message'
+          AND e.summary IS NOT NULL
+          AND trim(e.summary) != ''
+        ORDER BY e.created_at DESC, e.id DESC
+        LIMIT 2
+      ) latest_prompts
+      ORDER BY created_at ASC, id ASC
+    ) ordered_prompts
+  ) END,
+  NULLIF((
+    SELECT main.task
+    FROM agents main
+    WHERE main.session_id = s.id
+      AND main.type = 'main'
+      AND main.task IS NOT NULL
+      AND trim(main.task) != ''
+    ORDER BY main.updated_at DESC
+    LIMIT 1
+  ), ''),
+  (
+    SELECT e.summary
+    FROM events e
+    WHERE e.session_id = s.id
+      AND e.event_type = 'codex_user_message'
+      AND e.summary IS NOT NULL
+      AND trim(e.summary) != ''
+    ORDER BY e.created_at DESC, e.id DESC
+    LIMIT 1
+  )
+)`;
+
 const stmts = {
   getSession: db.prepare("SELECT * FROM sessions WHERE id = ?"),
   listSessions: db.prepare(
     `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity,
-            COALESCE(
-              NULLIF((SELECT main.task FROM agents main WHERE main.session_id = s.id AND main.type = 'main' AND main.task IS NOT NULL AND trim(main.task) != '' ORDER BY main.updated_at DESC LIMIT 1), ''),
-              (SELECT e.summary FROM events e WHERE e.session_id = s.id AND e.event_type = 'codex_user_message' AND e.summary IS NOT NULL AND trim(e.summary) != '' ORDER BY e.created_at DESC, e.id DESC LIMIT 1)
-            ) AS prompt_preview
+            ${CARD_PROMPT_PREVIEW_SQL} AS prompt_preview
      FROM sessions s LEFT JOIN agents a ON a.session_id = s.id
      GROUP BY s.id ORDER BY s.updated_at DESC LIMIT ? OFFSET ?`
   ),
   listSessionsByStatus: db.prepare(
     `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity,
-            COALESCE(
-              NULLIF((SELECT main.task FROM agents main WHERE main.session_id = s.id AND main.type = 'main' AND main.task IS NOT NULL AND trim(main.task) != '' ORDER BY main.updated_at DESC LIMIT 1), ''),
-              (SELECT e.summary FROM events e WHERE e.session_id = s.id AND e.event_type = 'codex_user_message' AND e.summary IS NOT NULL AND trim(e.summary) != '' ORDER BY e.created_at DESC, e.id DESC LIMIT 1)
-            ) AS prompt_preview
+            ${CARD_PROMPT_PREVIEW_SQL} AS prompt_preview
      FROM sessions s LEFT JOIN agents a ON a.session_id = s.id
      WHERE s.status = ? GROUP BY s.id ORDER BY s.updated_at DESC LIMIT ? OFFSET ?`
   ),
@@ -1255,6 +1304,14 @@ const stmts = {
   // case so the broadcast path stays quiet.
   updateSessionName: db.prepare(
     "UPDATE sessions SET name = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND COALESCE(name, '') != ?"
+  ),
+  // A compact, durable summary of the two newest real human turns. It is
+  // intentionally not a transcript cache: full content stays in JSONL, while
+  // cards can render useful context even after an import or server restart.
+  // No-op on unchanged previews so the real-time path does not create needless
+  // session_updated broadcasts.
+  updateSessionCardPromptPreview: db.prepare(
+    "UPDATE sessions SET card_prompt_preview = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ? AND COALESCE(card_prompt_preview, '') != ?"
   ),
   // One-shot writer for sessions.transcript_path. The NULL/'' guard makes
   // every subsequent hook event for the same session a SQL no-op, so the

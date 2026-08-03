@@ -356,7 +356,7 @@ Codex rollout 수명 주기 레코드는 Claude Code와 같은 실시간 카드 
 
 Codex의 `/rename` 제목은 네이티브 세션 인덱스에서 읽어 세션과 agent 카드에 실시간으로 반영됩니다. 대화 재생에는 사용자 턴과 `exec` custom-tool 호출 및 출력이 포함되며, cursor 페이지네이션으로 transcript 상단에서 이전 메시지를 불러옵니다.
 
-Codex 카드는 명시적인 `/rename` 제목을 가장 최근에 기록된 사용자 프롬프트와 함께 표시하므로, 짧고 친숙한 이름이 진행 중인 작업을 가리지 않습니다. 새 rollout 턴은 이 컨텍스트를 실시간으로 새로 고치며, 가져온 rollout은 저장된 `user_message` 이벤트로 대체합니다.
+Claude Code와 Codex 카드는 각 제공자의 네이티브 제목 아래에 최근의 서로 다른 사용자 프롬프트를 두 줄로 간결하게 표시하므로, 짧고 친숙한 이름이나 짧은 후속 요청이 진행 중인 작업을 가리지 않습니다. Claude는 실시간 Hook, 가져오기 및 watchdog 스윕 중 로컬 transcript 캐시에서 이 컨텍스트를 새로 고치고, Codex는 rollout 레코드에서 새로 고치며 오래된 가져오기는 저장된 `user_message` 이벤트로 대체합니다. Transcript는 가능한 경우 Claude Code와 Codex에 저장된 PNG/JPEG/GIF/WebP 첨부 파일을 렌더링하고, 중복된 Codex response/event 사본은 하나의 사용자 턴으로 합칩니다.
 
 Codex `response_item` 도구 호출은 별도 rollout 커서로 정확히 한 번 인덱싱되므로 Workflows 도구 흐름, 세션 drill-in, 모델/token 합계와 `context_compacted` 횟수가 수명 주기나 token 카운터를 재생하지 않고 기록된 Codex 데이터를 충실히 반영합니다. 대시보드 범위가 Codex 전용이면 Claude Code journal 전용 Dynamic Workflows 패널은 빈 Codex 데이터로 표시되지 않고 숨겨집니다.
 

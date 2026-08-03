@@ -2,7 +2,7 @@
  * @file Express router for session endpoints, allowing creation, retrieval, and
  * updating of sessions with pagination plus status, search, and multi-directory
  * filtering. It computes costs, adds card-ready main-task/Codex prompt context,
- * and broadcasts session changes to connected WebSocket clients in real time.
+ * safely exposes persisted transcript images, and broadcasts live changes.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -29,11 +29,29 @@ const {
 const router = Router();
 
 // Compact cards need enough context to distinguish a meaningful task from a
-// renamed session title. Claude supplies it through the main agent's `task`;
-// older Codex imports may only have their persisted user-message event. The
-// correlated fallback keeps those existing sessions informative immediately,
-// while new Codex rollouts also promote this prompt into agents.task at ingest.
+// renamed session title. Both providers preserve their newest two distinct
+// human turns as a tiny newline-separated summary. Claude derives it from its
+// local JSONL scanner; Codex has equivalent append-only lifecycle events.
+// Historical rows still fall back to a main-agent task.
 const SESSION_PROMPT_PREVIEW_SQL = `COALESCE(
+  NULLIF(s.card_prompt_preview, ''),
+  CASE WHEN s.provider = 'codex' THEN (
+    SELECT group_concat(prompt, char(10))
+    FROM (
+      SELECT prompt
+      FROM (
+        SELECT e.summary AS prompt, e.created_at, e.id
+        FROM events e
+        WHERE e.session_id = s.id
+          AND e.event_type = 'codex_user_message'
+          AND e.summary IS NOT NULL
+          AND trim(e.summary) != ''
+        ORDER BY e.created_at DESC, e.id DESC
+        LIMIT 2
+      ) latest_prompts
+      ORDER BY created_at ASC, id ASC
+    ) ordered_prompts
+  ) END,
   NULLIF((
     SELECT a.task
     FROM agents a
@@ -724,6 +742,127 @@ router.get("/:id/transcripts", async (req, res) => {
 //   after: JSONL line number, only return messages after this line (incremental mode)
 //   before: JSONL line number, only return messages before this line (history mode)
 //   offset: legacy pagination offset (compatible, mutually exclusive with after/before)
+const MAX_INLINE_TRANSCRIPT_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_STORED_TRANSCRIPT_IMAGE_BYTES = 10 * 1024 * 1024;
+const SAFE_INLINE_IMAGE_DATA_URL = /^data:image\/(png|jpe?g|gif|webp);base64,([A-Za-z0-9+/=\s]+)$/i;
+const STORED_TRANSCRIPT_IMAGE_MIME = new Map([
+  [".png", "image/png"],
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".gif", "image/gif"],
+  [".webp", "image/webp"],
+]);
+
+/**
+ * Preserve only bounded raster image data that was already persisted inside a
+ * local transcript. This deliberately rejects remote URLs and SVG so opening
+ * a transcript never causes a network fetch or renders executable markup.
+ */
+function safeInlineTranscriptImage(value) {
+  if (typeof value !== "string") return null;
+  const match = value.match(SAFE_INLINE_IMAGE_DATA_URL);
+  if (!match) return null;
+  const base64 = match[2].replace(/\s/g, "");
+  if (Buffer.byteLength(base64, "base64") > MAX_INLINE_TRANSCRIPT_IMAGE_BYTES) return null;
+  const subtype = match[1].toLowerCase() === "jpg" ? "jpeg" : match[1].toLowerCase();
+  return `data:image/${subtype};base64,${base64}`;
+}
+
+/** Hide CLI image wrapper tags (and their local paths) from prose. */
+function stripTranscriptImageMarkup(value) {
+  return String(value || "")
+    .replace(/<image\b[^>]*>[\s\S]*?<\/image>/gi, "")
+    .replace(/<\/?image\b[^>]*>/gi, "")
+    .replace(/\n{3,}/g, "\n")
+    .trim();
+}
+
+/** Extract local paths from the CLI's persisted `<image … path="…">` wrappers. */
+function transcriptImagePaths(value) {
+  const paths = [];
+  const matcher = /<image\b[^>]*\bpath=(?:"([^"]+)"|'([^']+)'|([^\s>]+))[^>]*>/gi;
+  for (const match of String(value || "").matchAll(matcher)) {
+    const candidate = match[1] || match[2] || match[3];
+    if (candidate && path.isAbsolute(candidate)) paths.push(candidate);
+  }
+  return paths;
+}
+
+function inlineClaudeImage(block) {
+  if (block?.type !== "image") return null;
+  const source = block.source || {};
+  if (typeof source.data !== "string") return null;
+  const mediaType = String(source.media_type || "").toLowerCase();
+  return safeInlineTranscriptImage(
+    source.data.startsWith("data:") ? source.data : `data:${mediaType};base64,${source.data}`
+  );
+}
+
+/** Resolve only the exact transcript selected by the reader/image request. */
+function resolveSessionTranscriptPath(session, sessionId, agentId, runId) {
+  if (session.provider === "codex") {
+    return session.transcript_path && fs.existsSync(session.transcript_path)
+      ? session.transcript_path
+      : null;
+  }
+  if (agentId && agentId !== "main") {
+    return (
+      getSubagentTranscriptPath(sessionId, session.cwd, agentId, runId) ||
+      findSubagentTranscriptPath(sessionId, agentId, runId) ||
+      getSnapshotSubagentTranscriptPath(sessionId, agentId, runId)
+    );
+  }
+  return (
+    getTranscriptPath(sessionId, session.cwd) ||
+    findTranscriptPath(sessionId) ||
+    getSnapshotTranscriptPath(sessionId)
+  );
+}
+
+async function jsonlEntryAtLine(jsonlPath, targetLine) {
+  let lineNumber = 0;
+  const rl = readline.createInterface({
+    input: fs.createReadStream(jsonlPath, { encoding: "utf8" }),
+    crlfDelay: Infinity,
+  });
+  for await (const line of rl) {
+    lineNumber++;
+    if (lineNumber !== targetLine) continue;
+    try {
+      return JSON.parse(line);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Convert Codex's mixed input_text/input_image array into display blocks.
+ * Keeping images as their own block lets the client render the real persisted
+ * attachment instead of an "[Image #]" placeholder in the user prompt.
+ */
+function codexMessageContent(content) {
+  if (typeof content === "string") {
+    const text = stripTranscriptImageMarkup(content);
+    return text ? [{ type: "text", text: truncate(text, 10240) }] : [];
+  }
+  if (!Array.isArray(content)) return [];
+  const blocks = [];
+  for (const part of content) {
+    if (part?.type === "input_image") {
+      const src = safeInlineTranscriptImage(part.image_url);
+      if (src) blocks.push({ type: "image", src, alt: "Attached image" });
+      continue;
+    }
+    if (typeof part?.text === "string") {
+      const text = stripTranscriptImageMarkup(part.text);
+      if (text) blocks.push({ type: "text", text: truncate(text, 10240) });
+    }
+  }
+  return blocks;
+}
+
 function codexContentText(content) {
   if (typeof content === "string") return content;
   if (!Array.isArray(content)) return "";
@@ -761,7 +900,10 @@ function codexToolOutput(output) {
 /** Translate Codex rollout records into the shared conversation DTO. */
 function parseCodexMessage(entry, line) {
   if (entry.type === "event_msg" && entry.payload?.type === "user_message") {
-    const text = typeof entry.payload.message === "string" ? entry.payload.message : "";
+    const text =
+      typeof entry.payload.message === "string"
+        ? stripTranscriptImageMarkup(entry.payload.message)
+        : "";
     if (!text.trim()) return null;
     return {
       type: "user",
@@ -776,9 +918,15 @@ function parseCodexMessage(entry, line) {
   const item = entry.payload || {};
   const timestamp = entry.timestamp || null;
   if (item.type === "message") {
-    const text = codexContentText(item.content);
+    const content = codexMessageContent(item.content);
+    const text = content
+      .filter((block) => block.type === "text")
+      .map((block) => block.text || "")
+      .join("\n");
     // Codex injects this descriptor at session start; it is not a human turn.
-    if (!text.trim() || text.trim().startsWith("<environment_context>")) return null;
+    if ((!text.trim() && content.length === 0) || text.trim().startsWith("<environment_context>")) {
+      return null;
+    }
     // `event_msg:user_message` is Codex's durable human-turn record. A matching
     // response item normally immediately precedes it, but keep response-user
     // records too: the reader dedupes adjacent twins and preserves image-only
@@ -788,7 +936,7 @@ function parseCodexMessage(entry, line) {
       type: item.role === "assistant" ? "assistant" : "user",
       sender: item.role === "assistant" ? "assistant" : "user",
       timestamp,
-      content: [{ type: "text", text: truncate(text, 10240) }],
+      content,
       line,
       ...(item.role === "user" ? { _codexUserKind: "response" } : {}),
     };
@@ -922,12 +1070,13 @@ router.get("/:id/transcript", async (req, res) => {
   const offset = parseInt(req.query.offset) || 0;
 
   if (session.provider === "codex") {
-    if (!session.transcript_path || !fs.existsSync(session.transcript_path)) {
+    const jsonlPath = resolveSessionTranscriptPath(session, req.params.id, agentId, runId);
+    if (!jsonlPath) {
       return res.json({ messages: [], total: 0, has_more: false, last_line: 0, first_line: 0 });
     }
     try {
       return res.json(
-        await readCodexTranscript(session.transcript_path, { limit, afterLine, beforeLine, offset })
+        await readCodexTranscript(jsonlPath, { limit, afterLine, beforeLine, offset })
       );
     } catch {
       return res.json({ messages: [], total: 0, has_more: false, last_line: 0, first_line: 0 });
@@ -938,18 +1087,7 @@ router.get("/:id/transcript", async (req, res) => {
   // ~/.claude/projects, then fall back to the dashboard's durable snapshot —
   // the live file is gone once Claude Code prunes it under cleanupPeriodDays
   // (default 30 days), but the snapshot taken at import time survives.
-  let jsonlPath;
-  if (agentId && agentId !== "main") {
-    jsonlPath =
-      getSubagentTranscriptPath(req.params.id, session.cwd, agentId, runId) ||
-      findSubagentTranscriptPath(req.params.id, agentId, runId) ||
-      getSnapshotSubagentTranscriptPath(req.params.id, agentId, runId);
-  } else {
-    jsonlPath =
-      getTranscriptPath(req.params.id, session.cwd) ||
-      findTranscriptPath(req.params.id) ||
-      getSnapshotTranscriptPath(req.params.id);
-  }
+  const jsonlPath = resolveSessionTranscriptPath(session, req.params.id, agentId, runId);
 
   if (!jsonlPath || !fs.existsSync(jsonlPath)) {
     return res.json({ messages: [], total: 0, has_more: false, last_line: 0, first_line: 0 });
@@ -973,6 +1111,13 @@ router.get("/:id/transcript", async (req, res) => {
     // with the same value across a transcript, so only emit when the title
     // actually changes from the last one we surfaced.
     let lastRenameTitle = null;
+
+    function storedImageUrl(line, index) {
+      const query = new URLSearchParams({ line: String(line), index: String(index) });
+      if (agentId) query.set("agent_id", String(agentId));
+      if (runId) query.set("run_id", String(runId));
+      return `/api/sessions/${encodeURIComponent(req.params.id)}/transcript-image?${query.toString()}`;
+    }
 
     // Helper: parse a JSONL line into a message object, or null if not a displayable message
     function parseMessage(entry, num) {
@@ -1049,11 +1194,29 @@ router.get("/:id/transcript", async (req, res) => {
       if (entry.type === "user") {
         const msgContent = entry.message?.content;
         if (typeof msgContent === "string") {
-          content.push({ type: "text", text: truncate(msgContent, 10240) });
+          const imagePaths = transcriptImagePaths(msgContent);
+          imagePaths.forEach((_, index) => {
+            content.push({ type: "image", src: storedImageUrl(num, index), alt: "Attached image" });
+          });
+          const text = stripTranscriptImageMarkup(msgContent);
+          if (text) content.push({ type: "text", text: truncate(text, 10240) });
         } else if (Array.isArray(msgContent)) {
+          let storedImageIndex = 0;
           for (const block of msgContent) {
             if (block.type === "text" && block.text) {
-              content.push({ type: "text", text: truncate(block.text, 10240) });
+              const imagePaths = transcriptImagePaths(block.text);
+              imagePaths.forEach(() => {
+                content.push({
+                  type: "image",
+                  src: storedImageUrl(num, storedImageIndex++),
+                  alt: "Attached image",
+                });
+              });
+              const text = stripTranscriptImageMarkup(block.text);
+              if (text) content.push({ type: "text", text: truncate(text, 10240) });
+            } else if (block.type === "image") {
+              const src = inlineClaudeImage(block);
+              if (src) content.push({ type: "image", src, alt: "Attached image" });
             } else if (block.type === "tool_result") {
               content.push({
                 type: "tool_result",
@@ -1257,6 +1420,67 @@ router.get("/:id/transcript", async (req, res) => {
     });
   } catch (err) {
     res.json({ messages: [], total: 0, has_more: false, last_line: 0, first_line: 0 });
+  }
+});
+
+// GET /:id/transcript-image — Stream one image that is explicitly referenced
+// by one persisted Claude transcript line. The client receives this opaque
+// same-origin URL rather than the machine's absolute screenshot path.
+router.get("/:id/transcript-image", async (req, res) => {
+  const session = stmts.getSession.get(req.params.id);
+  if (!session || !sessionIsInScope(session, req)) {
+    return res.status(404).json({ error: { code: "NOT_FOUND", message: "Image not found" } });
+  }
+  const line = Number(req.query.line);
+  const index = Number(req.query.index);
+  if (!Number.isSafeInteger(line) || line < 1 || !Number.isSafeInteger(index) || index < 0) {
+    return res
+      .status(400)
+      .json({ error: { code: "INVALID_IMAGE", message: "Invalid image reference" } });
+  }
+  const agentId = req.query.agent_id || null;
+  const runId = req.query.run_id || null;
+  const jsonlPath = resolveSessionTranscriptPath(session, req.params.id, agentId, runId);
+  if (!jsonlPath) {
+    return res.status(404).json({ error: { code: "NOT_FOUND", message: "Image not found" } });
+  }
+
+  try {
+    const entry = await jsonlEntryAtLine(jsonlPath, line);
+    if (!entry || entry.type !== "user") {
+      return res.status(404).json({ error: { code: "NOT_FOUND", message: "Image not found" } });
+    }
+    const rawContent = entry.message?.content;
+    const textBlocks =
+      typeof rawContent === "string"
+        ? [rawContent]
+        : Array.isArray(rawContent)
+          ? rawContent.filter((block) => block?.type === "text").map((block) => block.text)
+          : [];
+    const imagePath = textBlocks.flatMap(transcriptImagePaths)[index];
+    if (!imagePath) {
+      return res.status(404).json({ error: { code: "NOT_FOUND", message: "Image not found" } });
+    }
+    const realPath = fs.realpathSync(imagePath);
+    const mime = STORED_TRANSCRIPT_IMAGE_MIME.get(path.extname(realPath).toLowerCase());
+    const stat = fs.statSync(realPath);
+    if (!mime || !stat.isFile() || stat.size > MAX_STORED_TRANSCRIPT_IMAGE_BYTES) {
+      return res.status(404).json({ error: { code: "NOT_FOUND", message: "Image not found" } });
+    }
+    res.set({
+      "Cache-Control": "private, max-age=300",
+      "Content-Type": mime,
+      "Content-Length": String(stat.size),
+      "X-Content-Type-Options": "nosniff",
+    });
+    const stream = fs.createReadStream(realPath);
+    stream.on("error", () => {
+      if (!res.headersSent) res.status(404).end();
+      else res.destroy();
+    });
+    return stream.pipe(res);
+  } catch {
+    return res.status(404).json({ error: { code: "NOT_FOUND", message: "Image not found" } });
   }
 });
 

@@ -2,8 +2,8 @@
  * @file AgentCard.tsx
  * @description Defines the AgentCard component that displays a summary of an
  * agent's name, status, task, current tool, timestamps, and native Codex
- * title plus latest human-prompt context. The card is clickable and navigates
- * to session details while visually distinguishing active agents.
+ * title plus a latest-two-human-turn context. The card is clickable and
+ * navigates to session details while visually distinguishing active agents.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -80,6 +80,23 @@ function mainAgentDisplayName(agentName: string, realSessionName: string): strin
   return sep >= 0 ? `${agentName.slice(0, sep)} - ${realSessionName}` : agentName;
 }
 
+/** Keep a compact card's history legible: at most two distinct human turns,
+ * one visual row each. This intentionally preserves a title-matching first
+ * request when a terse follow-up depends on it for context. */
+function promptPreviewLines(value: string | null | undefined): string[] {
+  const seen = new Set<string>();
+  return String(value || "")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter((line) => {
+      const key = line.toLocaleLowerCase();
+      if (!line || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(-2);
+}
+
 interface AgentCardProps {
   agent: Agent;
   /** Optional session data for richer main-agent rendering (model, cwd,
@@ -130,14 +147,14 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
     : isMain
       ? mainAgentDisplayName(agent.name, realSessionName)
       : agent.name;
-  // Codex titles may be an intentional `/rename` rather than a task. The
-  // ingestor promotes the latest real user prompt into agent.task, while the
-  // session preview gives old imported rollouts the same context immediately.
-  // Suppress a literal duplicate when Codex's auto-title is exactly that first
-  // prompt; subsequent prompts and renamed sessions remain fully informative.
-  const taskPreview =
-    agent.task?.trim() || (isCodexMain ? session?.prompt_preview?.trim() || null : null);
-  const showTaskPreview = Boolean(taskPreview && taskPreview !== sessionName);
+  // Session titles and requests are intentionally independent: Claude and
+  // Codex both persist two recent real human turns on the session, while a
+  // main-agent task remains the truthful fallback for pre-preview history.
+  // Subagents keep their own assigned task instead of inheriting the parent.
+  const taskPreview = isMain
+    ? session?.prompt_preview?.trim() || agent.task?.trim() || null
+    : agent.task?.trim() || null;
+  const taskPreviewLines = promptPreviewLines(taskPreview);
   // A subagent's own model lives in its metadata (resolved from its transcript,
   // not the parent session's — see issue #185). Use it everywhere this card
   // shows a model so a Haiku QA agent under an Opus orchestrator reads as
@@ -235,10 +252,18 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
         />
       </div>
 
-      {showTaskPreview && taskPreview && (
-        <p className="text-xs text-gray-400 mb-3 line-clamp-2 leading-relaxed" title={taskPreview}>
-          {taskPreview}
-        </p>
+      {taskPreviewLines.length > 0 && (
+        <div className="mb-3 space-y-1 border-l-2 border-accent/25 pl-2.5">
+          {taskPreviewLines.map((prompt, index) => (
+            <p
+              key={`${index}-${prompt}`}
+              className="text-xs text-gray-400 leading-relaxed line-clamp-1"
+              title={prompt}
+            >
+              {prompt}
+            </p>
+          ))}
+        </div>
       )}
 
       <div className="flex items-center gap-3 text-[11px] text-gray-500 min-w-0 overflow-hidden flex-wrap">

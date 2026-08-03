@@ -115,9 +115,11 @@ GET /api/sessions
 ```
 
 Returns all sessions, ordered by most recent activity. Each row may include an optional
-`prompt_preview` for compact cards: it is the main agent task when available, or for
-pre-existing Codex imports the latest persisted `codex_user_message` summary. The detail
-route returns the same optional field.
+`prompt_preview` for compact cards: the two newest distinct real human prompts, oldest to
+newest and newline-separated. Claude Code persists this bounded summary from the local JSONL
+cache during hooks, imports, and watchdog sweeps; Codex derives it from durable
+`codex_user_message` records. Historical rows fall back to the main-agent task. The detail route
+returns the same optional field.
 
 **Query Parameters:**
 
@@ -251,7 +253,21 @@ read newer JSONL lines, or `before` to load the preceding page; responses includ
 responses include its normal conversation and local command records. Codex
 responses include human turns, legacy `function_call` records, and the primary
 `custom_tool_call` stream (including `exec` input and paired output), so clients
-can render the actual command flow rather than only `wait` calls.
+can render the actual command flow rather than only `wait` calls. Both providers
+also expose persisted PNG/JPEG/GIF/WebP user attachments as `image` content blocks;
+missing or expired files are simply omitted, and Codex's duplicated response/event
+user records are returned as one human turn.
+
+#### Read Persisted Transcript Image
+
+```http
+GET /api/sessions/:id/transcript-image?line={line}&index={index}
+```
+
+Streams a same-origin image referenced by one persisted Claude transcript line. The
+transcript response provides this opaque URL rather than its local path. Codex inline
+attachments are already returned as validated `data:image/...` block sources. Only bounded
+PNG, JPEG, GIF, and WebP images are served; unavailable files return `404`.
 
 ---
 

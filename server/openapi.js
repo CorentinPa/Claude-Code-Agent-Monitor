@@ -254,7 +254,7 @@ function createOpenApiSpec() {
               type: "string",
               nullable: true,
               description:
-                "Latest concise main-agent task for card context. Derived from the main agent task, with a Codex user-message fallback for historical rollouts.",
+                "Up to two newest distinct real human prompts, newline-separated, for compact card context. Claude derives the persisted summary from its local JSONL cache; Codex derives it from durable user-message records. Historical rows fall back to the main-agent task.",
             },
             updated_at: { type: "string", format: "date-time" },
             agent_count: { type: "integer", nullable: true },
@@ -429,7 +429,7 @@ function createOpenApiSpec() {
           properties: {
             type: {
               type: "string",
-              enum: ["text", "tool_use", "tool_result", "thinking"],
+              enum: ["text", "tool_use", "tool_result", "thinking", "image"],
             },
             text: { type: "string" },
             name: { type: "string", description: "Tool name when type === tool_use." },
@@ -443,6 +443,15 @@ function createOpenApiSpec() {
             },
             output: { type: "string", description: "Tool output text when type === tool_result." },
             is_error: { type: "boolean" },
+            src: {
+              type: "string",
+              description:
+                "Same-origin persisted-image URL or validated inline raster data URL when type === image.",
+            },
+            alt: {
+              type: "string",
+              description: "Accessible image description when type === image.",
+            },
           },
         },
         TranscriptMessage: {

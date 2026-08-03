@@ -1,8 +1,8 @@
 /**
  * @file SessionCard.test.tsx
  * @description Regression tests for the compact Kanban session card, including
- * preserving a Codex session's meaningful title, human task context, and no
- * redundant ID badge.
+ * preserving provider-native session titles, two-turn human task context, and
+ * no redundant ID badge.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -48,7 +48,8 @@ describe("SessionCard", () => {
         <SessionCard
           session={makeSession({
             name: "hehe",
-            prompt_preview: "Add live card context for renamed Codex sessions.",
+            prompt_preview:
+              "Add live card context for renamed Codex sessions.\nKeep the follow-up concise.",
           })}
         />
       </MemoryRouter>
@@ -58,5 +59,25 @@ describe("SessionCard", () => {
     expect(
       screen.getByText("Add live card context for renamed Codex sessions.")
     ).toBeInTheDocument();
+    expect(screen.getByText("Keep the follow-up concise.")).toBeInTheDocument();
+  });
+
+  it("shows the same bounded two-turn history for a Claude session", () => {
+    render(
+      <MemoryRouter>
+        <SessionCard
+          session={makeSession({
+            id: "claude-two-turn-context",
+            name: "Remote sync investigation",
+            provider: "claude",
+            prompt_preview:
+              "Investigate the remote sync delay.\nThen preserve the normal idle sweep.",
+          })}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("Investigate the remote sync delay.")).toBeInTheDocument();
+    expect(screen.getByText("Then preserve the normal idle sweep.")).toBeInTheDocument();
   });
 });
