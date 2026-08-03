@@ -110,11 +110,11 @@ Tài liệu đã bản địa hóa: [`README.md`](./README.md) · [`README-CN.md
 
 ## Tổng quan
 
-Theo dõi các phiên, giám sát tác nhân trong thời gian thực, trực quan hóa việc sử dụng công cụ và quan sát việc điều phối tác nhân phụ thông qua giao diện web có chủ đề tối chuyên nghiệp. Tích hợp trực tiếp với Claude Code thông qua hệ thống hook gốc của nó.
+Theo dõi các phiên, giám sát tác nhân trong thời gian thực, trực quan hóa việc sử dụng công cụ và quan sát việc điều phối tác nhân phụ thông qua giao diện web có chủ đề tối chuyên nghiệp. Tích hợp trực tiếp với Claude Code & Codex thông qua hệ thống hook gốc của nó.
 
 ```mermaid
 graph LR
-    A["Claude Code<br/>Session"] -->|hooks fire on<br/>tool use / stop| B["Hook Handler<br/>(Node.js script)"]
+    A["Claude Code & Codex<br/>Session"] -->|hooks fire on<br/>tool use / stop| B["Hook Handler<br/>(Node.js script)"]
     B -->|HTTP POST| C["Dashboard Server<br/>(Express + SQLite)"]
     C -->|WebSocket<br/>broadcast| D["Dashboard UI<br/>(React + Tailwind)"]
     style A fill:#6366f1,stroke:#818cf8,color:#fff
@@ -123,7 +123,7 @@ graph LR
     style D fill:#10b981,stroke:#34d399,color:#fff
 ```
 
-Ngoài bảng thông tin giám sát thời gian thực, nó còn bao gồm triển khai máy chủ MCP cục bộ trong `mcp/` hiển thị danh mục các công cụ để xem xét nội tâm và quản lý bảng thông tin, giúp dễ dàng tích hợp trực tiếp các hoạt động của bảng thông tin vào quy trình làm việc của Claude Code của bạn. Ngoài ra còn có một lớp mở rộng tác nhân, cung cấp các plugin, kỹ năng và tác nhân phụ của Claude Code để tương tác trên trang tổng quan, phân tích và thông tin về quy trình làm việc.
+Ngoài bảng thông tin giám sát thời gian thực, nó còn bao gồm triển khai máy chủ MCP cục bộ trong `mcp/` hiển thị danh mục các công cụ để xem xét nội tâm và quản lý bảng thông tin, giúp dễ dàng tích hợp trực tiếp các hoạt động của bảng thông tin vào quy trình làm việc của Claude Code & Codex của bạn. Ngoài ra còn có một lớp mở rộng tác nhân, cung cấp các plugin, kỹ năng và tác nhân phụ của Claude Code & Codex để tương tác trên trang tổng quan, phân tích và thông tin về quy trình làm việc.
 
 ### Quốc tế hóa (i18n)
 
@@ -273,23 +273,23 @@ flowchart LR
 <p align="center">
   <img src="images/remote.png" alt="Cài đặt — Nguồn dữ liệu từ xa" width="100%">
   <br>
-  <em>🛰️ <strong>Cài đặt · Nguồn dữ liệu từ xa</strong> — kéo hoạt động Claude Code từ các máy khác qua SSH: thêm nguồn theo đích đến, kiểm tra kết nối, đồng bộ thủ công hoặc theo bộ hẹn giờ nền, và chuyển phạm vi dữ liệu toàn cục giữa cục bộ, tất cả nguồn, hoặc một máy cụ thể, với huy hiệu nguồn cho từng phiên</em>
+  <em>🛰️ <strong>Cài đặt · Nguồn dữ liệu từ xa</strong> — kéo hoạt động Claude Code & Codex từ các máy khác qua SSH: thêm nguồn theo đích đến, kiểm tra kết nối, đồng bộ thủ công hoặc theo bộ hẹn giờ nền, và chuyển phạm vi dữ liệu toàn cục giữa cục bộ, tất cả nguồn, hoặc một máy cụ thể, với huy hiệu nguồn cho từng phiên</em>
 </p>
 
-Thanh bên cung cấp quyền truy cập nhanh vào Trang tổng quan, Bảng Kanban, danh sách Phiên, Nguồn cấp dữ liệu hoạt động, Phân tích, Quy trình công việc và Cài đặt. Mỗi trang được thiết kế để cung cấp cho bạn những hiểu biết sâu sắc về hoạt động Agent Claude Code của bạn với các cập nhật theo thời gian thực và hình ảnh trực quan phong phú.
+Thanh bên cung cấp quyền truy cập nhanh vào Trang tổng quan, Bảng Kanban, danh sách Phiên, Nguồn cấp dữ liệu hoạt động, Phân tích, Quy trình công việc và Cài đặt. Mỗi trang được thiết kế để cung cấp cho bạn những hiểu biết sâu sắc về hoạt động Agent Claude Code & Codex của bạn với các cập nhật theo thời gian thực và hình ảnh trực quan phong phú.
 
 ---
 
 ## Tính Năng
 
-Bảng điều khiển cung cấp một bộ tính năng toàn diện để giám sát và phân tích các phiên và Agent Claude Code của bạn:
+Bảng điều khiển cung cấp một bộ tính năng toàn diện để giám sát và phân tích các phiên và Agent Claude Code & Codex của bạn:
 
-> **Phiên Cursor (chỉ mang tính thông tin):** CCAM nhập mọi transcript agent nằm trong `~/.claude` — trên máy này và trên các máy từ xa đã đồng bộ. **Cursor** cũng được tính tương tự: Cursor tình cờ lưu phiên agent ở cùng các đường dẫn với Claude Code. CCAM không phân biệt ứng dụng nào ghi file.
+> **Phiên Cursor (chỉ mang tính thông tin):** CCAM nhập mọi transcript agent nằm trong `~/.claude` — trên máy này và trên các máy từ xa đã đồng bộ. **Cursor** cũng được tính tương tự: Cursor tình cờ lưu phiên agent ở cùng các đường dẫn với Claude Code & Codex. CCAM không phân biệt ứng dụng nào ghi file.
 
 | Tính năng                            | Sự miêu tả                                                                                                                                                                                                                                                                  |
 |------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Bảng điều khiển**                      | Hai tab lưu trong `localStorage`: **Monitor** — số liệu thống kê tổng quan (6 thẻ), thẻ Agent đang hoạt động với hệ thống phân cấp Subagent có thể thu gọn, nguồn cấp dữ liệu hoạt động gần đây với số mục hiển thị tự động lấp đầy chiều cao viewport qua `ResizeObserver`. **Health** — vòng điểm sức khỏe hệ thống tổng hợp (trọng số: 0,4 × tỷ lệ thành công + 0,25 × tỷ lệ cache hit + 0,25 × (100 − tỷ lệ lỗi) + 0,1 × (100 − heap %)), biểu đồ donut phân bổ bản ghi, thước đo hiệu suất cache / tỷ lệ lỗi / tỷ lệ thành công, biểu đồ thanh ngang top 8 công cụ, thanh hiệu quả subagent, phân bổ token theo mô hình, và thống kê nén. Tự làm mới mỗi 5 giây từ `/api/settings/info` và `/api/workflows`. Tooltip theo con trỏ với phát hiện cạnh viewport trên mọi biểu đồ |
-| **Bảng Kanban**                   | Hai chế độ với nút chuyển ở đầu trang (lưu trong `localStorage`): **Agent** — 4 cột (Đang làm / Đang chờ / Hoàn tất / Lỗi), và **Phiên** — 5 cột (Hoạt động / Đang chờ / Hoàn tất / Lỗi / Bỏ dở). Cột **Đang chờ** ánh xạ trực tiếp trạng thái lưu trữ `waiting` của Agent — được đặt khi Claude Code đang ngồi ở dòng nhập (phiên mới, giữa các lượt, hoặc đang bị chặn bởi Notification xin quyền) và chuyển sang `working` ngay khi người dùng tiếp tục (UserPromptSubmit / PreToolUse). Mỗi tiêu đề cột có biểu tượng `?` với tooltip giải thích vòng đời. Mỗi cột tìm nạp theo trạng thái từ máy chủ (không giới hạn thực tế mỗi cột), sau đó phân trang phía client với 10 thẻ mỗi cột kèm nút "Hiện thêm". Đăng ký WebSocket bám theo chế độ đang xem (`agent_*` so với `session_*`) nên cập nhật khác chế độ không gây tải lại. Huy hiệu Đang chờ hiển thị `awaiting_reason` của hàng dưới dạng tooltip khi hover — **Cần phản hồi** (`notification`), **Xong lượt** (`stop`), **Chờ prompt** (`session_start`), **Bị ngắt** (`interrupted`) — chỉ giữ ở dạng tooltip trên các thẻ nhỏ gọn để tiêu đề giữ nguyên không gian; các bề mặt rộng hơn (bảng Phiên, đầu trang chi tiết phiên) hiển thị thêm lý do ngay trên dòng dưới dạng chip lồng bên trong, với các lý do khẩn cấp (lời nhắc xin quyền, bị ngắt) dùng sắc hổ phách nóng hơn |
+| **Bảng Kanban**                   | Hai chế độ với nút chuyển ở đầu trang (lưu trong `localStorage`): **Agent** — 4 cột (Đang làm / Đang chờ / Hoàn tất / Lỗi), và **Phiên** — 5 cột (Hoạt động / Đang chờ / Hoàn tất / Lỗi / Bỏ dở). Cột **Đang chờ** ánh xạ trực tiếp trạng thái lưu trữ `waiting` của Agent — được đặt khi Claude Code & Codex đang ngồi ở dòng nhập (phiên mới, giữa các lượt, hoặc đang bị chặn bởi Notification xin quyền) và chuyển sang `working` ngay khi người dùng tiếp tục (UserPromptSubmit / PreToolUse). Mỗi tiêu đề cột có biểu tượng `?` với tooltip giải thích vòng đời. Mỗi cột tìm nạp theo trạng thái từ máy chủ (không giới hạn thực tế mỗi cột), sau đó phân trang phía client với 10 thẻ mỗi cột kèm nút "Hiện thêm". Đăng ký WebSocket bám theo chế độ đang xem (`agent_*` so với `session_*`) nên cập nhật khác chế độ không gây tải lại. Huy hiệu Đang chờ hiển thị `awaiting_reason` của hàng dưới dạng tooltip khi hover — **Cần phản hồi** (`notification`), **Xong lượt** (`stop`), **Chờ prompt** (`session_start`), **Bị ngắt** (`interrupted`) — chỉ giữ ở dạng tooltip trên các thẻ nhỏ gọn để tiêu đề giữ nguyên không gian; các bề mặt rộng hơn (bảng Phiên, đầu trang chi tiết phiên) hiển thị thêm lý do ngay trên dòng dưới dạng chip lồng bên trong, với các lý do khẩn cấp (lời nhắc xin quyền, bị ngắt) dùng sắc hổ phách nóng hơn |
 | **Phiên**                       | Bảng toàn bộ phiên có tìm kiếm, bộ lọc và **phân trang phía máy chủ**. Mỗi lần đổi trang gọi `/api/sessions?status=&q=&limit=10&offset=…`, nên tính toán chi phí chỉ chạy trên trang đang hiển thị — không phụ thuộc số phiên trong CSDL. Ô tìm kiếm (`q=`) thực hiện so khớp không phân biệt hoa thường trên `id` / `name` / `cwd` ở máy chủ với debounce 300 ms; phản hồi kèm `total` cho bộ phân trang. Bộ lọc trạng thái, tìm kiếm và phân trang kết hợp với nhau. Tên dễ đọc của mỗi phiên được đọc từ bản ghi và đồng bộ thời gian thực — tiêu đề rõ ràng do người dùng đặt qua `/rename`, `claude -n` hoặc `Ctrl+R` trong picker (dòng `custom-title` của JSONL) luôn thắng, nếu không thì dùng `ai-title` tự sinh, nếu vẫn chưa có thì **prompt đầu tiên của người dùng** (được cắt ngắn, bỏ qua nhiễu tool-result / lệnh slash) sẽ điền tên placeholder của phiên cùng tên/nhiệm vụ placeholder của main agent — nhờ đó các phiên không bao giờ có tiêu đề (kể cả phiên được nhập) vẫn cho biết mình đang làm gì; dashboard hiển thị tên đó (lùi về ID rút gọn khi chưa đặt) trên thẻ tác nhân, Dashboard, Activity Feed và picker tiếp tục của trang Run |
 | **Chi tiết phiên**                 | Bảng tổng quan thời gian thực mỗi phiên với banner tác nhân đang hoạt động (công cụ + tác vụ hiện tại), sáu ô đếm (sự kiện kèm tốc độ sự kiện/phút, lượt gọi công cụ, subagent, lần nén, lỗi, thời lượng đang đếm), thanh sử dụng top công cụ, phân tích theo loại subagent, dải dòng chảy token, và đám mây chip loại sự kiện — tất cả được làm mới trực tiếp theo sự kiện hook. Bên dưới: cây phân cấp tác nhân, dòng thời gian sự kiện đầy đủ với bộ lọc đa chiều, nhóm Pre/Post theo `tool_use_id`, khối tóm tắt dễ đọc, bộ kết xuất nhận biết công cụ (terminal cho Bash, diff cho Edit, code có số dòng cho Read/Write, danh sách kết quả khớp cho Grep, thẻ key/value cho công cụ MCP), và tab Conversation hiển thị bản ghi — bao gồm tin nhắn gõ giữa lượt (xếp hàng khi Claude còn đang làm việc), đặt đúng vị trí Claude thực sự nhận được, và thông báo từ harness được gán cho System — với markdown (tiêu đề, danh sách, blockquote, bảng, danh sách công việc), khối code có syntax highlight (js/ts, python, json, bash, html, css, sql, yaml, diff) kèm số dòng và nút sao chép, cùng các khối tool call có style theo từng công cụ (Bash → terminal, Edit → cũ/mới song song, Write → nhãn file, Read → chip đường dẫn, Grep → thẻ pattern). Khi phiên đang bị chặn chờ người dùng, một **banner chờ phản hồi** màu vàng dưới đầu trang nêu rõ `awaiting_reason`, lời giải thích của nó, và phiên đã chờ trong bao lâu (chấm nhấp nháy + thời gian tương đối); huy hiệu Đang chờ ở đầu trang mang cùng lý do dưới dạng chip lồng bên trong |
 | **Nguồn cấp dữ liệu hoạt động**                  | Nhật ký sự kiện phát trực tuyến theo thời gian thực với tính năng tạm dừng/tiếp tục và phân trang; nhấp vào bất kỳ hàng sự kiện nào để mở rộng nội dung hook payload ngay tại chỗ (bảng EventDetail nội tuyến); nút "Phiên →" chuyên biệt ở cuối mỗi hàng điều hướng trực tiếp đến chi tiết phiên mà không thu gọn feed                                                                   |
@@ -347,7 +347,7 @@ cd Claude-Code-Agent-Monitor
 npm run setup
 ```
 
-### 2. Cấu hình móc Claude Code
+### 2. Cấu hình móc Claude Code & Codex
 
 ```bash
 npm run install-hooks
