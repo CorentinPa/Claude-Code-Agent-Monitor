@@ -1398,59 +1398,64 @@ function watchdogCheck() {
         continue;
       }
 
-      // Check if we already recorded these errors
-      const existingErrorCount = db
-        .prepare(
-          "SELECT COUNT(*) as cnt FROM events WHERE session_id = ? AND event_type = 'APIError'"
-        )
-        .get(sess.id).cnt;
+      // Keep distinct error summaries, not raw error count. Claude can append
+      // the same terminal API failure many times while it retries (notably an
+      // expired OAuth session). Comparing that raw count to the deliberately
+      // de-duplicated event table caused this watchdog to rewrite and broadcast
+      // an already-errored session every 15 seconds. Besides notification
+      // spam, that made `updated_at` look like fresh user activity.
+      const knownSummaries = new Set(
+        db
+          .prepare(`SELECT summary FROM events WHERE session_id = ? AND event_type = 'APIError'`)
+          .all(sess.id)
+          .map((r) => r.summary)
+      );
+      let recordedNewError = false;
 
-      if (existingErrorCount < result.errors.length) {
-        // Batch-fetch existing error summaries to avoid per-error SELECT
-        const existingSummaries = new Set(
-          db
-            .prepare(`SELECT summary FROM events WHERE session_id = ? AND event_type = 'APIError'`)
-            .all(sess.id)
-            .map((r) => r.summary)
+      for (const apiErr of result.errors) {
+        const summary = `${apiErr.type}: ${apiErr.message}`;
+        if (knownSummaries.has(summary)) continue;
+        // Add immediately so duplicate entries in this single transcript read
+        // remain one durable APIError event as well.
+        knownSummaries.add(summary);
+        const createdAt = Date.parse(apiErr.timestamp || "")
+          ? new Date(apiErr.timestamp).toISOString()
+          : new Date().toISOString();
+        stmts.insertEventAt.run(
+          sess.id,
+          mainAgentId,
+          "APIError",
+          null,
+          summary,
+          JSON.stringify(apiErr),
+          createdAt
         );
+        broadcast("new_event", {
+          session_id: sess.id,
+          agent_id: mainAgentId,
+          event_type: "APIError",
+          tool_name: null,
+          summary,
+          created_at: createdAt,
+        });
+        recordedNewError = true;
+      }
 
-        for (const apiErr of result.errors) {
-          const summary = `${apiErr.type}: ${apiErr.message}`;
-          if (existingSummaries.has(summary)) continue;
-
-          stmts.insertEvent.run(
-            sess.id,
-            mainAgentId,
-            "APIError",
-            null,
-            summary,
-            JSON.stringify(apiErr)
-          );
-          broadcast("new_event", {
-            session_id: sess.id,
-            agent_id: mainAgentId,
-            event_type: "APIError",
-            tool_name: null,
-            summary,
-            created_at: apiErr.timestamp || new Date().toISOString(),
-          });
-        }
-
-        // Flip to error only when a NEW error was detected this tick AND it is
-        // still unrecovered at the transcript tail. The events above are kept
-        // for history regardless, but a transient error the CLI already retried
-        // past (successful turns after it) must not trip the session to `error`.
-        // (The newErrorRecorded gate also stops re-reads from yanking a
-        // recovered session back into error.)
-        if (isErrorAtTail(result)) {
+      // Flip to error only when a NEW distinct error was persisted this tick
+      // AND it is still unrecovered at the transcript tail. An unchanged
+      // terminal error is already represented in the DB, so it must be a true
+      // no-op: no timestamp touch, no WebSocket frame, and no duplicate alert.
+      if (recordedNewError && isErrorAtTail(result)) {
+        const currentSession = stmts.getSession.get(sess.id);
+        if (currentSession && currentSession.status !== "error") {
           stmts.updateSession.run(null, "error", null, null, sess.id);
           broadcast("session_updated", stmts.getSession.get(sess.id));
-          if (mainAgent && mainAgent.status !== "completed" && mainAgent.status !== "error") {
-            stmts.updateAgent.run(null, "error", null, null, null, null, mainAgentId);
-            if (mainAgentId) {
-              stmts.clearAgentAwaitingInput.run(mainAgentId);
-              broadcast("agent_updated", stmts.getAgent.get(mainAgentId));
-            }
+        }
+        if (mainAgent && mainAgent.status !== "completed" && mainAgent.status !== "error") {
+          stmts.updateAgent.run(null, "error", null, null, null, null, mainAgentId);
+          if (mainAgentId) {
+            stmts.clearAgentAwaitingInput.run(mainAgentId);
+            broadcast("agent_updated", stmts.getAgent.get(mainAgentId));
           }
         }
       }

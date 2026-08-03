@@ -92,6 +92,7 @@ const exampleMainAgent = {
   parent_agent_id: null,
   metadata: '{"model":"claude-opus-4-20250514"}',
   updated_at: "2026-06-25T14:31:50.119Z",
+  last_activity: "2026-06-25T14:31:50.119Z",
   awaiting_input_since: null,
   awaiting_reason: null,
 };
@@ -110,6 +111,7 @@ const exampleSubagent = {
   parent_agent_id: "b7f3a2c1-4e5d-4a8b-9c2f-1d6e8a0b3c4d-main",
   metadata: null,
   updated_at: "2026-06-25T14:14:09.882Z",
+  last_activity: "2026-06-25T14:14:09.882Z",
   awaiting_input_since: null,
   awaiting_reason: null,
 };
@@ -131,7 +133,7 @@ const paths = {
       tags: ["Sessions"],
       summary: "List sessions",
       description:
-        "Returns a paginated list of sessions, newest activity first, each enriched with a SQL `agent_count` (LEFT JOIN onto agents), a `last_activity` alias of `updated_at`, a card-ready optional `prompt_preview` (up to two newest distinct real human prompts, oldest to newest and newline-separated; Claude persists this bounded summary from local JSONL, Codex derives it from durable user-message events, and historical rows fall back to the main task), and a `cost` computed from the session's token usage against the current pricing rules. The `status`, `q`, and repeatable `cwd` filters compose (AND), while repeated `cwd` values include any matching project directory; `q` is a case-insensitive LIKE across `id`, `name`, and `cwd`. `total` reflects all rows matching the filters independent of `limit`/`offset` so paginators stay accurate, while `cost` is only calculated for the rows on the returned page (when `sort_by=price` it is computed across all matching rows so the price sort is correct). The endpoint is read-only with no side effects; `metadata` on each session is returned as a raw JSON-encoded string, not a parsed object.",
+        "Returns a paginated list of sessions, newest real activity first, each enriched with a SQL `agent_count` (LEFT JOIN onto agents), a `last_activity` timestamp derived from the latest durable session event (falling back to its lifecycle timestamp for eventless historical rows, never mutable bookkeeping `updated_at`), a card-ready optional `prompt_preview` (up to two newest distinct real human prompts, oldest to newest and newline-separated; Claude persists this bounded summary from local JSONL, Codex derives it from durable user-message events, and historical rows fall back to the main task), and a `cost` computed from the session's token usage against the current pricing rules. The `status`, `q`, and repeatable `cwd` filters compose (AND), while repeated `cwd` values include any matching project directory; `q` is a case-insensitive LIKE across `id`, `name`, and `cwd`. `total` reflects all rows matching the filters independent of `limit`/`offset` so paginators stay accurate, while `cost` is only calculated for the rows on the returned page (when `sort_by=price` it is computed across all matching rows so the price sort is correct). The endpoint is read-only with no side effects; `metadata` on each session is returned as a raw JSON-encoded string, not a parsed object.",
       operationId: "listSessions",
       parameters: [
         { $ref: "#/components/parameters/SessionStatusQuery", example: "active" },

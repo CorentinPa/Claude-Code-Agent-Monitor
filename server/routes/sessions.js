@@ -28,6 +28,16 @@ const {
 
 const router = Router();
 
+// A session's mutable `updated_at` also changes for metadata repair, title
+// discovery, and other bookkeeping. The UI's "Last active" label must instead
+// reflect the latest durable CLI event, with lifecycle timestamps only as a
+// fallback for historical/eventless rows.
+const SESSION_LAST_ACTIVITY_SQL = `COALESCE(
+  (SELECT MAX(e.created_at) FROM events e WHERE e.session_id = s.id),
+  s.ended_at,
+  s.started_at
+)`;
+
 // Compact cards need enough context to distinguish a meaningful task from a
 // renamed session title. Both providers preserve their newest two distinct
 // human turns as a tiny newline-separated summary. Claude derives it from its
@@ -230,7 +240,7 @@ router.get("/", (req, res) => {
   if (sortBy === "price") {
     const allRows = db
       .prepare(
-        `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity,
+        `SELECT s.*, COUNT(a.id) as agent_count, ${SESSION_LAST_ACTIVITY_SQL} as last_activity,
                 ${SESSION_PROMPT_PREVIEW_SQL} AS prompt_preview
          FROM sessions s LEFT JOIN agents a ON a.session_id = s.id
          ${whereSql}
@@ -285,16 +295,16 @@ router.get("/", (req, res) => {
       rows = allRows.slice(offset, offset + limit);
     }
   } else {
-    let orderSql = "s.updated_at DESC";
+    let orderSql = "last_activity DESC";
     if (sortBy === "time") {
-      orderSql = `s.updated_at ${sortDesc ? "DESC" : "ASC"}`;
+      orderSql = `last_activity ${sortDesc ? "DESC" : "ASC"}`;
     } else if (sortBy === "duration") {
       orderSql = `(julianday(COALESCE(s.ended_at, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))) - julianday(s.started_at)) ${sortDesc ? "DESC" : "ASC"}`;
     }
 
     rows = db
       .prepare(
-        `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity,
+        `SELECT s.*, COUNT(a.id) as agent_count, ${SESSION_LAST_ACTIVITY_SQL} as last_activity,
                 ${SESSION_PROMPT_PREVIEW_SQL} AS prompt_preview
          FROM sessions s LEFT JOIN agents a ON a.session_id = s.id
          ${whereSql}

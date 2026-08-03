@@ -180,6 +180,19 @@ function startServer(app, port) {
         },
       })
     );
+    // API handlers (including Swagger and ReDoc) are registered above. Never
+    // let an unrecognised `/api/*` request fall through to the React shell:
+    // otherwise a typo or stale reference asset can mount the dashboard's
+    // first-run overlay over API documentation instead of returning a useful
+    // API-shaped 404 response.
+    app.use("/api", (req, res) => {
+      res.status(404).json({
+        error: {
+          code: "ENOTFOUND",
+          message: `API route not found: ${req.method} ${req.originalUrl}`,
+        },
+      });
+    });
     app.get("*", (_req, res) => {
       res.setHeader("Cache-Control", "no-cache, must-revalidate");
       res.sendFile(path.join(clientDist, "index.html"));

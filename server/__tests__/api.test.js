@@ -206,6 +206,7 @@ describe("OpenAPI / Swagger", () => {
     assert.equal(res.status, 200);
     assert.match(res.headers["content-type"], /text\/html/);
     assert.match(res.body, /swagger/i);
+    assert.doesNotMatch(res.body, /What would you like to monitor\?/i);
   });
 
   it("should serve the ReDoc reference page", async () => {
@@ -215,6 +216,7 @@ describe("OpenAPI / Swagger", () => {
     // References the spec and the locally-served bundle (no CDN).
     assert.match(res.body, /spec-url="\/api\/openapi\.json"/);
     assert.match(res.body, /src="\/api\/redoc\/redoc\.standalone\.js"/);
+    assert.doesNotMatch(res.body, /What would you like to monitor\?/i);
   });
 
   it("should serve the self-hosted ReDoc bundle", async () => {
@@ -2260,6 +2262,106 @@ describe("Watchdog API-error detection", () => {
         after.status,
         "error",
         "watchdog must flip session to error when a new transcript error is detected"
+      );
+    } finally {
+      try {
+        fs.unlinkSync(tmpTranscript);
+      } catch {
+        // ignore
+      }
+    }
+  });
+
+  it("does not refresh an unchanged terminal error on later watchdog ticks", async () => {
+    const tmpTranscript = path.join(os.tmpdir(), `watchdog-duplicate-${Date.now()}.jsonl`);
+    const sessionId = `watchdog-duplicate-${Date.now()}`;
+    const hooks = require("../routes/hooks");
+
+    try {
+      await post("/api/hooks/event", {
+        hook_type: "PreToolUse",
+        data: {
+          session_id: sessionId,
+          transcript_path: tmpTranscript,
+          tool_name: "Read",
+          cwd: "/tmp",
+        },
+      });
+
+      // Claude retries authentication failures in-place, leaving repeated
+      // identical terminal entries in the transcript. The dashboard records
+      // one durable error, then every later watchdog pass must be a no-op.
+      const base = Date.now() - 30_000;
+      fs.writeFileSync(
+        tmpTranscript,
+        [0, 1, 2]
+          .map((offset) =>
+            JSON.stringify({
+              isApiErrorMessage: true,
+              error: "authentication_failed",
+              message: { content: [{ text: "OAuth session expired" }] },
+              timestamp: new Date(base + offset).toISOString(),
+            })
+          )
+          .join("\n") + "\n"
+      );
+
+      const staleAt = new Date(Date.now() - 60_000).toISOString();
+      db.prepare("UPDATE sessions SET updated_at = ? WHERE id = ?").run(staleAt, sessionId);
+      hooks.transcriptCache.invalidate(tmpTranscript);
+      hooks.watchdogCheck();
+
+      assert.strictEqual(stmts.getSession.get(sessionId).status, "error");
+      assert.strictEqual(
+        db
+          .prepare(
+            "SELECT COUNT(*) AS count FROM events WHERE session_id = ? AND event_type = 'APIError'"
+          )
+          .get(sessionId).count,
+        1,
+        "repeated identical transcript errors should produce one durable event"
+      );
+
+      // Age it again to force a second watchdog read. Prior behavior rewrote
+      // the error session here, turning the Sessions table's last-active value
+      // into 'just now' and emitting another error notification.
+      const secondStaleAt = new Date(Date.now() - 60_000).toISOString();
+      db.prepare("UPDATE sessions SET updated_at = ? WHERE id = ?").run(secondStaleAt, sessionId);
+      hooks.transcriptCache.invalidate(tmpTranscript);
+      hooks.watchdogCheck();
+
+      const after = stmts.getSession.get(sessionId);
+      assert.strictEqual(after.status, "error");
+      assert.strictEqual(
+        after.updated_at,
+        secondStaleAt,
+        "an unchanged error must not be rewritten as new session activity"
+      );
+      assert.strictEqual(
+        db
+          .prepare(
+            "SELECT COUNT(*) AS count FROM events WHERE session_id = ? AND event_type = 'APIError'"
+          )
+          .get(sessionId).count,
+        1
+      );
+
+      const lastEventAt = db
+        .prepare("SELECT MAX(created_at) AS last_activity FROM events WHERE session_id = ?")
+        .get(sessionId).last_activity;
+      const list = await fetch(`/api/sessions?q=${encodeURIComponent(sessionId)}`);
+      assert.strictEqual(list.status, 200);
+      assert.strictEqual(
+        list.body.sessions[0].last_activity,
+        lastEventAt,
+        "the session list must report durable event time, not mutable updated_at bookkeeping"
+      );
+      const agents = await fetch(`/api/agents?session_id=${encodeURIComponent(sessionId)}`);
+      assert.strictEqual(agents.status, 200);
+      assert.strictEqual(
+        agents.body.agents[0].last_activity,
+        lastEventAt,
+        "dashboard agent cards must use durable activity time too"
       );
     } finally {
       try {

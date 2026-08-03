@@ -1219,6 +1219,24 @@ db.prepare(
 `
 ).run();
 
+// `updated_at` includes local bookkeeping (such as title/card-context
+// backfills), so API card/list "last activity" must use the latest durable
+// event instead. Eventless historical rows fall back to their lifecycle time.
+const LAST_ACTIVITY_SQL = `COALESCE(
+  (SELECT MAX(e.created_at) FROM events e WHERE e.session_id = s.id),
+  s.ended_at,
+  s.started_at
+)`;
+
+// Agent cards have the same distinction: lifecycle and metadata state updates
+// are not a new CLI action. Resolve their activity from their own durable
+// events, then retain a safe lifecycle fallback for imported legacy rows.
+const AGENT_LAST_ACTIVITY_SQL = `COALESCE(
+  (SELECT MAX(e.created_at) FROM events e WHERE e.agent_id = a.id),
+  a.ended_at,
+  a.started_at
+)`;
+
 // Shared compact-card context: both providers persist their two most recent
 // distinct human turns (newline-separated). Claude fills that compact cache
 // from its JSONL scanner; Codex's append-only user-message events are already
@@ -1267,16 +1285,16 @@ const CARD_PROMPT_PREVIEW_SQL = `COALESCE(
 const stmts = {
   getSession: db.prepare("SELECT * FROM sessions WHERE id = ?"),
   listSessions: db.prepare(
-    `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity,
+    `SELECT s.*, COUNT(a.id) as agent_count, ${LAST_ACTIVITY_SQL} as last_activity,
             ${CARD_PROMPT_PREVIEW_SQL} AS prompt_preview
      FROM sessions s LEFT JOIN agents a ON a.session_id = s.id
-     GROUP BY s.id ORDER BY s.updated_at DESC LIMIT ? OFFSET ?`
+     GROUP BY s.id ORDER BY last_activity DESC LIMIT ? OFFSET ?`
   ),
   listSessionsByStatus: db.prepare(
-    `SELECT s.*, COUNT(a.id) as agent_count, s.updated_at as last_activity,
+    `SELECT s.*, COUNT(a.id) as agent_count, ${LAST_ACTIVITY_SQL} as last_activity,
             ${CARD_PROMPT_PREVIEW_SQL} AS prompt_preview
      FROM sessions s LEFT JOIN agents a ON a.session_id = s.id
-     WHERE s.status = ? GROUP BY s.id ORDER BY s.updated_at DESC LIMIT ? OFFSET ?`
+     WHERE s.status = ? GROUP BY s.id ORDER BY last_activity DESC LIMIT ? OFFSET ?`
   ),
   insertSession: db.prepare(
     "INSERT INTO sessions (id, name, status, cwd, model, started_at, updated_at, metadata) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), ?)"
@@ -1367,12 +1385,17 @@ const stmts = {
   ),
 
   getAgent: db.prepare("SELECT * FROM agents WHERE id = ?"),
-  listAgents: db.prepare("SELECT * FROM agents ORDER BY started_at DESC LIMIT ? OFFSET ?"),
+  listAgents: db.prepare(
+    `SELECT a.*, ${AGENT_LAST_ACTIVITY_SQL} AS last_activity
+     FROM agents a ORDER BY last_activity DESC LIMIT ? OFFSET ?`
+  ),
   listAgentsBySession: db.prepare(
-    "SELECT * FROM agents WHERE session_id = ? ORDER BY started_at DESC"
+    `SELECT a.*, ${AGENT_LAST_ACTIVITY_SQL} AS last_activity
+     FROM agents a WHERE a.session_id = ? ORDER BY last_activity DESC`
   ),
   listAgentsByStatus: db.prepare(
-    "SELECT * FROM agents WHERE status = ? ORDER BY started_at DESC LIMIT ? OFFSET ?"
+    `SELECT a.*, ${AGENT_LAST_ACTIVITY_SQL} AS last_activity
+     FROM agents a WHERE a.status = ? ORDER BY last_activity DESC LIMIT ? OFFSET ?`
   ),
   insertAgent: db.prepare(
     "INSERT INTO agents (id, session_id, name, type, subagent_type, status, task, started_at, updated_at, parent_agent_id, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), ?, ?)"

@@ -12,6 +12,15 @@ const { parseProviders, sessionIdInProvidersClause } = require("../lib/provider-
 
 const router = Router();
 
+// The mutable `agents.updated_at` includes status and metadata bookkeeping.
+// Agent cards must show the latest durable provider event so a maintenance
+// sweep never makes an idle/error agent appear freshly active.
+const AGENT_LAST_ACTIVITY_SQL = `COALESCE(
+  (SELECT MAX(e.created_at) FROM events e WHERE e.agent_id = a.id),
+  a.ended_at,
+  a.started_at
+)`;
+
 router.get("/", (req, res) => {
   const rawLimit = parseInt(req.query.limit);
   const limit = rawLimit > 0 ? rawLimit : 10000;
@@ -29,7 +38,7 @@ router.get("/", (req, res) => {
     const clauses = [];
     const params = [];
     if (session_id) {
-      clauses.push("session_id = ?");
+      clauses.push("a.session_id = ?");
       params.push(session_id);
     }
     const sourceScope = sessionIdInSourcesClause(sources, "session_id");
@@ -43,12 +52,14 @@ router.get("/", (req, res) => {
       params.push(...providerScope.params);
     }
     if (status) {
-      clauses.push("status = ?");
+      clauses.push("a.status = ?");
       params.push(status);
     }
     rows = db
       .prepare(
-        `SELECT * FROM agents WHERE ${clauses.join(" AND ")} ORDER BY started_at DESC LIMIT ? OFFSET ?`
+        `SELECT a.*, ${AGENT_LAST_ACTIVITY_SQL} AS last_activity
+         FROM agents a WHERE ${clauses.join(" AND ")}
+         ORDER BY last_activity DESC LIMIT ? OFFSET ?`
       )
       .all(...params, limit, offset);
   } else if (status) {

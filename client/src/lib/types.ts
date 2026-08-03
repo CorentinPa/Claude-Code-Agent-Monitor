@@ -758,6 +758,10 @@ export interface Agent {
   /** ISO timestamp of the most recent event attributed to this agent. Maps to
    *  `agents.updated_at`; bumped on every ingested event for this agent. */
   updated_at: string;
+  /** Latest durable provider event for this agent. List/detail reads derive it
+   *  independently of mutable metadata/status bookkeeping so cards report
+   *  real activity time; absent only from lightweight live WebSocket frames. */
+  last_activity?: string;
   /** Id of the agent that spawned this one via Task/Agent; null for main agents
    *  and for subagents whose parent wasn't recorded (e.g. legacy imports). Maps
    *  to `agents.parent_agent_id`; the self-reference that builds the agent tree. */

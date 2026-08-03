@@ -141,6 +141,8 @@ returns the same optional field.
 curl http://localhost:4820/api/sessions?limit=10&status=active
 ```
 
+`last_activity` in every list row is the timestamp of the latest durable session event. It does **not** reuse the mutable `updated_at` bookkeeping timestamp, so a title, card-context, or watchdog repair cannot make an idle session appear newly active. Eventless historical rows fall back to their lifecycle timestamp.
+
 **Example Response:**
 
 ```json
@@ -185,6 +187,7 @@ classDiagram
         +string started_at
         +string ended_at
         +string updated_at
+        +string last_activity "latest durable event; lifecycle fallback"
         +string awaiting_input_since "null unless Waiting"
         +string awaiting_reason "notification|stop|session_start|interrupted; null unless Waiting"
         +number cost
@@ -383,6 +386,8 @@ curl http://localhost:4820/api/sessions/sess_abc123/agents
 ```
 
 > **Note on `cost`** — `/api/agents` and `/api/sessions/:id/agents` attach a `cost` (USD) to each agent: the agent's **own** cost, computed server-side from the per-agent token buckets stored in `agents.metadata.tokens` and priced at the current pricing rules (at the agent's start date, so promo/standard cutovers apply — see [Pricing](#pricing)). It is `0` for main agents (whose cost is the session total, reported by `/api/pricing/cost/:sessionId`), for compaction pseudo-agents, and for any subagent whose transcript is unavailable. This lets a subagent card show only what that subagent spent instead of the whole session's total.
+
+> **Note on real activity time** — agent list/detail reads include `last_activity`, derived from the latest durable event attributed to that agent. Use it for user-facing time labels instead of mutable `updated_at`, which can change during status or metadata maintenance without new CLI activity.
 
 > **Note on `status` vs Waiting** — agents are persisted with one of `idle | connected | working | completed | error`. The yellow **Waiting** badge surfaced in the dashboard is a UI overlay derived from `awaiting_input_since` being non-null on a non-terminal agent (typically `idle` after a `Stop`, or `connected` right after `SessionStart`). Filter `?status=idle` on `/api/agents` and inspect `awaiting_input_since` to enumerate currently-waiting main agents.
 

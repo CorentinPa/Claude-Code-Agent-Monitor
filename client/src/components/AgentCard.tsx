@@ -301,7 +301,7 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
         ) : (
           <span className="flex items-center gap-1 flex-shrink-0">
             <Clock className="w-3 h-3" />
-            {timeAgo(agent.updated_at || agent.started_at)}
+            {timeAgo(agent.last_activity || agent.updated_at || agent.started_at)}
           </span>
         )}
         <span className="ml-auto flex items-center gap-1 min-w-0 opacity-50">

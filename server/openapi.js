@@ -258,7 +258,13 @@ function createOpenApiSpec() {
             },
             updated_at: { type: "string", format: "date-time" },
             agent_count: { type: "integer", nullable: true },
-            last_activity: { type: "string", format: "date-time", nullable: true },
+            last_activity: {
+              type: "string",
+              format: "date-time",
+              nullable: true,
+              description:
+                "Timestamp of the latest durable session event, falling back to lifecycle timestamps only for eventless historical rows. Unlike updated_at, metadata bookkeeping does not change this value.",
+            },
             cost: { type: "number", nullable: true },
             awaiting_input_since: {
               type: "string",
@@ -300,6 +306,13 @@ function createOpenApiSpec() {
               description: "JSON-encoded agent metadata",
             },
             updated_at: { type: "string", format: "date-time" },
+            last_activity: {
+              type: "string",
+              format: "date-time",
+              nullable: true,
+              description:
+                "Latest durable event attributed to this agent. List/detail reads derive it independently of mutable updated_at bookkeeping; lightweight live WebSocket frames may omit it.",
+            },
             awaiting_input_since: {
               type: "string",
               format: "date-time",
