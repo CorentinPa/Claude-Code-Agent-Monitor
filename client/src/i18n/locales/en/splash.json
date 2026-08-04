@@ -24,8 +24,8 @@
   "hookGate": {
     "kicker": "Live tracking",
     "title": "Set up live monitoring",
-    "description": "Install lightweight local hooks so new sessions and events arrive as they happen.",
-    "selectedProviders": "Selected providers",
+    "description": "Install lightweight local hooks only for the selected providers that still need them.",
+    "selectedProviders": "Hooks still needed for",
     "realTime": "Hooks send lifecycle events to this local dashboard in real time. Your data stays on this machine.",
     "checking": "Checking existing hook setup...",
     "installed": "Hooks installed and ready for live monitoring",

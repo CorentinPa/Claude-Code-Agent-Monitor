@@ -1066,6 +1066,10 @@
                     models. A live/offline indicator and auto-refresh via WebSocket keep
                     everything current. All charts are responsive and adapt to mobile viewports.
                   </p>
+                  <p>
+                    Long Analytics legends use compact pages with localized controls. Legends
+                    that fit on one page stay unchanged.
+                  </p>
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-blue">⚡</div>
@@ -1284,6 +1288,10 @@
                     cards, concurrency swim-lanes, and complexity bubble charts round out the
                     view. Six headline stat cards each include an info popover explaining
                     the metric and its current value. Status filter applies globally.
+                  </p>
+                  <p>
+                    Data-driven Workflows legends also paginate when labels would make a chart
+                    card too tall, while keeping every label reachable.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1818,6 +1826,11 @@ npm run mcp:start:repl         # interactive CLI with tab completion
             source, then use the provider-locked live-monitoring setup gate to install the selected
             hooks in place and review its output. You can also explicitly confirm hooks are already
             installed before continuing.
+          </p>
+          <p>
+            First-run readiness follows the selected scope: Claude Code requires Claude hooks,
+            Codex requires Codex hooks, and Both requires both. Ready selections open the
+            dashboard immediately; otherwise only missing selected providers appear in setup.
           </p>
 
           <h3>Alternative: Docker / Podman</h3>
@@ -6984,8 +6997,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=60" defer></script>
-    <script src="script.js?v=45" defer></script>
+    <script src="i18n-content.js?v=61" defer></script>
+    <script src="script.js?v=46" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

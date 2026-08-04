@@ -2607,7 +2607,8 @@
             <p>
               Hooks fire to the local server in milliseconds. WebSocket push updates the UI
               before you've taken your finger off the keyboard. A brief branding splash greets you
-              on load, and pulsing skeletons (never blank spinners) fill in while data streams.
+              on load, skips hook setup when the selected providers are already ready, and pulsing
+              skeletons (never blank spinners) fill in while data streams.
             </p>
           </div>
           <div class="value-card" style="--card-glow: rgba(52, 211, 153, 0.5)">
@@ -2999,7 +3000,7 @@
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
                 <h4>Analytics</h4>
-                <p>Token usage, tool frequency, activity heatmap, session trends</p>
+                <p>Token usage, activity heatmap, session trends, and paginated long legends</p>
               </div>
             </div>
           </div>
@@ -3152,7 +3153,7 @@
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
                 <h4>Workflows</h4>
-                <p>D3-powered orchestration DAG, tool Sankey, collaboration network</p>
+                <p>D3 orchestration, tool Sankey, collaboration network, bounded legends</p>
               </div>
             </div>
           </div>
@@ -3194,7 +3195,7 @@
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
                 <h4>Settings</h4>
-                <p>Claude and Codex pricing, provider-scoped data, live-configurable session homes, first-run hook setup, and real-time lifecycle states that keep active, waiting, and completed cards accurate — including compact two-request task history for either provider</p>
+                <p>Claude and Codex pricing, provider-scoped data, live-configurable session homes, selection-aware first-run hook readiness, and real-time lifecycle states that keep active, waiting, and completed cards accurate — including compact two-request task history for either provider</p>
               </div>
             </div>
           </div>

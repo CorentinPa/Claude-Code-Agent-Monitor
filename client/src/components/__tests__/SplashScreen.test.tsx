@@ -1,13 +1,13 @@
 /**
  * @file SplashScreen.test.tsx
- * @description Verifies the first-run provider choice and provider-locked live
- * hook installation gate, including existing-hook warnings, installer output,
- * and the explicit continuation path after a successful install.
+ * @description Verifies provider-aware onboarding skips setup for ready
+ * selections and offers installation only for selected providers whose
+ * dashboard hooks are missing.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SplashScreen } from "../SplashScreen";
 import { api } from "../../lib/api";
@@ -24,35 +24,80 @@ vi.mock("../../lib/api", () => ({
 const info = vi.mocked(api.settings.info);
 const installHooks = vi.mocked(api.settings.installHooks);
 
+function hookInfo(claudeInstalled: boolean, codexInstalled: boolean) {
+  return {
+    hooks: {
+      installed: claudeInstalled || codexInstalled,
+      path: "~/.claude/settings.json",
+      hooks: {},
+      providers: {
+        claude: {
+          installed: claudeInstalled,
+          has_dashboard_hooks: claudeInstalled,
+          path: "~/.claude/settings.json",
+          hooks: {},
+        },
+        codex: {
+          installed: codexInstalled,
+          has_dashboard_hooks: codexInstalled,
+          path: "~/.codex/hooks.json",
+          hooks: {},
+        },
+      },
+    },
+  } as unknown as Awaited<ReturnType<typeof api.settings.info>>;
+}
+
 describe("SplashScreen", () => {
   beforeEach(() => {
     sessionStorage.clear();
     localStorage.clear();
     vi.clearAllMocks();
-    info.mockResolvedValue({
-      hooks: {
-        installed: false,
-        path: "~/.claude/settings.json",
-        hooks: {},
-        providers: {
-          claude: {
-            installed: false,
-            path: "~/.claude/settings.json",
-            hooks: {},
-          },
-          codex: {
-            installed: true,
-            has_dashboard_hooks: true,
-            path: "~/.codex/hooks.json",
-            hooks: {},
-          },
-        },
-      },
-    } as unknown as Awaited<ReturnType<typeof api.settings.info>>);
+    info.mockResolvedValue(hookInfo(false, false));
   });
 
-  it("installs the selected provider hooks, shows output, then continues", async () => {
+  it("skips setup when Claude Code is selected and its hooks are installed", async () => {
     const user = userEvent.setup();
+    info.mockResolvedValue(hookInfo(true, false));
+
+    render(<SplashScreen />);
+    await user.click(screen.getByRole("button", { name: "Continue to dashboard" }));
+
+    expect(info).toHaveBeenCalledTimes(1);
+    expect(installHooks).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(sessionStorage.getItem("provider-onboarding-shown-v1")).toBe("1");
+  });
+
+  it("skips setup when Codex is selected and its hooks are installed", async () => {
+    const user = userEvent.setup();
+    info.mockResolvedValue(hookInfo(false, true));
+
+    render(<SplashScreen />);
+    await user.click(screen.getByRole("radio", { name: /codex beta/i }));
+    await user.click(screen.getByRole("button", { name: "Continue to dashboard" }));
+
+    expect(info).toHaveBeenCalledTimes(1);
+    expect(installHooks).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("skips setup for Both only when both providers are installed", async () => {
+    const user = userEvent.setup();
+    info.mockResolvedValue(hookInfo(true, true));
+
+    render(<SplashScreen />);
+    await user.click(screen.getByRole("radio", { name: /both/i }));
+    await user.click(screen.getByRole("button", { name: "Continue to dashboard" }));
+
+    expect(info).toHaveBeenCalledTimes(1);
+    expect(installHooks).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("offers only the missing provider when Both is partially installed", async () => {
+    const user = userEvent.setup();
+    info.mockResolvedValue(hookInfo(true, false));
     installHooks.mockResolvedValue({
       ok: true,
       results: {
@@ -75,14 +120,12 @@ describe("SplashScreen", () => {
 
     render(<SplashScreen />);
 
-    await user.click(screen.getByRole("radio", { name: /codex beta/i }));
+    await user.click(screen.getByRole("radio", { name: /both/i }));
     await user.click(screen.getByRole("button", { name: "Continue to dashboard" }));
 
-    expect(await screen.findByRole("heading", { name: "Set up live monitoring" })).toBeVisible();
-    expect(screen.getByText("Existing dashboard hooks detected")).toBeVisible();
-    expect(
-      screen.getByText(/Dashboard hooks already exist for a selected provider/i)
-    ).toBeVisible();
+    const hookDialog = await screen.findByRole("dialog", { name: "Set up live monitoring" });
+    expect(within(hookDialog).getByText("Codex")).toBeVisible();
+    expect(within(hookDialog).queryByText("Claude Code")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Install hooks" }));
 
@@ -96,7 +139,33 @@ describe("SplashScreen", () => {
     expect(sessionStorage.getItem("provider-onboarding-shown-v1")).toBe("1");
   });
 
-  it("allows a user to explicitly continue when hooks were installed already", async () => {
+  it("offers Claude only when Both is selected and only Codex is installed", async () => {
+    const user = userEvent.setup();
+    info.mockResolvedValue(hookInfo(false, true));
+
+    render(<SplashScreen />);
+    await user.click(screen.getByRole("radio", { name: /both/i }));
+    await user.click(screen.getByRole("button", { name: "Continue to dashboard" }));
+
+    const hookDialog = await screen.findByRole("dialog", { name: "Set up live monitoring" });
+    expect(within(hookDialog).getByText("Claude Code")).toBeVisible();
+    expect(within(hookDialog).queryByText("Codex")).not.toBeInTheDocument();
+  });
+
+  it("ignores Claude readiness when Codex alone is selected", async () => {
+    const user = userEvent.setup();
+    info.mockResolvedValue(hookInfo(true, false));
+
+    render(<SplashScreen />);
+    await user.click(screen.getByRole("radio", { name: /codex beta/i }));
+    await user.click(screen.getByRole("button", { name: "Continue to dashboard" }));
+
+    const hookDialog = await screen.findByRole("dialog", { name: "Set up live monitoring" });
+    expect(within(hookDialog).getByText("Codex")).toBeVisible();
+    expect(within(hookDialog).queryByText("Claude Code")).not.toBeInTheDocument();
+  });
+
+  it("shows setup when the selected provider is missing", async () => {
     const user = userEvent.setup();
     render(<SplashScreen />);
 
@@ -108,5 +177,18 @@ describe("SplashScreen", () => {
     expect(installHooks).not.toHaveBeenCalled();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(sessionStorage.getItem("provider-onboarding-shown-v1")).toBe("1");
+  });
+
+  it("keeps setup available when hook status cannot be checked", async () => {
+    const user = userEvent.setup();
+    info.mockRejectedValue(new Error("offline"));
+
+    render(<SplashScreen />);
+    await user.click(screen.getByRole("button", { name: "Continue to dashboard" }));
+
+    expect(await screen.findByRole("dialog", { name: "Set up live monitoring" })).toBeVisible();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "We could not check your current hook setup"
+    );
   });
 });

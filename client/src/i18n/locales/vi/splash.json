@@ -24,8 +24,8 @@
   "hookGate": {
     "kicker": "Theo dõi trực tiếp",
     "title": "Thiết lập giám sát trực tiếp",
-    "description": "Cài các hook cục bộ gọn nhẹ để phiên và sự kiện mới xuất hiện ngay khi diễn ra.",
-    "selectedProviders": "Nguồn đã chọn",
+    "description": "Chỉ cài hook cục bộ gọn nhẹ cho những nguồn đã chọn còn thiếu hook.",
+    "selectedProviders": "Nguồn vẫn cần hook",
     "realTime": "Hook gửi sự kiện vòng đời đến bảng điều khiển cục bộ này theo thời gian thực. Dữ liệu vẫn ở trên máy của bạn.",
     "checking": "Đang kiểm tra cấu hình hook hiện có...",
     "installed": "Hook đã được cài và sẵn sàng để giám sát trực tiếp",
