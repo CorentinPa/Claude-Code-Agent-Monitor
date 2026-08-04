@@ -8,8 +8,16 @@
 import { z } from "zod";
 import { registrarFor } from "../../core/tool-registry.js";
 import { assertMutationsEnabled } from "../../policy/tool-guards.js";
-import { JsonObjectSchema } from "../schemas.js";
 import type { ToolContext } from "../../types/tool-context.js";
+
+const PushSubscriptionSchema = z.object({
+  endpoint: z.string().url().max(8192),
+  expirationTime: z.number().nullable().optional(),
+  keys: z.object({
+    p256dh: z.string().min(1).max(4096),
+    auth: z.string().min(1).max(4096),
+  }),
+});
 
 export function registerPushTools(context: ToolContext): void {
   const { api, config } = context;
@@ -25,7 +33,7 @@ export function registerPushTools(context: ToolContext): void {
   register(
     "dashboard_subscribe_push",
     "Register a browser PushSubscription object with the dashboard.",
-    { subscription: JsonObjectSchema },
+    { subscription: PushSubscriptionSchema },
     async (args) => {
       assertMutationsEnabled(config);
       return api.post("/api/push/subscribe", { body: args.subscription });

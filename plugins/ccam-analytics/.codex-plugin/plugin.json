@@ -21,7 +21,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "CCAM Analytics",
-    "shortDescription": "Deep analytics and monitoring for Claude Code sessions — cost tracking, token usage breakdowns, ",
+    "shortDescription": "Deep analytics and monitoring for Claude Code sessions — cost tracking, token usage...",
     "longDescription": "Deep analytics and monitoring for Claude Code sessions — cost tracking, token usage breakdowns, usage trends, and productivity scoring powered by Agent Monitor.",
     "developerName": "Son Nguyen",
     "category": "Productivity",

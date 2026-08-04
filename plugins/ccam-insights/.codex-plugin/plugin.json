@@ -21,7 +21,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "CCAM Insights",
-    "shortDescription": "AI-powered insights for Claude Code — pattern detection, anomaly alerting, optimization recommen",
+    "shortDescription": "AI-powered insights for Claude Code — pattern detection, anomaly alerting, optimization...",
     "longDescription": "AI-powered insights for Claude Code — pattern detection, anomaly alerting, optimization recommendations, and session comparison using Agent Monitor analytics.",
     "developerName": "Son Nguyen",
     "category": "Productivity",

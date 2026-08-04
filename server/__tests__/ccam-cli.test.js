@@ -304,7 +304,38 @@ describe("ccam CLI — alerts, rules, webhooks", () => {
     const { code, out } = await ccam("webhooks", "providers");
     assert.equal(code, 0);
     const parsed = JSON.parse(out);
-    assert.ok(parsed.providers.length >= 10);
+    assert.deepEqual(parsed.providers.map((provider) => provider.type).sort(), [
+      "discord",
+      "generic",
+      "google_chat",
+      "make",
+      "mattermost",
+      "n8n",
+      "opsgenie",
+      "pagerduty",
+      "pipedream",
+      "rocketchat",
+      "slack",
+      "splunk_oncall",
+      "teams",
+      "telegram",
+      "zapier",
+    ]);
+  });
+
+  it("webhook update and delete require an id", async () => {
+    for (const action of ["update", "delete"]) {
+      const result = await ccam("webhooks", action, "--yes");
+      assert.equal(result.code, 1);
+      assert.match(result.err, new RegExp(`${action} requires a webhook id`, "i"));
+    }
+  });
+
+  it("unknown alert-rule subcommands report usage before confirmation", async () => {
+    const result = await ccam("alert-rules", "unknown");
+    assert.equal(result.code, 1);
+    assert.match(result.err, /Usage: ccam alert-rules/);
+    assert.doesNotMatch(result.err, /require --yes/);
   });
 });
 

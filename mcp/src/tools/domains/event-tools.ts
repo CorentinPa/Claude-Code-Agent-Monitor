@@ -83,16 +83,17 @@ export function registerEventTools(context: ToolContext): void {
       limit: z.number().int().min(1).max(200).optional(),
       offset: z.number().int().min(0).max(100_000).optional(),
       session_id: z.string().min(1).max(256).optional(),
-      session_ids: z.array(z.string().min(1).max(256)).max(100).optional(),
-      event_types: z.array(z.string().min(1).max(128)).max(100).optional(),
-      tool_names: z.array(z.string().min(1).max(256)).max(100).optional(),
-      agent_ids: z.array(z.string().min(1).max(256)).max(100).optional(),
+      session_ids: z.array(z.string().min(1).max(256)).min(1).max(100).optional(),
+      event_types: z.array(z.string().min(1).max(128)).min(1).max(100).optional(),
+      tool_names: z.array(z.string().min(1).max(256)).min(1).max(100).optional(),
+      agent_ids: z.array(z.string().min(1).max(256)).min(1).max(100).optional(),
       query: z.string().max(1000).optional(),
       from: z.string().max(128).optional(),
       to: z.string().max(128).optional(),
-      sources: z.array(z.string().min(1).max(256)).max(100).optional(),
+      sources: z.array(z.string().min(1).max(256)).min(1).max(100).optional(),
       providers: z
         .array(z.enum(["claude", "codex"]))
+        .min(1)
         .max(2)
         .optional(),
     },

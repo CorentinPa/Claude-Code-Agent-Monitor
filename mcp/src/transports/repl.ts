@@ -95,11 +95,12 @@ interface ToolEntry {
 }
 
 const TOOL_DOMAIN_RULES: Array<[RegExp, string]> = [
+  [/update_status|check_for_updates|agent_homes|set_(claude|codex)_home|install_hooks/, "settings"],
   [/workflow/, "workflows"],
   [/alert/, "alerts"],
   [/webhook/, "webhooks"],
   [/remote_source/, "remote"],
-  [/import|restore_export/, "imports"],
+  [/import|restore_export|rescan_history|upload_history/, "imports"],
   [/_run|run_/, "runs"],
   [/claude_config|codex_config|keybindings|profile/, "config"],
   [/pricing|cost/, "pricing"],
@@ -114,7 +115,7 @@ const TOOL_DOMAIN_RULES: Array<[RegExp, string]> = [
   ],
 ];
 
-function toolDomain(name: string): string {
+export function toolDomain(name: string): string {
   return TOOL_DOMAIN_RULES.find(([pattern]) => pattern.test(name))?.[1] ?? "other";
 }
 

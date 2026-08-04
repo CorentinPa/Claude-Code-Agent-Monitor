@@ -19,6 +19,14 @@ const PLUGINS_DIR = path.join(REPO_ROOT, "plugins");
 const MARKETPLACE = path.join(REPO_ROOT, ".claude-plugin", "marketplace.json");
 const CODEX_MARKETPLACE = path.join(REPO_ROOT, ".agents", "plugins", "marketplace.json");
 const PROJECT_VERSION = readJson(path.join(REPO_ROOT, "package.json")).version;
+const WRITE_CAPABLE = new Set([
+  "ccam-config",
+  "ccam-cost-guard",
+  "ccam-integrations",
+  "ccam-platform",
+  "ccam-runner",
+  "ccam-sessions",
+]);
 
 function readJson(p) {
   return JSON.parse(fs.readFileSync(p, "utf8"));
@@ -57,12 +65,9 @@ describe("plugin marketplace", () => {
     assert.ok(Array.isArray(marketplace.plugins));
   });
 
-  it("ships at least 13 plugins", () => {
-    assert.ok(
-      marketplace.plugins.length >= 13,
-      `expected >=13 marketplace entries, got ${marketplace.plugins.length}`
-    );
-    assert.ok(pluginDirs.length >= 13, `expected >=13 plugin dirs, got ${pluginDirs.length}`);
+  it("ships the complete 14-plugin catalog", () => {
+    assert.equal(marketplace.plugins.length, 14);
+    assert.equal(pluginDirs.length, 14);
   });
 
   it("marketplace entries and plugin dirs are a bijection", () => {
@@ -131,6 +136,14 @@ describe("plugin marketplace", () => {
         assert.equal(manifest.skills, "./skills/");
         assert.ok(manifest.interface?.displayName);
         assert.ok(Array.isArray(manifest.interface?.capabilities));
+        assert.ok(manifest.interface.shortDescription.length <= 96);
+        assert.doesNotMatch(manifest.interface.shortDescription, /[\s,]$/);
+        if (manifest.interface.shortDescription.endsWith("...")) {
+          assert.match(manifest.interface.shortDescription, /\S\.\.\.$/);
+        }
+        if (dir === "ccam-dashboard" || WRITE_CAPABLE.has(dir)) {
+          assert.deepEqual(manifest.interface.capabilities, ["Read", "Write"]);
+        }
       });
 
       it("agents carry valid frontmatter (name === filename, description)", () => {
@@ -166,7 +179,12 @@ describe("plugin marketplace", () => {
           assert.ok(frontmatter.description, `${dir}/skills/${s}/SKILL.md missing description`);
           const openAi = path.join(skillsDir, s, "agents", "openai.yaml");
           assert.ok(fs.existsSync(openAi), `${dir}/skills/${s} missing agents/openai.yaml`);
-          assert.match(fs.readFileSync(openAi, "utf8"), new RegExp(`\\$${s}\\b`));
+          const metadata = fs.readFileSync(openAi, "utf8");
+          assert.match(metadata, new RegExp(`\\$${s}\\b`));
+          assert.match(
+            metadata,
+            new RegExp(`allow_implicit_invocation: ${WRITE_CAPABLE.has(dir) ? "false" : "true"}`)
+          );
         }
       });
 

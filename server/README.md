@@ -581,16 +581,22 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
 | `POST` | `/api/settings/install-hooks` | Install selected Claude Code and/or Codex hook sets; preserves unrelated hook entries |
 | `POST` | `/api/settings/reset-pricing`  | Reset pricing table to defaults                  |
 | `GET`  | `/api/settings/export`         | Export all data (sessions, agents, events, token_usage, workflows, dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) as one versioned JSON attachment |
-| `POST` | `/api/settings/import`         | Restore a bundle from `/export`. Multipart `file`, or JSON `{ path }` (server reads it). Idempotent + non-destructive: sessions already present are skipped whole |
+| `POST` | `/api/settings/import`         | Restore one bundle up to 25 MiB from `/export`. Multipart `file`, or JSON `{ path }` (server reads it). Idempotent + non-destructive: sessions already present are skipped whole |
 | `POST` | `/api/settings/cleanup`        | Abandon stale sessions and purge old data        |
 | `GET` / `PUT` | `/api/settings/claude-home` | Read or update the Claude Code transcript/configuration root |
 | `GET` / `PUT` | `/api/settings/codex-home` | Read or update the Codex rollout/hooks root; saving immediately re-arms the watcher and schedules a scan |
 
 Both home updates accept `{ "path": "/absolute/path" }`; a leading `~/` is expanded, and a missing or non-directory path returns `400 INVALID_PATH`. The Codex setting persists as `DASHBOARD_CODEX_HOME`, not `CODEX_HOME`, so Settings never mutates the broader Codex CLI environment.
 
+Backup restore accepts exactly one export bundle up to 25 MiB from either multipart field `file` or a server-side absolute `path`. Larger inputs return `413 IMPORT_TOO_LARGE` before parsing.
+
+### Alerts and Webhooks
+
+Webhook targets use HTTPS for hosted providers. The `generic` and `n8n` types also accept HTTP so local or self-hosted receivers remain supported. Delivery never follows redirects, which prevents provider credentials, custom headers, or HMAC signatures from being forwarded to a second destination.
+
 ### Claude Config Explorer (`/api/cc-config`)
 
-Reads — and carefully gated mutations for low-risk text-file artifacts — for every Claude Code configuration surface. Mutations always create timestamped backups under `<root>/cc-config-backups/<type>/` before writing.
+Reads — and carefully gated mutations for low-risk text-file artifacts — for every Claude Code configuration surface. File reads canonicalize both the requested path and allowed roots with `realpath`, so symlinks cannot escape `CLAUDE_HOME`, the project `.claude/` directory, or the project `CLAUDE.md`. Mutations always create timestamped backups under `<root>/cc-config-backups/<type>/` before writing.
 
 | Method   | Path                                  | Description |
 | -------- | ------------------------------------- | ----------- |
@@ -616,7 +622,7 @@ Reads — and carefully gated mutations for low-risk text-file artifacts — for
 
 ### Codex Config Explorer (`/api/codex-config`)
 
-The Agent Config page also includes a **Codex configuration workspace**. It discovers defaults, account-visible model catalog entries, profiles, MCP servers, projects, skills, rules, hooks, installed plugins, and instruction files. The account catalog uses a dedicated bounded reader, so large cached model instructions cannot trip the 256 KiB preview cap and render the Models tab empty; base/profile model overrides remain visible without a cache. Profiles are Codex-native `<name>.config.toml` overlays (strict letters/numbers/hyphens/underscores) created without overwriting existing files and applied only by `codex --profile <name>`; their cards copy that exact launch command in one click. Plugin cards use `codex plugin list` as the source of truth and enrich those entries from their manifests; cache directories are never presented as plugins. Normal TOML and JSON previews redact secret-like values. A separate, unredacted local editor is limited to `config.toml`, named profile overlays, `hooks.json`, user rule files, user `SKILL.md` files, and Codex/project `AGENTS.md`; it is explicitly necessary so a redacted preview cannot overwrite real secret values. Every allowed save is capped at 256 KiB, backed up first, and atomically renamed. User-maintained profiles, hooks, rules, skills, and instructions also have View source / Copy path / Edit / confirmed delete actions with timestamped backups; skill deletion backs up and removes its whole directory, while `config.toml` is permanently edit-only. The dashboard does not validate Codex syntax. `lib/codex-config-watcher.js` broadcasts `codex_config_changed` on relevant config, skill, rule, or plugin changes so the page refreshes immediately.
+The Agent Config page also includes a **Codex configuration workspace**. It discovers defaults, account-visible model catalog entries, profiles, MCP servers, projects, skills, rules, hooks, installed plugins, and instruction files. The account catalog uses a dedicated bounded reader, so large cached model instructions cannot trip the 256 KiB preview cap and render the Models tab empty; base/profile model overrides remain visible without a cache. Profiles are Codex-native `<name>.config.toml` overlays (strict letters/numbers/hyphens/underscores) created without overwriting existing files and applied only by `codex --profile <name>`; their cards copy that exact launch command in one click. Plugin cards use `codex plugin list` as the source of truth and enrich those entries from their manifests; cache directories are never presented as plugins. Normal TOML and JSON previews redact secret-like values. Preview reads canonicalize targets before containment checks. A separate, unredacted local editor is limited to `config.toml`, named profile overlays, `hooks.json`, user rule files, user `SKILL.md` files, and Codex/project `AGENTS.md`; it rejects symlinked components below the trusted root and verifies the canonical parent before a write. It is explicitly necessary so a redacted preview cannot overwrite real secret values, and a payload containing `[redacted]` is rejected rather than saved. Every allowed save is capped at 256 KiB, backed up first, and atomically renamed. User-maintained profiles, hooks, rules, skills, and instructions also have View source / Copy path / Edit / confirmed delete actions with timestamped backups; skill deletion backs up and removes its whole directory, while `config.toml` is permanently edit-only. The dashboard does not validate Codex syntax. `lib/codex-config-watcher.js` broadcasts `codex_config_changed` on relevant config, skill, rule, or plugin changes so the page refreshes immediately.
 
 | Method | Path | Description |
 | --- | --- | --- |
@@ -629,7 +635,7 @@ The Agent Config page also includes a **Codex configuration workspace**. It disc
 
 ### Run Agent (`/api/run`)
 
-Provider-aware HTTP surface for spawning and supervising Claude Code processes and native interactive Codex threads from the dashboard. Every route enforces a same-origin / loopback-Origin guard against browser CSRF.
+Provider-aware HTTP surface for spawning and supervising Claude Code processes and native interactive Codex threads from the dashboard. Every route enforces a same-origin / loopback-Origin guard against browser CSRF. A supplied `cwd` must be an existing absolute directory and is canonicalized with `realpath`; it intentionally may be outside this repository so users can launch from their home directory or any recent project.
 
 | Method   | Path                          | Description |
 | -------- | ----------------------------- | ----------- |
@@ -637,7 +643,7 @@ Provider-aware HTTP surface for spawning and supervising Claude Code processes a
 | `GET`    | `/api/run/binary?provider=…`  | Probe whether `claude` or `codex` is on `PATH` |
 | `GET`    | `/api/run/models?provider=…`  | Signed-in dynamic Codex model catalog; Claude aliases plus locally observed models |
 | `GET`    | `/api/run/cwds`               | Suggested cwds (dashboard, home, recent from sessions) |
-| `GET`    | `/api/run/files?cwd=…&q=…`    | Fuzzy file search inside `cwd` for the Run page's `@`-file autocomplete. Skips `node_modules`, `.git`, `dist`, `build`, `.next`, `.cache`, `coverage`, `vendor`, etc. Cwd is required and must exist; results are capped and ranked by basename match |
+| `GET`    | `/api/run/files?cwd=…&q=…`    | Fuzzy file search inside the canonicalized `cwd` for the Run page's `@`-file autocomplete. Skips `node_modules`, `.git`, `dist`, `build`, `.next`, `.cache`, `coverage`, `vendor`, etc. Cwd is required and must exist; results are capped and ranked by basename match |
 | `POST`   | `/api/run`                    | Spawn. Body: `{ provider?: "claude"\|"codex", prompt, mode?, cwd?, model?, permissionMode?, sandbox?, resumeSessionId?, effort? }`. Claude supports headless or stream-json conversation. Codex always starts/resumes a native interactive app-server thread, with `permissionMode` as its approval policy (`untrusted`/`on-request`/`never`) and `sandbox` as `read-only`/`workspace-write`/`danger-full-access`. `effort` maps to the provider's native reasoning setting. Concurrency is effectively uncapped by default (ceiling 10000, override with `RUN_MAX_CONCURRENT`) |
 | `POST`   | `/api/run/:id/message`        | Send follow-up turn. Body: `{ text, provider? }` |
 | `GET`    | `/api/run/:id`                | Handle state. `?envelopes=1` includes the in-memory envelope log for re-attach |

@@ -174,9 +174,9 @@ When the server is down, **read-only commands automatically fall back to reading
 | `ccam analytics` | Token totals (input / output / cache read / cache write), top tools by call count, agent-type distribution, average events per session |
 | `ccam workflows [--session id]` | Workflow-intelligence stats (sessions analyzed, subagents, success rate, depth, compactions) and the top detected patterns; `--session` drills into one session |
 | `ccam runs [--session id]` | Dynamic Workflow-tool runs: status, agent count, tokens, tool calls, duration |
-| `ccam run list|history|get <id>` | Inspect live dashboard-launched Claude Code/Codex handles and persisted run history |
-| `ccam run models|binary <provider>` | Inspect the signed-in provider's model catalog and binary availability |
-| `ccam run cwds|files --cwd <dir>` | Discover valid working directories and prompt-reference files |
+| `ccam run list\|history\|get <id>` | Inspect live dashboard-launched Claude Code/Codex handles and persisted run history |
+| `ccam run models\|binary <provider>` | Inspect the signed-in provider's model catalog and binary availability |
+| `ccam run cwds\|files --cwd <dir>` | Discover valid working directories and prompt-reference files |
 | `ccam run start … --yes` | Launch a monitored Claude Code or Codex process. Supports provider, prompt, cwd, model, approval mode, sandbox, effort, and resume session |
 | `ccam run send <id> --text <message> --yes` | Send a follow-up to a live run |
 | `ccam run stop <id> --yes` | Stop a live dashboard-launched process |
@@ -190,11 +190,11 @@ When the server is down, **read-only commands automatically fall back to reading
 | `ccam alerts ack <id>` | Acknowledge one alert |
 | `ccam alerts ack-all` | Acknowledge every unacknowledged alert |
 | `ccam rules` | Alert rules with enabled state, type, and cooldown |
-| `ccam alert-rules list|create|update|delete` | Full alert-rule lifecycle. Writes require `--yes`; rule config is supplied with `--config '<json>'` or `--file <json>` |
+| `ccam alert-rules list\|create\|update\|delete` | Full alert-rule lifecycle. Writes require `--yes`; rule config is supplied with `--config '<json>'` or `--file <json>` |
 | `ccam webhooks` | Webhook targets (URLs masked server-side, secrets never returned) |
 | `ccam webhooks providers` | Provider catalog and required public configuration fields |
 | `ccam webhooks deliveries <id>` | Delivery history for one target |
-| `ccam webhooks create|update|delete … --yes` | Manage targets using a JSON body from `--data` or `--file` |
+| `ccam webhooks create\|update\|delete … --yes` | Manage targets using a JSON body from `--data` or `--file` |
 | `ccam webhooks test <id>` | Fire a synthetic test alert at a target and report the delivery result; exits non-zero on failure |
 
 ### Pricing
@@ -215,10 +215,10 @@ When the server is down, **read-only commands automatically fall back to reading
 
 | Command | Description |
 | ------- | ----------- |
-| `ccam import guide --provider claude|codex` | Show the provider's live history location, archive command, file limits, and supported formats |
-| `ccam import rescan --provider claude|codex` | Re-scan the selected provider's configured history tree |
-| `ccam import path <dir> --provider claude|codex` | Import an existing provider history directory |
-| `ccam import upload <files...> --provider claude|codex` | Upload JSONL files or archives through the same multipart importer used by the app |
+| `ccam import guide --provider claude\|codex` | Show the provider's live history location, archive command, file limits, and supported formats |
+| `ccam import rescan --provider claude\|codex` | Re-scan the selected provider's configured history tree |
+| `ccam import path <dir> --provider claude\|codex` | Import an existing provider history directory |
+| `ccam import upload <files...> --provider claude\|codex` | Upload JSONL files or archives through the same multipart importer used by the app |
 | `ccam import-data <file.json>` | Restore a full dashboard export produced by `ccam export` (or **Settings → Export data**). Idempotent and non-destructive — sessions already present are skipped whole, so it safely **consolidates several machines** into one dashboard. The file path is resolved to absolute and read server-side |
 
 ### Remote Sources
@@ -249,7 +249,7 @@ Manage the remote (SSH) machines this dashboard pulls Claude Code, Codex, or bot
 | `ccam config claude <surface>` | Inspect Claude skills, agents, commands, plugins, marketplaces, MCP, hooks, settings, memory, keybindings, statusline, and backups |
 | `ccam config codex <action>` | Inspect or backup-backed edit Codex config, profiles, hooks, rules, skills, plugins, and instructions |
 | `ccam mcp [stdio|http|repl]` | Launch the MCP server built by `npm run setup` |
-| `ccam api <METHOD> /api/path [--data JSON|--file path]` | Future-proof access to every JSON API route. Non-GET requests require `--yes`; clear-data additionally requires `--confirm CLEAR_ALL_DATA` |
+| `ccam api <METHOD> /api/path [--data JSON\|--file path]` | Future-proof access to every JSON API route. Non-GET requests require `--yes`; clear-data additionally requires `--confirm CLEAR_ALL_DATA` |
 | `ccam update-check` | Ask the server whether the dashboard checkout is behind the canonical remote (branch- and fork-aware). Prints the behind-by count, a situation note for fork/feature-branch checkouts, and the **copy-paste update command** — the dashboard never restarts itself. Also refreshes the update banner in any open dashboard tab (same `update_status` broadcast) |
 | `ccam clear-data --yes` | Delete **all** data (schema preserved). Refuses to run without `--yes` |
 | `ccam open` | Open the dashboard in your default browser (`open` / `xdg-open` / `start`) |
@@ -263,7 +263,9 @@ Manage the remote (SSH) machines this dashboard pulls Claude Code, Codex, or bot
 - `clear-data` refuses to run without `--yes`. The generic API path additionally requires `--confirm CLEAR_ALL_DATA`.
 - Remote-source removal retains imported data by default. Purging requires `--confirm PURGE_REMOTE_SOURCE_DATA`.
 - Webhook tests, push sends, process launches, and run messages are real side effects. Confirm the target and content first.
-- Set `DASHBOARD_API_TOKEN` or `CCAM_API_TOKEN` when the dashboard uses `DASHBOARD_TOKEN`.
+- Set `MCP_DASHBOARD_API_TOKEN` or `DASHBOARD_API_TOKEN` for MCP, and
+  `DASHBOARD_API_TOKEN` or `CCAM_API_TOKEN` for the CLI, when the dashboard
+  server uses `DASHBOARD_TOKEN`.
 
 ## Output & Scripting
 

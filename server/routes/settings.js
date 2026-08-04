@@ -28,7 +28,7 @@ const {
 } = require("../lib/data-transfer");
 
 const router = Router();
-const MAX_BACKUP_IMPORT_BYTES = 100 * 1024 * 1024;
+const MAX_BACKUP_IMPORT_BYTES = 25 * 1024 * 1024;
 const backupUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_BACKUP_IMPORT_BYTES, files: 1 },

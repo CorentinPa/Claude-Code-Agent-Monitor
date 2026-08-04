@@ -161,6 +161,26 @@ describe("loadConfig", () => {
     assert.equal(cfg.dashboardApiToken, "test-token");
   });
 
+  it("requires HTTPS for bearer tokens sent through container-host aliases", () => {
+    assert.throws(
+      () =>
+        loadConfig(
+          env({
+            MCP_DASHBOARD_BASE_URL: "http://host.docker.internal:4820",
+            MCP_DASHBOARD_API_TOKEN: "test-token",
+          })
+        ),
+      /require HTTPS/
+    );
+    const cfg = loadConfig(
+      env({
+        MCP_DASHBOARD_BASE_URL: "https://host.docker.internal:4820",
+        MCP_DASHBOARD_API_TOKEN: "test-token",
+      })
+    );
+    assert.equal(cfg.dashboardApiToken, "test-token");
+  });
+
   // ── Custom server name/version ──────────────────────────────
   it("parses custom server name and version", () => {
     const cfg = loadConfig(

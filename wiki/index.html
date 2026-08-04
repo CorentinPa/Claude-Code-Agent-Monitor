@@ -1351,10 +1351,10 @@
                   <div class="feature-icon ic-violet">🏪</div>
                   <h3>Plugin Marketplace</h3>
                   <p>
-                    One shared marketplace ships 13 plugins for Claude Code and Codex, with 62
-                    packaged skills, 17 Claude subagents, 33 Claude commands, 3 CLI helpers, and
+                    One shared marketplace ships 14 plugins for Claude Code and Codex, with 66
+                    packaged skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, and
                     2 MCP-enabled plugins. Every skill includes canonical frontmatter and OpenAI
-                    metadata. The skills.sh CLI discovers 70 repository skills from the same
+                    metadata. The skills.sh CLI discovers 74 repository skills from the same
                     public source. Install with <code>claude plugin marketplace add</code>,
                     <code>codex plugin marketplace add</code>, or <code>npx skills add</code>.
                   </p>
@@ -1970,7 +1970,19 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                 <tr>
                   <td><code>MCP_DASHBOARD_BASE_URL</code></td>
                   <td><code>http://127.0.0.1:4820</code></td>
-                  <td>Base URL used by the local MCP server when calling dashboard APIs</td>
+                  <td>
+                    Base URL used by the local MCP server when calling dashboard APIs. Direct
+                    loopback HTTP is allowed with a bearer token; tokenized container-host aliases
+                    require HTTPS.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>MCP_DASHBOARD_API_TOKEN</code></td>
+                  <td><code>(unset)</code></td>
+                  <td>
+                    Bearer token for a protected dashboard. Falls back to
+                    <code>DASHBOARD_API_TOKEN</code>.
+                  </td>
                 </tr>
                 <tr>
                   <td><code>MCP_TRANSPORT</code></td>
@@ -3417,7 +3429,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <div class="route-item">
               <span class="method method-post">POST</span>
               <span class="route-path">/api/settings/import</span>
-              <span class="route-desc">Restore an export bundle (multipart <code>file</code> or JSON <code>{ path }</code>) — idempotent, non-destructive; consolidate machines</span>
+              <span class="route-desc">Restore one export bundle up to 25 MiB (multipart <code>file</code> or JSON <code>{ path }</code>). The restore is idempotent and non-destructive, so it can consolidate machines.</span>
             </div>
             <div class="route-item">
               <span class="method method-post">POST</span>
@@ -4205,6 +4217,12 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             2025-11-25) and legacy SSE (protocol 2024-11-05). REPL mode provides tab-completed
             interactive tool invocation with colored output and JSON syntax highlighting.
           </p>
+          <p>
+            All dashboard requests reject redirects. Direct loopback HTTP may carry the dashboard
+            bearer token, while tokenized container-host aliases require HTTPS. History uploads are
+            capped at 50 MiB per file and 100 MiB per call, binary responses at 10 MiB, and backup
+            restore at 25 MiB. Only GET requests retry automatically.
+          </p>
           <div class="table-wrap">
             <table>
               <thead>
@@ -4342,9 +4360,9 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
           <div class="section-label">◈ Integrations</div>
           <h2>Plugin Marketplace</h2>
           <p>
-            The Agent Monitor ships one shared marketplace containing 13 plugins for Claude Code and
-            Codex, 62 packaged plugin skills, 17 Claude subagents, 33 Claude commands, 3 CLI helpers,
-            3 hook configurations, and 2 MCP-enabled plugins. The skills.sh CLI discovers 70 total
+            The Agent Monitor ships one shared marketplace containing 14 plugins for Claude Code and
+            Codex, 66 packaged plugin skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers,
+            3 hook configurations, and 2 MCP-enabled plugins. The skills.sh CLI discovers 74 total
             repository skills. Product-specific manifests stay separate while skill instructions and
             validation remain shared.
           </p>
@@ -4369,7 +4387,8 @@ claude plugin install ccam-config@claude-code-agent-monitor-plugins
 claude plugin install ccam-dashboard@claude-code-agent-monitor-plugins
 claude plugin install ccam-runner@claude-code-agent-monitor-plugins
 claude plugin install ccam-integrations@claude-code-agent-monitor-plugins
-claude plugin install ccam-platform@claude-code-agent-monitor-plugins</code></pre>
+claude plugin install ccam-platform@claude-code-agent-monitor-plugins
+claude plugin install ccam-reports@claude-code-agent-monitor-plugins</code></pre>
 
           <h3>Available Plugins</h3>
           <div class="table-wrap">
@@ -4474,6 +4493,13 @@ claude plugin install ccam-platform@claude-code-agent-monitor-plugins</code></pr
                   <td>platform-admin</td>
                   <td>—</td>
                   <td>Claude/Codex config, hooks, provider imports, backup restore, updates, and MCP operations</td>
+                </tr>
+                <tr>
+                  <td><strong>ccam-reports</strong></td>
+                  <td>executive-report, cost-report, reliability-report, workflow-report</td>
+                  <td>report-analyst</td>
+                  <td>—</td>
+                  <td>Stakeholder-ready executive, cost, reliability, and workflow reports with explicit scope and evidence</td>
                 </tr>
               </tbody>
             </table>
@@ -5424,6 +5450,10 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
             outside the dashboard.
           </p>
           <p>
+            Configuration file reads canonicalize the target and allowed roots, so symlinks cannot
+            escape the trusted Claude directories.
+          </p>
+          <p>
             The same page also has a <strong>Codex</strong> switch. Its workspace shows defaults,
             the full local account model catalog, profiles, MCP servers, projects, skills, rules,
             hooks, installed plugins, and instruction files from <code>CODEX_HOME</code>. The model
@@ -5440,6 +5470,10 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
             its whole directory, while <code>config.toml</code> stays edit-only. It warns that syntax is
             not validated, and <code>codex_config_changed</code> refreshes the view when those files
             change.
+          </p>
+          <p>
+            Codex preview targets are canonicalized before containment checks. Edits reject symlinked
+            path components and refuse content containing <code>[redacted]</code>.
           </p>
 
           <div class="feature-grid">
@@ -5725,6 +5759,10 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
                 <code>result:"failure"</code>). Delivery is <strong>detached and fail-safe</strong> —
                 it never throws into, slows, or blocks the alert path.
               </p>
+              <p>
+                Redirects are rejected rather than forwarding credentials or signed headers to
+                another URL.
+              </p>
             </div>
             <div class="feature-card">
               <div class="feature-icon ic-rose">🔒</div>
@@ -5736,6 +5774,10 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
                 Generic endpoints support optional <strong>HMAC-SHA256</strong> body signing
                 (<code>X-Webhook-Signature</code> + <code>X-Webhook-Timestamp</code>) so receivers
                 can verify authenticity.
+              </p>
+              <p>
+                Hosted providers require HTTPS. Generic and n8n targets may use HTTP for local or
+                self-hosted receivers.
               </p>
             </div>
             <div class="feature-card">
@@ -6997,8 +7039,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=61" defer></script>
-    <script src="script.js?v=46" defer></script>
+    <script src="i18n-content.js?v=63" defer></script>
+    <script src="script.js?v=48" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

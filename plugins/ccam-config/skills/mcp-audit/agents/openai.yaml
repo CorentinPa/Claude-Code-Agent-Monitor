@@ -3,4 +3,4 @@ interface:
   short_description: "Audit the configured MCP servers (user + project scope) via..."
   default_prompt: "Use $mcp-audit to inspect CCAM data and complete this workflow safely."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

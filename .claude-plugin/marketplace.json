@@ -1,6 +1,6 @@
 {
   "name": "claude-code-agent-monitor-plugins",
-  "description": "Official Claude Code plugin marketplace for CCAM with 13 plugins, 62 skills, 17 agents, 33 commands, and comprehensive local dashboard operations.",
+  "description": "Official Claude Code plugin marketplace for CCAM with 14 plugins, 66 skills, 18 agents, 34 commands, and comprehensive local dashboard operations.",
   "owner": { "name": "hoangsonww", "url": "https://github.com/hoangsonww" },
   "plugins": [
     {
@@ -62,6 +62,12 @@
       "source": "./plugins/ccam-quality",
       "description": "Reliability and error monitoring for Claude Code sessions — surfaces APIError events, hook delivery failures, tool-failure ratios (PreToolUse/PostToolUse gaps), and SLO tracking with error-budget reporting, all derived from the Claude Code Agent Monitor event stream at http://localhost:4820.",
       "tags": ["reliability", "errors", "slo", "quality"]
+    },
+    {
+      "name": "ccam-reports",
+      "source": "./plugins/ccam-reports",
+      "description": "Generate stakeholder-ready CCAM reports from local session, cost, reliability, and workflow data with explicit scope, evidence, and export-friendly Markdown.",
+      "tags": ["reports", "executive-summary", "cost", "reliability", "workflows", "ccam"]
     },
     {
       "name": "ccam-runner",

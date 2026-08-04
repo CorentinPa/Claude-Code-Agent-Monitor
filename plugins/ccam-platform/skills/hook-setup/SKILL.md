@@ -13,8 +13,11 @@ description: >
 3. Install only after confirmation:
 
 ```bash
-ccam hooks install claude codex --yes
+ccam hooks install <selected-or-missing-providers> --yes
 ```
+
+Replace the placeholder with `claude`, `codex`, or `claude codex` based on the
+user's selected scope and the missing providers reported by `ccam hooks status`.
 
 4. Read back `ccam hooks status`.
 5. Start a real provider session and verify a new session/event reaches CCAM.

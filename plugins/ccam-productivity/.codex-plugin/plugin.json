@@ -14,7 +14,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "CCAM Productivity",
-    "shortDescription": "Productivity workflows for Claude Code — daily standups, weekly reports, sprint summaries, and i",
+    "shortDescription": "Productivity workflows for Claude Code — daily standups, weekly reports, sprint summaries,...",
     "longDescription": "Productivity workflows for Claude Code — daily standups, weekly reports, sprint summaries, and intelligent workflow optimization powered by Agent Monitor session data.",
     "developerName": "Son Nguyen",
     "category": "Productivity",

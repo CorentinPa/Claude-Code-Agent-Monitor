@@ -14,7 +14,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "CCAM Runner",
-    "shortDescription": "Operate dashboard-launched Claude Code and Codex runs with safe launch, follow-up, stop, resume,",
+    "shortDescription": "Operate dashboard-launched Claude Code and Codex runs with safe launch, follow-up, stop,...",
     "longDescription": "Operate dashboard-launched Claude Code and Codex runs with safe launch, follow-up, stop, resume, model discovery, and persistent run-history workflows.",
     "developerName": "Son Nguyen",
     "category": "Productivity",

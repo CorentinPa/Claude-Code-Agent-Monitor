@@ -60,12 +60,15 @@
  * ----------------------------------------------------------------------------- */
 
 import { setTimeout as sleep } from "node:timers/promises";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import type { AppConfig } from "../config/app-config.js";
 import { Logger } from "../core/logger.js";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+const MAX_UPLOAD_FILE_BYTES = 50 * 1024 * 1024;
+const MAX_UPLOAD_TOTAL_BYTES = 100 * 1024 * 1024;
+const MAX_BINARY_RESPONSE_BYTES = 10 * 1024 * 1024;
 
 interface RequestOptions {
   /** Query params; `undefined`/`null` values are omitted, not stringified. */
@@ -178,7 +181,22 @@ export class DashboardApiClient {
     const url = this.buildUrl(requestPath);
     const form = new FormData();
     for (const [key, value] of Object.entries(fields)) form.append(key, value);
+    let totalBytes = 0;
     for (const filePath of filePaths) {
+      const metadata = await stat(filePath);
+      if (!metadata.isFile()) {
+        throw new ApiError(`Upload path is not a file: ${filePath}`, { code: "INVALID_PATH" });
+      }
+      totalBytes += metadata.size;
+      if (metadata.size > MAX_UPLOAD_FILE_BYTES || totalBytes > MAX_UPLOAD_TOTAL_BYTES) {
+        throw new ApiError(`Upload exceeds the configured size limit: ${filePath}`, {
+          code: "TOO_LARGE",
+          details: {
+            max_file_bytes: MAX_UPLOAD_FILE_BYTES,
+            max_total_bytes: MAX_UPLOAD_TOTAL_BYTES,
+          },
+        });
+      }
       const data = await readFile(filePath);
       form.append("files", new Blob([data]), path.basename(filePath));
     }
@@ -191,6 +209,7 @@ export class DashboardApiClient {
           ? { Authorization: `Bearer ${this.config.dashboardApiToken}` }
           : undefined,
         body: form,
+        redirect: "error",
         signal: abortController.signal,
       });
       const rawBody = await response.text();
@@ -232,13 +251,37 @@ export class DashboardApiClient {
             ? { Authorization: `Bearer ${this.config.dashboardApiToken}` }
             : {}),
         },
+        redirect: "error",
         signal: abortController.signal,
       });
       if (!response.ok) {
         const rawBody = await response.text();
         throw this.toApiError("GET", url, response.status, this.tryParseJson(rawBody));
       }
-      const bytes = Buffer.from(await response.arrayBuffer());
+      const declaredLength = Number.parseInt(response.headers.get("content-length") || "", 10);
+      if (Number.isFinite(declaredLength) && declaredLength > MAX_BINARY_RESPONSE_BYTES) {
+        throw new ApiError(`Binary response exceeds ${MAX_BINARY_RESPONSE_BYTES} bytes`, {
+          code: "TOO_LARGE",
+        });
+      }
+      const reader = response.body?.getReader();
+      if (!reader)
+        throw new ApiError("Binary response has no readable body", { code: "EMPTY_BODY" });
+      const chunks: Buffer[] = [];
+      let total = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        total += value.byteLength;
+        if (total > MAX_BINARY_RESPONSE_BYTES) {
+          await reader.cancel();
+          throw new ApiError(`Binary response exceeds ${MAX_BINARY_RESPONSE_BYTES} bytes`, {
+            code: "TOO_LARGE",
+          });
+        }
+        chunks.push(Buffer.from(value));
+      }
+      const bytes = Buffer.concat(chunks, total);
       return {
         content_type: response.headers.get("content-type") || "application/octet-stream",
         base64: bytes.toString("base64"),
@@ -320,6 +363,7 @@ export class DashboardApiClient {
               : {}),
           },
           body: options.body === undefined ? undefined : JSON.stringify(options.body),
+          redirect: "error",
           signal: abortController.signal,
         });
 

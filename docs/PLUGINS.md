@@ -6,7 +6,7 @@ CCAM ships one source tree that supports three distribution paths:
 - **Codex plugins** through `.agents/plugins/marketplace.json` and each plugin's `.codex-plugin/plugin.json`
 - **Open Agent Skills / skills.sh** through standards-compliant `SKILL.md` files with required `name` and `description` metadata
 
-The verified bundle contains **13 plugins, 62 bundled plugin skills, 17 Claude subagents, 33 Claude commands, 3 CLI helpers, 3 hook configurations, and 2 MCP-enabled plugins**. The skills.sh CLI discovers **70 total repository skills** because it also includes the repository-maintenance skills under `.agents/skills/` and `.claude/skills/`.
+The verified bundle contains **14 plugins, 66 bundled plugin skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, 3 hook configurations, and 2 MCP-enabled plugins**. The skills.sh CLI discovers **74 total repository skills** because it also includes the repository-maintenance skills under `.agents/skills/` and `.claude/skills/`.
 
 ## Install for Claude Code
 
@@ -37,7 +37,7 @@ Codex reads `.agents/plugins/marketplace.json`. Every entry points to the same `
 The repository does not need a PR to the `vercel-labs/skills` source repository. The `skills` CLI installs from public GitHub repositories directly, and skills.sh discovery/ranking is driven by install telemetry.
 
 ```bash
-# List all 70 repository skills without installing
+# List all 74 repository skills without installing
 npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
 
 # Install one skill for Claude Code and Codex
@@ -72,6 +72,7 @@ The public repository becomes installable as soon as these files are on the defa
 | `ccam-platform` | Claude/Codex config, hooks, import, backup, MCP | `config-explorer`, `history-portability`, `hook-setup`, `mcp-server` |
 | `ccam-productivity` | standups and reviews | `daily-standup`, `monthly-review`, `sprint-summary`, `time-of-day`, `weekly-report`, `workflow-optimizer` |
 | `ccam-quality` | errors, SLOs, hook reliability | `api-error-report`, `error-scan`, `hook-failure-audit`, `regression-alert`, `slo-check` |
+| `ccam-reports` | executive, cost, reliability, workflow reports | `cost-report`, `executive-report`, `reliability-report`, `workflow-report` |
 | `ccam-runner` | monitored Claude Code/Codex launch and history | `run-agent`, `run-history` |
 | `ccam-sessions` | session search, timeline, replay, cleanup | `cwd-rollup`, `session-cleanup`, `session-search`, `session-timeline`, `transcript-replay` |
 | `ccam-workflows` | orchestration and fleet intelligence | `concurrency-report`, `dag-map`, `delegation-audit`, `error-propagation`, `fleet-runs` |

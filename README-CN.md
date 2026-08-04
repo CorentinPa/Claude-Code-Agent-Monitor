@@ -306,11 +306,13 @@ Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Ag
 | **Transcript 缓存** | 从 JSONL Transcript 实时提取：Token、压缩、API 错误（`isApiErrorMessage` 条目存储为 `APIError` 事件）、回合耗时（存储为 `TurnDuration` 事件）、思考块计数和用量附加信息（service_tier、speed、inference_geo）。会话元数据实时丰富这些字段 |
 | **通知** | 基于 Web Push (VAPID) 的持久化浏览器通知。即使 Dashboard 标签页未聚焦或浏览器已关闭也能送达。特别针对 macOS 音效支持进行了配置。支持按事件配置开关及订阅管理 |
 | **更新提醒** | 服务端定期以非阻塞方式执行 `git fetch`，将本地检出与所选规范远程的默认分支对比。**支持分支与 fork：** 若同时存在 `upstream` 和 `origin`，优先使用 `upstream`（fork 的常规约定）；命令也会根据用户处境调整——只有在本地分支真正跟踪规范引用时才建议 `git pull --ff-only`，否则给出 `git fetch`（fork 场景下加上 fast-forward 合并），让命令永不撒谎。侧边栏还有常驻的"检查更新"按钮及状态徽标。Dashboard **不会**自行拉取或重启——用户在终端中手动执行命令——因此该机制不会破坏开发会话、pm2/systemd/Docker 进程管理，也不会留下孤立进程 |
-| **设置** | 系统信息、Hook 状态、模型定价管理、通知偏好、数据导出**与恢复**（Import History 面板的 **Restore backup** 模式可重新导入完整的导出 `.json`——幂等且非破坏性，因此可将多台机器的历史合并到一个仪表盘）、会话清理。**模型定价**区块在标题旁提供一个信息浮层（`i` 图标），讲解规则匹配方式（首条匹配的模式生效）、SQL 风格 `%` 通配符的语法及具体示例（`claude-opus-4-7%`、`claude-%-haiku`、精确 id），并提醒：当 Anthropic 公布新价格时必须手动更新——已存储的会话仍保留入库时所用价格。每条规则的编辑器还带有一个可折叠的 Introductory rates 区块（一个 YYYY-MM-DD 促销截止日期 + 按类别的介绍性价格）；将日期留空表示没有促销，而空日期会清除任何已存储的介绍性价格。CLAUDE_HOME 区块与 Import History 面板已完整覆盖 en/vi/zh 三语 i18n |
+| **设置** | 系统信息、Hook 状态、模型定价管理、通知偏好、数据导出**与恢复**（Import History 面板的 **Restore backup** 模式接受一个不超过 25 MiB 的导出 `.json`，并以幂等、非覆盖方式重新导入，因此可将多台机器的历史合并到一个仪表盘）、会话清理。**模型定价**区块在标题旁提供一个信息浮层（`i` 图标），讲解规则匹配方式（首条匹配的模式生效）、SQL 风格 `%` 通配符的语法及具体示例（`claude-opus-4-7%`、`claude-%-haiku`、精确 id），并提醒：当 Anthropic 公布新价格时必须手动更新——已存储的会话仍保留入库时所用价格。每条规则的编辑器还带有一个可折叠的 Introductory rates 区块（一个 YYYY-MM-DD 促销截止日期 + 按类别的介绍性价格）；将日期留空表示没有促销，而空日期会清除任何已存储的介绍性价格。CLAUDE_HOME 区块与 Import History 面板已完整覆盖 en/vi/zh 三语 i18n |
 > **提供方范围与数据位置：** 设置会让 Claude Code / Codex / 两者的选择在整个应用中保持一致，并可在无需重启仪表盘的情况下更改任一会话数据目录。
+>
+> **本地安全边界：** Run Agent 接受任意已存在的绝对工作目录，并在使用前规范化路径，因此仍支持从主目录和最近项目启动。托管 Webhook 提供方必须使用 HTTPS；generic 与 n8n 可为本地/自托管接收方使用 HTTP，投递不会跟随重定向。
 
-| **Codex Agent 配置** | Agent Config 的 Codex 一侧会读取完整的本地账户模型目录，不受通用预览限制影响，因此 Models 标签不会错误显示为 0，并始终包含基础/配置文件覆盖。可直接在应用中创建标准 Codex `<name>.config.toml` 覆盖层；每张卡均可一键复制其准确的 `codex --profile <name>` 命令并打开受保护的编辑器。配置文件、Hook、规则、技能和指令共用 Claude 风格的 **View source / Copy path / Edit / Delete** 操作。每次允许的删除都需确认并先创建备份（技能保留完整目录）；`config.toml` 永远只能编辑。 |
-| **MCP 服务器（本地）** | 位于 `mcp/` 的完整本地 MCP 服务器，支持三种传输模式，16 个领域模块共 97 个类型化工具。覆盖应用支持的全部操作：带作用域的数据读取、Transcript 与图片、Claude/GPT 定价、工作流、告警、Webhook、导入与恢复、Claude/Codex 配置、Run Agent、远程数据源、Hook/Home/更新、推送与维护。所有传输共享同一套已验证目录，并支持 Bearer Token 与分层变更/破坏性门控 |
+| **Codex Agent 配置** | Agent Config 的 Codex 一侧会读取完整的本地账户模型目录，不受通用预览限制影响，因此 Models 标签不会错误显示为 0，并始终包含基础/配置文件覆盖。可直接在应用中创建标准 Codex `<name>.config.toml` 覆盖层；每张卡均可一键复制其准确的 `codex --profile <name>` 命令并打开受保护的编辑器。预览路径会先规范化再做包含检查。编辑器拒绝受信任根目录下的符号链接路径组件，验证规范化父目录仍位于允许范围内，并拒绝保存含 `[redacted]` 的预览内容。配置文件、Hook、规则、技能和指令共用 Claude 风格的 **View source / Copy path / Edit / Delete** 操作。每次允许的删除都需确认并先创建备份（技能保留完整目录）；`config.toml` 永远只能编辑。 |
+| **MCP 服务器（本地）** | 位于 `mcp/` 的完整本地 MCP 服务器，支持三种传输模式，16 个领域模块共 97 个类型化工具。覆盖应用支持的全部操作：带作用域的数据读取、Transcript 与图片、Claude/GPT 定价、工作流、告警、Webhook、导入与恢复、Claude/Codex 配置、Run Agent、远程数据源、Hook/Home/更新、推送与维护。所有传输共享同一套已验证目录，并支持分层变更/破坏性门控。直接回环 HTTP 可携带 Bearer Token，带 Token 的容器主机别名必须使用 HTTPS。请求拒绝重定向；历史上传限制为单文件 50 MiB、每次调用合计 100 MiB，二进制响应限制为 10 MiB，备份恢复限制为 25 MiB |
 | **工作流** | 基于 D3.js 的可视化页面，包含 11 个交互式模块：Agent 编排 DAG、工具执行 Sankey 图、协作网络、子 Agent 有效性（按周 sparkline 通过 portal 渲染——可越过卡片的 `overflow:hidden`，并自动夹在视口内不再被裁切）、检测到的流程模式、模型委派流、错误传播图（带比率徽章的水平条形图、Agent 类型分解、API/会话错误卡片）、并发时间线、会话复杂度散点图、压缩影响分析和按会话下钻。**全方位、多语言的丰富 tooltip：** 每个图表标题旁都有一个 `i` 图标，可弹出结构化的「此图展示了什么 / 如何阅读 / 为何重要」浮层；悬停节点、边、条、气泡都会显示带有确定性、值相关解读的多段 tooltip（例如占源/占目标比例、成功率健康分级、Opus / Sonnet / Haiku 模型系列说明，以及前段/中段/后段等时间模式）。六张总览统计卡片各自在右下角带一个信息浮层，用自然语言解释指标的计算方式与当前数值含义。Tooltip 通过每张图唯一的 DOM ref 直接更新，并附带容器级 `mouseleave` 兜底，绝不会落后于光标或在重新渲染后残留。点击 **检测到的工作流模式** 中的任意一行会就地展开详情面板，包含完整步骤序列、统计网格、确定性叙述（循环检测、频率分级）和一条务实的建议。状态筛选标签（仅活跃 / 已完成 / 全部）可筛选全部 11 个模块。支持交叉筛选、JSON 导出和 3 秒防抖的实时 WebSocket 自动刷新。**工作流运行**面板呈现「动态工作流」——由 `Workflow` 工具（及自定节奏的 `/loop`）派生的 sub-agent 群组——它们不触发任何 hook，因此改为依据磁盘上的运行日志（`workflows/wf_<runId>.json`）重建：每次运行展示其阶段以及按 Agent 的 token / 工具调用 / 时长分解，并在日志写入前实时检测 `running` 状态，同时在每个会话详情页提供一个关联子区块 |
 | **压缩追踪** | 从 JSONL Transcript 检测 `/compact` 事件,创建压缩 Agent 和事件。启动时回填历史压缩。周期性扫描器(频率从 `DASHBOARD_STALE_MINUTES` 派生)在无 Hook 触发时也能捕获压缩。共享 Transcript 缓存,避免重复文件读取 |
 | **子会话/恢复会话** | 新事件到达时自动重新激活会话,正确处理 `/resume` 和孤立会话。周期性清理(每 ¼ 个 `DASHBOARD_STALE_MINUTES`,夹在 60 秒–5 分钟之间)标记遗漏事件检测的废弃会话 |
@@ -322,7 +324,7 @@ Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Ag
 | **种子数据** | 内置种子脚本，用于演示和开发 |
 | **状态栏** | 彩色编码的 CLI 状态栏，显示模型、上下文使用率、Git 分支、Token 数 |
 | **模型名称格式化** | 整个 UI 中使用人性化的模型名称：原始标识符如 `claude-opus-4-7-20260101` 或 `claude-opus-4-7[1m]` 显示为"Claude Opus 4.7"或"Claude Opus 4.7 (1M)"。支持 Claude、GPT 和 Gemini 家族的自动版本号点连接、日期/latest 后缀剥离、提供商前缀移除和上下文窗口标签格式化。设置页保留原始名称以配置定价规则 |
-| **Claude + Codex 插件市场** | 同一套 13 个插件同时提供 Claude Code 与 Codex Manifest、两个 Marketplace Catalog、62 个插件技能、17 个 Claude 子 Agent、33 个 Claude 命令和 OpenAI 技能元数据。skills.sh CLI 可通过 `npx skills add hoangsonww/Claude-Code-Agent-Monitor --list` 发现仓库中的 70 个技能。支持 `claude plugin marketplace add`、`codex plugin marketplace add` 和 `npx skills add` |
+| **Claude + Codex 插件市场** | 同一套 14 个插件同时提供 Claude Code 与 Codex Manifest、两个 Marketplace Catalog、66 个插件技能、18 个 Claude 子 Agent、34 个 Claude 命令和 OpenAI 技能元数据。skills.sh CLI 可通过 `npx skills add hoangsonww/Claude-Code-Agent-Monitor --list` 发现仓库中的 74 个技能。支持 `claude plugin marketplace add`、`codex plugin marketplace add` 和 `npx skills add` |
 | **运行 Claude** | 直接从仪表盘启动 `claude` 子进程,带聊天式流式 UI。两种模式:**对话**(多轮 — stdin 持续打开,后续轮次以 stream-json 信封通过 stdin 传送)与 **单次**(headless,一个 prompt → 一个响应)。对话模式还支持通过 `claude --resume <id>` **恢复任何已有会话** — 使用可搜索选择器从你的完整会话历史中挑选。标题栏的进行中运行切换器允许你将运行留在后台、启动另一个、稍后重新附加。重新附加是持久的:客户端会把派生进程的内存信封日志(`?envelopes=1`)与会话磁盘上的 JSONL 转录文件协调,优先选择 user/assistant 消息更多的那一份,因此从已恢复的运行离开再回来会保留全部历史(派生进程只看到 spawn 之后的轮次;转录文件包含先前 + 当前)。模型下拉(Opus 4.7 / 1M / Sonnet 4.6 / Haiku 4.5 / 自定义)、permission-mode 选择器(对 `bypassPermissions` 显式警告)、**思考强度**字段(low / medium / high — 映射到 `--effort`)、cwd 自动补全(预填用户的**主目录** — 一个中性的启动位置,不会继承仪表盘仓库自身的 `.claude` 项目上下文(agents、skills、rules、`CLAUDE.md`、`.mcp.json`);若没有 home 建议则回退到仪表盘 cwd,建议分组以 home 优先(home → dashboard → 最近))。通过 `--include-partial-messages` 实现真正的逐字符流式渲染,加上客户端 **打字机平滑层** 通过 `requestAnimationFrame` 让每个 `text_delta` / `thinking_delta` 逐字浮现 — 即便是短回复(claude 把整个回答打成一两块 chunk 的情况)也呈现为打字效果。合并代码在 claude 中途送达 canonical `assistant` 信封时保留 `_streaming` 标志和增量累积的 `content` 数组,所以 thinking 块不会在完成时丢失。WebSocket 分发为每个信封包裹 `flushSync`,避免 React 18 自动批处理把多个 deltas 合并成一次渲染。**TUI 对齐(Tier 1)**:**限制说明横幅** 可最小化为细条(永不消失)解释 stream-json 模式相对终端 TUI 能做和不能做什么;**带斜杠命令自动补全的提示编辑器** 使用分级评分(精确名称 → 前缀匹配 → 词边界 → 包含 → 子序列 → 描述匹配)列出用户 / 项目 / 插件命令(发送前在客户端按模板展开执行),并以"仅 CLI — 此处不会执行"标记呈现 `/clear`、`/model`、`/config` 等内置 CLI 命令;**`@` 文件引用** 通过对该 run 的 cwd 进行去抖模糊搜索(跳过 `node_modules`、`.git`、`dist`、`build` 等);**实时上下文窗口 / token 计** 显示输入 + 输出 + 缓存命中 token 与运行成本 — 实时流式时从 `stream_event` / `result.usage` 计算,从转录恢复 / 查看 / 重新附加时也从已完结的 assistant `usage` 块(input / output / cache-read / cache-creation)读取,因此不会卡在 0/200k;**状态头** 显示当前 model、effort、permission mode、cwd、session ID、信封计数与已运行时间。自动补全下拉框向上展开,避免与下方 cwd 选择器冲突。标题旁有 Live / Offline 指示器。路由上的同源守卫防止浏览器 drive-by spawn。并发实际上不设上限(默认安全上限 10000,与终端 TUI 一致 — 仅作为防止有缺陷客户端 fork-bomb 的兜底;通过 `RUN_MAX_CONCURRENT` 设置真正的上限)。统一的活动运行 / 历史模态框还提供两个一键跳转按钮:对话型历史行的 **Resume** 按钮立即派生 `claude --resume <id>` 并把过去的对话记录预填入聊天视图(无需重新输入 prompt — 派生的进程会在 stdin 上空转直到你发送跟进消息);单次型历史行的 **View** 按钮把已捕获的转录内联加载到 run 查看器中作只读展示(不派生进程 — 同一面板,无 Stop / 跟进控件)。生成的会话触发与任何 `claude` 进程相同的 hooks,因此自动出现在 Sessions / Analytics / Kanban / Workflows — 而 Sessions / SessionDetail 会为当前正由 Run 页驱动的会话显示绿色 **▶ Run** 徽标 / 横幅,可点击跳回 Run 页 |
 | **Tabby** | 固定在每个页面右下角的可爱 SVG 小猫伴侣,会订阅实时会话 WebSocket 流并据此做出反应。**会做出反应的吉祥物**:基于实时会话流呈现 8 种情绪——空闲、观察、开心、担忧、卡住、思考、睡觉、断开连接;眼睛会追踪光标,每种情绪都有专属动画。**气泡台词**在值得关注的事件发生时弹出(会话开始/结束、出现错误、运行完成),带节流且可静音。点击小猫或按 **⌘B / Ctrl+B** 打开**面板**(Esc 关闭):实时状态行(N 个进行中 · M 个出错 · 连接状态)、快捷操作(跳转到 Run Claude / 活动 / 会话 / 出错的会话,静音,清除提醒)以及一个 **Ask** 提问框。Ask 提问框在本地回答简单的状态类问题;其他问题则交给现有的 **Run Claude** 页面(`/run?prompt=...`)以启动一个真正的 Claude Code 会话——**无需新增后端、无需 API 密钥**。完全构建在现有的 WebSocket 流之上,支持无障碍(键盘、`aria-live`、尊重 `prefers-reduced-motion`),可在「设置」中开关。代码位于 `client/src/components/Tabby/` |
 | **告警与 Webhook** | 基于规则的告警引擎在服务端评估实时事件流,支持四种条件类型:**事件模式**(匹配事件类型 / 工具名 / 摘要子串,可选要求在时间窗口内出现 N 次匹配——例如「2 分钟内超过 5 个错误」)、**闲置**(活跃会话 N 分钟无事件)、**卡住的代理**(代理在 `working`/`waiting` 状态下 N 分钟无活动)和**令牌阈值**(会话总令牌超过上限)。每条规则都按 (规则、会话、代理) 维度做冷却去重。触发的告警显示在实时列表中(支持确认 / 全部确认),并扇出到 **14 个一等公民 Webhook 提供方**——**Slack**、**Discord**、**Microsoft Teams**(通过 Power Automate Workflows 的 Adaptive Card)、**Google Chat**、**Mattermost**、**Rocket.Chat**、**Telegram**(Bot API)、**PagerDuty**(Events API v2)、**Opsgenie**(Alert API)、**Splunk On-Call**(VictorOps)、**Zapier**、**Make**、**n8n**、**Pipedream**——以及任意通用 JSON 端点(可选 **HMAC-SHA256** 签名 + 自定义请求头)。每个提供方都有各自的原生负载格式,可按规则限定范围。投递与告警流程分离且完全失败安全:请求超时、有界重试/退避、响应体校验(Splunk On-Call 返回 200 但 `result:"failure"`)、同步的**「发送测试」**按钮以及每个目标的投递日志。URL、密钥和凭据均存储在服务端,**绝不**通过 API 返回(在所有响应中被掩码/脱敏)。规则与渠道在 **设置 → 告警** 中统一管理,每个字段都有解释性提示,并提供按提供方的设置指南(附说明:这些步骤可能已过时——请查阅官方文档) |
@@ -929,6 +931,15 @@ graph TD
     EVT["事件和 Hook<br/>list events, ingest hook events"]
     PRC["定价和成本<br/>规则 CRUD, 总成本/会话成本, 重置默认"]
     MNT["维护<br/>cleanup, reimport, reinstall hooks, clear-all（受保护）"]
+    WFL["工作流<br/>统计、运行、下钻、编排"]
+    ALT["告警<br/>规则与触发记录"]
+    WHK["Webhook<br/>提供方、目标与投递"]
+    IMP["导入<br/>指南、扫描、上传、恢复"]
+    CFG["配置<br/>Claude/Codex 文件与备份"]
+    RUN["Run<br/>模型、目录、启动与控制"]
+    SET["设置<br/>更新、Home 与 Hook"]
+    DET["会话详情<br/>Transcript、图片与工作流"]
+    PSH["推送<br/>订阅、取消与发送"]
 
     ROOT --> OBS
     ROOT --> SES
@@ -936,6 +947,15 @@ graph TD
     ROOT --> EVT
     ROOT --> PRC
     ROOT --> MNT
+    ROOT --> WFL
+    ROOT --> ALT
+    ROOT --> WHK
+    ROOT --> IMP
+    ROOT --> CFG
+    ROOT --> RUN
+    ROOT --> SET
+    ROOT --> DET
+    ROOT --> PSH
 ```
 
 ### MCP 安全模型
@@ -966,6 +986,9 @@ flowchart TD
 
 - 只读模式（默认）：`MCP_DASHBOARD_ALLOW_MUTATIONS=false`
 - 管理模式：`MCP_DASHBOARD_ALLOW_MUTATIONS=true`
+- 认证：`MCP_DASHBOARD_API_TOKEN`（回退到 `DASHBOARD_API_TOKEN`）应与 Dashboard 的 `DASHBOARD_TOKEN` 一致
+- 传输防护：直接回环 HTTP 可携带 Token；容器主机别名必须使用 HTTPS；所有重定向都会被拒绝
+- 负载防护：历史上传单文件 50 MiB、每次调用合计 100 MiB、二进制响应 10 MiB、备份恢复 25 MiB
 - 破坏性模式：需要同时满足：
   - `MCP_DASHBOARD_ALLOW_MUTATIONS=true`
   - `MCP_DASHBOARD_ALLOW_DESTRUCTIVE=true`
@@ -1132,7 +1155,7 @@ npm run monitoring:docker:up
 | `POST` | `/api/settings/install-hooks` | 安装 Claude Code、Codex 或两者的 Hook；保留无关 Hook |
 | `POST` | `/api/settings/reset-pricing` | 重置 Claude 与 GPT 定价为默认值 |
 | `GET` | `/api/settings/export` | 以 JSON 下载方式导出所有数据 |
-| `POST` | `/api/settings/import` | 从 `/export` 恢复导出包（multipart `file` 或 JSON `{ path }`）。幂等且非破坏性——已存在的会话会被整体跳过 |
+| `POST` | `/api/settings/import` | 从 `/export` 恢复一个不超过 25 MiB 的导出包（multipart `file` 或 JSON `{ path }`）。幂等且非破坏性——已存在的会话会被整体跳过 |
 | `POST` | `/api/settings/cleanup` | 废弃过期会话、清除旧数据 |
 
 ### 远程数据源
@@ -1781,6 +1804,7 @@ claude plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
 | **ccam-runner** | `claude plugin install ccam-runner@claude-code-agent-monitor-plugins` | `run-agent`、`run-history` |
 | **ccam-integrations** | `claude plugin install ccam-integrations@claude-code-agent-monitor-plugins` | `alert-management`、`webhook-management`、`remote-collection` |
 | **ccam-platform** | `claude plugin install ccam-platform@claude-code-agent-monitor-plugins` | `config-explorer`、`history-portability`、`hook-setup`、`mcp-server` |
+| **ccam-reports** | `claude plugin install ccam-reports@claude-code-agent-monitor-plugins` | `executive-report`、`cost-report`、`reliability-report`、`workflow-report` |
 
 ### 包含的 CLI 工具
 
@@ -2036,9 +2060,9 @@ agent-dashboard/
 |   +-- skills/                 # Claude 可复用项目技能
 |   +-- agents/                 # Claude 自定义子 Agent
 |-- .claude-plugin/
-|   +-- marketplace.json        # Claude Code 插件市场清单（13 个插件）
+|   +-- marketplace.json        # Claude Code 插件市场清单（14 个插件）
 |-- .agents/plugins/
-|   +-- marketplace.json        # Codex 插件市场清单（13 个插件）
+|   +-- marketplace.json        # Codex 插件市场清单（14 个插件）
 |-- plugins/
 |   |-- ccam-analytics/         # 分析：会话报告、成本明细、使用趋势、生产力评分
 |   |   |-- .claude-plugin/plugin.json
@@ -2048,6 +2072,9 @@ agent-dashboard/
 |   |   +-- bin/ccam-stats      # 终端 Dashboard CLI
 |   |-- ccam-productivity/      # 生产力：站会、报告、冲刺、工作流优化
 |   |-- ccam-devtools/          # 开发工具：调试、诊断、导出、健康检查
+|   |-- ccam-runner/            # Run Agent：启动、跟进、停止、恢复与历史
+|   |-- ccam-integrations/      # 集成：告警、Webhook、推送与远程采集
+|   |-- ccam-platform/          # 平台：配置、导入/恢复、Hook 与 MCP 管理
 |   |   +-- bin/                # ccam-doctor + ccam-export CLI
 |   |-- ccam-insights/          # 洞察：模式、异常、优化、比较
 |   |-- ccam-cost-guard/        # 成本护栏：预算、支出预测、成本告警、模型节省

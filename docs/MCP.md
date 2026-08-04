@@ -112,6 +112,8 @@ Webhook responses stay redacted. Test delivery is a real external side effect.
 
 History import supports Claude Code and Codex. `dashboard_upload_history_files` sends local JSONL/archive files through the same multipart route used by the app. Export restore is idempotent and does not overwrite existing rows.
 
+MCP-side history uploads are capped at 50 MiB per file and 100 MiB total per call before file contents are loaded. Dashboard backup restore separately accepts one export bundle up to 25 MiB.
+
 ### Claude Code config
 
 - `dashboard_get_claude_config`, `dashboard_read_claude_config_file`
@@ -188,14 +190,16 @@ ccam mcp stdio
 
 The call must also pass `confirmation_token = "CLEAR_ALL_DATA"`.
 
+All dashboard fetches reject HTTP redirects. Binary transcript-image responses are streamed with a 10 MiB cap, including responses without a trustworthy `Content-Length`, so a local endpoint cannot make the MCP process buffer an unbounded payload.
+
 ## Configuration
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `MCP_DASHBOARD_BASE_URL` | `http://127.0.0.1:4820` | Local dashboard URL. Only loopback and approved container-host names are accepted |
-| `MCP_DASHBOARD_API_TOKEN` | unset | Bearer token when the dashboard uses `DASHBOARD_TOKEN`; `DASHBOARD_API_TOKEN` is also accepted |
+| `MCP_DASHBOARD_BASE_URL` | `http://127.0.0.1:4820` | Local dashboard URL. Only direct loopback and approved container-host aliases are accepted |
+| `MCP_DASHBOARD_API_TOKEN` | unset | Bearer token when the dashboard uses `DASHBOARD_TOKEN`; falls back to `DASHBOARD_API_TOKEN` |
 | `MCP_DASHBOARD_TIMEOUT_MS` | `10000` | Request timeout |
-| `MCP_DASHBOARD_RETRY_COUNT` | `2` | Extra attempts for idempotent reads only |
+| `MCP_DASHBOARD_RETRY_COUNT` | `2` | Extra attempts for GET requests only |
 | `MCP_DASHBOARD_RETRY_BACKOFF_MS` | `250` | Exponential backoff base |
 | `MCP_DASHBOARD_ALLOW_MUTATIONS` | `false` | Enable write-capable tools |
 | `MCP_DASHBOARD_ALLOW_DESTRUCTIVE` | `false` | Enable full data clearing, with mutation gate and confirmation token |
@@ -203,6 +207,8 @@ The call must also pass `confirmation_token = "CLEAR_ALL_DATA"`.
 | `MCP_HTTP_HOST` | `127.0.0.1` | HTTP transport bind host |
 | `MCP_HTTP_PORT` | `8819` | HTTP transport port |
 | `MCP_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, or `error` |
+
+Direct loopback URLs (`127.0.0.1`, `localhost`, or `::1`) may use a bearer token over HTTP because the request never leaves the machine. A tokenized container-host alias such as `host.docker.internal`, `gateway.docker.internal`, or `host.containers.internal` must use HTTPS. Startup fails instead of sending the token over plain container-network HTTP.
 
 ## Host Configuration
 
@@ -235,7 +241,9 @@ npm run extensions:validate
 ## Troubleshooting
 
 - Dashboard unreachable: run `ccam status`, then `ccam start` or `npm run dev`.
-- Auth failure: set `MCP_DASHBOARD_API_TOKEN` to the same value as `DASHBOARD_TOKEN`.
+- Auth failure: set `MCP_DASHBOARD_API_TOKEN` or its `DASHBOARD_API_TOKEN` fallback to the same value as `DASHBOARD_TOKEN`.
+- Tokenized container-host alias rejected: terminate TLS for the dashboard and use an `https://` base URL, or run the MCP process on the host and use direct loopback HTTP.
+- Upload or image is too large: keep each history file at or below 50 MiB, each upload call at or below 100 MiB total, transcript images at or below 10 MiB, and backup exports at or below 25 MiB.
 - Mutation denied: set `MCP_DASHBOARD_ALLOW_MUTATIONS=true` for that MCP process.
 - Plugin MCP launch fails: run `npm run setup`, then verify `ccam mcp repl`.
 - HTTP clients cannot connect: verify `/health`, bind host, firewall, and the exact `/mcp` endpoint.

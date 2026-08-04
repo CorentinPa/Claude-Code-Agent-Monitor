@@ -33,7 +33,9 @@ ccam mcp repl
 - Reads are enabled by default.
 - Writes require `MCP_DASHBOARD_ALLOW_MUTATIONS=true`.
 - Full data clearing additionally requires
-  `MCP_DASHBOARD_ALLOW_DESTRUCTIVE=true` and `CLEAR_ALL_DATA`.
+  `MCP_DASHBOARD_ALLOW_DESTRUCTIVE=true` and the exact tool argument
+  `confirmation_token = "CLEAR_ALL_DATA"`. `CLEAR_ALL_DATA` is not an
+  environment variable.
 - Set `MCP_DASHBOARD_API_TOKEN` when the dashboard uses `DASHBOARD_TOKEN`.
 - The target URL remains restricted to loopback and approved container-host
   names.

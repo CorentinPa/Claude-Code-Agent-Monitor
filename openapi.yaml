@@ -3670,7 +3670,7 @@ components:
           example: conversation
         cwd:
           type: string
-          description: Absolute working directory for the child. Must exist as a directory at request time. Omitted/empty defaults to the dashboard server's cwd. Non-absolute or missing paths are rejected with EBADCWD.
+          description: Absolute working directory for the child. Must exist as a directory at request time and is canonicalized with realpath before use. It intentionally may be outside this repository so Run Agent can launch in a home directory or any recent project. Omitted/empty defaults to the dashboard server's cwd. Non-absolute or missing paths are rejected with EBADCWD.
           example: /Users/dev/projects/my-app
         model:
           type: string
@@ -7394,7 +7394,7 @@ paths:
       tags:
         - Webhooks
       summary: List supported providers + their config fields (for the UI)
-      description: 'Returns the redacted provider catalog the webhook-target editor renders. For each of the 14 supported providers (Slack, Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream) plus the `generic` family, it lists: a human label, the provider family, whether the URL must be https / is user-supplied, and the per-provider config field definitions (key, label, type, required, options, and whether the field is secret). No secret values are ever included — this is purely the *shape* of the form, not stored credentials.'
+      description: 'Returns the redacted provider catalog the webhook-target editor renders. For each of the 14 supported providers (Slack, Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream) plus the `generic` family, it lists: a human label, the provider family, whether the URL must be HTTPS / is user-supplied, and the per-provider config field definitions (key, label, type, required, options, and whether the field is secret). Hosted providers require HTTPS; `generic` and `n8n` may use HTTP for local or self-hosted receivers. No secret values are ever included — this is purely the *shape* of the form, not stored credentials.'
       operationId: listWebhookProviders
       responses:
         '200':
@@ -7513,7 +7513,7 @@ paths:
       tags:
         - Webhooks
       summary: Create a webhook target
-      description: Creates a webhook target that fires when alerts match. `name` and `type` are required. `url` is required for most providers but is derived or defaulted for a few (Telegram and Opsgenie derive it from config; PagerDuty defaults it) — consult GET /api/webhooks/providers for which fields each provider needs. `config` carries provider-specific params (e.g. `{ chat_id }` for Telegram, `{ routing_key, severity }` for PagerDuty, `{ api_key, region }` for Opsgenie). `secret` (HMAC-SHA256 signing) and custom `headers` apply only to the generic family and are silently ignored for other providers. `rule_ids` optionally scopes the target to specific alert rules; omit it to fire for all rules. The response is the created target, REDACTED the same way as the list endpoint (URL masked, secrets shown only as `has_secret`/`••••`).
+      description: Creates a webhook target that fires when alerts match. `name` and `type` are required. `url` is required for most providers but is derived or defaulted for a few (Telegram and Opsgenie derive it from config; PagerDuty defaults it) — consult GET /api/webhooks/providers for which fields each provider needs. Hosted providers require HTTPS; `generic` and `n8n` may use HTTP for local or self-hosted receivers. Delivery rejects redirects, so credentials, custom headers, and HMAC signatures are never forwarded to a second destination. `config` carries provider-specific params (e.g. `{ chat_id }` for Telegram, `{ routing_key, severity }` for PagerDuty, `{ api_key, region }` for Opsgenie). `secret` (HMAC-SHA256 signing) and custom `headers` apply only to the generic family and are silently ignored for other providers. `rule_ids` optionally scopes the target to specific alert rules; omit it to fire for all rules. The response is the created target, REDACTED the same way as the list endpoint (URL masked, secrets shown only as `has_secret`/`••••`).
       operationId: createWebhook
       requestBody:
         required: true
@@ -8500,7 +8500,7 @@ paths:
       tags:
         - CcConfig
       summary: Read a single file body
-      description: 'Read-only. Returns the body of one file. Strict path containment: the resolved absolute path MUST live under the Claude home, the project .claude dir, or (only for a file literally named CLAUDE.md) the project root. Bodies over 256 KiB are truncated. NOTE: there is no 404 path — a missing, unreadable, or out-of-root file all return 400.'
+      description: 'Read-only. Returns the body of one file. Strict symlink-aware path containment: the requested file and allowed roots are canonicalized with realpath, and the canonical target MUST live under the Claude home, the project .claude dir, or (only for a file literally named CLAUDE.md) the project root. Bodies over 256 KiB are truncated. NOTE: there is no 404 path — a missing, unreadable, or out-of-root file all return 400.'
       operationId: ccConfigGetFile
       parameters:
         - name: path
@@ -8749,7 +8749,7 @@ paths:
       tags:
         - CodexConfig
       summary: Read one safe Codex configuration file
-      description: Reads one file contained by CODEX_HOME, or this repository's AGENTS.md. TOML and JSON secret-like values are redacted; files are capped at 256 KiB. Paths outside those roots are refused.
+      description: Reads one file contained by CODEX_HOME, or this repository's AGENTS.md. The target is canonicalized before containment is checked, so a symlink cannot escape the trusted roots. TOML and JSON secret-like values are redacted; files are capped at 256 KiB. Paths outside those roots are refused.
       operationId: codexConfigFile
       parameters:
         - name: path
@@ -8775,7 +8775,7 @@ paths:
       tags:
         - CodexConfig
       summary: Save one editable Codex configuration file
-      description: Atomically saves config.toml, hooks.json, user rules, user skill SKILL.md files, or Codex/project AGENTS.md only. A timestamped backup is created before every overwrite. The dashboard does not validate TOML, JSON, hook, or instruction syntax.
+      description: Atomically saves config.toml, named profile overlays, hooks.json, user rules, user skill SKILL.md files, or Codex/project AGENTS.md only. Existing path components may not be symbolic links, the canonical parent must remain inside the trusted root, and content containing the redacted-preview marker `[redacted]` is refused. A timestamped backup is created before every overwrite. The dashboard does not validate TOML, JSON, hook, or instruction syntax.
       operationId: codexConfigWriteFile
       requestBody:
         required: true
@@ -8837,7 +8837,7 @@ paths:
       tags:
         - CodexConfig
       summary: Read one editable Codex file for local editing
-      description: Returns unredacted content only for the editable allowlist. Use the normal /file endpoint for redacted read-only previews.
+      description: Returns unredacted content only for the editable allowlist. Existing path components may not be symbolic links. Use the normal /file endpoint for redacted read-only previews.
       operationId: codexConfigEditableFile
       parameters:
         - name: path
@@ -9197,7 +9197,7 @@ paths:
       tags:
         - Run
       summary: Autocomplete files within a cwd
-      description: Walks the given `cwd` and returns up to 40 file paths (relative to that cwd, shortest first) for the prompt editor's `@` references. The cwd is validated via the same sanitiser as spawning (must be an existing absolute directory). Dotfiles (except .env/.gitignore) and heavy build dirs (node_modules, .git, dist, build, out, .next, coverage, target, .venv, __pycache__, etc.) are skipped; the walk is bounded (≤5000 entries visited). Read-only — no process is spawned. The loopback same-origin guard applies.
+      description: 'Walks the given `cwd` and returns up to 40 file paths (relative to that cwd, shortest first) for the prompt editor''s `@` references. The cwd is validated via the same sanitiser as spawning: it must be an existing absolute directory, is canonicalized with realpath, and intentionally may be outside this repository. Dotfiles (except .env/.gitignore) and heavy build dirs (node_modules, .git, dist, build, out, .next, coverage, target, .venv, __pycache__, etc.) are skipped; the walk is bounded (≤5000 entries visited). Read-only — no process is spawned. The loopback same-origin guard applies.'
       operationId: runFiles
       parameters:
         - name: cwd
@@ -9205,7 +9205,7 @@ paths:
           required: false
           schema:
             type: string
-          description: Absolute directory to walk. Must exist; defaults to the dashboard server's cwd when omitted. Invalid values yield 400 EBADCWD.
+          description: Absolute directory to walk. Must exist and is canonicalized with realpath; defaults to the dashboard server's cwd when omitted. It may be outside this repository. Invalid values yield 400 EBADCWD.
           example: /Users/dev/projects/my-app
         - name: q
           in: query
@@ -10404,7 +10404,7 @@ paths:
       tags:
         - Settings
       summary: Restore (import) a previously exported data bundle
-      description: 'Restores a bundle produced by GET /api/settings/export. Supply it either as `multipart/form-data` with a single `file` field (browser upload) or as a JSON body `{ "path": "<absolute path>" }` (the server reads the file from disk — used by the `ccam import-data` CLI, and it also sidesteps the global 1 MB JSON body cap for large bundles). The restore is idempotent and NON-DESTRUCTIVE: it is session-atomic, so a session already present (matched by its UUID) is skipped whole together with its agents/events/token_usage/workflows, and independent config rows (dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) are inserted only when absent. Nothing existing is overwritten — ideal for consolidating several machines into one dashboard. The response reports per-table counts.'
+      description: 'Restores one bundle up to 25 MiB produced by GET /api/settings/export. Supply it either as `multipart/form-data` with a single `file` field (browser upload) or as a JSON body `{ "path": "<absolute path>" }` (the server reads the file from disk — used by the `ccam import-data` CLI, and it also sidesteps the global 1 MB JSON body cap for large bundles). The restore is idempotent and NON-DESTRUCTIVE: it is session-atomic, so a session already present (matched by its UUID) is skipped whole together with its agents/events/token_usage/workflows, and independent config rows (dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) are inserted only when absent. Nothing existing is overwritten — ideal for consolidating several machines into one dashboard. The response reports per-table counts.'
       operationId: importData
       requestBody:
         required: true
@@ -10452,4 +10452,6 @@ paths:
                 errors: 0
         '400':
           description: Missing file, invalid JSON, or unrecognized export format
+        '413':
+          description: The export bundle exceeds the 25 MiB restore limit
 x-issues-url: https://github.com/hoangsonww/Claude-Code-Agent-Monitor/issues

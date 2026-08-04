@@ -68,7 +68,10 @@ export function registerSettingsTools(context: ToolContext): void {
       providers: z
         .array(z.enum(["claude", "codex"]))
         .min(1)
-        .max(2),
+        .max(2)
+        .refine((providers) => new Set(providers).size === providers.length, {
+          message: "providers must not contain duplicates",
+        }),
     },
     async (args) => {
       assertMutationsEnabled(config);

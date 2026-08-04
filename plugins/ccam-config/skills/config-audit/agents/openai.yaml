@@ -3,4 +3,4 @@ interface:
   short_description: "Run a full audit of the user's Claude Code configuration via..."
   default_prompt: "Use $config-audit to inspect CCAM data and complete this workflow safely."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

@@ -3,4 +3,4 @@ interface:
   short_description: "Inventory hooks across the user, project, and project-local..."
   default_prompt: "Use $hook-inventory to inspect CCAM data and complete this workflow safely."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

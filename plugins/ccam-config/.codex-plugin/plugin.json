@@ -14,7 +14,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "CCAM Config",
-    "shortDescription": "Audit and govern your Claude Code configuration and file-based memory via the Agent Monitor Conf",
+    "shortDescription": "Audit and govern your Claude Code configuration and file-based memory via the Agent Monitor...",
     "longDescription": "Audit and govern your Claude Code configuration and file-based memory via the Agent Monitor Config Explorer API — skills, subagents, commands, MCP servers, hooks, settings, and the per-project memory store. Surfaces sprawl, duplication, risky hooks, and stale facts, all read through the dashboard at http://localhost:4820.",
     "developerName": "Son Nguyen",
     "category": "Developer Tools",

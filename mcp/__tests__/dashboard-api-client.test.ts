@@ -7,6 +7,9 @@
 
 import { afterEach, describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { mkdtemp, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import type { AppConfig } from "../src/config/app-config.js";
 import { DashboardApiClient } from "../src/clients/dashboard-api-client.js";
 import { Logger } from "../src/core/logger.js";
@@ -71,5 +74,47 @@ describe("DashboardApiClient", () => {
       }),
       { ok: true }
     );
+  });
+
+  it("rejects multipart uploads above the cumulative size cap before fetch", async () => {
+    const directory = await mkdtemp(path.join(os.tmpdir(), "ccam-mcp-upload-"));
+    const first = path.join(directory, "first.jsonl");
+    const second = path.join(directory, "second.jsonl");
+    await writeFile(first, Buffer.alloc(50 * 1024 * 1024));
+    await writeFile(second, Buffer.alloc(50 * 1024 * 1024 + 1));
+    globalThis.fetch = (async () => {
+      assert.fail("fetch must not run for oversized uploads");
+    }) as typeof fetch;
+
+    const client = new DashboardApiClient(config(), new Logger("error"));
+    await assert.rejects(() => client.postFiles("/api/import/upload", [first, second]), {
+      code: "TOO_LARGE",
+    });
+  });
+
+  it("rejects oversized binary responses from Content-Length", async () => {
+    globalThis.fetch = (async () =>
+      new Response("x", {
+        status: 200,
+        headers: { "content-length": String(10 * 1024 * 1024 + 1) },
+      })) as typeof fetch;
+
+    const client = new DashboardApiClient(config(), new Logger("error"));
+    await assert.rejects(() => client.getBinary("/api/sessions/id/transcript-image"), {
+      code: "TOO_LARGE",
+    });
+  });
+
+  it("rejects automatic redirects so bearer headers never cross routes", async () => {
+    globalThis.fetch = (async (_input, init) => {
+      assert.equal(init?.redirect, "error");
+      return new Response(JSON.stringify({ ok: true }), { status: 200 });
+    }) as typeof fetch;
+
+    const client = new DashboardApiClient(
+      config({ dashboardApiToken: "dashboard-secret" }),
+      new Logger("error")
+    );
+    await client.get("/api/health");
   });
 });

@@ -16,6 +16,14 @@ const { spawnSync } = require("node:child_process");
 const ROOT = path.resolve(__dirname, "..");
 const PLUGINS = path.join(ROOT, "plugins");
 const PROJECT_VERSION = json(path.join(ROOT, "package.json")).version;
+const WRITE_CAPABLE = new Set([
+  "ccam-config",
+  "ccam-cost-guard",
+  "ccam-integrations",
+  "ccam-platform",
+  "ccam-runner",
+  "ccam-sessions",
+]);
 
 function json(file) {
   return JSON.parse(fs.readFileSync(file, "utf8"));
@@ -66,6 +74,11 @@ for (const name of pluginNames) {
   assert.equal(typeof claude.repository, "string");
   assert.equal(typeof codex.repository, "string");
   assert.equal(codex.skills, "./skills/");
+  assert.ok(codex.interface.shortDescription.length <= 96);
+  assert.doesNotMatch(codex.interface.shortDescription, /[\s,]$/);
+  if (name === "ccam-dashboard" || WRITE_CAPABLE.has(name)) {
+    assert.deepEqual(codex.interface.capabilities, ["Read", "Write"]);
+  }
   const codexEntry = codexMarketplace.plugins.find((entry) => entry.name === name);
   assert.equal(codexEntry.source.path, `./plugins/${name}`);
   assert.equal(codexEntry.policy.installation, "AVAILABLE");
@@ -80,6 +93,10 @@ for (const name of pluginNames) {
     const metadata = fs.readFileSync(path.join(skillRoot, "agents", "openai.yaml"), "utf8");
     assert.match(metadata, /default_prompt:/);
     assert.match(metadata, new RegExp(`\\$${skillName}\\b`));
+    assert.match(
+      metadata,
+      new RegExp(`allow_implicit_invocation: ${WRITE_CAPABLE.has(name) ? "false" : "true"}`)
+    );
     skillCount += 1;
   }
 }

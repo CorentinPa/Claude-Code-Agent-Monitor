@@ -14,7 +14,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "CCAM Integrations",
-    "shortDescription": "Manage CCAM alert rules, universal webhook providers, browser push notifications, and SSH Remote",
+    "shortDescription": "Manage CCAM alert rules, universal webhook providers, browser push notifications, and SSH...",
     "longDescription": "Manage CCAM alert rules, universal webhook providers, browser push notifications, and SSH Remote Data Sources with explicit mutation and external-send confirmation.",
     "developerName": "Son Nguyen",
     "category": "Developer Tools",

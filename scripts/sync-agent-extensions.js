@@ -34,6 +34,7 @@ const CATEGORY_BY_PLUGIN = {
   "ccam-platform": "Developer Tools",
   "ccam-productivity": "Productivity",
   "ccam-quality": "Developer Tools",
+  "ccam-reports": "Productivity",
   "ccam-runner": "Productivity",
   "ccam-sessions": "Developer Tools",
   "ccam-workflows": "Productivity",
@@ -52,11 +53,53 @@ function readJson(file) {
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
+function isUnder(root, target) {
+  const relative = path.relative(root, target);
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
+
+function assertSafeWritePath(file) {
+  const target = path.resolve(file);
+  if (!isUnder(ROOT, target)) throw new Error(`Refusing to write outside repository root: ${file}`);
+  const relative = path.relative(ROOT, target);
+  let current = ROOT;
+  for (const segment of relative.split(path.sep).filter(Boolean)) {
+    current = path.join(current, segment);
+    if (!fs.existsSync(current)) break;
+    if (fs.lstatSync(current).isSymbolicLink()) {
+      throw new Error(`Refusing to write through symbolic link: ${current}`);
+    }
+  }
+  let ancestor = path.dirname(target);
+  while (!fs.existsSync(ancestor)) ancestor = path.dirname(ancestor);
+  if (!isUnder(fs.realpathSync(ROOT), fs.realpathSync(ancestor))) {
+    throw new Error(`Refusing to write through a path outside repository root: ${file}`);
+  }
+}
+
+function safeWriteFile(file, contents) {
+  assertSafeWritePath(file);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  assertSafeWritePath(file);
+  fs.writeFileSync(file, contents);
+}
+
+function truncateWords(value, maxLength) {
+  if (value.length <= maxLength) return value;
+  const contentLimit = Math.max(1, maxLength - 3);
+  const candidate = value.slice(0, contentLimit + 1);
+  const boundary = candidate
+    .slice(0, contentLimit)
+    .replace(/\s+\S*$/, "")
+    .trimEnd();
+  const prefix = boundary || value.slice(0, contentLimit).trimEnd();
+  return `${prefix}...`;
+}
+
 async function writeJson(file, value) {
   const prettier = require("prettier");
   const prettierConfig = (await prettier.resolveConfig(file)) || {};
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(
+  safeWriteFile(
     file,
     await prettier.format(JSON.stringify(value), {
       ...prettierConfig,
@@ -112,7 +155,7 @@ function ensureSkillName(file, expectedName) {
   }
   if (found) return text;
   const next = text.replace(/^---\r?\n/, `---\nname: ${expectedName}\n`);
-  fs.writeFileSync(file, next);
+  safeWriteFile(file, next);
   return next;
 }
 
@@ -121,22 +164,20 @@ function yamlQuote(value) {
 }
 
 function writeSkillMetadata(skillDir, name, description) {
-  const summary =
-    description.length <= 64
-      ? description
-      : `${description.slice(0, 61).replace(/\s+\S*$/, "")}...`;
+  const summary = truncateWords(description, 64);
+  const pluginName = path.relative(PLUGINS_DIR, skillDir).split(path.sep)[0];
+  const allowImplicitInvocation = !WRITE_CAPABLE.has(pluginName);
   const metadata = [
     "interface:",
     `  display_name: ${yamlQuote(titleCase(name))}`,
     `  short_description: ${yamlQuote(summary)}`,
     `  default_prompt: ${yamlQuote(`Use $${name} to inspect CCAM data and complete this workflow safely.`)}`,
     "policy:",
-    "  allow_implicit_invocation: true",
+    `  allow_implicit_invocation: ${allowImplicitInvocation}`,
     "",
   ].join("\n");
   const target = path.join(skillDir, "agents", "openai.yaml");
-  fs.mkdirSync(path.dirname(target), { recursive: true });
-  fs.writeFileSync(target, metadata);
+  safeWriteFile(target, metadata);
 }
 
 function countPluginComponents(pluginRoot) {
@@ -175,11 +216,12 @@ function codexManifest(name, claudeManifest, pluginRoot) {
   }
   manifest.interface = {
     displayName: titleCase(name),
-    shortDescription: claudeManifest.description.slice(0, 96),
+    shortDescription: truncateWords(claudeManifest.description, 96),
     longDescription: claudeManifest.description,
     developerName: AUTHOR.name,
     category,
-    capabilities: WRITE_CAPABLE.has(name) ? ["Read", "Write"] : ["Read"],
+    capabilities:
+      WRITE_CAPABLE.has(name) || name === "ccam-dashboard" ? ["Read", "Write"] : ["Read"],
     websiteURL: REPOSITORY,
     defaultPrompt: [
       `Use ${titleCase(name)} to inspect the local CCAM dashboard.`,

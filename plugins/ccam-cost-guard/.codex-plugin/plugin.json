@@ -14,7 +14,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "CCAM Cost Guard",
-    "shortDescription": "Budget tracking, spend forecasting, and cost-threshold alerts for Claude Code usage via the Agen",
+    "shortDescription": "Budget tracking, spend forecasting, and cost-threshold alerts for Claude Code usage via the...",
     "longDescription": "Budget tracking, spend forecasting, and cost-threshold alerts for Claude Code usage via the Agent Monitor pricing engine. Watches spend against a target budget, projects month-end cost from the daily trend, surfaces the priciest sessions, estimates savings from cheaper-model routing, and wires up cost alert rules — all backed by the dashboard at http://localhost:4820.",
     "developerName": "Son Nguyen",
     "category": "Productivity",

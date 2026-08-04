@@ -1187,6 +1187,11 @@ async function cmdRules() {
 async function cmdAlertRules(flags, positional) {
   const sub = positional[0] || "list";
   if (sub === "list") return cmdRules();
+  const writeSubcommands = new Set(["create", "update", "delete"]);
+  if (!writeSubcommands.has(sub)) {
+    console.error(c.red("✖ Usage: ccam alert-rules list|create|update <id>|delete <id>"));
+    process.exit(1);
+  }
   if (!flags.yes) {
     console.error(c.red("✖ Alert-rule writes require --yes."));
     process.exit(1);
@@ -1261,6 +1266,10 @@ async function cmdWebhooks(flags, positional) {
       await api("DELETE", `/api/webhooks/${encodeURIComponent(positional[1])}`);
       console.log(`${c.green("✔")} Deleted webhook ${positional[1]}`);
       return;
+    }
+    if ((sub === "update" || sub === "delete") && !positional[1]) {
+      console.error(c.red(`✖ ${sub} requires a webhook id.`));
+      process.exit(1);
     }
     const body = jsonFlag(flags) || {};
     if (sub === "create") {
@@ -1615,7 +1624,12 @@ async function cmdImport(flags, positional) {
       throw new ServerDownError();
     }
     const raw = await response.text();
-    const result = raw ? JSON.parse(raw) : {};
+    let result = {};
+    try {
+      result = raw ? JSON.parse(raw) : {};
+    } catch {
+      result = { error: { message: raw || `HTTP ${response.status}` } };
+    }
     if (!response.ok) {
       console.error(c.red(`✖ Upload failed: ${result?.error?.message || response.status}`));
       process.exit(1);
@@ -1929,6 +1943,11 @@ async function cmdMcp(positional) {
     process.exit(1);
   }
   const child = spawn(process.execPath, args, { stdio: "inherit", env: process.env });
+  child.on("error", (error) => {
+    console.error(c.red(`✖ Failed to start MCP server: ${error.message}`));
+    console.error(c.dim("  Run npm run mcp:install && npm run mcp:build, then retry."));
+    process.exitCode = 1;
+  });
   child.on("exit", (code, signal) => {
     if (signal) process.kill(process.pid, signal);
     process.exit(code ?? 0);

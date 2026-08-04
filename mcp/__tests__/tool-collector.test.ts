@@ -10,6 +10,7 @@ import { collectAllTools } from "../src/transports/tool-collector.js";
 import { Logger } from "../src/core/logger.js";
 import type { AppConfig } from "../src/config/app-config.js";
 import { DashboardApiClient } from "../src/clients/dashboard-api-client.js";
+import { toolDomain } from "../src/transports/repl.js";
 
 function fakeConfig(overrides: Partial<AppConfig> = {}): AppConfig {
   return {
@@ -64,6 +65,23 @@ describe("collectAllTools", () => {
         `Tool ${tool.name} should start with 'dashboard_'`
       );
       assert.ok(/^[a-z_]+$/.test(tool.name), `Tool ${tool.name} should be lowercase snake_case`);
+    }
+  });
+
+  it("classifies every collected tool into a known REPL domain", () => {
+    const tools = collectAllTools(config, api, logger);
+    for (const tool of tools) {
+      assert.notEqual(toolDomain(tool.name), "other", `${tool.name} must have a REPL domain`);
+    }
+    for (const name of [
+      "dashboard_get_update_status",
+      "dashboard_check_for_updates",
+      "dashboard_get_agent_homes",
+      "dashboard_set_claude_home",
+      "dashboard_set_codex_home",
+      "dashboard_install_hooks",
+    ]) {
+      assert.equal(toolDomain(name), "settings");
     }
   });
 

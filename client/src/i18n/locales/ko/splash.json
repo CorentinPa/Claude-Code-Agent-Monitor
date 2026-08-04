@@ -24,7 +24,7 @@
   "hookGate": {
     "kicker": "실시간 추적",
     "title": "실시간 모니터링 설정",
-    "description": "선택한 제공자 중 아직 필요한 항목에만 가벼운 로컬 hook을 설치합니다.",
+    "description": "선택한 제공자 중 아직 hook이 필요한 제공자에만 가벼운 로컬 hook을 설치합니다.",
     "selectedProviders": "아직 hook이 필요한 제공자",
     "realTime": "hook은 라이프사이클 이벤트를 이 로컬 대시보드로 실시간 전송합니다. 데이터는 이 머신에만 남습니다.",
     "checking": "기존 hook 설정을 확인하는 중...",
