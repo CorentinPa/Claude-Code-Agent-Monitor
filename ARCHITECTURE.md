@@ -125,7 +125,7 @@ C4Context
 - Never block Claude Code -- hooks fail silently with timeouts
 - Instant feedback -- WebSocket push, no polling
 - Portable -- SQLite, no external services, runs on any OS with Node.js 20+
-- Extensible -- plugin marketplace with 10 plugins (53 skills, 14 agents, 30 slash commands, 3 CLI tools)
+- Extensible -- 13 dual-format Claude/Codex plugins with 62 bundled skills, plus 70 skills discoverable through the skills CLI
 
 ---
 
@@ -147,7 +147,7 @@ graph TB
 
     subgraph "Plugin Layer"
         direction TB
-        PM["Plugin Marketplace<br/>(10 plugins, 53 skills)"]
+        PM["Claude + Codex Marketplace<br/>(13 plugins, 62 bundled skills)"]
         PA["ccam-analytics"]
         PP["ccam-productivity"]
         PD["ccam-devtools"]
@@ -1531,303 +1531,121 @@ changes.
 
 ## Agent Extension Layer
 
-The repository includes a triple extension strategy:
+CCAM uses one shared extension source tree with product-specific manifests:
 
-- Claude Code-native extensions (`CLAUDE.md`, `.claude/rules`, `.claude/skills`)
-- Codex-native extensions (`AGENTS.md`, `.codex/rules`, `.codex/agents`, `.codex/skills`)
-- Plugin marketplace (`plugins/`, `.claude-plugin/marketplace.json`) — 10 plugins with 53 skills, 14 agents, 30 slash commands, 3 CLI tools
-- Codex-native extensions (`AGENTS.md`, `.codex/rules`, `.codex/agents`, `.codex/skills`)
+- Claude Code project guidance: `CLAUDE.md`, `.claude/rules/`, `.claude/skills/`, `.claude/agents/`
+- Codex project guidance: `AGENTS.md`, `.codex/config.toml`, `.codex/rules/`, `.codex/agents/`, `.codex/skills/`
+- Shared plugins: `plugins/<name>/`
+- Claude marketplace: `.claude-plugin/marketplace.json`
+- Codex marketplace: `.agents/plugins/marketplace.json`
+- Open Agent Skills metadata: `plugins/*/skills/*/SKILL.md` plus `agents/openai.yaml`
 
 ```mermaid
 graph TD
     USER["Developer"] --> CLAUDE["Claude Code"]
     USER --> CODEX["Codex"]
-
-    CLAUDE --> C_MEM["CLAUDE.md"]
-    CLAUDE --> C_RULES[".claude/rules/*"]
-    CLAUDE --> C_SKILLS[".claude/skills/*"]
-    CLAUDE --> C_PLUGINS["plugins/<br/>10 plugins, 53 skills"]
-
-    CODEX --> X_MEM["AGENTS.md"]
-    CODEX --> X_RULES[".codex/rules/*.rules"]
-    CODEX --> X_AGENTS[".codex/agents/*.toml"]
-    CODEX --> X_SKILLS[".codex/skills/*"]
-
-    style C_PLUGINS fill:#8b5cf6,stroke:#a78bfa,color:#fff
+    USER --> SKILLS["skills CLI / skills.sh"]
+    SOURCE["plugins/<name>/"] --> CM[".claude-plugin/plugin.json"]
+    SOURCE --> XM[".codex-plugin/plugin.json"]
+    SOURCE --> S["skills/*/SKILL.md + agents/openai.yaml"]
+    CM --> CLAUDE
+    XM --> CODEX
+    S --> CLAUDE
+    S --> CODEX
+    S --> SKILLS
 ```
 
-### Claude Code extension scope
+The verified distribution contains **13 plugins, 62 bundled plugin skills, 17 Claude subagents, 33 Claude commands, 3 CLI helpers, 3 hook configurations, and 2 MCP-enabled plugins**. `npx skills add hoangsonww/Claude-Code-Agent-Monitor --list` discovers **70 total repository skills** because repository-maintenance skills are included alongside plugin skills.
 
-- `CLAUDE.md` defines always-on project working agreements.
-- `.claude/rules/` adds path-scoped guidance by file area.
-- `.claude/skills/` provides reusable workflows:
-  - onboarding
-  - feature shipping
-  - MCP operations
-  - live issue debugging
-- `.claude/agents/` provides specialized review workers:
-  - backend reviewer
-  - frontend reviewer
-  - MCP reviewer
-- `plugins/` provides distributable plugin marketplace (see [Plugin Marketplace](#plugin-marketplace)):
-  - ccam-analytics (session reports, cost analysis, usage trends, productivity scoring)
-  - ccam-productivity (standups, weekly reports, sprint summaries, workflow optimization)
-  - ccam-devtools (session debugging, hook diagnostics, data export, health checks)
-  - ccam-insights (pattern detection, anomaly alerting, optimization, session comparison)
-  - ccam-dashboard (status checks, quick stats, MCP integration)
-  - ccam-cost-guard (budget guardrails, week/month-end spend forecasting, cost-threshold alerts, model-routing savings)
-  - ccam-sessions (session forensics: search, timeline, transcript replay, per-cwd rollup, cleanup)
-  - ccam-workflows (multi-agent orchestration & fleet intelligence: DAG map, delegation audit, concurrency, error propagation, fleet runs)
-  - ccam-quality (reliability & SLOs: error scan, API-error report, hook-failure audit, SLO check, regression alert)
-  - ccam-config (Claude Code config & memory governance: config audit, memory review, skill/MCP/hook inventory)
+Three focused packs extend the original analytics and governance catalog:
 
-### Codex extension scope
+- `ccam-runner`: monitored Claude Code/Codex launch, follow-up, stop, resume, and persistent run history
+- `ccam-integrations`: alert rules, webhook providers, browser push, and SSH remote collection
+- `ccam-platform`: Claude/Codex Config Explorer, history import, backup restore, hook setup, updates, and MCP operations
 
-- `AGENTS.md` provides project-wide default behavior.
-- `.codex/rules/default.rules` controls external execution decisions.
-- `.codex/agents/` provides custom subagent templates.
-- `.codex/skills/` provides reusable task workflows.
+`node scripts/sync-agent-extensions.js` deterministically adds missing skill names, writes `agents/openai.yaml`, generates Codex manifests, and rebuilds both catalogs. `scripts/validate-agent-extensions.js` and `server/__tests__/plugins-marketplace.test.js` enforce the Claude/Codex marketplace bijection, dual manifests, skill metadata, agent/command frontmatter, hook JSON, and stable MCP launcher.
+
+Claude Code and Codex install from the same Git repository:
+
+```bash
+claude plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
+codex plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
+```
+
+Skills install directly from the public repository. No upstream skills.sh PR is required. Public OpenAI universal-directory inclusion remains a separate reviewed submission and is not performed by repository code.
 
 ---
 
 ## Plugin Marketplace
 
-The repository includes an official Claude Code plugin marketplace with ten production-ready plugins. These extend Claude Code itself (not just the dashboard) with skills, agents, slash commands, hooks, CLI tools, and MCP integration — all deeply grounded in the actual dashboard data model. The five original plugins (ccam-analytics, ccam-productivity, ccam-devtools, ccam-insights, ccam-dashboard) were each deepened with more agents/skills and a `commands/` dir of slash commands, and five new plugins were added: **ccam-cost-guard** (budget guardrails — set budgets, forecast week/month-end spend, cost-threshold alerts, model-routing savings, with a fail-safe Stop hook), **ccam-sessions** (session forensics — search, timeline, transcript replay, per-cwd rollup, cleanup), **ccam-workflows** (multi-agent orchestration & fleet intelligence — DAG map, delegation audit, concurrency, error propagation, fleet runs, built on the 11-dataset workflow intelligence API), **ccam-quality** (reliability & SLOs — error scan, API-error report, hook-failure audit, SLO check, regression alert), and **ccam-config** (Claude Code config & memory governance — config audit, memory review, skill/MCP/hook inventory via the Config Explorer API).
+Each plugin uses this cross-agent structure:
 
-### Marketplace Architecture
-
-```mermaid
-graph TD
-    subgraph Marketplace[".claude-plugin/marketplace.json"]
-        M["Marketplace Manifest"]
-    end
-
-    subgraph Plugins["plugins/"]
-        A["ccam-analytics<br/>4 skills, 1 agent, 1 CLI"]
-        P["ccam-productivity<br/>4 skills, 1 agent"]
-        D["ccam-devtools<br/>4 skills, 1 agent, 2 CLIs"]
-        I["ccam-insights<br/>4 skills, 1 agent"]
-        C["ccam-dashboard<br/>2 skills, MCP config"]
-        G["ccam-cost-guard<br/>5 skills, 1 agent, Stop hook"]
-        S["ccam-sessions<br/>5 skills, 1 agent"]
-        W["ccam-workflows<br/>5 skills, 1 agent"]
-        Q["ccam-quality<br/>5 skills, 1 agent"]
-        F["ccam-config<br/>5 skills, 1 agent"]
-    end
-
-    subgraph API["Dashboard API (port 4820)"]
-        STATS["/api/stats"]
-        ANALYTICS["/api/analytics"]
-        PRICING["/api/pricing/cost"]
-        WORKFLOWS["/api/workflows/session/:id"]
-        SESSIONS["/api/sessions"]
-    end
-
-    M --> A & P & D & I & C & G & S & W & Q & F
-    A & P & I --> ANALYTICS & PRICING & WORKFLOWS
-    D --> STATS & SESSIONS
-    C --> STATS & ANALYTICS
-    G --> PRICING & ANALYTICS
-    S --> SESSIONS
-    W --> WORKFLOWS
-    Q --> STATS & SESSIONS
-    F --> STATS
-
-    style M fill:#6366f1,stroke:#818cf8,color:#fff
-    style A fill:#10b981,stroke:#34d399,color:#fff
-    style P fill:#f59e0b,stroke:#fbbf24,color:#000
-    style D fill:#ef4444,stroke:#f87171,color:#fff
-    style I fill:#8b5cf6,stroke:#a78bfa,color:#fff
-    style C fill:#06b6d4,stroke:#22d3ee,color:#000
-    style G fill:#ec4899,stroke:#f472b6,color:#fff
-    style S fill:#14b8a6,stroke:#2dd4bf,color:#000
-    style W fill:#a855f7,stroke:#c084fc,color:#fff
-    style Q fill:#f43f5e,stroke:#fb7185,color:#fff
-    style F fill:#3b82f6,stroke:#60a5fa,color:#fff
+```text
+plugins/<name>/
+├── .claude-plugin/plugin.json
+├── .codex-plugin/plugin.json
+├── skills/<skill>/
+│   ├── SKILL.md
+│   └── agents/openai.yaml
+├── agents/*.md
+├── commands/*.md
+├── hooks/hooks.json
+├── bin/*
+└── .mcp.json
 ```
 
-### Plugin Structure
+`ccam-dashboard` and `ccam-platform` use `{ "command": "ccam", "args": ["mcp", "stdio"] }`. The launcher resolves `mcp/build/index.js` from the linked checkout, avoiding plugin-cache-relative paths. `npm run setup` now installs/builds MCP before linking `ccam`.
 
-Each plugin follows the official Claude Code plugin specification:
-
-```
-plugins/ccam-{name}/
-├── .claude-plugin/
-│   └── plugin.json              # Manifest: name, version, description, author
-├── skills/
-│   └── {skill-name}/
-│       └── SKILL.md             # Skill definition with $ARGUMENTS placeholder
-├── agents/
-│   └── {agent-name}.md          # Agent: model, tools, instructions
-├── hooks/
-│   └── hooks.json               # Event hooks (fail-safe, non-blocking)
-├── bin/
-│   └── {cli-tool}               # Executable scripts (added to PATH)
-├── .mcp.json                    # MCP server configuration (optional)
-└── settings.json                # Plugin settings (optional)
-```
-
-Skills are namespaced: `/ccam-analytics:session-report`, `/ccam-productivity:daily-standup`, etc.
-
-### Plugin Catalog
-
-| Plugin | Skills | Agent | CLI Tools | Hooks |
-|--------|--------|-------|-----------|-------|
-| **ccam-analytics** | `session-report`, `cost-breakdown`, `usage-trends`, `productivity-score` | `analytics-advisor` | `ccam-stats` | Stop, SubagentStop |
-| **ccam-cost-guard** | `budget-set`, `spend-forecast`, `cost-alert`, `model-savings`, `daily-budget-check` | `budget-sentinel` | — | Stop |
-| **ccam-productivity** | `daily-standup`, `weekly-report`, `sprint-summary`, `workflow-optimizer` | `productivity-coach` | — | SessionStart, SessionEnd |
-| **ccam-devtools** | `session-debug`, `hook-diagnostics`, `data-export`, `health-check` | `issue-triager` | `ccam-doctor`, `ccam-export` | — |
-| **ccam-insights** | `pattern-detect`, `anomaly-alert`, `optimization-suggest`, `session-compare` | `insights-advisor` | — | — |
-| **ccam-sessions** | `session-search`, `session-timeline`, `transcript-replay`, `cwd-rollup`, `session-cleanup` | `session-investigator` | — | — |
-| **ccam-workflows** | `dag-map`, `delegation-audit`, `concurrency-report`, `error-propagation`, `fleet-runs` | `orchestration-analyst` | — | — |
-| **ccam-quality** | `error-scan`, `api-error-report`, `hook-failure-audit`, `slo-check`, `regression-alert` | `reliability-engineer` | — | — |
-| **ccam-config** | `config-audit`, `memory-review`, `skill-inventory`, `mcp-audit`, `hook-inventory` | `config-auditor` | — | — |
-| **ccam-dashboard** | `dashboard-status`, `quick-stats` | — | — | — |
-
-**Totals**: 10 plugins, 53 skills, 14 agents, 30 slash commands, 3 CLI tools, 3 hook configurations, 1 MCP config. Each plugin is installable via `claude plugin install <name>@hoangsonww-claude-code-agent-monitor`, and a server test (`server/__tests__/plugins-marketplace.test.js`) validates the marketplace↔directory bijection plus every `plugin.json`, agent, skill, and command.
-
-### Data Model Grounding
-
-Every skill and agent references the actual dashboard API response shapes:
-
-| Data Source | Key Fields Used by Plugins |
-|-------------|---------------------------|
-| Token tracking | `input_tokens`, `output_tokens`, `cache_read_input_tokens`, `cache_creation_input_tokens` + 4 `baseline_*` columns (preserve pre-compaction data) |
-| Cost engine | `(tokens / 1M) × rate_per_mtok` for each type; longest `model_pattern` match wins; pre-seeded Opus/Sonnet/Haiku rates |
-| Session metadata | `thinking_blocks`, `turn_count`, `total_turn_duration_ms`, `usage_extras` (`{ service_tiers[], speeds[], inference_geos[] }`) |
-| Event types | `PreToolUse`, `PostToolUse`, `Stop`, `SubagentStop`, `SessionStart`, `SessionEnd`, `Notification`, `Compaction`, `APIError`, `TurnDuration`, `ToolError`, `Interrupted` |
-| Workflow intelligence | 11 datasets per session: `stats`, `orchestration` (DAG), `toolFlow` (transitions), `effectiveness`, `patterns`, `modelDelegation`, `errorPropagation` (by depth), `concurrency` (lanes), `complexity` (score), `compaction` (impact), `cooccurrence` (agent pairs) |
-| Agent hierarchy | Recursive CTE with `parent_agent_id`, `subagent_type`, depth tracking |
-
-### Key Derived Metrics
-
-Plugins compute these from raw API data:
-
-- **Cache efficiency**: `cache_read / (cache_read + input)` — trending up = improving prompt reuse
-- **Compaction pressure**: `sum(baseline_*) / sum(effective_tokens)` — high = frequent context overflow
-- **Tool success rate**: `PostToolUse count / PreToolUse count` — should be ~1.0; gap = tool failures
-- **Turn velocity**: `turn_count / (total_turn_duration_ms / 1000)` — turns per second
-- **Cost per completed session**: `total_cost / completed_sessions`
-
-### Installation
-
-```bash
-# Marketplace install
-claude plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
-claude plugin install ccam-analytics@hoangsonww-claude-code-agent-monitor
-
-# Local development testing
-claude --plugin-dir plugins/ccam-analytics
-```
-
-Full documentation: [`docs/plugins.md`](docs/PLUGINS.md)
+The canonical catalog and install/validation procedures live in [`docs/PLUGINS.md`](docs/PLUGINS.md).
 
 ---
 
 ## MCP Integration
 
-The repository includes an enterprise-grade local MCP server in `mcp/` that exposes dashboard functionality as tools for MCP hosts such as Claude Code and Claude Desktop. It supports three transport modes: stdio (for MCP host child-process integration), HTTP+SSE (for remote/networked clients), and an interactive REPL (for operator debugging).
-
-### MCP Transport Selection
+The MCP server exposes **97 typed tools across 16 domain modules**. It covers every supported action exposed by the app, including scoped data queries, transcript images, Claude and GPT pricing, workflow runs, alerts, webhook delivery, multipart history import, backup restore, Claude/Codex config, Run Agent, remote collection, homes/hooks/updates, push notifications, and maintenance.
 
 ```mermaid
-flowchart TD
-    START["MCP Server Start"] --> ARG{"CLI arg or env?"}
-    ARG -->|"--transport=stdio\nor default"| STDIO["stdio transport\nJSON-RPC over stdin/stdout"]
-    ARG -->|"--transport=http\nor --http"| HTTP["HTTP + SSE transport\nExpress on :8819"]
-    ARG -->|"--transport=repl\nor --repl"| REPL["Interactive REPL\nreadline with tab completion"]
-
-    STDIO --> HOST["MCP Host\n(Claude Code / Desktop)"]
-    HTTP --> ENDPOINTS["Endpoints:\n/mcp (Streamable HTTP)\n/sse (Legacy SSE)\n/messages (Legacy POST)\n/health (status)"]
-    REPL --> CLI["Operator Terminal\ncolored output, JSON highlighting\ntool invocation, domain browsing"]
-
-    style STDIO fill:#6366f1,stroke:#818cf8,color:#fff
-    style HTTP fill:#f59e0b,stroke:#fbbf24,color:#000
-    style REPL fill:#a855f7,stroke:#c084fc,color:#fff
+flowchart LR
+    HOST["Claude Code / Codex / MCP host"] -->|stdio or HTTP| MCP["CCAM MCP server"]
+    HUMAN["Operator"] -->|REPL| MCP
+    MCP --> CATALOG["Canonical registerAllTools catalog"]
+    CATALOG --> API["Dashboard /api/*"]
+    API --> DB[(SQLite)]
 ```
 
-### MCP Runtime Topology
+Protocol transports and REPL no longer maintain separate tool implementations. Domain modules receive either a live MCP registrar or a collector registrar, and both run the same Zod schemas and policy guards. This makes tool-count and behavior parity structural rather than documentation-only.
 
-```mermaid
-graph LR
-    HOST["MCP Host<br/>(Claude Code / Claude Desktop)"]
-    HTTP_CLIENT["Remote MCP Client"]
-    OPERATOR["Operator CLI"]
+### Tool domains
 
-    MCP_STDIO["MCP Server<br/>stdio"]
-    MCP_HTTP["MCP Server<br/>HTTP+SSE :8819"]
-    MCP_REPL["MCP Server<br/>REPL"]
+1. observability
+2. sessions
+3. session detail and transcripts
+4. agents
+5. events and hooks
+6. Claude/GPT pricing and cost
+7. workflows
+8. alerts
+9. webhooks
+10. imports and portability
+11. Claude/Codex config
+12. Run Agent
+13. remote sources
+14. settings and updates
+15. browser push
+16. maintenance
 
-    API["Dashboard API<br/>http://127.0.0.1:4820/api/*"]
-    DB["SQLite"]
+### Safety and transport
 
-    HOST -->|"stdin/stdout"| MCP_STDIO
-    HTTP_CLIENT -->|"POST /mcp · GET /sse"| MCP_HTTP
-    OPERATOR -->|"interactive CLI"| MCP_REPL
+- Dashboard targets are limited to loopback and approved container-host names.
+- `MCP_DASHBOARD_API_TOKEN` authenticates to dashboards protected by `DASHBOARD_TOKEN`.
+- Reads are enabled by default.
+- Writes require `MCP_DASHBOARD_ALLOW_MUTATIONS=true`.
+- Full data clearing also requires `MCP_DASHBOARD_ALLOW_DESTRUCTIVE=true` and `CLEAR_ALL_DATA`.
+- Remote-source purge uses its own `PURGE_REMOTE_SOURCE_DATA` confirmation token.
+- Webhook tests, push sends, imports, syncs, and Run Agent operations are treated as mutations.
+- Stdio logs remain on stderr.
 
-    MCP_STDIO -->|"validated HTTP"| API
-    MCP_HTTP -->|"validated HTTP"| API
-    MCP_REPL -->|"validated HTTP"| API
-    API --> DB
-
-    style HOST fill:#6366f1,stroke:#818cf8,color:#fff
-    style HTTP_CLIENT fill:#f59e0b,stroke:#fbbf24,color:#000
-    style OPERATOR fill:#a855f7,stroke:#c084fc,color:#fff
-    style MCP_STDIO fill:#0f766e,stroke:#14b8a6,color:#fff
-    style MCP_HTTP fill:#0f766e,stroke:#14b8a6,color:#fff
-    style MCP_REPL fill:#0f766e,stroke:#14b8a6,color:#fff
-    style API fill:#339933,stroke:#5cb85c,color:#fff
-    style DB fill:#003B57,stroke:#005f8a,color:#fff
-```
-
-### MCP Module Architecture
-
-```mermaid
-graph TD
-    ENTRY["src/index.ts<br/>(transport router)"]
-    SERVER["src/server.ts"]
-    CONFIG["config/app-config.ts"]
-    CLIENT["clients/dashboard-api-client.ts"]
-    CORE["core/*<br/>logger, tool-registry, tool-result"]
-    POLICY["policy/tool-guards.ts"]
-    TOOLS["tools/index.ts"]
-    DOMAINS["tools/domains/*<br/>observability, sessions, agents,<br/>events, pricing, maintenance"]
-
-    T_HTTP["transports/http-server.ts<br/>Express SSE + Streamable HTTP"]
-    T_REPL["transports/repl.ts<br/>readline + tab completion"]
-    T_COLL["transports/tool-collector.ts<br/>handler collection for REPL"]
-    UI["ui/*<br/>banner, colors, formatter"]
-
-    ENTRY --> CONFIG
-    ENTRY --> SERVER
-    ENTRY --> T_HTTP
-    ENTRY --> T_REPL
-    ENTRY --> T_COLL
-    SERVER --> TOOLS
-    TOOLS --> DOMAINS
-    DOMAINS --> CLIENT
-    DOMAINS --> POLICY
-    DOMAINS --> CORE
-    T_HTTP --> UI
-    T_REPL --> UI
-```
-
-### MCP Safety Model
-
-- API target is restricted to loopback hosts only (`127.0.0.1`, `localhost`, `::1`)
-- Tool inputs are schema-validated with zod before execution
-- Mutating tools require `MCP_DASHBOARD_ALLOW_MUTATIONS=true`
-- Destructive tools additionally require `MCP_DASHBOARD_ALLOW_DESTRUCTIVE=true` and explicit confirmation token
-- Logging is written to `stderr` only so stdio protocol traffic is never corrupted
-
-### MCP Tool Domains
-
-- Observability: health/stats/analytics/system/export/snapshot
-- Sessions: list/get/create/update
-- Agents: list/get/create/update
-- Events: list + hook event ingestion
-- Pricing: rule CRUD + total/per-session cost
-- Maintenance: cleanup/reimport/reinstall-hooks/clear-data (guarded)
+Transport commands are `ccam mcp stdio`, `ccam mcp http`, and `ccam mcp repl`. The full catalog and host configuration are in [`mcp/README.md`](mcp/README.md).
 
 ---
 

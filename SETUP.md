@@ -148,14 +148,13 @@ graph LR
     style REPL fill:#a855f7,stroke:#c084fc,color:#fff
 ```
 
-Quick start:
+Quick start. Normal `npm run setup` already installs and builds MCP:
 
 ```bash
-npm run mcp:install
-npm run mcp:build
 npm run mcp:start              # stdio (for Claude Code / Claude Desktop)
 npm run mcp:start:http         # HTTP + SSE server on port 8819
 npm run mcp:start:repl         # interactive CLI with tab completion
+ccam mcp stdio                 # stable launcher used by bundled plugins
 ```
 
 For full host config and tool catalog, see [mcp/README.md](./mcp/README.md).
@@ -175,8 +174,16 @@ This repository ships extension files for both agent ecosystems:
   - `.codex/rules/default.rules`
   - `.codex/agents/*`
   - `.codex/skills/*`
+  - `.agents/plugins/marketplace.json`
+- Shared plugins:
+  - `plugins/*/.claude-plugin/plugin.json`
+  - `plugins/*/.codex-plugin/plugin.json`
+  - `plugins/*/skills/*/SKILL.md`
+  - `plugins/*/skills/*/agents/openai.yaml`
 
-See [`.codex/README.md`](./.codex/README.md) for Codex extension details.
+See [`.codex/README.md`](./.codex/README.md) and
+[`docs/PLUGINS.md`](./docs/PLUGINS.md) for Codex, Claude, and skills.sh
+installation details.
 
 ### VS Code extension setup
 
@@ -408,7 +415,7 @@ node scripts/import-history.js --project my-project
 
 | Script | Command | Description |
 |---|---|---|
-| `setup` | `npm run setup` | Install all dependencies (server + client) |
+| `setup` | `npm run setup` | Install root, client, VS Code extension, and MCP dependencies, build MCP, and link `ccam` |
 | `dev` | `npm run dev` | Start server + client in development mode |
 | `start` | `npm start` | Start server in production mode |
 | `build` | `npm run build` | Build the React client to `client/dist/` |
@@ -449,7 +456,7 @@ Commonly used targets:
 
 | Make target | Equivalent npm command | Description |
 |---|---|---|
-| `make setup` | `npm run setup` + MCP install | Install all dependencies (root + client + MCP) |
+| `make setup` | `npm run setup` | Install all dependencies, build MCP, and link `ccam` |
 | `make dev` | `npm run dev` | Start server + client in watch mode |
 | `make build` | `npm run build` | Build the React client for production |
 | `make start` | `npm start` | Start the production server |

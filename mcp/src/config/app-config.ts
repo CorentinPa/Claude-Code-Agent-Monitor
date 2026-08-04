@@ -87,6 +87,9 @@ export interface AppConfig {
    * {@link parseDashboardUrl}) — a hard boundary against reaching a remote
    * origin. From `MCP_DASHBOARD_BASE_URL`, default `http://127.0.0.1:4820`. */
   dashboardBaseUrl: URL;
+  /** Optional bearer token for dashboards started with DASHBOARD_API_TOKEN.
+   * Read from MCP_DASHBOARD_API_TOKEN first, then DASHBOARD_API_TOKEN. */
+  dashboardApiToken?: string;
   /** Per-attempt timeout (ms) before a request aborts as `TIMEOUT`. From
    * `MCP_DASHBOARD_TIMEOUT_MS`, default `10_000`, clamped `[500, 120_000]`. */
   requestTimeoutMs: number;
@@ -211,6 +214,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     serverName: env.MCP_SERVER_NAME?.trim() || "agent-dashboard-mcp",
     serverVersion: env.MCP_SERVER_VERSION?.trim() || "1.0.0",
     dashboardBaseUrl: parseDashboardUrl(env.MCP_DASHBOARD_BASE_URL),
+    dashboardApiToken:
+      env.MCP_DASHBOARD_API_TOKEN?.trim() || env.DASHBOARD_API_TOKEN?.trim() || undefined,
     requestTimeoutMs: parseInteger(env.MCP_DASHBOARD_TIMEOUT_MS, 10_000, 500, 120_000),
     retryCount: parseInteger(env.MCP_DASHBOARD_RETRY_COUNT, 2, 0, 5),
     retryBackoffMs: parseInteger(env.MCP_DASHBOARD_RETRY_BACKOFF_MS, 250, 50, 10_000),

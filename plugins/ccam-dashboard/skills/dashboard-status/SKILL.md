@@ -1,4 +1,5 @@
 ---
+name: dashboard-status
 description: >
   Quick dashboard health and status overview — checks the Agent Monitor API
   (port 4820), reports session/agent/event counts from /api/stats, confirms

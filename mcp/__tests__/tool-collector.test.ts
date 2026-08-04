@@ -16,6 +16,7 @@ function fakeConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     serverName: "test",
     serverVersion: "1.0.0",
     dashboardBaseUrl: new URL("http://127.0.0.1:4820"),
+    dashboardApiToken: undefined,
     requestTimeoutMs: 10_000,
     retryCount: 0,
     retryBackoffMs: 250,
@@ -36,7 +37,7 @@ describe("collectAllTools", () => {
 
   it("registers all expected tools", () => {
     const tools = collectAllTools(config, api, logger);
-    assert.ok(tools.length >= 25, `Expected at least 25 tools, got ${tools.length}`);
+    assert.ok(tools.length >= 97, `Expected at least 97 tools, got ${tools.length}`);
   });
 
   it("every tool has name, description, and handler", () => {
@@ -112,6 +113,21 @@ describe("collectAllTools", () => {
     assert.ok(names.has("dashboard_list_remote_sources"));
     assert.ok(names.has("dashboard_sync_remote_source"));
     assert.ok(names.has("dashboard_sync_all_remote_sources"));
+
+    // Workflows, alerts, webhooks, imports, config, runs, and settings
+    assert.ok(names.has("dashboard_get_workflows"));
+    assert.ok(names.has("dashboard_list_alerts"));
+    assert.ok(names.has("dashboard_list_webhooks"));
+    assert.ok(names.has("dashboard_get_import_guide"));
+    assert.ok(names.has("dashboard_get_claude_config"));
+    assert.ok(names.has("dashboard_get_codex_config"));
+    assert.ok(names.has("dashboard_list_runs"));
+    assert.ok(names.has("dashboard_install_hooks"));
+    assert.ok(names.has("dashboard_get_session_transcript"));
+    assert.ok(names.has("dashboard_upload_history_files"));
+    assert.ok(names.has("dashboard_get_push_public_key"));
+    assert.ok(names.has("dashboard_get_prometheus_metrics"));
+    assert.ok(names.has("dashboard_get_transcript_image"));
   });
 
   it("mutation tools throw when mutations disabled", async () => {

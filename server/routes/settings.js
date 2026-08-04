@@ -9,6 +9,7 @@ const { Router } = require("express");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
+const multer = require("multer");
 const {
   db,
   stmts,
@@ -20,9 +21,18 @@ const {
 } = require("../db");
 const { getConnectionCount } = require("../websocket");
 const { transcriptCache } = require("./hooks");
-const { buildExportBundle } = require("../lib/data-transfer");
+const {
+  buildExportBundle,
+  importExportBundle,
+  ImportFormatError,
+} = require("../lib/data-transfer");
 
 const router = Router();
+const MAX_BACKUP_IMPORT_BYTES = 100 * 1024 * 1024;
+const backupUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_BACKUP_IMPORT_BYTES, files: 1 },
+}).single("file");
 
 const APP_VERSION = (() => {
   try {
@@ -240,6 +250,96 @@ router.get("/export", (_req, res) => {
     `attachment; filename="agent-monitor-export-${new Date().toISOString().slice(0, 10)}.json"`
   );
   res.json(buildExportBundle(db, stmts));
+});
+
+// POST /api/settings/import — restore a bundle produced by /export. Browser
+// callers upload one JSON file as multipart/form-data; CLI/MCP callers pass an
+// absolute server-side path in a JSON body. Restore is idempotent and never
+// overwrites an existing session or configuration row.
+router.post("/import", (req, res) => {
+  backupUpload(req, res, (uploadError) => {
+    if (uploadError) {
+      const tooLarge = uploadError.code === "LIMIT_FILE_SIZE";
+      return res.status(tooLarge ? 413 : 400).json({
+        error: {
+          code: tooLarge ? "IMPORT_TOO_LARGE" : "IMPORT_UPLOAD_FAILED",
+          message: tooLarge
+            ? `Export file exceeds ${MAX_BACKUP_IMPORT_BYTES} bytes`
+            : uploadError.message,
+        },
+      });
+    }
+
+    try {
+      let source;
+      let text;
+      if (req.file) {
+        source = req.file.originalname || "uploaded-export.json";
+        text = req.file.buffer.toString("utf8");
+      } else {
+        const rawPath = req.body?.path;
+        if (typeof rawPath !== "string" || !rawPath.trim()) {
+          return res.status(400).json({
+            error: {
+              code: "INVALID_INPUT",
+              message: 'Provide multipart field "file" or JSON body { "path": "/absolute/file" }',
+            },
+          });
+        }
+        const expanded = rawPath.startsWith("~")
+          ? path.join(os.homedir(), rawPath.slice(1))
+          : rawPath;
+        if (!path.isAbsolute(expanded)) {
+          return res.status(400).json({
+            error: { code: "INVALID_PATH", message: "path must be absolute" },
+          });
+        }
+        const stat = fs.statSync(expanded);
+        if (!stat.isFile()) {
+          return res.status(400).json({
+            error: { code: "INVALID_PATH", message: "path must reference a regular file" },
+          });
+        }
+        if (stat.size > MAX_BACKUP_IMPORT_BYTES) {
+          return res.status(413).json({
+            error: {
+              code: "IMPORT_TOO_LARGE",
+              message: `Export file exceeds ${MAX_BACKUP_IMPORT_BYTES} bytes`,
+            },
+          });
+        }
+        source = expanded;
+        text = fs.readFileSync(expanded, "utf8");
+      }
+
+      const bundle = JSON.parse(text);
+      const counters = importExportBundle(db, bundle);
+      return res.json({
+        ok: true,
+        source,
+        format: bundle.format || "legacy",
+        version: bundle.version || 1,
+        ...counters,
+      });
+    } catch (error) {
+      if (error instanceof SyntaxError || error instanceof ImportFormatError) {
+        return res.status(400).json({
+          error: {
+            code: error instanceof SyntaxError ? "INVALID_JSON" : error.code,
+            message: error.message,
+          },
+        });
+      }
+      if (error?.code === "ENOENT") {
+        return res.status(404).json({
+          error: { code: "PATH_NOT_FOUND", message: error.message },
+        });
+      }
+      return res.status(500).json({
+        error: { code: "IMPORT_FAILED", message: error.message || String(error) },
+      });
+    }
+  });
 });
 
 // GET /api/settings/claude-home — get current CLAUDE_HOME path

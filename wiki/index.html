@@ -1239,13 +1239,12 @@
                   <div class="feature-icon ic-blue">🔌</div>
                   <h3>Local MCP Server</h3>
                   <p>
-                    Local MCP sidecar with three transport modes — stdio for Claude Code
-                    native integration, HTTP+SSE for remote clients, and an interactive REPL
-                    for ad-hoc terminal queries. Exposes 25 typed tools across 6 domains:
-                    sessions, agents, events, analytics, settings, and system health. Every
-                    mutation is gated behind a tiered policy so nothing dangerous fires without
-                    opt-in. Retry-aware API access handles transient failures. Runs as a
-                    standalone Node process with no Docker or cloud dependency.
+                    Local MCP sidecar with three transport modes and 97 typed tools across 16
+                    domain modules. It covers the complete supported app surface, including
+                    scoped data, transcripts and images, Claude/GPT pricing, workflows, alerts,
+                    webhooks, imports and restore, Claude/Codex config, Run Agent, remote sources,
+                    push, and maintenance. Every transport shares one validated catalog with
+                    bearer-token support and tiered mutation/destructive gates.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1344,20 +1343,12 @@
                   <div class="feature-icon ic-violet">🏪</div>
                   <h3>Plugin Marketplace</h3>
                   <p>
-                    Official Claude Code plugin marketplace shipping 10 plugins with 53 skills,
-                    14 agents, 30 slash commands, 3 CLI tools, 3 hook configs, and 1 MCP server.
-                    Deep analytics with compaction-aware baselines, productivity automation,
-                    developer diagnostics, AI-powered workflow intelligence, and dashboard MCP
-                    integration. Five newer plugins go further:
-                    <code>ccam-cost-guard</code> (budget guardrails, spend forecasts, and
-                    cost-threshold alerts), <code>ccam-sessions</code> (session forensics —
-                    search, timeline, and transcript replay), <code>ccam-workflows</code>
-                    (multi-agent orchestration and fleet intelligence), <code>ccam-quality</code>
-                    (reliability and SLO checks), and <code>ccam-config</code> (Claude Code
-                    config and memory governance). Install with
-                    <code>claude plugin install</code> — no restart needed. Each listing shows
-                    author, license, homepage, and per-skill contribution breakdown. The Config
-                    Explorer's Plugins tab surfaces installed plugins with live status.
+                    One shared marketplace ships 13 plugins for Claude Code and Codex, with 62
+                    packaged skills, 17 Claude subagents, 33 Claude commands, 3 CLI helpers, and
+                    2 MCP-enabled plugins. Every skill includes canonical frontmatter and OpenAI
+                    metadata. The skills.sh CLI discovers 70 repository skills from the same
+                    public source. Install with <code>claude plugin marketplace add</code>,
+                    <code>codex plugin marketplace add</code>, or <code>npx skills add</code>.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -4338,31 +4329,34 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
           <div class="section-label">◈ Integrations</div>
           <h2>Plugin Marketplace</h2>
           <p>
-            The Agent Monitor ships with an official Claude Code plugin marketplace containing ten
-            production-ready plugins (53 skills, 14 agents, 30 slash commands, 3 CLI tools, 3 hook
-            configs, and 1 MCP server). These extend Claude Code with skills, agents, hooks, CLI tools,
-            and MCP integration — all grounded in the real data model (token tracking with compaction
-            baselines, cost calculation via pattern-matched pricing rules, workflow intelligence with
-            11 datasets per session, and session metadata including thinking blocks, turn counts, and
-            inference geography).
+            The Agent Monitor ships one shared marketplace containing 13 plugins for Claude Code and
+            Codex, 62 packaged plugin skills, 17 Claude subagents, 33 Claude commands, 3 CLI helpers,
+            3 hook configurations, and 2 MCP-enabled plugins. The skills.sh CLI discovers 70 total
+            repository skills. Product-specific manifests stay separate while skill instructions and
+            validation remain shared.
           </p>
 
           <h3>Installation</h3>
           <div class="code-header"><span class="code-lang">bash</span></div>
           <pre><code># Add the marketplace
 claude plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
+codex plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
+npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
 
 # Install individual plugins
-claude plugin install ccam-analytics@hoangsonww-claude-code-agent-monitor
-claude plugin install ccam-cost-guard@hoangsonww-claude-code-agent-monitor
-claude plugin install ccam-productivity@hoangsonww-claude-code-agent-monitor
-claude plugin install ccam-devtools@hoangsonww-claude-code-agent-monitor
-claude plugin install ccam-insights@hoangsonww-claude-code-agent-monitor
-claude plugin install ccam-sessions@hoangsonww-claude-code-agent-monitor
-claude plugin install ccam-workflows@hoangsonww-claude-code-agent-monitor
-claude plugin install ccam-quality@hoangsonww-claude-code-agent-monitor
-claude plugin install ccam-config@hoangsonww-claude-code-agent-monitor
-claude plugin install ccam-dashboard@hoangsonww-claude-code-agent-monitor</code></pre>
+claude plugin install ccam-analytics@claude-code-agent-monitor-plugins
+claude plugin install ccam-cost-guard@claude-code-agent-monitor-plugins
+claude plugin install ccam-productivity@claude-code-agent-monitor-plugins
+claude plugin install ccam-devtools@claude-code-agent-monitor-plugins
+claude plugin install ccam-insights@claude-code-agent-monitor-plugins
+claude plugin install ccam-sessions@claude-code-agent-monitor-plugins
+claude plugin install ccam-workflows@claude-code-agent-monitor-plugins
+claude plugin install ccam-quality@claude-code-agent-monitor-plugins
+claude plugin install ccam-config@claude-code-agent-monitor-plugins
+claude plugin install ccam-dashboard@claude-code-agent-monitor-plugins
+claude plugin install ccam-runner@claude-code-agent-monitor-plugins
+claude plugin install ccam-integrations@claude-code-agent-monitor-plugins
+claude plugin install ccam-platform@claude-code-agent-monitor-plugins</code></pre>
 
           <h3>Available Plugins</h3>
           <div class="table-wrap">
@@ -4447,6 +4441,27 @@ claude plugin install ccam-dashboard@hoangsonww-claude-code-agent-monitor</code>
                   <td>—</td>
                   <td>Dashboard connector with MCP integration and one-line metric summaries</td>
                 </tr>
+                <tr>
+                  <td><strong>ccam-runner</strong></td>
+                  <td>run-agent, run-history</td>
+                  <td>run-operator</td>
+                  <td>—</td>
+                  <td>Safe monitored Claude Code/Codex launch, follow-up, stop, resume, and run history</td>
+                </tr>
+                <tr>
+                  <td><strong>ccam-integrations</strong></td>
+                  <td>alert-management, webhook-management, remote-collection</td>
+                  <td>integration-operator</td>
+                  <td>—</td>
+                  <td>Alert rules, webhook providers, push notifications, and SSH remote collection</td>
+                </tr>
+                <tr>
+                  <td><strong>ccam-platform</strong></td>
+                  <td>config-explorer, history-portability, hook-setup, mcp-server</td>
+                  <td>platform-admin</td>
+                  <td>—</td>
+                  <td>Claude/Codex config, hooks, provider imports, backup restore, updates, and MCP operations</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -4492,19 +4507,21 @@ ccam-export all --output backup.json</code></pre>
 
           <h3>Plugin Architecture</h3>
           <p>
-            Each plugin follows the official Claude Code plugin specification. The marketplace manifest
-            at <code>.claude-plugin/marketplace.json</code> catalogs all ten plugins. Each plugin
-            directory contains:
+            Each plugin carries product-specific Claude Code and Codex manifests. The catalogs live at
+            <code>.claude-plugin/marketplace.json</code> and
+            <code>.agents/plugins/marketplace.json</code>. Each plugin directory contains:
           </p>
           <div class="code-header"><span class="code-lang">text</span></div>
           <pre><code>plugins/ccam-{name}/
 ├── .claude-plugin/plugin.json    # Plugin manifest (name, version, description)
-├── skills/{skill-name}/SKILL.md  # Skill definitions with $ARGUMENTS
+├── .codex-plugin/plugin.json     # Codex plugin manifest and interface metadata
+├── skills/{skill-name}/SKILL.md  # Shared skill instructions
+├── skills/{skill-name}/agents/openai.yaml # OpenAI skill UI metadata
 ├── commands/{command-name}.md    # Slash command definitions
 ├── agents/{agent-name}.md        # Agent definitions (model, tools, instructions)
 ├── hooks/hooks.json              # Event hooks (fail-safe, non-blocking)
 ├── bin/{cli-tool}                # CLI scripts (added to PATH)
-├── .mcp.json                     # MCP server configuration (dashboard plugin)
+├── .mcp.json                     # Optional stable ccam mcp stdio launcher
 └── settings.json                 # Plugin settings (dashboard plugin)</code></pre>
 
           <h3>Data Model Reference</h3>
@@ -6967,8 +6984,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=59" defer></script>
-    <script src="script.js?v=44" defer></script>
+    <script src="i18n-content.js?v=60" defer></script>
+    <script src="script.js?v=45" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

@@ -1400,7 +1400,7 @@ test("POST /api/hooks/event ingests hook payload", async () => {
 
 ## Terminal Access (`ccam` CLI)
 
-Everything this server exposes over REST is also reachable from a terminal via the repo's dependency-free `ccam` CLI (`bin/ccam.js`, linked by `npm run setup`): monitoring (`health`/`stats`/`kanban`/`tail`), data browsing, analytics/workflows/cost, alerts + webhook tests, pricing CRUD, imports, and administration (`doctor`/`export`/`cleanup`/`reinstall-hooks`/`update-check`/`clear-data --yes`). It resolves the live server through the same `~/.claude/.agent-dashboard.json` registry the hook handler uses. See [docs/CLI.md](../docs/CLI.md).
+Everything this server exposes over JSON REST is reachable from the dependency-free `ccam` CLI (`bin/ccam.js`, linked by `npm run setup`). High-level commands cover monitoring, data browsing, workflows/cost, Run Agent, alerts/rules/webhooks, Claude and GPT pricing, provider-aware imports, remote sources, Claude/Codex config, hooks, backup restore, and administration. `ccam api <METHOD> /api/path` provides future-proof low-level coverage with `--yes` on writes and exact confirmation tokens for destructive actions. Multipart history upload is available through `ccam import upload`. It resolves the live server through the same `~/.claude/.agent-dashboard.json` registry as the hook handler and supports `DASHBOARD_API_TOKEN` / `CCAM_API_TOKEN` when the API is protected. See [docs/CLI.md](../docs/CLI.md).
 
 ## Deployment
 

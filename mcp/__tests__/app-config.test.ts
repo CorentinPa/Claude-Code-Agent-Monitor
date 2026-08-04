@@ -21,6 +21,7 @@ describe("loadConfig", () => {
     assert.equal(cfg.serverName, "agent-dashboard-mcp");
     assert.equal(cfg.serverVersion, "1.0.0");
     assert.equal(cfg.dashboardBaseUrl.toString(), "http://127.0.0.1:4820/");
+    assert.equal(cfg.dashboardApiToken, undefined);
     assert.equal(cfg.requestTimeoutMs, 10_000);
     assert.equal(cfg.retryCount, 2);
     assert.equal(cfg.retryBackoffMs, 250);
@@ -153,6 +154,11 @@ describe("loadConfig", () => {
   it("accepts host.docker.internal", () => {
     const cfg = loadConfig(env({ MCP_DASHBOARD_BASE_URL: "http://host.docker.internal:4820" }));
     assert.equal(cfg.dashboardBaseUrl.hostname, "host.docker.internal");
+  });
+
+  it("loads an optional dashboard bearer token", () => {
+    const cfg = loadConfig(env({ MCP_DASHBOARD_API_TOKEN: "test-token" }));
+    assert.equal(cfg.dashboardApiToken, "test-token");
   });
 
   // ── Custom server name/version ──────────────────────────────

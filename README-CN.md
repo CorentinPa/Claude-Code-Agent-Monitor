@@ -310,7 +310,7 @@ Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Ag
 > **提供方范围与数据位置：** 设置会让 Claude Code / Codex / 两者的选择在整个应用中保持一致，并可在无需重启仪表盘的情况下更改任一会话数据目录。
 
 | **Codex Agent 配置** | Agent Config 的 Codex 一侧会读取完整的本地账户模型目录，不受通用预览限制影响，因此 Models 标签不会错误显示为 0，并始终包含基础/配置文件覆盖。可直接在应用中创建标准 Codex `<name>.config.toml` 覆盖层；每张卡均可一键复制其准确的 `codex --profile <name>` 命令并打开受保护的编辑器。配置文件、Hook、规则、技能和指令共用 Claude 风格的 **View source / Copy path / Edit / Delete** 操作。每次允许的删除都需确认并先创建备份（技能保留完整目录）；`config.toml` 永远只能编辑。 |
-| **MCP 服务器（本地）** | 位于 `mcp/` 的企业级本地 MCP 服务器，支持三种传输模式（stdio、HTTP+SSE、交互式 REPL），6 个域共 25 个类型化工具，严格输入 Schema、重试/退避、仅限本地 API 强制执行，以及分层变更/破坏性安全门控。HTTP 模式在可配置端口上提供 Streamable HTTP（2025-11-25）和传统 SSE（2024-11-05）。REPL 模式提供带 Tab 补全和彩色输出的交互式工具调用 |
+| **MCP 服务器（本地）** | 位于 `mcp/` 的完整本地 MCP 服务器，支持三种传输模式，16 个领域模块共 97 个类型化工具。覆盖应用支持的全部操作：带作用域的数据读取、Transcript 与图片、Claude/GPT 定价、工作流、告警、Webhook、导入与恢复、Claude/Codex 配置、Run Agent、远程数据源、Hook/Home/更新、推送与维护。所有传输共享同一套已验证目录，并支持 Bearer Token 与分层变更/破坏性门控 |
 | **工作流** | 基于 D3.js 的可视化页面，包含 11 个交互式模块：Agent 编排 DAG、工具执行 Sankey 图、协作网络、子 Agent 有效性（按周 sparkline 通过 portal 渲染——可越过卡片的 `overflow:hidden`，并自动夹在视口内不再被裁切）、检测到的流程模式、模型委派流、错误传播图（带比率徽章的水平条形图、Agent 类型分解、API/会话错误卡片）、并发时间线、会话复杂度散点图、压缩影响分析和按会话下钻。**全方位、多语言的丰富 tooltip：** 每个图表标题旁都有一个 `i` 图标，可弹出结构化的「此图展示了什么 / 如何阅读 / 为何重要」浮层；悬停节点、边、条、气泡都会显示带有确定性、值相关解读的多段 tooltip（例如占源/占目标比例、成功率健康分级、Opus / Sonnet / Haiku 模型系列说明，以及前段/中段/后段等时间模式）。六张总览统计卡片各自在右下角带一个信息浮层，用自然语言解释指标的计算方式与当前数值含义。Tooltip 通过每张图唯一的 DOM ref 直接更新，并附带容器级 `mouseleave` 兜底，绝不会落后于光标或在重新渲染后残留。点击 **检测到的工作流模式** 中的任意一行会就地展开详情面板，包含完整步骤序列、统计网格、确定性叙述（循环检测、频率分级）和一条务实的建议。状态筛选标签（仅活跃 / 已完成 / 全部）可筛选全部 11 个模块。支持交叉筛选、JSON 导出和 3 秒防抖的实时 WebSocket 自动刷新。**工作流运行**面板呈现「动态工作流」——由 `Workflow` 工具（及自定节奏的 `/loop`）派生的 sub-agent 群组——它们不触发任何 hook，因此改为依据磁盘上的运行日志（`workflows/wf_<runId>.json`）重建：每次运行展示其阶段以及按 Agent 的 token / 工具调用 / 时长分解，并在日志写入前实时检测 `running` 状态，同时在每个会话详情页提供一个关联子区块 |
 | **压缩追踪** | 从 JSONL Transcript 检测 `/compact` 事件,创建压缩 Agent 和事件。启动时回填历史压缩。周期性扫描器(频率从 `DASHBOARD_STALE_MINUTES` 派生)在无 Hook 触发时也能捕获压缩。共享 Transcript 缓存,避免重复文件读取 |
 | **子会话/恢复会话** | 新事件到达时自动重新激活会话,正确处理 `/resume` 和孤立会话。周期性清理(每 ¼ 个 `DASHBOARD_STALE_MINUTES`,夹在 60 秒–5 分钟之间)标记遗漏事件检测的废弃会话 |
@@ -322,7 +322,7 @@ Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Ag
 | **种子数据** | 内置种子脚本，用于演示和开发 |
 | **状态栏** | 彩色编码的 CLI 状态栏，显示模型、上下文使用率、Git 分支、Token 数 |
 | **模型名称格式化** | 整个 UI 中使用人性化的模型名称：原始标识符如 `claude-opus-4-7-20260101` 或 `claude-opus-4-7[1m]` 显示为"Claude Opus 4.7"或"Claude Opus 4.7 (1M)"。支持 Claude、GPT 和 Gemini 家族的自动版本号点连接、日期/latest 后缀剥离、提供商前缀移除和上下文窗口标签格式化。设置页保留原始名称以配置定价规则 |
-| **插件市场** | 官方 Claude Code 插件市场，包含 10 个插件（ccam-analytics、ccam-productivity、ccam-devtools、ccam-insights、ccam-dashboard、ccam-cost-guard、ccam-sessions、ccam-workflows、ccam-quality、ccam-config）。53 个技能、14 个 Agent、30 个斜杠命令、3 个 CLI 工具、3 个 Hook 配置。全部基于实际数据模型 — Token 基线、定价引擎、工作流智能（11 个数据集）、会话元数据。通过 `claude plugin marketplace add` 安装 |
+| **Claude + Codex 插件市场** | 同一套 13 个插件同时提供 Claude Code 与 Codex Manifest、两个 Marketplace Catalog、62 个插件技能、17 个 Claude 子 Agent、33 个 Claude 命令和 OpenAI 技能元数据。skills.sh CLI 可通过 `npx skills add hoangsonww/Claude-Code-Agent-Monitor --list` 发现仓库中的 70 个技能。支持 `claude plugin marketplace add`、`codex plugin marketplace add` 和 `npx skills add` |
 | **运行 Claude** | 直接从仪表盘启动 `claude` 子进程,带聊天式流式 UI。两种模式:**对话**(多轮 — stdin 持续打开,后续轮次以 stream-json 信封通过 stdin 传送)与 **单次**(headless,一个 prompt → 一个响应)。对话模式还支持通过 `claude --resume <id>` **恢复任何已有会话** — 使用可搜索选择器从你的完整会话历史中挑选。标题栏的进行中运行切换器允许你将运行留在后台、启动另一个、稍后重新附加。重新附加是持久的:客户端会把派生进程的内存信封日志(`?envelopes=1`)与会话磁盘上的 JSONL 转录文件协调,优先选择 user/assistant 消息更多的那一份,因此从已恢复的运行离开再回来会保留全部历史(派生进程只看到 spawn 之后的轮次;转录文件包含先前 + 当前)。模型下拉(Opus 4.7 / 1M / Sonnet 4.6 / Haiku 4.5 / 自定义)、permission-mode 选择器(对 `bypassPermissions` 显式警告)、**思考强度**字段(low / medium / high — 映射到 `--effort`)、cwd 自动补全(预填用户的**主目录** — 一个中性的启动位置,不会继承仪表盘仓库自身的 `.claude` 项目上下文(agents、skills、rules、`CLAUDE.md`、`.mcp.json`);若没有 home 建议则回退到仪表盘 cwd,建议分组以 home 优先(home → dashboard → 最近))。通过 `--include-partial-messages` 实现真正的逐字符流式渲染,加上客户端 **打字机平滑层** 通过 `requestAnimationFrame` 让每个 `text_delta` / `thinking_delta` 逐字浮现 — 即便是短回复(claude 把整个回答打成一两块 chunk 的情况)也呈现为打字效果。合并代码在 claude 中途送达 canonical `assistant` 信封时保留 `_streaming` 标志和增量累积的 `content` 数组,所以 thinking 块不会在完成时丢失。WebSocket 分发为每个信封包裹 `flushSync`,避免 React 18 自动批处理把多个 deltas 合并成一次渲染。**TUI 对齐(Tier 1)**:**限制说明横幅** 可最小化为细条(永不消失)解释 stream-json 模式相对终端 TUI 能做和不能做什么;**带斜杠命令自动补全的提示编辑器** 使用分级评分(精确名称 → 前缀匹配 → 词边界 → 包含 → 子序列 → 描述匹配)列出用户 / 项目 / 插件命令(发送前在客户端按模板展开执行),并以"仅 CLI — 此处不会执行"标记呈现 `/clear`、`/model`、`/config` 等内置 CLI 命令;**`@` 文件引用** 通过对该 run 的 cwd 进行去抖模糊搜索(跳过 `node_modules`、`.git`、`dist`、`build` 等);**实时上下文窗口 / token 计** 显示输入 + 输出 + 缓存命中 token 与运行成本 — 实时流式时从 `stream_event` / `result.usage` 计算,从转录恢复 / 查看 / 重新附加时也从已完结的 assistant `usage` 块(input / output / cache-read / cache-creation)读取,因此不会卡在 0/200k;**状态头** 显示当前 model、effort、permission mode、cwd、session ID、信封计数与已运行时间。自动补全下拉框向上展开,避免与下方 cwd 选择器冲突。标题旁有 Live / Offline 指示器。路由上的同源守卫防止浏览器 drive-by spawn。并发实际上不设上限(默认安全上限 10000,与终端 TUI 一致 — 仅作为防止有缺陷客户端 fork-bomb 的兜底;通过 `RUN_MAX_CONCURRENT` 设置真正的上限)。统一的活动运行 / 历史模态框还提供两个一键跳转按钮:对话型历史行的 **Resume** 按钮立即派生 `claude --resume <id>` 并把过去的对话记录预填入聊天视图(无需重新输入 prompt — 派生的进程会在 stdin 上空转直到你发送跟进消息);单次型历史行的 **View** 按钮把已捕获的转录内联加载到 run 查看器中作只读展示(不派生进程 — 同一面板,无 Stop / 跟进控件)。生成的会话触发与任何 `claude` 进程相同的 hooks,因此自动出现在 Sessions / Analytics / Kanban / Workflows — 而 Sessions / SessionDetail 会为当前正由 Run 页驱动的会话显示绿色 **▶ Run** 徽标 / 横幅,可点击跳回 Run 页 |
 | **Tabby** | 固定在每个页面右下角的可爱 SVG 小猫伴侣,会订阅实时会话 WebSocket 流并据此做出反应。**会做出反应的吉祥物**:基于实时会话流呈现 8 种情绪——空闲、观察、开心、担忧、卡住、思考、睡觉、断开连接;眼睛会追踪光标,每种情绪都有专属动画。**气泡台词**在值得关注的事件发生时弹出(会话开始/结束、出现错误、运行完成),带节流且可静音。点击小猫或按 **⌘B / Ctrl+B** 打开**面板**(Esc 关闭):实时状态行(N 个进行中 · M 个出错 · 连接状态)、快捷操作(跳转到 Run Claude / 活动 / 会话 / 出错的会话,静音,清除提醒)以及一个 **Ask** 提问框。Ask 提问框在本地回答简单的状态类问题;其他问题则交给现有的 **Run Claude** 页面(`/run?prompt=...`)以启动一个真正的 Claude Code 会话——**无需新增后端、无需 API 密钥**。完全构建在现有的 WebSocket 流之上,支持无障碍(键盘、`aria-live`、尊重 `prefers-reduced-motion`),可在「设置」中开关。代码位于 `client/src/components/Tabby/` |
 | **告警与 Webhook** | 基于规则的告警引擎在服务端评估实时事件流,支持四种条件类型:**事件模式**(匹配事件类型 / 工具名 / 摘要子串,可选要求在时间窗口内出现 N 次匹配——例如「2 分钟内超过 5 个错误」)、**闲置**(活跃会话 N 分钟无事件)、**卡住的代理**(代理在 `working`/`waiting` 状态下 N 分钟无活动)和**令牌阈值**(会话总令牌超过上限)。每条规则都按 (规则、会话、代理) 维度做冷却去重。触发的告警显示在实时列表中(支持确认 / 全部确认),并扇出到 **14 个一等公民 Webhook 提供方**——**Slack**、**Discord**、**Microsoft Teams**(通过 Power Automate Workflows 的 Adaptive Card)、**Google Chat**、**Mattermost**、**Rocket.Chat**、**Telegram**(Bot API)、**PagerDuty**(Events API v2)、**Opsgenie**(Alert API)、**Splunk On-Call**(VictorOps)、**Zapier**、**Make**、**n8n**、**Pipedream**——以及任意通用 JSON 端点(可选 **HMAC-SHA256** 签名 + 自定义请求头)。每个提供方都有各自的原生负载格式,可按规则限定范围。投递与告警流程分离且完全失败安全:请求超时、有界重试/退避、响应体校验(Splunk On-Call 返回 200 但 `result:"failure"`)、同步的**「发送测试」**按钮以及每个目标的投递日志。URL、密钥和凭据均存储在服务端,**绝不**通过 API 返回(在所有响应中被掩码/脱敏)。规则与渠道在 **设置 → 告警** 中统一管理,每个字段都有解释性提示,并提供按提供方的设置指南(附说明:这些步骤可能已过时——请查阅官方文档) |
@@ -395,17 +395,16 @@ npm run build && npm start
 ### 5. 可选：构建并运行本地 MCP 服务器
 
 ```bash
-npm run mcp:install
-npm run mcp:build
 npm run mcp:start              # stdio（默认 — 用于 MCP 宿主集成）
 npm run mcp:start:http         # HTTP + SSE 服务器，端口 8819
 npm run mcp:start:repl         # 带 Tab 补全的交互式 CLI
+ccam mcp stdio                 # 内置插件使用的稳定启动器
 ```
 
 stdio 模式下，配置你的 MCP 宿主（Claude Code / Claude Desktop / 其他 MCP 客户端）：
 
-- command: `node`
-- args: `["<绝对路径>/mcp/build/index.js"]`
+- command: `ccam`
+- args: `["mcp", "stdio"]`
 
 HTTP 模式下，远程 MCP 客户端连接 `http://127.0.0.1:8819/mcp`（Streamable HTTP）或 `http://127.0.0.1:8819/sse`（传统 SSE）。
 
@@ -713,7 +712,7 @@ ccam version                      # 打印 CLI 版本（也可用 --version / -v
 
 | 命令 | 描述 |
 | ----------------------- | ---------------------------------------------------------- |
-| `npm run setup` | 安装服务端和客户端依赖 |
+| `npm run setup` | 安装根目录、客户端、扩展与 MCP 依赖，构建 MCP 并链接 `ccam` |
 | `npm run dev` | 同时启动服务端（watch 模式）+ 客户端（Vite HMR） |
 | `npm run dev:server` | 仅启动 Express 服务器（`--watch`） |
 | `npm run dev:client` | 仅启动 Vite 开发服务器 |
@@ -1769,16 +1768,19 @@ claude plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
 
 | 插件 | 安装命令 | 技能 |
 |--------|----------------|--------|
-| **ccam-analytics** | `claude plugin install ccam-analytics@hoangsonww-claude-code-agent-monitor` | `session-report`、`cost-breakdown`、`usage-trends`、`productivity-score` |
-| **ccam-cost-guard** | `claude plugin install ccam-cost-guard@hoangsonww-claude-code-agent-monitor` | `budget-set`、`spend-forecast`、`cost-alert`、`model-savings`、`daily-budget-check` |
-| **ccam-productivity** | `claude plugin install ccam-productivity@hoangsonww-claude-code-agent-monitor` | `daily-standup`、`weekly-report`、`sprint-summary`、`workflow-optimizer` |
-| **ccam-devtools** | `claude plugin install ccam-devtools@hoangsonww-claude-code-agent-monitor` | `session-debug`、`hook-diagnostics`、`data-export`、`health-check` |
-| **ccam-insights** | `claude plugin install ccam-insights@hoangsonww-claude-code-agent-monitor` | `pattern-detect`、`anomaly-alert`、`optimization-suggest`、`session-compare` |
-| **ccam-sessions** | `claude plugin install ccam-sessions@hoangsonww-claude-code-agent-monitor` | `session-search`、`session-timeline`、`transcript-replay`、`cwd-rollup`、`session-cleanup` |
-| **ccam-workflows** | `claude plugin install ccam-workflows@hoangsonww-claude-code-agent-monitor` | `dag-map`、`delegation-audit`、`concurrency-report`、`error-propagation`、`fleet-runs` |
-| **ccam-quality** | `claude plugin install ccam-quality@hoangsonww-claude-code-agent-monitor` | `error-scan`、`api-error-report`、`hook-failure-audit`、`slo-check`、`regression-alert` |
-| **ccam-config** | `claude plugin install ccam-config@hoangsonww-claude-code-agent-monitor` | `config-audit`、`memory-review`、`skill-inventory`、`mcp-audit`、`hook-inventory` |
-| **ccam-dashboard** | `claude plugin install ccam-dashboard@hoangsonww-claude-code-agent-monitor` | `dashboard-status`、`quick-stats` + MCP 服务器 |
+| **ccam-analytics** | `claude plugin install ccam-analytics@claude-code-agent-monitor-plugins` | `session-report`、`cost-breakdown`、`usage-trends`、`productivity-score` |
+| **ccam-cost-guard** | `claude plugin install ccam-cost-guard@claude-code-agent-monitor-plugins` | `budget-set`、`spend-forecast`、`cost-alert`、`model-savings`、`daily-budget-check` |
+| **ccam-productivity** | `claude plugin install ccam-productivity@claude-code-agent-monitor-plugins` | `daily-standup`、`weekly-report`、`sprint-summary`、`workflow-optimizer` |
+| **ccam-devtools** | `claude plugin install ccam-devtools@claude-code-agent-monitor-plugins` | `session-debug`、`hook-diagnostics`、`data-export`、`health-check` |
+| **ccam-insights** | `claude plugin install ccam-insights@claude-code-agent-monitor-plugins` | `pattern-detect`、`anomaly-alert`、`optimization-suggest`、`session-compare` |
+| **ccam-sessions** | `claude plugin install ccam-sessions@claude-code-agent-monitor-plugins` | `session-search`、`session-timeline`、`transcript-replay`、`cwd-rollup`、`session-cleanup` |
+| **ccam-workflows** | `claude plugin install ccam-workflows@claude-code-agent-monitor-plugins` | `dag-map`、`delegation-audit`、`concurrency-report`、`error-propagation`、`fleet-runs` |
+| **ccam-quality** | `claude plugin install ccam-quality@claude-code-agent-monitor-plugins` | `error-scan`、`api-error-report`、`hook-failure-audit`、`slo-check`、`regression-alert` |
+| **ccam-config** | `claude plugin install ccam-config@claude-code-agent-monitor-plugins` | `config-audit`、`memory-review`、`skill-inventory`、`mcp-audit`、`hook-inventory` |
+| **ccam-dashboard** | `claude plugin install ccam-dashboard@claude-code-agent-monitor-plugins` | `dashboard-status`、`quick-stats` + MCP 服务器 |
+| **ccam-runner** | `claude plugin install ccam-runner@claude-code-agent-monitor-plugins` | `run-agent`、`run-history` |
+| **ccam-integrations** | `claude plugin install ccam-integrations@claude-code-agent-monitor-plugins` | `alert-management`、`webhook-management`、`remote-collection` |
+| **ccam-platform** | `claude plugin install ccam-platform@claude-code-agent-monitor-plugins` | `config-explorer`、`history-portability`、`hook-setup`、`mcp-server` |
 
 ### 包含的 CLI 工具
 
@@ -2034,7 +2036,9 @@ agent-dashboard/
 |   +-- skills/                 # Claude 可复用项目技能
 |   +-- agents/                 # Claude 自定义子 Agent
 |-- .claude-plugin/
-|   +-- marketplace.json        # 插件市场清单（10 个插件）
+|   +-- marketplace.json        # Claude Code 插件市场清单（13 个插件）
+|-- .agents/plugins/
+|   +-- marketplace.json        # Codex 插件市场清单（13 个插件）
 |-- plugins/
 |   |-- ccam-analytics/         # 分析：会话报告、成本明细、使用趋势、生产力评分
 |   |   |-- .claude-plugin/plugin.json
@@ -2133,7 +2137,7 @@ agent-dashboard/
 |   |   |-- config/              # 环境/CLI 配置解析
 |   |   |-- core/                # 日志器、工具注册、结果辅助
 |   |   |-- policy/              # 变更/破坏性守卫
-|   |   |-- tools/               # 领域特定工具模块（6 个域）
+|   |   |-- tools/               # 16 个领域模块注册 97 个工具
 |   |   |-- transports/          # HTTP+SSE 服务器、REPL、工具收集器
 |   |   |-- ui/                  # ANSI 横幅、颜色、格式化器、表格
 |   |   +-- types/               # 共享 MCP 类型定义

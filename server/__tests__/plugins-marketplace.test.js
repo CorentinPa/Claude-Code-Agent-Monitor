@@ -17,6 +17,8 @@ const { parseFrontmatter } = require("../lib/cc-discovery");
 const REPO_ROOT = path.join(__dirname, "..", "..");
 const PLUGINS_DIR = path.join(REPO_ROOT, "plugins");
 const MARKETPLACE = path.join(REPO_ROOT, ".claude-plugin", "marketplace.json");
+const CODEX_MARKETPLACE = path.join(REPO_ROOT, ".agents", "plugins", "marketplace.json");
+const PROJECT_VERSION = readJson(path.join(REPO_ROOT, "package.json")).version;
 
 function readJson(p) {
   return JSON.parse(fs.readFileSync(p, "utf8"));
@@ -42,8 +44,10 @@ function listMd(dir) {
 
 describe("plugin marketplace", () => {
   const marketplace = readJson(MARKETPLACE);
+  const codexMarketplace = readJson(CODEX_MARKETPLACE);
   const pluginDirs = listDirs(PLUGINS_DIR).sort();
   const entryNames = marketplace.plugins.map((p) => p.name).sort();
+  const codexEntryNames = codexMarketplace.plugins.map((p) => p.name).sort();
 
   it("marketplace.json has the required top-level shape", () => {
     assert.equal(typeof marketplace.name, "string");
@@ -53,12 +57,12 @@ describe("plugin marketplace", () => {
     assert.ok(Array.isArray(marketplace.plugins));
   });
 
-  it("ships at least 10 plugins", () => {
+  it("ships at least 13 plugins", () => {
     assert.ok(
-      marketplace.plugins.length >= 10,
-      `expected >=10 marketplace entries, got ${marketplace.plugins.length}`
+      marketplace.plugins.length >= 13,
+      `expected >=13 marketplace entries, got ${marketplace.plugins.length}`
     );
-    assert.ok(pluginDirs.length >= 10, `expected >=10 plugin dirs, got ${pluginDirs.length}`);
+    assert.ok(pluginDirs.length >= 13, `expected >=13 plugin dirs, got ${pluginDirs.length}`);
   });
 
   it("marketplace entries and plugin dirs are a bijection", () => {
@@ -69,18 +73,31 @@ describe("plugin marketplace", () => {
     );
   });
 
+  it("Codex marketplace entries and plugin dirs are a bijection", () => {
+    assert.equal(typeof codexMarketplace.name, "string");
+    assert.ok(codexMarketplace.interface?.displayName);
+    assert.deepEqual(codexEntryNames, pluginDirs);
+    for (const entry of codexMarketplace.plugins) {
+      assert.equal(entry.source.source, "local");
+      assert.equal(entry.source.path, `./plugins/${entry.name}`);
+      assert.equal(entry.policy.installation, "AVAILABLE");
+      assert.equal(entry.policy.authentication, "ON_INSTALL");
+      assert.equal(typeof entry.category, "string");
+    }
+  });
+
   for (const entry of marketplace.plugins) {
     describe(`entry: ${entry.name}`, () => {
-      it("has name, path, description, tags", () => {
+      it("has name, source, description, tags", () => {
         assert.equal(typeof entry.name, "string");
-        assert.equal(entry.path, `plugins/${entry.name}`);
+        assert.equal(entry.source, `./plugins/${entry.name}`);
         assert.equal(typeof entry.description, "string");
         assert.ok(entry.description.length > 20);
         assert.ok(Array.isArray(entry.tags) && entry.tags.length > 0);
       });
 
       it("path exists on disk", () => {
-        assert.ok(fs.existsSync(path.join(REPO_ROOT, entry.path)));
+        assert.ok(fs.existsSync(path.join(REPO_ROOT, entry.source)));
       });
     });
   }
@@ -89,6 +106,7 @@ describe("plugin marketplace", () => {
     describe(`plugin: ${dir}`, () => {
       const root = path.join(PLUGINS_DIR, dir);
       const manifestPath = path.join(root, ".claude-plugin", "plugin.json");
+      const codexManifestPath = path.join(root, ".codex-plugin", "plugin.json");
 
       it("has a valid plugin.json whose name matches the dir", () => {
         assert.ok(fs.existsSync(manifestPath), `${dir} is missing .claude-plugin/plugin.json`);
@@ -96,10 +114,23 @@ describe("plugin marketplace", () => {
         assert.equal(m.name, dir, `${dir}/plugin.json name must equal the dir name`);
         assert.equal(typeof m.description, "string");
         assert.ok(m.description.length > 20);
-        assert.equal(typeof m.version, "string");
+        assert.equal(m.version, PROJECT_VERSION);
         assert.ok(m.author && typeof m.author.name === "string");
+        assert.equal(typeof m.repository, "string");
         assert.equal(typeof m.license, "string");
         assert.ok(Array.isArray(m.keywords) && m.keywords.length > 0);
+      });
+
+      it("has a valid Codex plugin.json whose name matches the dir", () => {
+        assert.ok(fs.existsSync(codexManifestPath), `${dir} is missing .codex-plugin/plugin.json`);
+        const manifest = readJson(codexManifestPath);
+        assert.equal(manifest.name, dir);
+        assert.equal(typeof manifest.description, "string");
+        assert.equal(manifest.version, PROJECT_VERSION);
+        assert.equal(typeof manifest.repository, "string");
+        assert.equal(manifest.skills, "./skills/");
+        assert.ok(manifest.interface?.displayName);
+        assert.ok(Array.isArray(manifest.interface?.capabilities));
       });
 
       it("agents carry valid frontmatter (name === filename, description)", () => {
@@ -131,7 +162,11 @@ describe("plugin marketplace", () => {
           assert.ok(fs.existsSync(file), `${dir}/skills/${s} is missing SKILL.md`);
           const { frontmatter } = parseFrontmatter(fs.readFileSync(file, "utf8"));
           assert.ok(frontmatter, `${dir}/skills/${s}/SKILL.md has no frontmatter`);
+          assert.equal(frontmatter.name, s, `${dir}/skills/${s} name must match directory`);
           assert.ok(frontmatter.description, `${dir}/skills/${s}/SKILL.md missing description`);
+          const openAi = path.join(skillsDir, s, "agents", "openai.yaml");
+          assert.ok(fs.existsSync(openAi), `${dir}/skills/${s} missing agents/openai.yaml`);
+          assert.match(fs.readFileSync(openAi, "utf8"), new RegExp(`\\$${s}\\b`));
         }
       });
 

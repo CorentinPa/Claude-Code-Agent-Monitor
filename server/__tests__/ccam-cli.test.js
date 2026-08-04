@@ -174,6 +174,26 @@ describe("ccam CLI — data browsing", () => {
     assert.equal(code, 0);
     assert.match(out, /Stop/);
   });
+
+  it("transcript reads the provider-aware transcript endpoint", async () => {
+    const { code, out } = await ccam("transcript", "cli-test-session-0001", "--limit", "5");
+    assert.equal(code, 0);
+    const parsed = JSON.parse(out);
+    assert.ok(Array.isArray(parsed.messages));
+  });
+
+  it("transcript-image rejects an invalid persisted image reference", async () => {
+    const { code, err } = await ccam(
+      "transcript-image",
+      "cli-test-session-0001",
+      "--line",
+      "1",
+      "--index",
+      "0"
+    );
+    assert.equal(code, 1);
+    assert.match(err, /Image download failed/);
+  });
 });
 
 describe("ccam CLI — insights", () => {
@@ -196,6 +216,13 @@ describe("ccam CLI — insights", () => {
     assert.equal(code, 0);
     assert.match(out, /Run/);
     assert.match(out, /Status/);
+  });
+
+  it("run list exposes the live Run API", async () => {
+    const { code, out } = await ccam("run", "list");
+    assert.equal(code, 0);
+    const parsed = JSON.parse(out);
+    assert.ok(Array.isArray(parsed.items));
   });
 
   it("cost prints a total", async () => {
@@ -271,6 +298,13 @@ describe("ccam CLI — alerts, rules, webhooks", () => {
     const { code, out } = await ccam("webhooks");
     assert.equal(code, 0);
     assert.match(out, /Provider/);
+  });
+
+  it("webhooks providers exposes the provider catalog", async () => {
+    const { code, out } = await ccam("webhooks", "providers");
+    assert.equal(code, 0);
+    const parsed = JSON.parse(out);
+    assert.ok(parsed.providers.length >= 10);
   });
 });
 
@@ -369,6 +403,13 @@ describe("ccam CLI — pricing", () => {
 });
 
 describe("ccam CLI — import & administration", () => {
+  it("import guide supports Codex", async () => {
+    const { code, out } = await ccam("import", "guide", "--provider", "codex");
+    assert.equal(code, 0);
+    const parsed = JSON.parse(out);
+    assert.equal(parsed.provider, "codex");
+  });
+
   it("import rescan runs against the (empty) default projects dir", async () => {
     const { code, out } = await ccam("import", "rescan");
     assert.equal(code, 0);
@@ -400,6 +441,46 @@ describe("ccam CLI — import & administration", () => {
     assert.ok(parsed.server);
   });
 
+  it("config claude overview exposes the Config Explorer API", async () => {
+    const { code, out } = await ccam("config", "claude", "overview");
+    assert.equal(code, 0);
+    const parsed = JSON.parse(out);
+    assert.ok(parsed.roots);
+  });
+
+  it("hooks status exposes both providers", async () => {
+    const { code, out } = await ccam("hooks", "status");
+    assert.equal(code, 0);
+    const parsed = JSON.parse(out);
+    assert.ok(parsed.providers.claude);
+    assert.ok(parsed.providers.codex);
+  });
+
+  it("api GET provides complete low-level read coverage", async () => {
+    const { code, out } = await ccam("api", "GET", "/api/health");
+    assert.equal(code, 0);
+    const parsed = JSON.parse(out);
+    assert.equal(parsed.status, "ok");
+  });
+
+  it("api GET preserves non-JSON responses such as Prometheus metrics", async () => {
+    const { code, out } = await ccam("api", "GET", "/api/metrics");
+    assert.equal(code, 0);
+    assert.match(out, /^# HELP ccam_up/m);
+  });
+
+  it("api writes require --yes", async () => {
+    const { code, err } = await ccam("api", "POST", "/api/alerts/ack-all");
+    assert.equal(code, 1);
+    assert.match(err, /require --yes/);
+  });
+
+  it("generic clear-data requires the exact confirmation token", async () => {
+    const { code, err } = await ccam("api", "POST", "/api/settings/clear-data", "--yes");
+    assert.equal(code, 1);
+    assert.match(err, /CLEAR_ALL_DATA/);
+  });
+
   it("export writes a JSON file containing the seeded session", async () => {
     const file = path.join(TMP, "export.json");
     const { code, out } = await ccam("export", file);
@@ -407,6 +488,39 @@ describe("ccam CLI — import & administration", () => {
     assert.match(out, /Exported to/);
     const data = JSON.parse(fs.readFileSync(file, "utf8"));
     assert.ok(JSON.stringify(data).includes("cli-test-session-0001"));
+  });
+
+  it("import-data round-trips an export through the server restore route", async () => {
+    const file = path.join(TMP, "roundtrip-export.json");
+    const exported = await ccam("export", file);
+    assert.equal(exported.code, 0);
+    const restored = await ccam("import-data", file);
+    assert.equal(restored.code, 0, `stderr: ${restored.err}`);
+    assert.match(restored.out, /already present/);
+  });
+
+  it("import upload sends multipart history files through the CLI", async () => {
+    const file = path.join(TMP, "empty-history.jsonl");
+    fs.writeFileSync(file, "");
+    const uploaded = await ccam("import", "upload", file, "--provider", "claude");
+    assert.equal(uploaded.code, 0, `stderr: ${uploaded.err}`);
+    assert.equal(JSON.parse(uploaded.out).ok, true);
+  });
+
+  it("the app multipart backup restore path is idempotent", async () => {
+    const exported = await fetch(`http://127.0.0.1:${PORT}/api/settings/export`);
+    assert.equal(exported.status, 200);
+    const payload = await exported.text();
+    const form = new FormData();
+    form.append("file", new Blob([payload], { type: "application/json" }), "dashboard-export.json");
+    const restored = await fetch(`http://127.0.0.1:${PORT}/api/settings/import`, {
+      method: "POST",
+      body: form,
+    });
+    assert.equal(restored.status, 200);
+    const result = await restored.json();
+    assert.equal(result.ok, true);
+    assert.ok(result.sessions_skipped >= 1);
   });
 
   it("update-check reports the checkout's update status", async () => {

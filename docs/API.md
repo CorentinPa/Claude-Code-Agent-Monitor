@@ -1037,10 +1037,23 @@ curl "http://localhost:4820/api/sessions?sources=local,4d1f0e2a-7b9c-4c33-8a21-9
 
 | Method | Path | Description |
 | --- | --- | --- |
+| `GET` | `/api/settings/info` | Database, hook, server, process, and transcript-cache status |
+| `GET` | `/api/settings/export` | Download a versioned full-dashboard JSON bundle |
+| `POST` | `/api/settings/import` | Restore an export by multipart `file` or JSON `{ "path": "/absolute/file" }`; idempotent and non-destructive |
+| `POST` | `/api/settings/install-hooks` | Install the selected `claude` and/or `codex` hook sets |
+| `POST` | `/api/settings/cleanup` | Abandon stale sessions and/or purge old terminal sessions |
+| `POST` | `/api/settings/clear-data` | Delete captured sessions, agents, events, token usage, fired alerts, and webhook delivery history |
 | `GET` / `PUT` | `/api/settings/claude-home` | Read or update the Claude Code transcript/configuration root |
 | `GET` / `PUT` | `/api/settings/codex-home` | Read or update the Codex rollout/hooks root; saving re-arms the live watcher and schedules an immediate session scan |
 
 Both home updates accept `{ "path": "/absolute/path" }` (a leading `~/` is expanded). The resolved path must exist and be a directory; invalid input returns `400 INVALID_PATH`. Codex changes are persisted as `DASHBOARD_CODEX_HOME` and notify the background synchronizer after the response so a large history cannot delay the Settings action.
+
+`POST /api/settings/import` accepts one export file up to 100 MiB. Multipart
+callers use field `file`; CLI/MCP callers may send an absolute server-side
+`path`. The restore skips existing sessions as a whole and inserts independent
+run, alert-rule, and pricing rows only when absent. It never overwrites existing
+rows. Malformed JSON returns `400 INVALID_JSON`, an invalid bundle returns
+`400 INVALID_FORMAT`, and an oversized file returns `413 IMPORT_TOO_LARGE`.
 
 ### Agent Config
 

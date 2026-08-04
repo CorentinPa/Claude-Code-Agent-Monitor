@@ -37,7 +37,7 @@ A plain root install already covers server **and** client — a `postinstall` ho
 npm install
 ```
 
-`npm run setup` additionally installs the VS Code extension and links the `ccam` CLI. (If you install with `--ignore-scripts`, the `postinstall` hook is skipped — run `cd client && npm install` manually in that case.)
+`npm run setup` additionally installs the VS Code extension, installs and builds the MCP package, and links the `ccam` CLI. The bundled Claude/Codex plugins use `ccam mcp stdio`, so the MCP build is part of normal setup. If you install with `--ignore-scripts`, the `postinstall` hook is skipped. Run `cd client && npm install` manually in that case.
 
 Or via Makefile (also installs MCP dependencies):
 
@@ -222,7 +222,7 @@ Then jump to [Install the app](#install-the-app).
 From the project root, after `git clone`. electron-builder packages for the **host OS**, so build the macOS DMG on a Mac and the Windows `.exe` on Windows. The common prelude is the same:
 
 ```bash
-npm run setup                # install root + client + vscode-extension deps
+npm run setup                # install root + client + vscode-extension + MCP deps, build MCP, link ccam
 npm run build                # build the React client (the SPA the window loads)
 npm run desktop:install      # install Electron + electron-builder into desktop/
 
