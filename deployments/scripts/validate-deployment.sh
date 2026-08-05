@@ -29,13 +29,15 @@ assert_single_writer() {
 }
 
 assert_no_unsafe_assets() {
-  if rg -n \
-    '\$\{IMAGE_|newTag: (latest|dev|staging)|replicas: [2-9]|minReplicas:|maxReplicas:|kind: HorizontalPodAutoscaler|kind: PodDisruptionBudget|app.kubernetes.io/version: "1\.0\.0"' \
-    "${KUSTOMIZE_DIR}" --glob '*.yaml' \
-    --glob '!base/hpa.yaml' \
-    --glob '!base/pdb.yaml' \
-    --glob '!strategies/**' \
-    --glob '!overlays/production/patches/hpa-patch.yaml'; then
+  local unsafe_matches
+  unsafe_matches="$(
+    find "${KUSTOMIZE_DIR}" -type f \( -name '*.yaml' -o -name '*.yml' \) \
+      -exec grep -EnH \
+        '\$\{IMAGE_|newTag: (latest|dev|staging)|replicas: [2-9]|minReplicas:|maxReplicas:|kind: HorizontalPodAutoscaler|kind: PodDisruptionBudget|app.kubernetes.io/version: "1\.0\.0"' \
+        {} + || true
+  )"
+  if [[ -n "$unsafe_matches" ]]; then
+    printf '%s\n' "$unsafe_matches"
     fatal "unsafe or stale Kubernetes deployment values remain"
   fi
 }
@@ -151,13 +153,17 @@ validate_terraform() {
     )
     return
   fi
-  docker run --rm -v "${PROJECT_ROOT}:/workspace" -w /workspace/deployments/terraform \
-    hashicorp/terraform:1.15.8@sha256:7ae513256f7ce67879e218ae8593d6fbe216ec9e123abe6c94e4e10704857963 fmt -check -recursive >/dev/null
-  docker run --rm -v "${PROJECT_ROOT}:/workspace" -w /workspace/deployments/terraform \
-    hashicorp/terraform:1.15.8@sha256:7ae513256f7ce67879e218ae8593d6fbe216ec9e123abe6c94e4e10704857963 init -backend=false -input=false >/dev/null
-  docker run --rm -v "${PROJECT_ROOT}:/workspace" -w /workspace/deployments/terraform \
-    hashicorp/terraform:1.15.8@sha256:7ae513256f7ce67879e218ae8593d6fbe216ec9e123abe6c94e4e10704857963 validate >/dev/null
-  rm -rf "${terraform_dir}/.terraform"
+  docker run --rm \
+    --user "$(id -u):$(id -g)" \
+    --env HOME=/tmp \
+    --env TF_DATA_DIR=/tmp/ccam-terraform-data \
+    -v "${PROJECT_ROOT}:/workspace" \
+    -w /workspace/deployments/terraform \
+    --entrypoint /bin/sh \
+    hashicorp/terraform:1.15.8@sha256:7ae513256f7ce67879e218ae8593d6fbe216ec9e123abe6c94e4e10704857963 \
+    -c 'terraform fmt -check -recursive &&
+        terraform init -backend=false -input=false >/dev/null &&
+        terraform validate >/dev/null'
 }
 
 main() {
