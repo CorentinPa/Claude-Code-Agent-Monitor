@@ -3,7 +3,7 @@
 // response, so monitoring never delays the Codex CLI.
 // @author Son Nguyen <hoangson091104@gmail.com>
 
-const http = require("http");
+const { sendHook } = require("./hook-transport");
 
 const hookType = process.argv[2] || "unknown";
 
@@ -28,38 +28,8 @@ process.stdin.on("end", () => {
   } catch {
     data = { raw: input };
   }
-  const payload = JSON.stringify({ hook_type: hookType, data });
-  const contentLength = Buffer.byteLength(payload);
-  const sends = resolvePorts().map(
-    (port) =>
-      new Promise((resolve) => {
-        let settled = false;
-        const done = () => {
-          if (!settled) {
-            settled = true;
-            resolve();
-          }
-        };
-        const request = http.request(
-          {
-            hostname: "127.0.0.1",
-            port,
-            path: "/api/hooks/codex",
-            method: "POST",
-            headers: { "Content-Type": "application/json", "Content-Length": contentLength },
-            timeout: 2000,
-          },
-          (response) => response.resume()
-        );
-        request.on("error", done);
-        request.on("timeout", () => {
-          request.destroy();
-          done();
-        });
-        request.write(payload);
-        request.end(done);
-      })
+  sendHook(resolvePorts, "/api/hooks/codex", { hook_type: hookType, data }).finally(() =>
+    setImmediate(() => process.exit(0))
   );
-  Promise.all(sends).finally(() => setImmediate(() => process.exit(0)));
 });
 setTimeout(() => process.exit(0), 2500);

@@ -19,7 +19,7 @@ if (nodeProcess) nodeProcess.env.TZ = "UTC";
 import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from "vitest";
 import type { ReactNode } from "react";
 import { render, act } from "@testing-library/react";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router";
 import i18n from "i18next";
 
 // ── Mock the API layer with deterministic, crash-safe empty fixtures ──────────

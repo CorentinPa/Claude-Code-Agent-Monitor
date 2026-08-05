@@ -6951,7 +6951,7 @@ exports[`screen snapshots > Sessions 1`] = `
           class="relative w-full"
         >
           <button
-            aria-controls=":r0:"
+            aria-controls="_r_0_"
             aria-expanded="false"
             aria-haspopup="dialog"
             aria-label="Project directories: All projects"
@@ -6992,7 +6992,7 @@ exports[`screen snapshots > Sessions 1`] = `
             class="relative"
           >
             <button
-              aria-controls=":r1:"
+              aria-controls="_r_1_"
               aria-expanded="false"
               aria-haspopup="listbox"
               class="w-full flex items-center justify-between gap-2 bg-surface-2 border border-border rounded-md px-3 py-1.5 text-[11px] text-gray-100 focus:outline-none focus:border-accent/50 hover:bg-surface-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
@@ -11494,6 +11494,7 @@ exports[`screen snapshots > Workflows 1`] = `
             </div>
             <a
               class="text-gray-500 hover:text-violet-400 transition-colors flex-shrink-0"
+              data-discover="true"
               href="/sessions/sess-1"
               title="Open parent session"
             >

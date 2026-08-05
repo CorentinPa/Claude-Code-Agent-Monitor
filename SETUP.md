@@ -51,44 +51,40 @@ npm run install-hooks
 > Container note: do not rely on hook auto-install from inside Docker or Podman. The hook path written by a container would point at the container filesystem, not the host. Start the container first, then run `npm run install-hooks` on the host. As a safeguard (issue #193), the installer now **detects container execution and refuses to run** (exiting non-zero) so it can never poison a bind-mounted host `~/.claude`; the containerized server logs the same guidance instead of silently writing a bad path. If you genuinely run Claude Code inside the same container, override with `CCAM_ALLOW_CONTAINER_HOOKS=1 npm run install-hooks`.
 
 > [!NOTE]
-> Prefer a ready-made dev environment? This repo ships an **optional** Dev Container (`.devcontainer/`) for VS Code / GitHub Codespaces — Node 22, native build tools for `better-sqlite3`, Python, and ports `4820`/`5173` preconfigured. It's purely opt-in and changes nothing for host-based development. See [`.devcontainer/README.md`](.devcontainer/README.md). (Hooks remain host-side there too.)
+> Prefer a ready-made dev environment? This repo ships an **optional** Dev Container (`.devcontainer/`) for VS Code / GitHub Codespaces — Node 24 LTS, native build tools for `better-sqlite3`, Python, and ports `4820`/`5173` preconfigured. It's purely opt-in and changes nothing for host-based development. See [`.devcontainer/README.md`](.devcontainer/README.md). (Hooks remain host-side there too.)
 
 ### Container runtime (Docker / Podman)
 
-The repo includes both a multi-stage `Dockerfile` and a `docker-compose.yml` file. The container image serves the built client and API on port `4820`, stores SQLite data under `/app/data`, and can import legacy Claude history from a read-only `~/.claude` mount.
+The repository ships a non-root OCI image plus dashboard-only and complete Compose stacks. Docker Compose and Podman Compose use the same file.
 
 ```bash
-# Docker Compose
++# Dashboard only
 docker compose up -d --build
++# or
++podman compose up -d --build
++
++# Complete stack secrets
++umask 077
++openssl rand -hex 32 > deployments/secrets/dashboard-token
++openssl rand -hex 32 > deployments/secrets/hook-token
++openssl rand -hex 32 > deployments/secrets/mcp-token
++openssl rand -base64 32 > deployments/secrets/grafana-admin-password
++
++# Dashboard + MCP + Nginx + Prometheus + Grafana
++npm run docker:full:up
++```
 
-# Podman Compose
-CLAUDE_HOME="$HOME/.claude" podman compose up -d --build
+Container behavior:
 
-# Plain Docker
-docker build -t agent-monitor .
-docker run -d --name agent-monitor \
-  -p 127.0.0.1:4820:4820 \
-  -v "$HOME/.claude:/root/.claude:ro" \
-  -v agent-monitor-data:/app/data \
-  agent-monitor
+- dashboard `4820`, MCP `8819`, Nginx `8080`, Prometheus `9090`, and Grafana `3000` bind host loopback by default
+- Claude and Codex homes mount read-only at `/home/node/.claude` and `/home/node/.codex`
+- named volumes persist `/app/data` and `/app/config`
+- the root filesystem is read-only, all capabilities are dropped, and `no-new-privileges` is enabled
+- Git, OpenSSH, and SQLite CLI are installed for updates, Remote Data Sources, backup, and restore
+- MCP HTTP/SSE requires `mcp-token`; Nginx blocks hooks, metrics, and MCP unless an explicit proxy policy is mounted
+- host hooks are still installed from the host with `npm run install-hooks`
 
-# Plain Podman
-podman build -t agent-monitor .
-podman run -d --name agent-monitor \
-  -p 127.0.0.1:4820:4820 \
-  -v "$HOME/.claude:/root/.claude:ro" \
-  -v "$HOME/.claude/agent-dashboard:/app/data" \
-  agent-monitor
-```
-
-Container-specific behavior:
-
-- The dashboard is available at `http://localhost:4820`
-- The image sets `DASHBOARD_HOST=0.0.0.0` (bind inside the container — its loopback is a separate namespace the published port cannot reach) and `DASHBOARD_DATA_DIR=/app/data` internally; both are baked into the `Dockerfile`
-- The examples publish on `127.0.0.1` only, so the dashboard is local-only. To expose it on a LAN, publish on `0.0.0.0` (`-p 4820:4820`) **and** set `DASHBOARD_TOKEN`
-- `~/.claude:/root/.claude:ro` is used for history import only
-- `~/.claude/agent-dashboard:/app/data` is the **canonical** SQLite database (shared with native installs)
-- Claude Code hooks still execute on the host, so install them from the host with `npm run install-hooks`
+For cloud deployment, Run Agent containers, remote hooks, Kubernetes, Terraform, backup, and restore, see [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
 ### Environment variables
 
@@ -107,6 +103,12 @@ Container-specific behavior:
 | `MCP_TRANSPORT` | `stdio` | MCP transport mode: `stdio`, `http`, `repl` |
 | `MCP_HTTP_PORT` | `8819` | Port for the MCP HTTP+SSE server (only when `MCP_TRANSPORT=http`) |
 | `MCP_HTTP_HOST` | `127.0.0.1` | Bind address for the MCP HTTP server |
+| `MCP_HTTP_AUTH_TOKEN` / `_FILE` | unset | Protect MCP `/mcp`, `/sse`, and `/messages`; `/health` stays probeable |
+| `DASHBOARD_TOKEN_FILE` | unset | File-backed dashboard API/WebSocket token |
+| `DASHBOARD_HOOK_TOKEN` / `_FILE` | unset | Dedicated credential for remote hook ingestion |
+| `DASHBOARD_ENV_PATH` | repo `.env` | Writable dotenv path for persisted Settings overrides |
+| `CCAM_DASHBOARD_URL` | localhost discovery | Remote hook destination; non-loopback requires HTTPS and hook auth |
+| `CCAM_HOOK_TOKEN` / `_FILE` | unset | Credential sent by Claude/Codex hook handlers |
 
 Example with a custom port:
 
@@ -615,7 +617,7 @@ Open `~/.claude/settings.json` and verify the hook commands reference `localhost
 
 If the build fails in Stage 1 with `better-sqlite3` errors, this is expected and should not block the build — `better-sqlite3` is an optional dependency. If the build still fails:
 
-- Ensure you are using the latest Dockerfile (it should use `node:22-alpine` and **not** install `python3`, `make`, or `g++`)
+- Ensure you are using the latest multi-stage Dockerfile (`node:24.19.0-alpine3.24`, non-root runtime, Git/OpenSSH/SQLite/Tini, no compiler toolchain in the final image)
 - Run `docker build --no-cache -t agent-monitor .` to force a clean rebuild
 - Check that `package.json` has `better-sqlite3` under `optionalDependencies`, not `dependencies`
 

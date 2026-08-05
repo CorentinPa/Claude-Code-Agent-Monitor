@@ -10,7 +10,10 @@ if (!process.env.NODE_ENV) process.env.NODE_ENV = "production";
 (function loadDotEnv() {
   const fs = require("fs");
   const os = require("os");
-  const envPath = require("path").resolve(__dirname, "..", ".env");
+  const path = require("path");
+  const envPath = path.resolve(
+    process.env.DASHBOARD_ENV_PATH || path.resolve(__dirname, "..", ".env")
+  );
   if (!fs.existsSync(envPath)) return;
   for (const line of fs.readFileSync(envPath, "utf8").split("\n")) {
     const trimmed = line.trim();
@@ -45,6 +48,7 @@ const {
   corsOptions,
   hostGuard,
   tokenGuard,
+  hookGuard,
   getDashboardToken,
 } = require("./lib/security");
 
@@ -91,6 +95,7 @@ function createApp() {
   app.use(hostGuard);
   app.use(express.json({ limit: "1mb" }));
   app.use("/api", tokenGuard);
+  app.use("/api/hooks", hookGuard);
 
   app.use("/api/sessions", sessionsRouter);
   app.use("/api/agents", agentsRouter);

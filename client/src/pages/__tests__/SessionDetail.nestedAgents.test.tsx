@@ -6,7 +6,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, within, waitFor } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router";
 import { SessionDetail } from "../SessionDetail";
 import type { Agent, Session, DashboardEvent } from "../../lib/types";
 import { fmtCost } from "../../lib/format";

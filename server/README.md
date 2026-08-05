@@ -3,7 +3,7 @@
 Enterprise-grade Node.js backend for Claude Code agent monitoring with real-time WebSocket updates.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22.22-339933?style=flat-square&logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4.21-000000?style=flat-square&logo=express&logoColor=white)
 ![Javascript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?style=flat-square&logo=javascript&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite&logoColor=white)
@@ -15,8 +15,8 @@ Enterprise-grade Node.js backend for Claude Code agent monitoring with real-time
 ![ESLint](https://img.shields.io/badge/ESLint-8.44-4B32C3?style=flat-square&logo=eslint&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-20.10-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![Podman](https://img.shields.io/badge/Podman-4.0-CC342D?style=flat-square&logo=podman&logoColor=white)
-![Prometheus](https://img.shields.io/badge/Prometheus-2.x-E6522C?style=flat-square&logo=prometheus&logoColor=white)
-![Grafana](https://img.shields.io/badge/Grafana-10.x-F46800?style=flat-square&logo=grafana&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-3.13-E6522C?style=flat-square&logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-13.1-F46800?style=flat-square&logo=grafana&logoColor=white)
 ![SSE](https://img.shields.io/badge/SSE-Server_Sent_Events-FF6600?style=flat-square&logo=googlechrome&logoColor=white)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
@@ -1452,7 +1452,12 @@ NODE_ENV=production                # Environment mode
 # Network exposure & hardening (see server/lib/security.js)
 DASHBOARD_HOST=127.0.0.1           # Bind address; default loopback. Set 0.0.0.0 to widen (logs a warning)
 DASHBOARD_TOKEN=                   # Optional bearer token; when set, /api/* and the WebSocket require it (off by default)
+DASHBOARD_TOKEN_FILE=              # File-backed dashboard token for Docker/Kubernetes secrets
+DASHBOARD_HOOK_TOKEN=              # Independent token for /api/hooks/* remote ingestion
+DASHBOARD_HOOK_TOKEN_FILE=         # File-backed hook token
 DASHBOARD_ALLOWED_HOSTS=           # Extra Host-header names to allow (comma-separated), e.g. for LAN access
+POD_IP=                            # Kubernetes downward-API pod IP; automatically accepted by the Host guard
+DASHBOARD_ENV_PATH=                # Writable dotenv path for persisted Settings overrides
 
 # Database
 DASHBOARD_DB_PATH=./data/dashboard.db  # SQLite database path
@@ -1487,37 +1492,24 @@ pm2 start server/index.js --name agent-dashboard
 sudo systemctl start agent-dashboard
 ```
 
-### Docker Deployment
+### Docker, Podman, and Kubernetes
 
-```dockerfile
-# Dockerfile (root of project)
-FROM node:22-alpine
-
-WORKDIR /app
-
-# Install dependencies
-COPY package*.json ./
-COPY client/package*.json ./client/
-RUN npm ci --production && cd client && npm ci --production
-
-# Build client
-COPY client ./client
-RUN cd client && npm run build
-
-# Copy server
-COPY server ./server
-COPY data ./data
-
-EXPOSE 4820
-
-CMD ["node", "server/index.js"]
-```
+Use the repository `Dockerfile` and Compose files rather than recreating an
+image. The runtime is non-root, includes Git/OpenSSH/SQLite, uses Tini as PID 1,
+and is read-only except for mounted data/config volumes and tmpfs.
 
 ```bash
-# Build and run
-docker build -t agent-dashboard .
-docker run -p 127.0.0.1:4820:4820 -v "$HOME/.claude/agent-dashboard:/app/data" agent-dashboard
+docker compose up -d --build
+
+# Complete authenticated stack
+npm run docker:full:up
+
+# Full deployment validation
+npm run deploy:validate
 ```
+
+For Kubernetes, Helm and Kustomize enforce one Recreate-managed dashboard
+replica with a retained ReadWriteOnce PVC. See [`DEPLOYMENT.md`](../DEPLOYMENT.md).
 
 ---
 

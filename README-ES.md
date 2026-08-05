@@ -8,7 +8,7 @@ Un panel profesional para rastrear y visualizar sus sesiones de agente Claude Co
 ![OpenAI Codex](https://img.shields.io/badge/OpenAI_Codex-blue?style=flat-square&logo=githubcopilot&logoColor=white)
 ![Claude Code Plugins](https://img.shields.io/badge/Claude_Code_&_Codex-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
 ![Model Context Protocol](https://img.shields.io/badge/Model_Context_Protocol-1.0-0f766e?style=flat-square&logo=modelcontextprotocol&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22.22-339933?style=flat-square&logo=node.js&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-%3E%3D3.6-3776AB?style=flat-square&logo=python&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4.21-000000?style=flat-square&logo=express&logoColor=white)
 ![ws](https://img.shields.io/badge/ws-WebSocket_server-010101?style=flat-square&logo=socketdotio&logoColor=white)
@@ -17,14 +17,14 @@ Un panel profesional para rastrear y visualizar sus sesiones de agente Claude Co
 ![multer](https://img.shields.io/badge/multer-multipart_upload-FF6B6B?style=flat-square&logo=express&logoColor=white)
 ![adm-zip](https://img.shields.io/badge/adm--zip-archive_extract-FBBF24?style=flat-square&logo=files&logoColor=white)
 ![tar](https://img.shields.io/badge/tar-tgz_extract-A78BFA?style=flat-square&logo=gnu&logoColor=white)
-![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react&logoColor=white)
+![React](https://img.shields.io/badge/React-19.2-61DAFB?style=flat-square&logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![Javascript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?style=flat-square&logo=javascript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-6.1-646CFF?style=flat-square&logo=vite&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7.3-646CFF?style=flat-square&logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 ![PostCSS](https://img.shields.io/badge/PostCSS-8.5-DD3A0A?style=flat-square&logo=postcss&logoColor=white)
 ![Autoprefixer](https://img.shields.io/badge/Autoprefixer-10.4-DD3735?style=flat-square&logo=autoprefixer&logoColor=white)
-![React Router](https://img.shields.io/badge/React_Router-6.28-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
+![React Router](https://img.shields.io/badge/React_Router-8.3-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
 ![Lucide](https://img.shields.io/badge/Lucide_Icons-0.474-F56565?style=flat-square&logo=lucide&logoColor=white)
 ![D3.js](https://img.shields.io/badge/D3.js-7-F9A03C?style=flat-square&logo=d3&logoColor=white)
 ![Mermaid](https://img.shields.io/badge/Mermaid-10.2-ff3333?style=flat-square&logo=mermaid&logoColor=white)
@@ -51,8 +51,8 @@ Un panel profesional para rastrear y visualizar sus sesiones de agente Claude Co
 ![Prettier](https://img.shields.io/badge/Prettier-3.8-F7B93E?style=flat-square&logo=prettier&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-20.10-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![Podman](https://img.shields.io/badge/Podman-4.0-CC342D?style=flat-square&logo=podman&logoColor=white)
-![Prometheus](https://img.shields.io/badge/Prometheus-2.x-E6522C?style=flat-square&logo=prometheus&logoColor=white)
-![Grafana](https://img.shields.io/badge/Grafana-10.x-F46800?style=flat-square&logo=grafana&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-3.13-E6522C?style=flat-square&logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-13.1-F46800?style=flat-square&logo=grafana&logoColor=white)
 ![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.5-844FBA?style=flat-square&logo=terraform&logoColor=white)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-%3E%3D1.24-326CE5?style=flat-square&logo=kubernetes&logoColor=white)
 ![Helm](https://img.shields.io/badge/Helm-3-0F1689?style=flat-square&logo=helm&logoColor=white)
@@ -65,7 +65,6 @@ Un panel profesional para rastrear y visualizar sus sesiones de agente Claude Co
 ![Azure](https://img.shields.io/badge/Azure-AKS%20%7C%20SQL-0078D4?style=flat-square&logo=cloudflare&logoColor=white)
 ![Oracle Cloud](https://img.shields.io/badge/Oracle_Cloud-OKE%20%7C%20DB-F80000?style=flat-square&logo=cloudways&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-pipelines-2088FF?style=flat-square&logo=githubactions&logoColor=white)
-![GitLab CI](https://img.shields.io/badge/GitLab_CI-pipelines-FC6D26?style=flat-square&logo=gitlab&logoColor=white)
 ![Make](https://img.shields.io/badge/Make-4.3-000000?style=flat-square&logo=make&logoColor=white)
 ![Auto Release](https://img.shields.io/badge/CI-auto--release_to_GitHub-22c55e?style=flat-square&logo=githubactions&logoColor=white)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
@@ -325,7 +324,7 @@ El panel de control ofrece un conjunto completo de funciones para monitorear y a
 | **Línea de estado**                     | Línea de estado CLI codificada por color que muestra el modelo, el uso del contexto, la rama de git, los tokens por dirección y el costo de la sesión (USD)                                                                                                                                                            |
 | **Formato de nombres de modelos** | Nombres de modelos fáciles de entender para el usuario en toda la interfaz de usuario: identificadores brutos como `claude-opus-4-7-20260101` o `claude-opus-4-7[1m]` se muestran como "Claude Opus 4.7" o "Claude Opus 4.7 (1M)". Maneja las familias Claude, GPT y Gemini con uniones automáticas de puntos de versión, eliminación de sufijos de fecha/último, eliminación de prefijos del proveedor y formato de etiquetas de ventana de contexto. La página de configuración conserva los nombres brutos para la configuración de reglas de precios |
 | **Mercado de plugins Claude + Codex** | Un árbol compartido de 14 plugins incluye manifests de Claude Code y Codex, dos catálogos, 66 habilidades empaquetadas, 18 subagentes de Claude, 34 comandos de Claude y metadatos OpenAI. La CLI de skills.sh descubre 74 habilidades del repositorio con `npx skills add hoangsonww/Claude-Code-Agent-Monitor --list`. Se instala con `claude plugin marketplace add`, `codex plugin marketplace add` o `npx skills add` |
-| **Ejecutar Claude**                     | Crear subprocesos `claude` directamente desde el panel de control con una interfaz de usuario de streaming de estilo chat. Dos modos: **Conversación** (multi-turnos — la entrada estándar se mantiene abierta, los turnos de seguimiento se envían como paquetes stream-json) y **Una vez** (sin cabeza, solo un mensaje de inicio → solo una respuesta). El modo de conversación también admite **reanudar cualquier sesión existente** a través de `claude --resume <id>` - elige entre tu historial completo de sesiones con un selector de búsqueda. El modo de historial / ejecuciones activas unificado también ofrece dos botones de salto de configuración cero: **Resumen** en cualquier fila de conversación anterior genera `claude --resume <id>` inmediatamente y siembra el chat con la transcripción anterior para que llegues a la vista en vivo con el contexto completo (no es necesario volver a escribir un mensaje de inicio de sesión, el id de generación se queda en espera en stdin hasta que envíes un seguimiento); **Ver** en cualquier fila de una sola ejecución anterior carga la transcripción capturada directamente en el visualizador de ejecuciones como de solo lectura (sin generación, mismo panel, sin controles de Detener/seguimiento). El interruptor de carreras activas en el encabezado le permite dejar una carrera en segundo plano, iniciar otra y volver a adjuntarla más tarde. Re-attach es duradero: el cliente reconcilia el registro de sobrecargas en memoria del generador (`?envelopes=1`) con la transcripción JSONL en disco de la sesión y prefiere la que tenga más mensajes de usuario/asistente, por lo que navegar lejos de una ejecución suspendida y volver mantiene visible todo el historial anterior (el generador solo ve las vueltas posteriores a la generación; el archivo de transcripción tiene anterior + actual). Desplegable de modelos (Opus 4.7 / 1M / Sonnet 4.6 / Haiku 4.5 / personalizado), seleccionador de modo de permiso con advertencia explícita de `bypassPermissions`, campo de **efecto de pensamiento** (bajo / medio / alto - conectado a `--effort`), prelleno automático de cwd prellenado con el **directorio de inicio** del usuario - una ubicación de creación neutral que no hereda el propio contexto de proyecto `.claude` del repositorio del panel de control (agentes, habilidades, reglas, `CLAUDE.md`, `.mcp.json`); se vuelve a conectar al cwd del panel de control si no hay sugerencia de inicio disponible, con el inicio listado primero en los grupos de sugerencias (inicio → panel de control → recientes). Transmisión real de personajes por personaje a través de `--include-partial-messages`, además de una **capa de suavización de máquina de escribir** del lado del cliente que gotea cada `text_delta` / `thinking_delta` a través de `requestAnimationFrame`, por lo que incluso las respuestas cortas (donde claude empaqueta toda la respuesta en uno o dos trozos) parecen escribirse. El código de fusión mantiene intacto el indicador `_streaming` y la matriz `content` acumulada en delta cuando llega el sobre `assistant` canónico de claude a mitad del flujo, por lo que los bloques de pensamiento no se pierden al finalizar. La emisión de WebSocket envuelve cada sobre en `flushSync` para que el agrupamiento automático de React 18 no colapse los picos de deltas en una sola renderización. **Paridad TUI (Nivel 1):** un **banner de limitaciones plegable** que se minimiza a una píldora delgada (nunca desaparece) explicando lo que el modo stream-json puede y no puede hacer frente al TUI terminal; un **editor de comandos con autocompletado de comandos con guiones** con puntuación por niveles (nombre exacto → comienza con → límite de palabra → contiene → subsecuencia → contiene descripción) que enumera los comandos de usuario / proyecto / plugin (ejecutados desde el lado del cliente a través de la expansión de plantillas antes del envío) y muestra comandos de CLI integrados como `/clear`, `/model`, `/config` con un distintivo "Solo CLI, no se ejecutará desde aquí"; **referencias de archivos `@`** con búsqueda borrosa amortiguada en todo el directorio de trabajo de la ejecución (omitiendo `node_modules`, `.git`, `dist`, `build`, etc.); una **ventana de contexto en vivo / medidor de tokens** que muestra tokens de entrada + salida + lectura de caché y costo de ejecución, calculados a partir de `stream_event` y `result.usage` sobres durante la transmisión en vivo y de los bloques de `uso` del asistente finalizados (entrada / salida / lectura de caché / creación de caché) cuando se inician desde una transcripción en reiniciar / ver / volver a adjuntar, para que el medidor se llene inmediatamente en lugar de quedarse en 0/200k. La barra de progreso pasa de índigo → ámbar → rojo al 80 % / 95 % del límite de contexto del modelo; un **encabezado de estado** con el modelo activo, el esfuerzo, el modo de permiso, el directorio actual, el ID de la sesión, el número de sobres y el tiempo transcurrido. Los menús desplegables de autocompletado se abren hacia arriba para que no colisionen con el selector cwd de abajo. Indicador de en vivo / sin conexión junto al título. La guardia de origen común en la ruta evita que el navegador genere ataques de tráfico cruzado. La concurrencia no está efectivamente limitada por defecto (techo de cordura de 10000 para evitar que las pistolas de pie fork-bomb causen problemas en el cliente; la TUI terminal no tiene límite y nosotros tampoco). Establezca `RUN_MAX_CONCURRENT` si desea un techo real. Las sesiones generadas disparan los mismos ganchos que cualquier proceso `claude`, por lo que aparecen automáticamente en Sesiones / Análisis / Kanban / Flujos de trabajo, y las superficies Sesiones / Detalle de sesión muestran un distintivo / banner verde **▶ Ejecutar** que vuelve a enlazar con la página Ejecutar para cualquier sesión que se esté ejecutando actualmente desde allí |
+| **Ejecutar Claude**                     | Crear subprocesos `claude` directamente desde el panel de control con una interfaz de usuario de streaming de estilo chat. Dos modos: **Conversación** (multi-turnos — la entrada estándar se mantiene abierta, los turnos de seguimiento se envían como paquetes stream-json) y **Una vez** (sin cabeza, solo un mensaje de inicio → solo una respuesta). El modo de conversación también admite **reanudar cualquier sesión existente** a través de `claude --resume <id>` - elige entre tu historial completo de sesiones con un selector de búsqueda. El modo de historial / ejecuciones activas unificado también ofrece dos botones de salto de configuración cero: **Resumen** en cualquier fila de conversación anterior genera `claude --resume <id>` inmediatamente y siembra el chat con la transcripción anterior para que llegues a la vista en vivo con el contexto completo (no es necesario volver a escribir un mensaje de inicio de sesión, el id de generación se queda en espera en stdin hasta que envíes un seguimiento); **Ver** en cualquier fila de una sola ejecución anterior carga la transcripción capturada directamente en el visualizador de ejecuciones como de solo lectura (sin generación, mismo panel, sin controles de Detener/seguimiento). El interruptor de carreras activas en el encabezado le permite dejar una carrera en segundo plano, iniciar otra y volver a adjuntarla más tarde. Re-attach es duradero: el cliente reconcilia el registro de sobrecargas en memoria del generador (`?envelopes=1`) con la transcripción JSONL en disco de la sesión y prefiere la que tenga más mensajes de usuario/asistente, por lo que navegar lejos de una ejecución suspendida y volver mantiene visible todo el historial anterior (el generador solo ve las vueltas posteriores a la generación; el archivo de transcripción tiene anterior + actual). Desplegable de modelos (Opus 4.7 / 1M / Sonnet 4.6 / Haiku 4.5 / personalizado), seleccionador de modo de permiso con advertencia explícita de `bypassPermissions`, campo de **efecto de pensamiento** (bajo / medio / alto - conectado a `--effort`), prelleno automático de cwd prellenado con el **directorio de inicio** del usuario - una ubicación de creación neutral que no hereda el propio contexto de proyecto `.claude` del repositorio del panel de control (agentes, habilidades, reglas, `CLAUDE.md`, `.mcp.json`); se vuelve a conectar al cwd del panel de control si no hay sugerencia de inicio disponible, con el inicio listado primero en los grupos de sugerencias (inicio → panel de control → recientes). Transmisión real de personajes por personaje a través de `--include-partial-messages`, además de una **capa de suavización de máquina de escribir** del lado del cliente que gotea cada `text_delta` / `thinking_delta` a través de `requestAnimationFrame`, por lo que incluso las respuestas cortas (donde claude empaqueta toda la respuesta en uno o dos trozos) parecen escribirse. El código de fusión mantiene intacto el indicador `_streaming` y la matriz `content` acumulada en delta cuando llega el sobre `assistant` canónico de claude a mitad del flujo, por lo que los bloques de pensamiento no se pierden al finalizar. La emisión de WebSocket envuelve cada sobre en `flushSync` para que el agrupamiento automático de React no colapse los picos de deltas en una sola renderización. **Paridad TUI (Nivel 1):** un **banner de limitaciones plegable** que se minimiza a una píldora delgada (nunca desaparece) explicando lo que el modo stream-json puede y no puede hacer frente al TUI terminal; un **editor de comandos con autocompletado de comandos con guiones** con puntuación por niveles (nombre exacto → comienza con → límite de palabra → contiene → subsecuencia → contiene descripción) que enumera los comandos de usuario / proyecto / plugin (ejecutados desde el lado del cliente a través de la expansión de plantillas antes del envío) y muestra comandos de CLI integrados como `/clear`, `/model`, `/config` con un distintivo "Solo CLI, no se ejecutará desde aquí"; **referencias de archivos `@`** con búsqueda borrosa amortiguada en todo el directorio de trabajo de la ejecución (omitiendo `node_modules`, `.git`, `dist`, `build`, etc.); una **ventana de contexto en vivo / medidor de tokens** que muestra tokens de entrada + salida + lectura de caché y costo de ejecución, calculados a partir de `stream_event` y `result.usage` sobres durante la transmisión en vivo y de los bloques de `uso` del asistente finalizados (entrada / salida / lectura de caché / creación de caché) cuando se inician desde una transcripción en reiniciar / ver / volver a adjuntar, para que el medidor se llene inmediatamente en lugar de quedarse en 0/200k. La barra de progreso pasa de índigo → ámbar → rojo al 80 % / 95 % del límite de contexto del modelo; un **encabezado de estado** con el modelo activo, el esfuerzo, el modo de permiso, el directorio actual, el ID de la sesión, el número de sobres y el tiempo transcurrido. Los menús desplegables de autocompletado se abren hacia arriba para que no colisionen con el selector cwd de abajo. Indicador de en vivo / sin conexión junto al título. La guardia de origen común en la ruta evita que el navegador genere ataques de tráfico cruzado. La concurrencia no está efectivamente limitada por defecto (techo de cordura de 10000 para evitar que las pistolas de pie fork-bomb causen problemas en el cliente; la TUI terminal no tiene límite y nosotros tampoco). Establezca `RUN_MAX_CONCURRENT` si desea un techo real. Las sesiones generadas disparan los mismos ganchos que cualquier proceso `claude`, por lo que aparecen automáticamente en Sesiones / Análisis / Kanban / Flujos de trabajo, y las superficies Sesiones / Detalle de sesión muestran un distintivo / banner verde **▶ Ejecutar** que vuelve a enlazar con la página Ejecutar para cualquier sesión que se esté ejecutando actualmente desde allí |
 | **Explorador de Configuración de Claude** | Un inspector de 12 pestañas en `/cc-config` para todo lo que Claude Code sabe sobre: habilidades, subagentes, comandos de guión, estilos de salida, complementos (con el conteo de contribuciones por complemento + autor/licencia/Página de inicio de `plugin.json`), mercados (con el conteo de complementos leído de cada `marketplace.json`), servidores MCP, ganchos (con la lista de scripts `~/.claude/hooks/`), configuraciones (un resumen de **Configuración actual** a un vistazo de las opciones que controlan los controles `/config` — modelo, verbose, tema, estilo de salida, esfuerzo, compactación automática, notificaciones, ... — resueltas en los ámbitos de usuario/proyecto/proyecto local con opciones no establecidas mostradas como predeterminadas, además de la vista estructurada de clave-valor por archivo + interruptor JSON bruto, redacción de clave secreta), memoria (los archivos `CLAUDE.md` del usuario + proyecto **más** el almacenamiento de memoria basado en archivos por proyecto — cada `*.md` inferior a `~/.claude/projects/<slug>/memory/`, es decir, un índice `MEMORY.md` más un archivo por hecho recordado, a menudo más de 100; agrupados por proyecto en secciones colapsables que dividen los archivos de índice de los archivos por hecho, con una caja de búsqueda y enlaces de índice `MEMORY.md` interactivos que saltan a — desplazar hacia arriba + resaltar — el archivo de hecho correspondiente), atajos de teclado (agrupados por contexto con chips `<kbd>`) y línea de estado (configuración + contenido del script). Para superficies de archivos de texto de bajo riesgo (habilidades / agentes / comandos / estilos de salida / memoria, incluidos los archivos de memoria automática por proyecto), la página admite **crear / editar / eliminar con copias de seguridad con hora y fecha obligatorias** escritas atómicamente fuera de los directorios que Claude Code escanea, además de una modalidad de Copias de seguridad con comandos de restauración `mv` construidos automáticamente. Los plugins, MCP, ganchos en la configuración y los archivos `settings.json` permanecen de solo lectura con banners explicativos + comandos CLI copiables para que el usuario sepa el comando exacto que debe ejecutar él mismo. **Actualizaciones en vivo**: un `cc-watcher` que se ejecuta en el servidor utiliza `fs.watch` en `~/.claude/` (recursivo donde la plataforma lo admite) además de `~/.claude.json`, retrasado a 500 ms, para transmitir un mensaje WebSocket `cc_config_changed` cada vez que cambian las configuraciones de Claude Code, ya sea a través de mutaciones del panel de control o herramientas externas (instalación de un complemento en la CLI, edición manual de `settings.json`, eliminación de una nueva habilidad). La página se suscribe y se vuelve a recuperar automáticamente; una píldora en vivo / sin conexión junto al título muestra el estado de WebSocket |
 | **Tabby**                          | Un compañero de gato flotante atado en la esquina inferior derecha de cada página. Construido enteramente sobre el existente WebSocket `eventBus` — **sin nuevo backend, sin clave API, sin nuevas dependencias**. Una mascota SVG reactiva con ojos que rastrean el cursor y **ocho estados de ánimo** derivados del flujo de la sesión en vivo (`idle`, `watching`, `happy`, `worried`, `stuck`, `thinking`, `sleeping`, `disconnected`), cada uno con su propia animación (golpe de cola, levantamiento de orejas, movimiento de cabeza, sacudida, brillo, zzz, alerta "!"). **Bolas de diálogo automáticas** publican chistes cortos, moderados y coalescidos sobre eventos notables (sesión iniciada/terminada, errores, ejecución completada) y se pueden silenciar. Haz clic en el gato o presiona **⌘B / Ctrl+B** (Esc cierra) para abrir un **panel** con una línea de estado en vivo (`N en vivo · M con errores · estado de conexión`), acciones rápidas (salta a Ejecutar Claude / Actividad / Sesiones / sesiones con errores, silenciar burbujas, eliminar alertas) y una casilla de **Pregunta**: las preguntas de estado simples ("¿qué está ejecutando?", "algunos errores", "estado") se responden localmente a partir de datos caché, mientras que cualquier otra pregunta se envía a la página de **Ejecutar Claude** (enlaces profundos a `/run?prompt=…`) para iniciar una sesión de Claude Code real. Accesible (operable con teclado, burbujas `aria-live`, respeta `prefers-reduced-motion`), degrada de forma segura a un estado tranquilo de `desconectado` si la conexión está rota, puede activarse o desactivarse en **Configuración** (localizado en en/zh/vi/ko/es). La implementación vive en `client/src/components/Tabby/` |
 | **Aplicación web progresiva (PWA)** | Tres PWAs independientes: panel de control, página de destino y wiki, cada una con su propio manifiesto de aplicación web y trabajador de servicios. Instala cualquiera de ellos en tu pantalla de inicio / dock para una experiencia independiente, sin Chrome. El SW del panel de control sirve los paquetes de contenido hashados de Vite bajo `/assets/` primero en la caché (los URL son inmutables por compilación, por lo que los accesos a la caché siempre son correctos) y trata todo lo demás, como las navegaciones, el SW en sí, `manifest.json`, los iconos, la raíz `/`, como primero en la red con fallback de caché. Combinado con encabezados explícitos de `Cache-Control` en el middleware estático de producción Express (`immutable` para `/assets/*`, `no-cache, must-revalidate` para `index.html`, `sw.js`, `manifest.json`), una reconstrucción siempre reemplaza el paquete en el navegador sin una actualización forzosa; un oyente de `controllerchange` en el cliente se carga exactamente una vez cuando un nuevo SW toma el control de una página ya controlada. El canal de notificaciones push de VAPID se conserva. La página de inicio y los SW wiki precargan sus respectivas cáscaras y imágenes de caché lento en la primera visita, lo que permite el acceso sin conexión después de una sola carga. Todas las manifestaciones utilizan iconos SVG (`favicon.svg`) con `sizes="any"` para navegadores modernos, e incluyen etiquetas meta `apple-mobile-web-app-capable` + `apple-touch-icon` para el modo independiente de iOS |
@@ -339,7 +338,7 @@ El panel de control ofrece un conjunto completo de funciones para monitorear y a
 
 ### Prerequisitos
 
-- **Node.js** >= 20.0.0 (22+ recomendado)
+- **Node.js** >= 22.22.0 (se recomienda Node 24 LTS)
 - **npm** >= 9.0.0
 
 ### 1. instalar
@@ -435,54 +434,27 @@ La cobertura completa de la aplicación de escritorio, incluida la descarga, la 
 
 ### Alternativa: Docker / Podman
 
-Se incluyen un `Dockerfile` y un `docker-compose.yml`. Tanto Docker como Podman son compatibles.
-
-**Con Docker Compose:**
+La imagen OCI se ejecuta sin root, elimina todas las capabilities, usa Tini como PID 1 e incluye Git, OpenSSH y SQLite. Docker Compose y Podman Compose usan el mismo archivo.
 
 ```bash
+# Solo Dashboard
 docker compose up -d --build
+# o
+podman compose up -d --build
+
+# Pila autenticada completa
+umask 077
+openssl rand -hex 32 > deployments/secrets/dashboard-token
+openssl rand -hex 32 > deployments/secrets/hook-token
+openssl rand -hex 32 > deployments/secrets/mcp-token
+openssl rand -base64 32 > deployments/secrets/grafana-admin-password
+npm run docker:full:up
 ```
 
-**Con Podman Compose:**
+Los puertos del host solo se enlazan a loopback por defecto: Dashboard `4820`, MCP `8819`, Nginx `8080`, Prometheus `9090` y Grafana `3000`. Los homes de Claude/Codex se montan como solo lectura. Nginx bloquea hooks, métricas y MCP en el borde salvo que se habiliten explícitamente.
 
-```bash
-CLAUDE_HOME="$HOME/.claude" podman compose up -d --build
-```
-
-**Con Docker o Podman simples (sin Compose):**
-
-```bash
-# Docker
-docker build -t agent-monitor .
-docker run -d --name agent-monitor \
-  -p 127.0.0.1:4820:4820 \
-  -v "$HOME/.claude:/root/.claude:ro" \
-  -v "$HOME/.claude/agent-dashboard:/app/data" \
-  agent-monitor
-
-# Podman
-podman build -t agent-monitor .
-podman run -d --name agent-monitor \
-  -p 127.0.0.1:4820:4820 \
-  -v "$HOME/.claude:/root/.claude:ro" \
-  -v "$HOME/.claude/agent-dashboard:/app/data" \
-  agent-monitor
-```
-
-El panel de control está disponible en `http://localhost:4820`. La imagen vincula `0.0.0.0` **dentro del contenedor** (`DASHBOARD_HOST`) y escribe SQLite en `/app/data` (`DASHBOARD_DATA_DIR`) —ambos integrados en el `Dockerfile` para que Compose y el sencillo `docker run` funcionen tal cual. Compose y los ejemplos a continuación vinculan y montan **el mismo** directorio de host que `npm start` / `npm run dev` (`~/.claude/agent-dashboard`), por lo que Docker, nativo y dev comparten una base de datos. El límite de confianza es el puerto de publicación del **host**: los ejemplos solo publican en `127.0.0.1`, por lo que el panel de control no es accesible desde la LAN de fábrica. Para exponerlo en una LAN, publique en `0.0.0.0` (elimine el prefijo `127.0.0.1:`, por ejemplo, `-p 4820:4820`) **y** establezca `DASHBOARD_TOKEN` (consulte [Configuración](#configuración) y [`.github/SECURITY.md`](./.github/SECURITY.md)).
-
-**Montajes de volumen:**
-
-| Montaje | Propósito |
-|---|---|
-| `~/.claude:/root/.claude:ro` | Leer el historial de sesiones heredadas para la importación |
-| `~/.claude/agent-dashboard:/app/data` | **Base de datos SQLite canónica** (compartida con las instalaciones nativas) |
-
-> [!NOTA]
-> Si anteriormente usaste el antiguo volumen de Compose llamado (`dashboard-data`), copia cualquier dato que necesites en `~/.claude/agent-dashboard/` una vez, luego elimina el volumen no utilizado: `docker volume rm claude-code-agent-monitor_dashboard-data` (el nombre puede variar).
-
-> [¡IMPORTANTE!]
-> **Nota:** Los ganchos de Claude Code todavía deben apuntar a un proceso de manejador de ganchos en ejecución en el host. El propio contenedor no recibe ganchos, ejecute `npm run install-hooks` **en el host** para configurar ganchos que POSTen a `http://localhost:4820`. Ejecutar el instalador dentro de un contenedor está **rechazado** (problema #193), por lo que no puede escribir una ruta de manejador interna del contenedor en un host montado mediante vinculación `~/.claude`; sobrescriba con `CCAM_ALLOW_CONTAINER_HOOKS=1` solo si realmente ejecuta Claude Code dentro del mismo contenedor.
+> [!IMPORTANT]
+> Instale los hooks en el host. Los hooks remotos usan `CCAM_DASHBOARD_URL=https://...` y `CCAM_HOOK_TOKEN`; los destinos no-loopback exigen HTTPS. Consulte [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ---
 
@@ -1005,7 +977,7 @@ npm run openapi:yaml
 ```bash
 npm start                          # dashboard on :4820
 npm run monitoring:install         # one-time: npm postinstall pulls binaries
-npm run monitoring:up              # Grafana on :3000 (login: admin / admin), auto-provisioned
+npm run monitoring:up              # Grafana on :3000; consulte monitoring/README.md para las credenciales
 ```
 
 **Docker / Podman** (cuando el panel de control se ejecuta en un contenedor o prefieres Compose):
@@ -2077,70 +2049,18 @@ flowchart LR
 
 ### Implementación en la nube
 
-La carpeta `deployments/` proporciona una infraestructura de grado empresarial sin dependencia de la nube para implementar el panel de control en producción. Soporta Helm, Kustomize y Terraform en AWS, GCP, Azure y OCI con estrategias de lanzamiento azul-verde, canario y progresivo.
+`deployments/` funciona en cualquier Kubernetes compatible, incluidos EKS, GKE, AKS, OKE y clústeres autogestionados. CCAM usa SQLite, por lo que todos los manifiestos admitidos fuerzan **exactamente un dashboard writer activo por persistent volume** con Recreate. HPA, active-active, múltiples réplicas, blue-green y canary no se admiten mientras SQLite sea el persistence backend.
 
-```mermaid
-graph TB
-  subgraph "Deployment Methods"
-    HELM["⎈ Helm Chart<br/>Parameterized installs"]
-    KUST["📦 Kustomize<br/>Overlay-based patching"]
-    TF["🏗️ Terraform<br/>Full cloud provisioning"]
-  end
-
-  subgraph "Cloud Providers"
-    AWS["☁️ AWS<br/>ECS Fargate + ALB"]
-    GCP["☁️ GCP<br/>Cloud Run + GCLB"]
-    AZ["☁️ Azure<br/>ACI + App Gateway"]
-    OCI["☁️ OCI<br/>OKE + LBaaS"]
-  end
-
-  subgraph "Release Strategies"
-    ROLL["Rolling Update"]
-    BG["Blue-Green"]
-    CAN["Canary + Analysis"]
-  end
-
-  subgraph "Observability"
-    PROM["📊 Prometheus + Grafana"]
-    CX["📡 Coralogix<br/>Logs · Metrics · Traces · SLOs"]
-  end
-
-  HELM & KUST --> ROLL & BG & CAN
-  TF --> AWS & GCP & AZ & OCI
-  ROLL & BG & CAN --> PROM & CX
-
-  style HELM fill:#0f1689,color:#fff
-  style KUST fill:#326ce5,color:#fff
-  style TF fill:#7b42bc,color:#fff
-  style AWS fill:#ff9900,color:#fff
-  style GCP fill:#4285f4,color:#fff
-  style AZ fill:#0078d4,color:#fff
-  style OCI fill:#f80000,color:#fff
-  style PROM fill:#e6522c,color:#fff
-  style CX fill:#1a1a2e,color:#fff
-```
+- Helm rechaza réplicas múltiples/HPA y admite digest, PVC retenido, Ingress o Gateway API, Secret externo, NetworkPolicy, MCP y ServiceMonitor opcionales.
+- Kustomize proporciona Restricted PSS base, overlays y componentes MCP, monitoring, Gateway API y CSI snapshot.
+- Terraform despliega el chart validado en un Kubernetes existente.
+- CI escanea app y MCP, publica amd64/arm64 con SBOM y SLSA provenance, y firma con Cosign.
 
 ```bash
-# Helm (recommended for Kubernetes)
-helm install agent-monitor deployments/helm/agent-monitor \
-  -f deployments/helm/agent-monitor/values-production.yaml \
-  -n agent-monitor --create-namespace
-
-# Kustomize
-kubectl apply -k deployments/kubernetes/overlays/production
-
-# Terraform (full infra + app)
-cd deployments/terraform/providers/aws
-terraform init && terraform apply -var-file=../../environments/production/terraform.tfvars
-
-# Script orchestrator
-./deployments/scripts/deploy.sh --env production --method helm --strategy blue-green
+npm run deploy:validate
 ```
 
-La pila de despliegue incluye pipelines de CI/CD (GitHub Actions + GitLab CI), monitoreo integral (Prometheus, Grafana, Alertmanager con 13 reglas de alerta, observabilidad de pila completa de Coralogix con OpenTelemetry Collector para registros, métricas, rastros y seguimiento de SLO), scripts operativos (despliegue, deshacer, cambio de color azul-verde, copia de seguridad/restauración, desinstalación) y una postura de seguridad completa (Estándar de seguridad de pods restringido, TLS 1.3, políticas de red, escaneo de Trivy).
-
-> [!NOTA]
-> 📘 **Guía completa de despliegue:** Consulte [DEPLOYMENT.md](DEPLOYMENT.md) para obtener instrucciones paso a paso, diagramas de arquitectura y flujos de trabajo operativos.
+Consulte [DEPLOYMENT.md](DEPLOYMENT.md) y [deployments/README.md](deployments/README.md).
 
 ---
 
@@ -2287,20 +2207,13 @@ agent-dashboard/
 |   +-- tests/
 |       +-- smoke.test.mjs       # Spawn Electron + probe /api/health
 |-- deployments/
-|   |-- README.md                # Deployment infrastructure reference
-|   |-- terraform/               # Cloud provisioning (AWS, GCP, Azure, OCI)
-|   |   |-- modules/             # Reusable modules (networking, compute, db, lb, monitoring)
-|   |   |-- providers/           # Cloud-specific implementations
-|   |   +-- environments/        # Per-env tfvars (dev, staging, production)
-|   |-- kubernetes/              # Kustomize manifests
-|   |   |-- base/                # 11 base resources (deployment, service, ingress, hpa, etc.)
-|   |   |-- overlays/            # Environment overlays (dev, staging, production)
-|   |   |-- components/          # Optional add-ons (mcp-sidecar, monitoring)
-|   |   +-- strategies/          # Blue-green and canary deployment strategies
-|   |-- helm/agent-monitor/      # Helm chart with 12 templates and 4 value sets
-|   |-- scripts/                 # Operational scripts (deploy, rollback, backup, teardown)
-|   |-- monitoring/              # Prometheus, Grafana, Alertmanager, Coralogix (OTel Collector)
-|   +-- ci/                      # CI/CD pipelines (GitHub Actions, GitLab CI)
+|   |-- README.md                # Referencia de despliegue de producción
+|   |-- nginx/                   # Borde Nginx rootless y políticas hook/MCP
+|   |-- secrets/                 # Archivos de token/password ignorados por Git
+|   |-- terraform/               # Helm hacia un Kubernetes existente
+|   |-- kubernetes/              # Kustomize single-writer y overlays
+|   |-- helm/agent-monitor/      # Chart con schema de seguridad
+|   +-- scripts/                 # validar, desplegar, backup, restore, rollback, health, teardown
 |-- .codex/
 |   |-- config.toml              # Codex runtime configuration
 |   |-- README.md                # Codex setup guide for agents and skills

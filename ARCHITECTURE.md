@@ -5,7 +5,7 @@ Architectural overview and technical reference for the Agent Dashboard system, c
 ![Claude Code](https://img.shields.io/badge/Claude_Code-orange?style=flat-square&logo=claude&logoColor=white)
 ![Claude Code Plugins](https://img.shields.io/badge/Claude_Code-Plugins_&_Skills-orange?style=flat-square&logo=anthropic&logoColor=white)
 ![Model Context Protocol](https://img.shields.io/badge/Model_Context_Protocol-1.0-0f766e?style=flat-square&logo=modelcontextprotocol&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22.22-339933?style=flat-square&logo=node.js&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-%3E%3D3.6-3776AB?style=flat-square&logo=python&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4.21-000000?style=flat-square&logo=express&logoColor=white)
 ![ws](https://img.shields.io/badge/ws-WebSocket_server-010101?style=flat-square&logo=socketdotio&logoColor=white)
@@ -14,14 +14,14 @@ Architectural overview and technical reference for the Agent Dashboard system, c
 ![multer](https://img.shields.io/badge/multer-multipart_upload-FF6B6B?style=flat-square&logo=express&logoColor=white)
 ![adm-zip](https://img.shields.io/badge/adm--zip-archive_extract-FBBF24?style=flat-square&logo=files&logoColor=white)
 ![tar](https://img.shields.io/badge/tar-tgz_extract-A78BFA?style=flat-square&logo=gnu&logoColor=white)
-![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react&logoColor=white)
+![React](https://img.shields.io/badge/React-19.2-61DAFB?style=flat-square&logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![Javascript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?style=flat-square&logo=javascript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-6.1-646CFF?style=flat-square&logo=vite&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7.3-646CFF?style=flat-square&logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 ![PostCSS](https://img.shields.io/badge/PostCSS-8.5-DD3A0A?style=flat-square&logo=postcss&logoColor=white)
 ![Autoprefixer](https://img.shields.io/badge/Autoprefixer-10.4-DD3735?style=flat-square&logo=autoprefixer&logoColor=white)
-![React Router](https://img.shields.io/badge/React_Router-6.28-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
+![React Router](https://img.shields.io/badge/React_Router-8.3-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
 ![Lucide](https://img.shields.io/badge/Lucide_Icons-0.474-F56565?style=flat-square&logo=lucide&logoColor=white)
 ![D3.js](https://img.shields.io/badge/D3.js-7-F9A03C?style=flat-square&logo=d3&logoColor=white)
 ![Mermaid](https://img.shields.io/badge/Mermaid-10.2-ff3333?style=flat-square&logo=mermaid&logoColor=white)
@@ -47,13 +47,13 @@ Architectural overview and technical reference for the Agent Dashboard system, c
 ![Prettier](https://img.shields.io/badge/Prettier-3.8-F7B93E?style=flat-square&logo=prettier&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-20.10-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![Podman](https://img.shields.io/badge/Podman-4.0-CC342D?style=flat-square&logo=podman&logoColor=white)
-![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.5-844FBA?style=flat-square&logo=terraform&logoColor=white)
-![Kubernetes](https://img.shields.io/badge/Kubernetes-%3E%3D1.24-326CE5?style=flat-square&logo=kubernetes&logoColor=white)
-![Helm](https://img.shields.io/badge/Helm-3-0F1689?style=flat-square&logo=helm&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.7-844FBA?style=flat-square&logo=terraform&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-%3E%3D1.29-326CE5?style=flat-square&logo=kubernetes&logoColor=white)
+![Helm](https://img.shields.io/badge/Helm-4-0F1689?style=flat-square&logo=helm&logoColor=white)
 ![Kustomize](https://img.shields.io/badge/Kustomize-5.0-326CE5?style=flat-square&logo=kubernetes&logoColor=white)
 ![Nginx](https://img.shields.io/badge/Nginx-Ingress-009639?style=flat-square&logo=nginx&logoColor=white)
-![Prometheus](https://img.shields.io/badge/Prometheus-2.x-E6522C?style=flat-square&logo=prometheus&logoColor=white)
-![Grafana](https://img.shields.io/badge/Grafana-10.x-F46800?style=flat-square&logo=grafana&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-3.13-E6522C?style=flat-square&logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-13.1-F46800?style=flat-square&logo=grafana&logoColor=white)
 ![Coralogix](https://img.shields.io/badge/Coralogix-Observability-1a1a2e?style=flat-square&logo=datadog&logoColor=white)
 ![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Collector-4f46e5?style=flat-square&logo=opentelemetry&logoColor=white)
 ![AWS](https://img.shields.io/badge/AWS-ECS%20%7C%20RDS-232F3E?style=flat-square&logo=task&logoColor=white)
@@ -61,7 +61,6 @@ Architectural overview and technical reference for the Agent Dashboard system, c
 ![Azure](https://img.shields.io/badge/Azure-AKS%20%7C%20SQL-0078D4?style=flat-square&logo=cloudflare&logoColor=white)
 ![Oracle Cloud](https://img.shields.io/badge/Oracle_Cloud-OKE%20%7C%20DB-F80000?style=flat-square&logo=cloudways&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-pipelines-2088FF?style=flat-square&logo=githubactions&logoColor=white)
-![GitLab CI](https://img.shields.io/badge/GitLab_CI-pipelines-FC6D26?style=flat-square&logo=gitlab&logoColor=white)
 ![Make](https://img.shields.io/badge/Make-4.3-000000?style=flat-square&logo=make&logoColor=white)
 ![Auto Release](https://img.shields.io/badge/CI-auto--release_to_GitHub-22c55e?style=flat-square&logo=githubactions&logoColor=white)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
@@ -124,7 +123,7 @@ C4Context
 - Zero-config operation -- auto-discovers sessions from hook events
 - Never block Claude Code -- hooks fail silently with timeouts
 - Instant feedback -- WebSocket push, no polling
-- Portable -- SQLite, no external services, runs on any OS with Node.js 20+
+- Portable -- SQLite, no external services, runs on any OS with Node.js 22.22+
 - Extensible -- 14 dual-format Claude/Codex plugins with 66 bundled skills, plus 74 skills discoverable through the skills CLI
 
 ---
@@ -345,19 +344,21 @@ graph TD
 | `server/lib/redoc.js`     | Serves the **ReDoc** API reference (`/api/redoc`) as a self-hosted three-panel rendering of the OpenAPI spec, with the ReDoc bundle served locally from `/api/redoc/redoc.standalone.js` (bundled via the `redoc` dependency, never a CDN) so the reference works fully offline / air-gapped                                                                                                                                                                                                                                                                                                                                                                            |
 | `server/openapi-extra/`   | Supplementary OpenAPI path/schema fragments merged into the spec by `createOpenApiSpec()` — covers `cc-config.js`, `push.js`, `run.js`, and `misc.js` route groups                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `server/db.js`            | SQLite connection with WAL mode, schema migration (CREATE TABLE IF NOT EXISTS + ALTER TABLE for column additions), all prepared statements as a reusable `stmts` object, and the tiny persisted `sessions.card_prompt_preview` cache used by compact cards. Tries `better-sqlite3` first, falls back to `node:sqlite` via `compat-sqlite.js`. Migrations use literal defaults for ALTER TABLE since SQLite does not support expressions like `strftime()` in column defaults added via ALTER TABLE                                                                                                                      |
+| `server/lib/claude-home.js` | Resolves `CLAUDE_HOME`, project paths, and the writable dotenv file used by Settings. Native runs default to the repository `.env`; immutable containers set `DASHBOARD_ENV_PATH=/app/config/.env` so persisted home overrides land on the dedicated configuration volume instead of the read-only image filesystem. |
 | `server/lib/codex-home.js` | Resolves the optional `DASHBOARD_CODEX_HOME` (or `CODEX_HOME` / `~/.codex`) and the local `sessions/`, `hooks.json`, and native `session_index.jsonl` paths. Settings can validate and persist a dashboard-specific home here; live synchronizers subscribe to its change notifications rather than owning a second scanner. |
 | `server/lib/codex-ingest.js` | Incremental Codex rollout ingestor. Persists a byte cursor plus cumulative token snapshot in `codex_ingest_state`, and an independent transactional `codex_tool_ingest_state` cursor for exact-once `response_item` tool calls. It converts only new JSONL records into `provider='codex'` sessions/events/token buckets, applies the 272K short/long boundary, syncs native `/rename` titles from Codex's session index, promotes each real `user_message` into the main agent's live card context, and safely handles hook lifecycle notifications that arrive before a final record flushes. It prioritizes newest rollouts, yields through cold history, isolates a failed file for retry, derives Working/Waiting from `user_message` / `task_started` / `task_complete` / `turn_aborted`, and reconciles a missed terminal state after restart. |
 | `server/lib/provider-filter.js` | Parses the dashboard-wide `?providers=claude,codex` data scope and composes its SQL predicates with source filtering. |
 | `server/compat-sqlite.js` | Compatibility wrapper that gives Node.js built-in `node:sqlite` (`DatabaseSync`) the same API as `better-sqlite3` — pragma, transaction, prepare. Used as automatic fallback when the native module is unavailable (Node 22+)                                                                                                                                                                                                                                                                                                        |
 | `server/websocket.js`     | WebSocket server on `/ws` path, 30s heartbeat with ping/pong dead connection detection, typed broadcast function. Upgrades run through the same Host-header allowlist and optional `DASHBOARD_TOKEN` check as the HTTP surface (`isWebSocketAuthorized`)                                                                                                                                                                                                                                                                                                                                                  |
-| `server/lib/security.js`  | Network-hardening module (fix for GHSA-gr74-4xfh-6jw9). `resolveHost()` picks the bind address — `127.0.0.1` by default, widened only by `DASHBOARD_HOST` (logs a warning for non-loopback binds). `hostGuard` rejects requests whose `Host` header isn't in the loopback set or `DASHBOARD_ALLOWED_HOSTS` (DNS-rebinding defense). `corsOptions()` allows only loopback origins while letting No-Origin (curl/CLI) requests through. `tokenGuard` + `isWebSocketAuthorized` enforce the optional `DASHBOARD_TOKEN` on `/api/*` and WebSocket upgrades (accepted as `Authorization: Bearer`, `x-dashboard-token`, or `?token=`; off by default). Exempt paths and token-matching helpers (`tokensMatch`, `extractToken`) live here too                                                                                                                  |
+| `server/lib/security.js`  | Network-hardening module (fix for GHSA-gr74-4xfh-6jw9). `resolveHost()` picks the bind address. `hostGuard` rejects requests whose `Host` is not loopback, operator-allowlisted, or the Kubernetes `POD_IP`. `DASHBOARD_TOKEN` / `DASHBOARD_TOKEN_FILE` protects REST and WebSocket access. Independent `DASHBOARD_HOOK_TOKEN` / `DASHBOARD_HOOK_TOKEN_FILE` protects `/api/hooks/*` when remote ingestion is enabled. Token matching is constant-time. |
+| `scripts/hook-transport.js` | Shared fail-safe hook delivery for Claude Code and Codex. Defaults to local dashboard discovery, accepts an explicit `CCAM_DASHBOARD_URL`, rejects non-HTTP(S) schemes, requires HTTPS plus `CCAM_HOOK_TOKEN` / `_FILE` for non-loopback destinations, and sends the token as `x-ccam-hook-token` without blocking the agent CLI on the response. |
 | `routes/hooks.js`         | Core event processing inside a SQLite transaction. Auto-creates sessions/agents. Handles 8 hook types: SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SubagentStop, Notification, SessionEnd, plus synthetic `Compaction` events. Manages the agent state machine plus the `awaiting_input_since` overlay (stamped on SessionStart for fresh CLIs — `startup`/`resume`/`clear` only, since a `compact`-source SessionStart fires mid-turn while Claude is working and is deliberately skipped so a working session stays Active — on non-error Stop, and on permission Notifications (which now also set agent status to `waiting`); cleared on UserPromptSubmit / PreToolUse / PostToolUse / SessionStart-resume / SessionEnd; SubagentStop intentionally does NOT clear it; and stamped by the 15 s watchdog on user-interrupt (Esc) recovery — see the `index.js` row — since `Esc` fires no hook). After `res.json()` returns on `SubagentStop`, fires a fire-and-forget `scanAndImportSubagents` (from `scripts/import-history.js`) that parses every `subagents/agent-*.jsonl`, pairs `tool_use` ↔ `tool_result` blocks by `tool_use_id`, and emits per-tool `PreToolUse` + `PostToolUse` events under each subagent's own `agent_id` — closes the gap where subagent-internal tool calls would otherwise never reach the events table. The same scan also reparents nested subagents under their true spawner (see the `import-history.js` row); it returns `{ created, reparented }`, and the follow-up `new_event` refetch nudge fires when **either** is non-zero so a pure re-parent (tree shape changed, no new rows) still refreshes the UI. The same scan attributes each subagent's tokens to **its own model** (resolved from the subagent transcript) and stamps `metadata.model` on the subagent row (issue #185), so a tiered pipeline (Opus orchestrator + Sonnet/Haiku subagents) is priced per real model rather than entirely at the orchestrator's rate; the parent-model bucket is skipped to avoid colliding with the main-transcript token writer's compaction baseline logic. Session reactivation on resume (including Stop/SubagentStop reactivation for imported completed/abandoned sessions), orphaned-session cleanup uses `DASHBOARD_STALE_MINUTES` (default 180). Uses a shared `TranscriptCache` instance (`server/lib/transcript-cache.js`) for extraction of tokens, API errors, turn durations, thinking blocks, usage extras, and the two newest distinct real human prompts — stat-based caching with incremental byte-offset reads avoids re-reading entire JSONL files on every event. That bounded prompt summary is stored in `sessions.card_prompt_preview` and emits `session_updated`, so Claude's compact cards use the same live two-row context as Codex. Detects compaction via `isCompactSummary` in JSONL transcripts and creates compaction agents + events (deduplicated by uuid). Token baselines (`baseline_*` columns) preserve pre-compaction totals so no usage is lost. Cache entries are evicted on SessionEnd. **SessionEnd preserves error state** — but only when the error is still unrecovered at the transcript tail (`isErrorAtTail`: latest API error with no successful turn after it); a transient error the CLI retried past finalizes as `completed` instead of freezing in a stale `error`. **Error recovery**: `UserPromptSubmit` and `PreToolUse` recover a session from `error`; additionally the 15 s watchdog now scans `error` sessions and self-heals one back to `active` when its transcript has progressed past the last API error (`isErrorAtTail` false) — closing the gap where a transient API error left an imported or sweep-monitored session (no live recovery hook) pinned in `error` forever. **Session naming**: on every event, syncs `sessions.name` from the transcript title surfaced by `TranscriptCache` and broadcasts `session_updated` — an explicit `custom-title` (`/rename`, `claude -n`, picker Ctrl+R) always wins, an `ai-title` (auto / plan-accept) only fills a placeholder/auto name (`Session <id8>` or a cwd-folder import name) so a user-chosen name is never clobbered. When neither title exists, the session's **first user prompt** (surfaced by `TranscriptCache` as `firstUserMessage`; tool-result / meta / slash-command plumbing entries skipped) fills the placeholder session name plus the main agent's placeholder name and empty task (issue #201) — a later `ai-title` can still replace a descriptor-filled name, and the agent fill passes the in-flight `current_tool` through (the shared `updateAgent` statement writes that column verbatim) so it is never wiped mid-turn. The guarded `updateSessionName` no-ops on the unchanged case, so the broadcast path stays quiet; the 15 s error-watchdog runs the same sync for idle sessions that fire no hook after a rename. **Dead-session liveness reap**: the same watchdog completes any `active` session whose `cwd` has no running `claude` CLI process (probe via `lib/session-liveness.js`) — recovering a `SessionEnd` lost while the dashboard was down (e.g. Ctrl+C) that previously left the session in Waiting until the 3 h stale sweep; watchdog ticks are gated on the transcript mtime (fallback `updated_at` when no transcript exists) being older than `DASHBOARD_LIVENESS_IDLE_SECONDS` (default 60 s); the boot passes — immediately at startup and again ~5 s later (post-import) — skip the gate so a session quit moments before launch clears at once, disabled via `DASHBOARD_LIVENESS_PROBE=0` / on Windows / in containers, and a false completion self-heals through hook reactivation. Sessions whose `cwd` is not POSIX-absolute (household-hook-forwarded from another machine, e.g. a Windows `D:\…` path a local `/proc`/`lsof` scan can never match) are skipped by the reap — so a mixed local + forwarded deployment stays correct without disabling the whole probe. **Remote Data Source sessions** (`sessions.source` ≠ `local`) are excluded from the reap, the error/interrupt watchdog scan, and both stale sweeps (all gated on `source = 'local'`): their POSIX-absolute `cwd` lives on another machine, so local process/clock heuristics would wrongly terminate a running remote session — their status is reconciled from the SSH mirror by `remote-sync.js` instead |
 | `routes/sessions.js`      | Standard CRUD with pagination. GET includes agent count via LEFT JOIN. POST is idempotent on session ID. GET `/:id/transcript` also surfaces `custom-title` lines as synthetic `session_event` (rename) messages — deduped, with `ai-title` excluded — so TUI-only `/rename` (which writes no user/assistant turn) is still visible in the conversation viewer. It also surfaces `system`/`local_command` lines: newer Claude Code builds write a local slash command's invocation and captured output (`<command-name>`, `<local-command-stdout>`/`stderr`) as `system`/`local_command` entries with the TUI markup in a top-level `content` string (older builds used `user` messages), so the route re-emits those as user-side text and the client's `tuiSegments` parser renders the command pill + its output (e.g. `/color` → a `/color` pill plus "Session color set to: cyan"). Content-less `local_command` lines (e.g. `/clear`) and every other `system` subtype (`turn_duration`, `stop_hook_summary`, …) are dropped as noise |
 | `routes/agents.js`        | CRUD with status/session_id filtering. PATCH broadcasts `agent_updated`. Agent-list responses (`GET /api/agents`, `GET /api/sessions/:id/agents`) attach a per-agent `cost` via `pricing.attachAgentCosts` — each subagent's OWN cost, computed from its `metadata.tokens` at current rates (main agents get 0; their cost is the session total), so a subagent card shows only what that subagent spent rather than the session total |
 | `routes/events.js`        | Read-only event listing with session_id filter and pagination                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `routes/stats.js`         | Single aggregate query returning total/active counts + status distributions                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `routes/metrics.js`       | Prometheus / OpenMetrics text-exposition endpoint (`GET /api/metrics`) — re-exposes the dashboard's live counters (sessions/agents by status, event + token totals, connected WebSocket clients, configured remote sources, process uptime/RSS, build version) in the v0.0.4 text format for scraping into Prometheus / Grafana. Read-only; reads the same `db.js` prepared statements the REST API uses, so numbers match the UI. Status series are enumerated so a gauge never drops out at zero. Mounted under `/api`, so it sits behind the Host-header (DNS-rebinding) guard and the optional `DASHBOARD_TOKEN` guard — a non-loopback scraper needs `DASHBOARD_ALLOWED_HOSTS` (+ token if set). A turnkey Prometheus + Grafana stack with four auto-provisioned dashboards lives in `monitoring/` (`npm run monitoring:up` or `npm run docker:full:up`) |
-| `monitoring/`             | Optional npm-managed or Docker Compose Prometheus + Grafana stack that scrapes `GET /api/metrics`. Ships four Grafana dashboards (`ccam-overview`, `ccam-sessions-agents`, `ccam-tokens-events`, `ccam-platform`), recording rules (`prometheus/ccam-rules.yml`), a Prometheus 3.x-compatible static HTML console (`prometheus/consoles/index.html`), and lifecycle scripts (`monitoring:install`, `monitoring:up`, `monitoring:verify`). See [`monitoring/README.md`](./monitoring/README.md) |
+| `monitoring/`             | Optional npm-managed or pinned-container Prometheus + Grafana stack that scrapes `GET /api/metrics`. Container paths use file-backed dashboard auth and Grafana admin credentials. The full Compose stack runs Prometheus 3.13.2 and Grafana 13.1.2 with four auto-provisioned dashboards. |
 | `routes/analytics.js`     | Extended analytics — token totals, tool usage counts, daily event/session trends, agent type distribution. The client-side analytics heatmap grid is aligned to a Sunday start for correct day-of-week positioning                                                                                                                                                                                                                                                                                                                   |
 | `routes/pricing.js`       | Model pricing CRUD (list/upsert/delete) and per-session / global cost calculation with pattern-based model matching. `PUT /api/pricing` upserts a rule and accepts optional time-limited **introductory** rates (`intro_*_per_mtok` + `intro_until`): usage on/before the cutoff date prices at the intro rate, after it at the standard rate — the calculator picks the effective rate per usage day (`ratesForBucket`), so a promo like Sonnet 5's launch discount is correct before AND after the cutoff, retroactively. Intro columns are written only when the caller sends them (a standard-rate edit never disturbs a promo). Cost is computed per token bucket — keyed by (model, speed, inference_geo, service_tier) — applying fast-mode premium, US data-residency (1.1x), and Batch (0.5x) modifiers, the 5m/1h cache-write split, plus server-tool surcharges (web search $10/1k; code execution estimated by container-time with the monthly free-hours allowance; web fetch free). `attachAgentCosts`/`agentOwnCost` reuse the same calculator to price each agent's `metadata.tokens` for the per-agent `cost` on agent-list responses. Feature rates + modifier math live in `lib/pricing-constants.js`; usage normalization in `lib/token-usage.js` |
 | `routes/settings.js`      | System info (DB size, per-provider hook status, server uptime, transcript cache stats), data export as one versioned JSON bundle and matching import/restore (`POST /api/settings/import` via `server/lib/data-transfer.js` — idempotent, session-atomic, non-destructive; consolidates machines), session cleanup (abandon stale, purge old), clear all data (including the fired-alert feed and webhook delivery log; alert *rules* and webhook *targets* are preserved as user configuration), reset pricing, a provider-selectable hook installer for Claude Code and Codex, and live-safe Claude/Codex home update routes. |
@@ -657,7 +658,7 @@ graph LR
 | `/analytics`    | Analytics     | `GET /api/analytics`                                   |
 | `/workflows`    | Workflows     | `GET /api/workflows?status=active\|completed`, `GET /api/workflows/session/:id` + WebSocket auto-refresh (3s debounce) |
 | `/cc-config`    | CcConfig      | 12-tab Claude Code configuration explorer. Reads via `GET /api/cc-config/{overview,skills,agents,commands,output-styles,plugins,marketplaces,mcp,hooks,hook-scripts,keybindings,statusline,settings,memory}`. Mutations for skills/agents/commands/output-styles/memory — including the per-project file-based auto-memory store (`*.md` under `~/.claude/projects/<slug>/memory/`, grouped by project and searchable in the Memory tab, with clickable `MEMORY.md` index links that scroll to + highlight the matching fact file) — via `PUT /api/cc-config/file` + `DELETE /api/cc-config/file` (timestamped backups, atomic writes). The Keybindings tab additionally offers a structured inline editor that persists via `PUT /api/cc-config/keybindings` (same backup-first, atomic-write guarantees). `GET /api/cc-config/file?path=…` for single-file viewer. `GET /api/cc-config/backups` for the recovery modal. Subscribes to `cc_config_changed` WS messages for live refresh on both dashboard mutations and external file edits picked up by `cc-watcher`. The Settings tab leads with a client-side **Current configuration** summary that resolves the `/config` options (model, verbose, theme, output style, effort, auto-compact, notifications, …) across user / project / project-local scopes, showing defaults when unset. Live / Offline indicator next to the title |
-| `/run`          | Run           | Spawns `claude` subprocesses with chat-style streaming UI. `GET /api/run/{binary,cwds,files}` for pre-flight + `@`-file autocomplete; `POST /api/run` to spawn (accepts `effort: low\|medium\|high`); `POST /api/run/:id/message` for follow-up turns; `DELETE /api/run/:id` to stop; `GET /api/run/:id?envelopes=1` for attach-with-history. WS messages: `run_stream` (includes `stream_event` deltas from `--include-partial-messages`), `run_status`, `run_input_ack`. Streaming pipeline: each WS envelope is dispatched through `flushSync` so React 18 doesn't batch bursts into a single render; a `useTypewriterEnvelopes` hook drips text/thinking deltas via `requestAnimationFrame` so even short replies type in; the merge code preserves `_streaming` and the delta-accumulated content array when claude's canonical `assistant` envelope arrives mid-stream so thinking blocks aren't dropped. Tier 1 TUI parity: collapsible-to-pill limitations banner, slash + `@`-file autocomplete (dropdowns open upward, slash matching uses tiered scoring), live token / context-window meter, status header. Live / Offline indicator next to the title |
+| `/run`          | Run           | Spawns `claude` subprocesses with chat-style streaming UI. `GET /api/run/{binary,cwds,files}` for pre-flight + `@`-file autocomplete; `POST /api/run` to spawn (accepts `effort: low\|medium\|high`); `POST /api/run/:id/message` for follow-up turns; `DELETE /api/run/:id` to stop; `GET /api/run/:id?envelopes=1` for attach-with-history. WS messages: `run_stream` (includes `stream_event` deltas from `--include-partial-messages`), `run_status`, `run_input_ack`. Streaming pipeline: each WS envelope is dispatched through `flushSync` so React auto-batching does not collapse bursts into a single render; a `useTypewriterEnvelopes` hook drips text/thinking deltas via `requestAnimationFrame` so even short replies type in; the merge code preserves `_streaming` and the delta-accumulated content array when claude's canonical `assistant` envelope arrives mid-stream so thinking blocks aren't dropped. Tier 1 TUI parity: collapsible-to-pill limitations banner, slash + `@`-file autocomplete (dropdowns open upward, slash matching uses tiered scoring), live token / context-window meter, status header. Live / Offline indicator next to the title |
 | `/settings`     | Settings      | `GET /api/settings/info`, Claude and GPT pricing/cost endpoints, `GET`/`PUT /api/settings/{claude,codex}-home`, and `localStorage` for notification prefs. Hosts the global provider selector (`claude` / `codex` / both), the hook-install modal (`POST /api/settings/install-hooks`) with selected-provider overwrite warnings, and independent Claude Code/Codex session-home inputs; a Codex home save re-arms the watcher and immediately schedules a sweep. Also hosts the **Remote Data Sources** panel (`components/RemoteSources.tsx`) — CRUD + test + sync over `/api/remote-sources`, live status from `remote_source.status` WS messages |
 | `/*`            | NotFound      | None (static 404 page)                                 |
 
@@ -1643,7 +1644,8 @@ Protocol transports and REPL no longer maintain separate tool implementations. D
 ### Safety and transport
 
 - Dashboard targets are limited to direct loopback and approved container-host aliases.
-- `MCP_DASHBOARD_API_TOKEN`, with `DASHBOARD_API_TOKEN` as a fallback, authenticates to dashboards protected by `DASHBOARD_TOKEN`.
+- `MCP_DASHBOARD_API_TOKEN` / `MCP_DASHBOARD_API_TOKEN_FILE` authenticates the MCP service to dashboards protected by `DASHBOARD_TOKEN`.
+- `MCP_HTTP_AUTH_TOKEN` / `MCP_HTTP_AUTH_TOKEN_FILE` independently protects HTTP/SSE MCP clients; `/health` remains available to probes.
 - Tokenized direct loopback HTTP is allowed because traffic stays on the machine. Tokenized container-host aliases require HTTPS.
 - Every MCP dashboard request rejects redirects.
 - History uploads are capped at 50 MiB per file and 100 MiB total per call. Binary responses are streamed with a 10 MiB cap. Backup restore accepts one file up to 25 MiB.
@@ -2563,101 +2565,53 @@ graph LR
 
 ### Container (Docker / Podman)
 
-A multi-stage `Dockerfile` builds the client and server into a single production image. Both Docker and Podman are fully supported — the image is OCI-compliant.
+The multi-stage OCI image uses digest-pinned Node 24 LTS on Alpine 3.24, builds the client separately, installs production dependencies, and runs the dashboard as UID/GID 1000 under Tini. Git, OpenSSH, SQLite CLI, CA certificates, and timezone data support update checks, Remote Data Sources, backup/restore, and predictable time handling.
 
 ```mermaid
-graph LR
-    subgraph "Multi-Stage Build"
-        S1["Stage 1: server-deps\nnode:22-alpine\nnpm ci --omit=dev"]
-        S2["Stage 2: client-build\nnode:22-alpine\nnpm ci + vite build"]
-        S3["Stage 3: runtime\nnode:22-alpine\nCopies node_modules + client/dist"]
-        S1 --> S3
-        S2 --> S3
-    end
-
-    subgraph "Container Runtime"
-        VOL1["~/.claude (ro)\nlegacy session import"]
-        VOL2["agent-monitor-data\nSQLite persistence"]
-        S3 -->|"EXPOSE 4820"| SRV["node server/index.js\nport 4820"]
-        VOL1 --> SRV
-        VOL2 --> SRV
-    end
-
-    style S3 fill:#339933,stroke:#5cb85c,color:#fff
-    style SRV fill:#6366f1,stroke:#818cf8,color:#fff
+flowchart LR
+  BUILD["server-deps + client-build"] --> RUNTIME["non-root runtime"]
+  RUNTIME --> APP["CCAM :4820"]
+  DATA[("/app/data")] --> APP
+  CONFIG[("/app/config")] --> APP
+  CLAUDE["Claude home, read-only"] --> APP
+  CODEX["Codex home, read-only"] --> APP
+  MCP["MCP :8819, bearer auth"] --> APP
+  EDGE["rootless Nginx :8080"] --> APP
+  PROM["Prometheus 3.13"] -->|"token-auth metrics"| APP
+  GRAFANA["Grafana 13.1"] --> PROM
 ```
 
-**Usage:**
+Compose makes dashboard and MCP root filesystems read-only, drops all capabilities, enables `no-new-privileges`, and publishes every host port on loopback. Nginx proxies the UI, REST, and WebSocket. Hook, metrics, and MCP routes are blocked at the edge by default. Private policy snippets opt remote hooks or MCP into the TLS edge.
+
+The optional `agent-runtime` image target installs pinned Claude Code and Codex CLIs. It is used only when the Run Agent page must execute agents inside the container, with explicitly writable agent homes and workspace mounts.
 
 ```bash
-# Docker Compose
 docker compose up -d --build
+# or
+podman compose up -d --build
 
-# Podman Compose
-CLAUDE_HOME="$HOME/.claude" podman compose up -d --build
-
-# Plain Docker / Podman (equivalent)
-docker build -t agent-monitor .
-docker run -d -p 4820:4820 \
-  -v "$HOME/.claude:/root/.claude:ro" \
-  -v agent-monitor-data:/app/data \
-  agent-monitor
+npm run docker:full:up
+npm run deploy:validate
 ```
-
-> [!NOTE]
-> **Hook note:** Claude Code hooks run on the host, not inside the container. The containerized server still receives hook events via HTTP on `localhost:4820` — run `npm run install-hooks` on the host after the container is up. `scripts/install-hooks.js` detects container execution and refuses there (issue #193) so it cannot write a container-internal handler path into a bind-mounted host `~/.claude`; the containerized server's boot-time auto-install is skipped for the same reason. Override with `CCAM_ALLOW_CONTAINER_HOOKS=1` only when Claude Code itself runs inside the container.
 
 ### Cloud Deployment
 
-For production cloud deployments, the `deployments/` directory provides enterprise-grade infrastructure supporting four cloud providers and multiple deployment strategies.
+Cloud deployment is Kubernetes-based and provider-neutral. EKS, GKE, AKS, OKE, and self-managed clusters consume the same Helm chart or Kustomize base. Terraform deploys that chart to an existing cluster instead of pretending one resource graph can safely provision every cloud.
 
 ```mermaid
-graph TB
-  subgraph "Deployment Pipeline"
-    direction LR
-    CI["CI Pipeline<br/>Build · Test · Scan"] --> DEPLOY["Deployment<br/>Helm · Kustomize · Terraform"]
-    DEPLOY --> VERIFY["Verification<br/>Health Check · Smoke Tests"]
-    VERIFY -->|Fail| ROLLBACK["Rollback<br/>Instant Revert"]
-  end
-
-  subgraph "Infrastructure"
-    direction TB
-    subgraph "Compute"
-      BLUE["Blue Slot<br/>Current Version"]
-      GREEN["Green Slot<br/>New Version"]
-    end
-    LB["Load Balancer<br/>TLS 1.3 · WebSocket<br/>Weighted Routing"]
-    PV["Persistent Storage<br/>Encrypted NFS"]
-    MON["Monitoring<br/>Prometheus · Grafana<br/>13 Alert Rules"]
-    OTEL["OTel Collector<br/>Coralogix"]
-  end
-
-  LB -->|"Active"| BLUE
-  LB -.->|"Standby"| GREEN
-  BLUE & GREEN --> PV
-  MON -->|"Scrape"| BLUE & GREEN
-  BLUE & GREEN -->|"logs + metrics + traces"| OTEL
-
-  style BLUE fill:#2563eb,color:#fff
-  style GREEN fill:#16a34a,color:#fff
-  style LB fill:#7c3aed,color:#fff
-  style CI fill:#2088ff,color:#fff
-  style OTEL fill:#4f46e5,color:#fff
+flowchart LR
+  CI["CI: tests + deployment gate"] --> IMG["amd64/arm64 app + MCP images"]
+  IMG --> SUPPLY["Grype scan + SBOM + SLSA provenance + Cosign"]
+  SUPPLY --> DEPLOY["Helm / Kustomize / Terraform"]
+  DEPLOY --> EDGE["Ingress or Gateway API + TLS"]
+  EDGE --> APP["CCAM, exactly 1 Recreate replica"]
+  APP --> PVC[("retained ReadWriteOnce PVC")]
+  PROM["Prometheus Operator"] -->|"Bearer /api/metrics"| APP
 ```
 
-| Capability | Details |
-| --- | --- |
-| **Cloud Providers** | AWS (ECS Fargate + ALB), GCP (Cloud Run + GCLB), Azure (ACI + App Gateway), OCI (OKE + LBaaS) |
-| **Deployment Methods** | Helm chart, Kustomize overlays, Terraform modules |
-| **Release Strategies** | Rolling update, blue-green (instant switchover), canary (automated analysis) |
-| **Environments** | Dev, staging, production with per-environment configuration |
-| **CI/CD** | GitHub Actions and GitLab CI pipelines with Trivy security scanning |
-| **Observability** | Prometheus scraping, 13 alert rules, Grafana dashboard (16 panels), Alertmanager routing, Coralogix full-stack observability (logs, metrics, traces, SLO tracking) via OpenTelemetry Collector |
-| **Operations** | Scripts for deploy, rollback, blue-green switch, database backup/restore, teardown |
-| **Security** | Restricted PSS, network policies, TLS enforcement, OIDC auth, no long-lived credentials |
+The one-writer SQLite invariant is enforced twice: Helm `values.schema.json` rejects multiple replicas/HPA, and Kustomize renders `replicas: 1` with `strategy.type: Recreate`. Optional components add authenticated MCP, ServiceMonitor, Gateway API `HTTPRoute`, and CSI `VolumeSnapshot`. Restricted Pod Security, RuntimeDefault seccomp, non-root execution, read-only roots, dropped capabilities, disabled service-account token mounts, retained PVCs, and NetworkPolicies are built in.
 
-> [!NOTE]
-> 📘 **Full guide:** See [DEPLOYMENT.md](DEPLOYMENT.md) for step-by-step deployment instructions, and [deployments/README.md](deployments/README.md) for the infrastructure technical reference.
+Production operations use SQLite online backups with integrity checks and SHA-256, scale-to-zero restore, backup-first deploy/rollback/teardown, atomic Helm upgrades, and authenticated health/WebSocket checks. See [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
 ---
 
@@ -2753,10 +2707,10 @@ Claude Code invokes this command on each update, piping a JSON payload to stdin.
 | **SQLite** (via `better-sqlite3` or built-in `node:sqlite`) | Zero-config, embedded, no server process. WAL mode gives concurrent reads. Synchronous API is simpler than async alternatives for this use case. Falls back to Node.js built-in `node:sqlite` when `better-sqlite3` cannot be compiled |
 | **Express**                     | Battle-tested, minimal, well-understood. Overkill would be Fastify for this scale; underkill would be raw `http` module                         |
 | **ws**                          | Fastest, most lightweight WebSocket library for Node. No Socket.IO overhead needed since we only push JSON messages                             |
-| **React 18**                    | Stable, widely known, strong TypeScript support. No need for Server Components or RSC given this is a client-rendered SPA                       |
+| **React 19**                    | Current supported client runtime with strong TypeScript support. CCAM remains a client-rendered SPA and does not enable Server Components or RSC |
 | **Vite**                        | Fast builds, native ESM, excellent dev experience. Proxy config handles the dev server split cleanly                                            |
 | **Tailwind CSS**                | Utility-first approach keeps styles colocated with markup. No CSS module boilerplate. Custom theme config for the dark UI                       |
-| **React Router 6**              | Standard routing for React SPAs. Layout routes with `<Outlet>` give clean shell composition                                                     |
+| **React Router 8**              | Standard declarative routing for React SPAs. Layout routes with `<Outlet>` give clean shell composition without enabling framework or RSC modes    |
 | **Lucide React**                | Tree-shakeable icon library. Only imports what's used (~20 icons)                                                                               |
 | **TypeScript Strict**           | Catches null/undefined bugs at compile time. `noUncheckedIndexedAccess` prevents array bounds issues                                            |
 

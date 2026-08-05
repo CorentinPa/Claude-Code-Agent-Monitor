@@ -6,6 +6,35 @@
  */
 window.__WIKI_CONTENT_I18N = {
   zh: {
+    "<strong>React 19</strong>": "<strong>React 19</strong>",
+    "<strong>Vite 7</strong>": "<strong>Vite 7</strong>",
+    "<strong>React Router 8</strong>": "<strong>React Router 8</strong>",
+    "The OCI runtime is non-root, uses Tini as PID 1, includes Git, OpenSSH, and SQLite, and becomes read-only except for persistent data/config volumes and tmpfs. Docker Compose and Podman Compose use the same file.":
+      "OCI 运行时以非 root 用户运行，使用 Tini 作为 PID 1，包含 Git、OpenSSH 与 SQLite，并且除持久化数据/配置卷和 tmpfs 外，根文件系统均为只读。Docker Compose 与 Podman Compose 使用同一份文件。",
+    "Dashboard, MCP, Nginx, Prometheus, and Grafana bind host loopback by default. Nginx proxies the UI, authenticated API, and WebSocket, while hooks, metrics, and MCP remain blocked at the edge unless explicitly enabled.":
+      "Dashboard、MCP、Nginx、Prometheus 与 Grafana 默认仅绑定宿主机 loopback。Nginx 代理 UI、认证 API 与 WebSocket，而 Hook、指标和 MCP 默认在边缘被阻止，除非显式启用。",
+    "Run exactly one dashboard container per data volume. Install hooks on the host. Remote hook destinations must use HTTPS plus <code>CCAM_HOOK_TOKEN</code>.":
+      "每个数据卷必须只运行一个 Dashboard 容器。请在宿主机安装 Hook。远程 Hook 目标必须使用 HTTPS，并提供 <code>CCAM_HOOK_TOKEN</code>。",
+    "The dashboard image runs as UID/GID 1000 with a read-only root filesystem, dropped capabilities, <code>no-new-privileges</code>, health checks, and persistent <code>/app/data</code> plus <code>/app/config</code> volumes. Claude and Codex homes mount read-only at <code>/home/node/.claude</code> and <code>/home/node/.codex</code>.":
+      "Dashboard 镜像以 UID/GID 1000 运行，根文件系统只读，丢弃所有 capability，启用 <code>no-new-privileges</code> 与健康检查，并持久化 <code>/app/data</code> 和 <code>/app/config</code> 卷。Claude 与 Codex home 分别只读挂载到 <code>/home/node/.claude</code> 和 <code>/home/node/.codex</code>。",
+    'The optional <code>agent-runtime</code> image target adds pinned Claude Code and Codex CLIs for container-native Run Agent workflows. Cloud deployments use one Recreate-managed dashboard replica on a retained ReadWriteOnce PVC through Helm, Kustomize, or Terraform-to-existing-Kubernetes. See <a href="../DEPLOYMENT.md">DEPLOYMENT.md</a>.':
+      '可选的 <code>agent-runtime</code> 镜像目标加入固定版本的 Claude Code 与 Codex CLI，用于容器原生 Run Agent 工作流。云部署通过 Helm、Kustomize 或面向现有 Kubernetes 的 Terraform，在保留的 ReadWriteOnce PVC 上运行一个由 Recreate 管理的 Dashboard 副本。参见 <a href="../DEPLOYMENT.md">DEPLOYMENT.md</a>。',
+    "Protects MCP <code>/mcp</code>, <code>/sse</code>, and <code>/messages</code>; <code>/health</code> remains available to probes":
+      "保护 MCP <code>/mcp</code>、<code>/sse</code> 和 <code>/messages</code>；<code>/health</code> 仍可供探针访问",
+    "File-backed dashboard REST and WebSocket token for Docker or Kubernetes secrets":
+      "供 Docker 或 Kubernetes Secret 使用的文件型 Dashboard REST 与 WebSocket Token",
+    "Independent credential for authenticated remote <code>/api/hooks/*</code> ingestion":
+      "用于认证远程 <code>/api/hooks/*</code> 采集的独立凭据",
+    "Writable dotenv path used when Settings persists Claude or Codex home overrides":
+      "Settings 持久化 Claude 或 Codex home 覆盖值时使用的可写 dotenv 路径",
+    "Optional remote hook destination; non-loopback URLs require HTTPS and a hook token":
+      "可选的远程 Hook 目标；非 loopback URL 必须使用 HTTPS 和 Hook Token",
+    "Rootless Docker and Podman stacks cover the dashboard, authenticated MCP, Nginx, Prometheus, and Grafana. Read-only root filesystems, file-backed secrets, health checks, WebSocket proxying, private metrics, backup tooling, and one-writer SQLite safeguards ship together.":
+      "Rootless Docker 与 Podman 栈覆盖 Dashboard、认证 MCP、Nginx、Prometheus 和 Grafana，并一起提供只读根文件系统、文件型 Secret、健康检查、WebSocket 代理、私有指标、备份工具与单 writer SQLite 保护。",
+    "hooks, metrics, MCP blocked by default": "Hook、指标和 MCP 默认被阻止",
+    "private bearer scrape": "私有 Bearer 抓取",
+    "password file": "密码文件",
+    "One SQLite writer": "一个 SQLite writer",
     "Base URL used by the local MCP server when calling dashboard APIs. Direct loopback HTTP is allowed with a bearer token; tokenized container-host aliases require HTTPS.":
       "本地 MCP 服务器调用仪表板 API 时使用的基础 URL。直接回环 HTTP 可携带 Bearer Token；带 Token 的容器主机别名必须使用 HTTPS。",
     "Bearer token for a protected dashboard. Falls back to <code>DASHBOARD_API_TOKEN</code>.":
@@ -82,14 +111,14 @@ window.__WIKI_CONTENT_I18N = {
       "可选的 Codex 主目录。默认使用 <code>CODEX_HOME</code> 或 <code>~/.codex</code>。",
     "Safety-net interval (ms) for incremental Codex rollout scanning. Default <code>4000</code>; <code>0</code> disables polling but keeps the watcher.":
       "增量扫描 Codex rollout 的兜底间隔（毫秒）。默认 <code>4000</code>；<code>0</code> 会禁用轮询但保留文件监视器。",
-    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. Login <code>admin</code> / <code>admin</code> on port 3000</span>':
-      '<span class="caption-icon">📊</span> <span><strong>可观测性 · Grafana</strong> — 默认首页仪表盘 <em>CCAM — Overview</em>（自动配置四个看板）：实时舰队快照、数据库累计总量、分解图与速率，来自 <code>/api/metrics</code> 抓取。端口 3000 登录 <code>admin</code> / <code>admin</code></span>',
+    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks read the admin password from <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>可观测性 · Grafana</strong> — 默认首页仪表盘 <em>CCAM — Overview</em>（自动配置四个看板）：实时舰队快照、数据库累计总量、分解图与速率，来自 <code>/api/metrics</code> 抓取。仅 npm 本地辅助栈使用 <code>admin</code> / <code>admin</code>；容器栈从 <code>deployments/secrets/grafana-admin-password</code> 读取管理员密码。</span>',
     '<span class="caption-icon">🔥</span> <span><strong>Observability · Prometheus console</strong> — pre-built landing page at <code>/consoles/index.html</code> with live metric cards, session/token tables, and drill-down links into the Graph UI (Prometheus 3.x compatible — queries the HTTP API directly)</span>':
       '<span class="caption-icon">🔥</span> <span><strong>可观测性 · Prometheus 控制台</strong> — <code>/consoles/index.html</code> 预置落地页：实时指标卡片、会话/Token 表，以及钻取到 Graph UI 的链接（兼容 Prometheus 3.x — 直接查询 HTTP API）</span>',
     '<span class="caption-icon">📈</span> <span><strong>Observability · Prometheus Graph</strong> — run PromQL against scraped CCAM series (e.g. <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>, <code>rate(ccam_tokens_total[5m])</code>) with starter expressions from the CCAM console and recording rules in <code>monitoring/prometheus/ccam-rules.yml</code></span>':
       '<span class="caption-icon">📈</span> <span><strong>可观测性 · Prometheus Graph</strong> — 对已抓取的 CCAM 序列运行 PromQL（如 <code>sum(ccam_sessions)</code>、<code>ccam_events_total</code>、<code>rate(ccam_tokens_total[5m])</code>），入门表达式见 CCAM 控制台与 <code>monitoring/prometheus/ccam-rules.yml</code> 记录规则</span>',
-    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login (<code>admin</code> / <code>admin</code> on port 3000): fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data</span>':
-      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — 登录后默认首页（端口 3000：<code>admin</code> / <code>admin</code>）：舰队快照、数据库累计、分解图与速率，全部来自实时 <code>/api/metrics</code> 抓取 — 无示例或合成数据</span>',
+    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login on port 3000: fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks use <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — 登录后端口 3000 的默认首页：舰队快照、数据库累计、分解图与速率，全部来自实时 <code>/api/metrics</code> 抓取 — 无示例或合成数据。仅 npm 本地辅助栈使用 <code>admin</code> / <code>admin</code>；容器栈使用 <code>deployments/secrets/grafana-admin-password</code>。</span>',
     '<span class="caption-icon">🔥</span> <span><strong>Prometheus · CCAM console</strong> — static HTML at <code>/consoles/index.html</code> (Prometheus 3.x compatible): live metric cards, session/token tables, and one-click Graph drill-down links that query the Prometheus HTTP API directly</span>':
       '<span class="caption-icon">🔥</span> <span><strong>Prometheus · CCAM 控制台</strong> — <code>/consoles/index.html</code> 静态 HTML（兼容 Prometheus 3.x）：实时指标卡片、会话/Token 表，以及一键钻取 Graph 的链接，直接查询 Prometheus HTTP API</span>',
     '<span class="caption-icon">📈</span> <span><strong>Prometheus · Graph</strong> — ad-hoc PromQL against scraped CCAM series; starter expressions ship in the CCAM console and <code>monitoring/README.md</code>, with derived rates in <code>monitoring/prometheus/ccam-rules.yml</code></span>':
@@ -99,8 +128,8 @@ window.__WIKI_CONTENT_I18N = {
     "<strong>Quick start (npm):</strong> run the dashboard on loopback, then <code>npm run monitoring:install</code> once and <code>npm run monitoring:up</code>. Open Grafana at <code>http://localhost:3000</code> and Prometheus at <code>http://localhost:9090</code>. The pre-built CCAM console is at <code>http://localhost:9090/consoles/index.html</code> (also reachable from the Prometheus UI under <strong>Consoles</strong>). For an all-Docker path use <code>npm run monitoring:docker:up</code> or <code>npm run docker:full:up</code> for dashboard + Prometheus + Grafana together. Verify with <code>npm run monitoring:verify</code> — the <code>ccam</code> scrape target should read <strong>UP</strong>.":
       "<strong>快速开始（npm）：</strong>在回环地址运行仪表盘，然后执行一次 <code>npm run monitoring:install</code> 与 <code>npm run monitoring:up</code>。Grafana：<code>http://localhost:3000</code>，Prometheus：<code>http://localhost:9090</code>。预置 CCAM 控制台：<code>http://localhost:9090/consoles/index.html</code>（也可在 Prometheus UI 的 <strong>Consoles</strong> 下打开）。全 Docker 路径：<code>npm run monitoring:docker:up</code> 或 <code>npm run docker:full:up</code>。用 <code>npm run monitoring:verify</code> 验证 — <code>ccam</code> 抓取目标应为 <strong>UP</strong>。",
     "Four Grafana boards": "四个 Grafana 看板",
-    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. Credentials default to <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>.":
-      "<strong>CCAM — Overview</strong>（默认首页）、<strong>CCAM — Sessions &amp; Agents</strong>、<strong>CCAM — Tokens &amp; Events</strong> 与 <strong>CCAM — Platform</strong> — 均从 <code>monitoring/grafana/dashboards/</code> 配置，PromQL 针对实时抓取。凭据默认为 <code>monitoring/grafana.defaults.env</code> 中的 <code>admin</code> / <code>admin</code>。",
+    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. The npm-only local helper uses <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>. Container stacks read the password from <code>deployments/secrets/grafana-admin-password</code>.":
+      "<strong>CCAM — Overview</strong>（默认首页）、<strong>CCAM — Sessions &amp; Agents</strong>、<strong>CCAM — Tokens &amp; Events</strong> 与 <strong>CCAM — Platform</strong> — 均从 <code>monitoring/grafana/dashboards/</code> 配置，PromQL 针对实时抓取。仅 npm 本地辅助栈通过 <code>monitoring/grafana.defaults.env</code> 使用 <code>admin</code> / <code>admin</code>；容器栈从 <code>deployments/secrets/grafana-admin-password</code> 读取密码。",
     "Prometheus console": "Prometheus 控制台",
     "Prometheus 3.x dropped the legacy console template libraries, so CCAM ships a <strong>static HTML console</strong> at <code>monitoring/prometheus/consoles/index.html</code> that fetches <code>/api/v1/query</code> directly — live cards, session tables, and Graph links without Go-template errors on <code>/consoles/index.html</code>.":
       "Prometheus 3.x 移除了旧版控制台模板库，因此 CCAM 在 <code>monitoring/prometheus/consoles/index.html</code> 提供<strong>静态 HTML 控制台</strong>，直接请求 <code>/api/v1/query</code> — 实时卡片、会话表与 Graph 链接，<code>/consoles/index.html</code> 不再出现 Go 模板错误。",
@@ -1142,12 +1171,12 @@ window.__WIKI_CONTENT_I18N = {
     "The Dockerfile uses three stages to minimize the final image size:":
       "Dockerfile 使用三个阶段来最小化最终镜像的体积：",
     Stage: "阶段",
-    "Installs production <code>node_modules</code> on <code>node:22-alpine</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
-      "在 <code>node:22-alpine</code> 上安装生产环境的 <code>node_modules</code>。<code>better-sqlite3</code> 是可选的——如果预构建不可用，服务器会回退到内置的 <code>node:sqlite</code>",
+    "Installs production <code>node_modules</code> on digest-pinned <code>node:24.19.0-alpine3.24</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
+      "在固定摘要的 <code>node:24.19.0-alpine3.24</code> 上安装生产环境的 <code>node_modules</code>。<code>better-sqlite3</code> 是可选的——如果预构建不可用，服务器会回退到内置的 <code>node:sqlite</code>",
     "Runs <code>npm ci</code> + <code>vite build</code> to produce optimized static assets":
       "运行 <code>npm ci</code> + <code>vite build</code> 以生成经过优化的静态资源",
-    "Clean <code>node:22-alpine</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
-      "干净的 <code>node:22-alpine</code>，仅包含 <code>node_modules</code>、服务器代码和 <code>client/dist</code>",
+    "Clean digest-pinned <code>node:24.19.0-alpine3.24</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
+      "干净的固定摘要 <code>node:24.19.0-alpine3.24</code>，仅包含 <code>node_modules</code>、服务器代码和 <code>client/dist</code>",
     "<strong>Hook note</strong>": "<strong>Hook 说明</strong>",
     "Claude Code hooks run on the host, not inside the container. The containerized server receives hook events via HTTP on <code>localhost:4820</code>. Run <code>npm run install-hooks</code> on the host after starting the container.":
       "Claude Code 的 hooks 在主机上运行，而不是在容器内部运行。容器化的服务器通过 HTTP 在 <code>localhost:4820</code> 上接收 hook 事件。启动容器后，请在主机上运行 <code>npm run install-hooks</code>。",
@@ -1224,14 +1253,14 @@ window.__WIKI_CONTENT_I18N = {
       "久经考验、精简、易于理解。Fastify 会显得过度；原始的 <code>http</code> 模块在路由方面需要过多的样板代码。",
     "Fastest, most lightweight WebSocket library for Node. No Socket.IO overhead needed — we only push typed JSON messages one-way.":
       "Node 上最快、最轻量的 WebSocket 库。无需 Socket.IO 的额外开销——我们只单向推送带类型的 JSON 消息。",
-    "Stable, widely known, strong TypeScript support. No Server Components or RSC needed for a client-rendered local SPA.":
-      "稳定、广为人知、对 TypeScript 支持强。对于客户端渲染的本地 SPA，无需 Server Components 或 RSC。",
+    "Current supported client runtime with strong TypeScript support. CCAM remains a client-rendered SPA and does not enable Server Components or RSC.":
+      "当前受支持的客户端运行时，对 TypeScript 支持强。CCAM 仍是客户端渲染的 SPA，不启用 Server Components 或 RSC。",
     "Fast builds, native ESM, excellent dev experience. Proxy config handles the dev server split cleanly with no ejection.":
       "构建快速、原生 ESM、出色的开发体验。代理配置可干净地处理开发服务器的拆分，无需弹出（eject）。",
     "Utility-first approach keeps styles colocated with markup. No CSS module boilerplate. Custom dark theme config for the dark UI.":
       "实用优先的方式让样式与标记就近放置。没有 CSS module 样板代码。为深色 UI 提供自定义深色主题配置。",
-    "Standard routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without prop drilling.":
-      "React SPA 的标准路由。使用 <code>&lt;Outlet&gt;</code> 的布局路由可在不进行属性透传（prop drilling）的情况下实现干净的外壳组合。",
+    "Standard declarative routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without enabling framework or RSC modes.":
+      "React SPA 的标准声明式路由。使用 <code>&lt;Outlet&gt;</code> 的布局路由可实现干净的外壳组合，同时不启用 framework 或 RSC 模式。",
     "Tree-shakeable icon library — only imports what's used (~20 icons). No heavy icon font.":
       "可摇树优化的图标库——只导入用到的部分（约 20 个图标）。没有沉重的图标字体。",
     "Catches null/undefined bugs at compile time. <code>noUncheckedIndexedAccess</code> prevents array bounds issues in analytics aggregations.":
@@ -1410,6 +1439,41 @@ window.__WIKI_CONTENT_I18N = {
       "<strong>服务端分页</strong>的表格，列出每一个已记录的会话。每一页只获取对应的数据片段，因此无论会话数量多少，成本计算都保持有界。针对 <code>id</code>、<code>name</code> 和 <code>cwd</code> 的不区分大小写搜索在服务端运行，并带有 300 ms 防抖；状态过滤器可与搜索组合以精确缩小范围。可搜索的复选框项目选择器支持选择多个目录；完整长路径仍可查看，紧凑的触发器文字让筛选栏保持易读。排序使用相同的自定义下拉模式。每一行显示会话的真实名称（从 transcript 实时同步：<code>/rename</code> 或 <code>claude -n</code> 标题，否则使用自动标题，再否则使用首条用户 prompt，并回退到短 ID）、状态徽章、agent 数量、时长、模型和预估成本。点击任意行即可深入查看完整的会话详情视图，包含对话记录和 agent 层级。",
   },
   vi: {
+    "<strong>React 19</strong>": "<strong>React 19</strong>",
+    "<strong>Vite 7</strong>": "<strong>Vite 7</strong>",
+    "<strong>React Router 8</strong>": "<strong>React Router 8</strong>",
+    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks read the admin password from <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Khả năng quan sát · Grafana</strong> — dashboard mặc định <em>CCAM — Overview</em> với bốn bảng được cấp sẵn: ảnh chụp đội hình trực tiếp, tổng số cơ sở dữ liệu, biểu đồ phân rã và tốc độ từ các lần scrape <code>/api/metrics</code>. Trình hỗ trợ cục bộ chỉ dùng npm sử dụng <code>admin</code> / <code>admin</code>; stack container đọc mật khẩu quản trị từ <code>deployments/secrets/grafana-admin-password</code>.</span>',
+    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login on port 3000: fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks use <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — dashboard mặc định sau khi đăng nhập trên cổng 3000: ảnh chụp đội hình, tổng số cơ sở dữ liệu, biểu đồ phân rã và tốc độ từ scrape <code>/api/metrics</code> trực tiếp — không có dữ liệu mẫu hay tổng hợp. Trình hỗ trợ cục bộ chỉ dùng npm sử dụng <code>admin</code> / <code>admin</code>; stack container dùng <code>deployments/secrets/grafana-admin-password</code>.</span>',
+    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. The npm-only local helper uses <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>. Container stacks read the password from <code>deployments/secrets/grafana-admin-password</code>.":
+      "<strong>CCAM — Overview</strong> (trang mặc định), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong> và <strong>CCAM — Platform</strong> đều được cấp từ <code>monitoring/grafana/dashboards/</code> với PromQL trên dữ liệu scrape trực tiếp. Trình hỗ trợ cục bộ chỉ dùng npm sử dụng <code>admin</code> / <code>admin</code> qua <code>monitoring/grafana.defaults.env</code>. Stack container đọc mật khẩu từ <code>deployments/secrets/grafana-admin-password</code>.",
+    "The OCI runtime is non-root, uses Tini as PID 1, includes Git, OpenSSH, and SQLite, and becomes read-only except for persistent data/config volumes and tmpfs. Docker Compose and Podman Compose use the same file.":
+      "OCI runtime chạy non-root, dùng Tini làm PID 1, có Git, OpenSSH và SQLite, đồng thời chỉ cho phép ghi vào volume dữ liệu/cấu hình bền vững và tmpfs. Docker Compose và Podman Compose dùng cùng một tệp.",
+    "Dashboard, MCP, Nginx, Prometheus, and Grafana bind host loopback by default. Nginx proxies the UI, authenticated API, and WebSocket, while hooks, metrics, and MCP remain blocked at the edge unless explicitly enabled.":
+      "Dashboard, MCP, Nginx, Prometheus và Grafana mặc định chỉ bind host loopback. Nginx proxy UI, API có xác thực và WebSocket, còn hook, metric và MCP bị chặn ở edge trừ khi được bật rõ ràng.",
+    "Run exactly one dashboard container per data volume. Install hooks on the host. Remote hook destinations must use HTTPS plus <code>CCAM_HOOK_TOKEN</code>.":
+      "Chỉ chạy đúng một dashboard container trên mỗi data volume. Cài hook trên host. Đích hook từ xa phải dùng HTTPS cùng <code>CCAM_HOOK_TOKEN</code>.",
+    "The dashboard image runs as UID/GID 1000 with a read-only root filesystem, dropped capabilities, <code>no-new-privileges</code>, health checks, and persistent <code>/app/data</code> plus <code>/app/config</code> volumes. Claude and Codex homes mount read-only at <code>/home/node/.claude</code> and <code>/home/node/.codex</code>.":
+      "Image dashboard chạy bằng UID/GID 1000 với root filesystem chỉ-đọc, bỏ mọi capability, bật <code>no-new-privileges</code>, health check và volume bền vững <code>/app/data</code> cùng <code>/app/config</code>. Claude và Codex home được mount chỉ-đọc tại <code>/home/node/.claude</code> và <code>/home/node/.codex</code>.",
+    'The optional <code>agent-runtime</code> image target adds pinned Claude Code and Codex CLIs for container-native Run Agent workflows. Cloud deployments use one Recreate-managed dashboard replica on a retained ReadWriteOnce PVC through Helm, Kustomize, or Terraform-to-existing-Kubernetes. See <a href="../DEPLOYMENT.md">DEPLOYMENT.md</a>.':
+      'Image target <code>agent-runtime</code> tùy chọn thêm Claude Code và Codex CLI được ghim phiên bản cho workflow Run Agent chạy native trong container. Triển khai cloud dùng một replica dashboard do Recreate quản lý trên PVC ReadWriteOnce được giữ lại qua Helm, Kustomize hoặc Terraform cho Kubernetes có sẵn. Xem <a href="../DEPLOYMENT.md">DEPLOYMENT.md</a>.',
+    "Protects MCP <code>/mcp</code>, <code>/sse</code>, and <code>/messages</code>; <code>/health</code> remains available to probes":
+      "Bảo vệ MCP <code>/mcp</code>, <code>/sse</code> và <code>/messages</code>; <code>/health</code> vẫn mở cho probe",
+    "File-backed dashboard REST and WebSocket token for Docker or Kubernetes secrets":
+      "Token REST và WebSocket của dashboard đọc từ tệp cho Secret Docker hoặc Kubernetes",
+    "Independent credential for authenticated remote <code>/api/hooks/*</code> ingestion":
+      "Credential độc lập cho remote <code>/api/hooks/*</code> ingestion có xác thực",
+    "Writable dotenv path used when Settings persists Claude or Codex home overrides":
+      "Đường dẫn dotenv có quyền ghi khi Settings lưu override Claude hoặc Codex home",
+    "Optional remote hook destination; non-loopback URLs require HTTPS and a hook token":
+      "Đích hook từ xa tùy chọn; URL không phải loopback yêu cầu HTTPS và hook token",
+    "Rootless Docker and Podman stacks cover the dashboard, authenticated MCP, Nginx, Prometheus, and Grafana. Read-only root filesystems, file-backed secrets, health checks, WebSocket proxying, private metrics, backup tooling, and one-writer SQLite safeguards ship together.":
+      "Stack Docker và Podman rootless bao gồm dashboard, MCP có xác thực, Nginx, Prometheus và Grafana. Root filesystem chỉ-đọc, Secret từ tệp, health check, WebSocket proxy, metric riêng tư, công cụ backup và bảo vệ SQLite một writer được cung cấp cùng nhau.",
+    "hooks, metrics, MCP blocked by default": "hook, metric và MCP bị chặn mặc định",
+    "private bearer scrape": "scrape Bearer riêng tư",
+    "password file": "tệp mật khẩu",
+    "One SQLite writer": "Một SQLite writer",
     "Base URL used by the local MCP server when calling dashboard APIs. Direct loopback HTTP is allowed with a bearer token; tokenized container-host aliases require HTTPS.":
       "URL cơ sở mà máy chủ MCP cục bộ dùng để gọi API dashboard. HTTP loopback trực tiếp được phép mang bearer token; alias host container có token phải dùng HTTPS.",
     "Bearer token for a protected dashboard. Falls back to <code>DASHBOARD_API_TOKEN</code>.":
@@ -2547,12 +2611,12 @@ window.__WIKI_CONTENT_I18N = {
     "The Dockerfile uses three stages to minimize the final image size:":
       "Dockerfile sử dụng ba giai đoạn để giảm thiểu kích thước image cuối cùng:",
     Stage: "Giai đoạn",
-    "Installs production <code>node_modules</code> on <code>node:22-alpine</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
-      "Cài đặt <code>node_modules</code> sản xuất trên <code>node:22-alpine</code>. <code>better-sqlite3</code> là tùy chọn — nếu không có bản dựng sẵn, máy chủ sẽ quay về dùng <code>node:sqlite</code> tích hợp sẵn",
+    "Installs production <code>node_modules</code> on digest-pinned <code>node:24.19.0-alpine3.24</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
+      "Cài đặt <code>node_modules</code> sản xuất trên <code>node:24.19.0-alpine3.24</code> được cố định digest. <code>better-sqlite3</code> là tùy chọn — nếu không có bản dựng sẵn, máy chủ sẽ quay về dùng <code>node:sqlite</code> tích hợp sẵn",
     "Runs <code>npm ci</code> + <code>vite build</code> to produce optimized static assets":
       "Chạy <code>npm ci</code> + <code>vite build</code> để tạo ra các tài nguyên tĩnh được tối ưu hóa",
-    "Clean <code>node:22-alpine</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
-      "Bản <code>node:22-alpine</code> sạch chỉ với <code>node_modules</code>, mã máy chủ và <code>client/dist</code>",
+    "Clean digest-pinned <code>node:24.19.0-alpine3.24</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
+      "Bản <code>node:24.19.0-alpine3.24</code> sạch, được cố định digest, chỉ gồm <code>node_modules</code>, mã máy chủ và <code>client/dist</code>",
     "<strong>Hook note</strong>": "<strong>Lưu ý về hook</strong>",
     "Claude Code hooks run on the host, not inside the container. The containerized server receives hook events via HTTP on <code>localhost:4820</code>. Run <code>npm run install-hooks</code> on the host after starting the container.":
       "Các hook của Claude Code chạy trên máy chủ, không phải bên trong container. Máy chủ được container hóa nhận các sự kiện hook qua HTTP trên <code>localhost:4820</code>. Hãy chạy <code>npm run install-hooks</code> trên máy chủ sau khi khởi động container.",
@@ -2634,14 +2698,14 @@ window.__WIKI_CONTENT_I18N = {
       "Đã được kiểm chứng kỹ, tối giản, dễ hiểu. Fastify sẽ là quá mức cần thiết; mô-đun <code>http</code> thuần sẽ đòi hỏi quá nhiều mã soạn sẵn cho việc định tuyến.",
     "Fastest, most lightweight WebSocket library for Node. No Socket.IO overhead needed — we only push typed JSON messages one-way.":
       "Thư viện WebSocket nhanh nhất, nhẹ nhất cho Node. Không cần thêm chi phí của Socket.IO — chúng ta chỉ đẩy các thông điệp JSON có kiểu theo một chiều.",
-    "Stable, widely known, strong TypeScript support. No Server Components or RSC needed for a client-rendered local SPA.":
-      "Ổn định, được biết đến rộng rãi, hỗ trợ TypeScript mạnh mẽ. Không cần Server Components hay RSC cho một SPA cục bộ được render phía client.",
+    "Current supported client runtime with strong TypeScript support. CCAM remains a client-rendered SPA and does not enable Server Components or RSC.":
+      "Runtime client hiện được hỗ trợ với TypeScript mạnh mẽ. CCAM vẫn là SPA render phía client và không bật Server Components hay RSC.",
     "Fast builds, native ESM, excellent dev experience. Proxy config handles the dev server split cleanly with no ejection.":
       "Build nhanh, ESM gốc, trải nghiệm phát triển tuyệt vời. Cấu hình proxy xử lý việc tách máy chủ phát triển một cách gọn gàng mà không cần eject.",
     "Utility-first approach keeps styles colocated with markup. No CSS module boilerplate. Custom dark theme config for the dark UI.":
       "Cách tiếp cận ưu tiên tiện ích (utility-first) giữ cho style nằm cạnh markup. Không có mã soạn sẵn của CSS module. Cấu hình chủ đề tối tùy chỉnh cho giao diện tối.",
-    "Standard routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without prop drilling.":
-      "Định tuyến tiêu chuẩn cho các SPA React. Các route bố cục với <code>&lt;Outlet&gt;</code> mang lại sự kết hợp lớp vỏ gọn gàng mà không cần truyền prop xuyên cấp (prop drilling).",
+    "Standard declarative routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without enabling framework or RSC modes.":
+      "Định tuyến khai báo tiêu chuẩn cho SPA React. Các route bố cục với <code>&lt;Outlet&gt;</code> tạo lớp vỏ gọn gàng mà không bật chế độ framework hay RSC.",
     "Tree-shakeable icon library — only imports what's used (~20 icons). No heavy icon font.":
       "Thư viện biểu tượng có thể tree-shake — chỉ nhập những gì được dùng (~20 biểu tượng). Không có font biểu tượng nặng nề.",
     "Catches null/undefined bugs at compile time. <code>noUncheckedIndexedAccess</code> prevents array bounds issues in analytics aggregations.":
@@ -2832,6 +2896,15 @@ window.__WIKI_CONTENT_I18N = {
       "Bảng <strong>phân trang phía máy chủ</strong> liệt kê mọi phiên đã ghi. Mỗi trang chỉ lấy phần dữ liệu của mình nên việc tính chi phí luôn có giới hạn, dù có bao nhiêu phiên. Tìm kiếm không phân biệt hoa thường trên <code>id</code>, <code>name</code> và <code>cwd</code> chạy ở phía máy chủ với độ trễ chống dội 300 ms; bộ lọc trạng thái kết hợp với tìm kiếm để thu hẹp chính xác. Bộ chọn dự án dạng hộp kiểm có thể tìm kiếm hỗ trợ chọn nhiều thư mục; đường dẫn dài vẫn có thể xem đầy đủ, còn văn bản gọn trên nút giữ thanh lọc dễ đọc. Sắp xếp dùng cùng mẫu menu tùy chỉnh. Mỗi hàng hiển thị tên thật của phiên (đồng bộ trực tiếp từ bản ghi: tiêu đề <code>/rename</code> hoặc <code>claude -n</code>, nếu không thì tiêu đề tự động, nếu vẫn không có thì prompt đầu tiên của người dùng, với dự phòng là ID ngắn), huy hiệu trạng thái, số lượng agent, thời lượng, mô hình và chi phí ước tính. Nhấp vào bất kỳ hàng nào để đi sâu vào chế độ xem chi tiết đầy đủ của phiên với bản ghi hội thoại và phân cấp agent.",
   },
   ko: {
+    "<strong>React 19</strong>": "<strong>React 19</strong>",
+    "<strong>Vite 7</strong>": "<strong>Vite 7</strong>",
+    "<strong>React Router 8</strong>": "<strong>React Router 8</strong>",
+    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks read the admin password from <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>관측성 · Grafana</strong> — 네 개의 보드가 자동 프로비저닝되는 기본 홈 대시보드 <em>CCAM — Overview</em>: 실시간 플릿 스냅샷, 데이터베이스 합계, 분해 차트, <code>/api/metrics</code> 스크레이프 기반 비율을 제공합니다. npm 전용 로컬 도우미만 <code>admin</code> / <code>admin</code>을 사용하며, 컨테이너 스택은 <code>deployments/secrets/grafana-admin-password</code>에서 관리자 비밀번호를 읽습니다.</span>',
+    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login on port 3000: fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks use <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — 포트 3000 로그인 후 기본 홈 대시보드로 플릿 스냅샷, 데이터베이스 합계, 분해 차트, 실시간 <code>/api/metrics</code> 스크레이프 비율을 보여주며 샘플이나 합성 데이터는 없습니다. npm 전용 로컬 도우미만 <code>admin</code> / <code>admin</code>을 사용하고 컨테이너 스택은 <code>deployments/secrets/grafana-admin-password</code>를 사용합니다.</span>',
+    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. The npm-only local helper uses <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>. Container stacks read the password from <code>deployments/secrets/grafana-admin-password</code>.":
+      "<strong>CCAM — Overview</strong>(기본 홈), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, <strong>CCAM — Platform</strong>은 모두 <code>monitoring/grafana/dashboards/</code>에서 프로비저닝되고 실시간 스크레이프에 PromQL을 사용합니다. npm 전용 로컬 도우미는 <code>monitoring/grafana.defaults.env</code>를 통해 <code>admin</code> / <code>admin</code>을 사용합니다. 컨테이너 스택은 <code>deployments/secrets/grafana-admin-password</code>에서 비밀번호를 읽습니다.",
     "Base URL used by the local MCP server when calling dashboard APIs. Direct loopback HTTP is allowed with a bearer token; tokenized container-host aliases require HTTPS.":
       "로컬 MCP 서버가 대시보드 API를 호출할 때 사용하는 기본 URL입니다. 직접 루프백 HTTP는 Bearer Token을 사용할 수 있지만 토큰이 있는 컨테이너 호스트 별칭은 HTTPS가 필요합니다.",
     "Bearer token for a protected dashboard. Falls back to <code>DASHBOARD_API_TOKEN</code>.":
@@ -3961,12 +4034,12 @@ window.__WIKI_CONTENT_I18N = {
     "The Dockerfile uses three stages to minimize the final image size:":
       "Dockerfile은 최종 이미지 크기를 최소화하기 위해 세 단계를 사용합니다.",
     Stage: "단계",
-    "Installs production <code>node_modules</code> on <code>node:22-alpine</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
-      "<code>node:22-alpine</code>에 프로덕션용 <code>node_modules</code>를 설치합니다. <code>better-sqlite3</code>는 선택 사항입니다 — 사전 빌드가 없을 경우 서버는 내장된 <code>node:sqlite</code>로 대체됩니다",
+    "Installs production <code>node_modules</code> on digest-pinned <code>node:24.19.0-alpine3.24</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
+      "digest가 고정된 <code>node:24.19.0-alpine3.24</code>에 프로덕션용 <code>node_modules</code>를 설치합니다. <code>better-sqlite3</code>는 선택 사항이며 사전 빌드가 없으면 서버가 내장 <code>node:sqlite</code>로 대체합니다",
     "Runs <code>npm ci</code> + <code>vite build</code> to produce optimized static assets":
       "<code>npm ci</code> + <code>vite build</code>를 실행하여 최적화된 정적 자산을 생성합니다",
-    "Clean <code>node:22-alpine</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
-      "<code>node_modules</code>, 서버 코드, <code>client/dist</code>만 포함한 깔끔한 <code>node:22-alpine</code>",
+    "Clean digest-pinned <code>node:24.19.0-alpine3.24</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
+      "<code>node_modules</code>, 서버 코드, <code>client/dist</code>만 포함한 깔끔한 digest 고정 <code>node:24.19.0-alpine3.24</code>",
     "<strong>Hook note</strong>": "<strong>Hook 참고 사항</strong>",
     "Claude Code hooks run on the host, not inside the container. The containerized server receives hook events via HTTP on <code>localhost:4820</code>. Run <code>npm run install-hooks</code> on the host after starting the container.":
       "Claude Code의 hook은 컨테이너 내부가 아니라 호스트에서 실행됩니다. 컨테이너화된 서버는 <code>localhost:4820</code>에서 HTTP를 통해 hook 이벤트를 수신합니다. 컨테이너를 시작한 후 호스트에서 <code>npm run install-hooks</code>를 실행하십시오.",
@@ -4047,14 +4120,14 @@ window.__WIKI_CONTENT_I18N = {
       "검증되었고, 최소한이며, 널리 이해되고 있습니다. Fastify는 과할 수 있고, 원시 <code>http</code> 모듈은 라우팅에 너무 많은 보일러플레이트 코드가 필요합니다.",
     "Fastest, most lightweight WebSocket library for Node. No Socket.IO overhead needed — we only push typed JSON messages one-way.":
       "Node에서 가장 빠르고 가벼운 WebSocket 라이브러리입니다. 타입이 지정된 JSON 메시지를 단방향으로 전송하기만 하므로 Socket.IO의 오버헤드가 필요하지 않습니다.",
-    "Stable, widely known, strong TypeScript support. No Server Components or RSC needed for a client-rendered local SPA.":
-      "안정적이고, 널리 알려져 있으며, TypeScript 지원이 뛰어납니다. 클라이언트 렌더링 방식의 로컬 SPA에는 Server Components나 RSC가 필요하지 않습니다.",
+    "Current supported client runtime with strong TypeScript support. CCAM remains a client-rendered SPA and does not enable Server Components or RSC.":
+      "현재 지원되는 클라이언트 런타임이며 TypeScript 지원이 뛰어납니다. CCAM은 클라이언트 렌더링 SPA로 유지되며 Server Components나 RSC를 활성화하지 않습니다.",
     "Fast builds, native ESM, excellent dev experience. Proxy config handles the dev server split cleanly with no ejection.":
       "빌드 속도가 빠르고, 네이티브 ESM을 지원하며, 개발 경험이 뛰어납니다. 프록시 설정이 개발 서버 분리를 이젝트(eject) 없이 깔끔하게 처리합니다.",
     "Utility-first approach keeps styles colocated with markup. No CSS module boilerplate. Custom dark theme config for the dark UI.":
       "유틸리티 우선 접근 방식으로 스타일을 마크업과 함께 배치할 수 있습니다. CSS 모듈 보일러플레이트가 필요 없습니다. 다크 UI를 위한 커스텀 다크 테마 설정을 제공합니다.",
-    "Standard routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without prop drilling.":
-      "React SPA를 위한 표준 라우팅입니다. <code>&lt;Outlet&gt;</code>을 사용한 레이아웃 라우트는 prop drilling 없이 깔끔한 셸 구성을 제공합니다.",
+    "Standard declarative routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without enabling framework or RSC modes.":
+      "React SPA를 위한 표준 선언형 라우팅입니다. <code>&lt;Outlet&gt;</code> 레이아웃 라우트는 framework 또는 RSC 모드를 활성화하지 않고 깔끔한 셸 구성을 제공합니다.",
     "Tree-shakeable icon library — only imports what's used (~20 icons). No heavy icon font.":
       "트리 셰이킹이 가능한 아이콘 라이브러리로, 사용되는 아이콘만 임포트합니다(약 20개). 무거운 아이콘 폰트가 필요 없습니다.",
     "Catches null/undefined bugs at compile time. <code>noUncheckedIndexedAccess</code> prevents array bounds issues in analytics aggregations.":
@@ -4312,14 +4385,14 @@ window.__WIKI_CONTENT_I18N = {
       "Las llamadas de herramienta <code>response_item</code> de Codex se indexan exactamente una vez mediante un cursor de rollout independiente; por eso Workflows con ámbito de proveedor muestra flujos de herramientas registrados, detalles de sesión, totales de tokens/modelos y recuentos de <code>context_compacted</code> sin repetir el ciclo de vida ni la contabilidad de tokens. Dynamic Workflows permanece oculto en el ámbito exclusivo de Codex porque sus journals en disco son una función de Claude Code.",
     "Safety-net interval (ms) for incremental Codex rollout scanning. Default <code>4000</code>; <code>0</code> disables polling but keeps the watcher.":
       "Intervalo de seguridad (ms) para el análisis incremental de rollouts de Codex. El valor predeterminado es <code>4000</code>; <code>0</code> desactiva el sondeo, pero conserva el vigilante.",
-    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. Login <code>admin</code> / <code>admin</code> on port 3000</span>':
-      '<span class="caption-icon">📊</span> <span><strong>Observabilidad · Grafana</strong> — panel de control de inicio predeterminado <em>CCAM - Visión general</em> (cuatro tableros provistos automáticamente): instantánea de la flota en vivo, totales de la base de datos, gráficos de desglose y tarifas de <code>/api/metrics</code> Rasguños. acceso <code>admin</code> / <code>admin</code> En el puerto 3000</span>',
+    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks read the admin password from <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Observabilidad · Grafana</strong> — panel de inicio predeterminado <em>CCAM — Overview</em> con cuatro tableros aprovisionados automáticamente: instantánea de la flota, totales de la base de datos, gráficos de desglose y tasas de los scrapes de <code>/api/metrics</code>. Solo el ayudante local administrado por npm usa <code>admin</code> / <code>admin</code>; las pilas de contenedores leen la contraseña de administración desde <code>deployments/secrets/grafana-admin-password</code>.</span>',
     '<span class="caption-icon">🔥</span> <span><strong>Observability · Prometheus console</strong> — pre-built landing page at <code>/consoles/index.html</code> with live metric cards, session/token tables, and drill-down links into the Graph UI (Prometheus 3.x compatible — queries the HTTP API directly)</span>':
       '<span class="caption-icon">🔥</span> <span><strong>Observabilidad · Consola Prometheus</strong> — página de destino preconstruida en <code>/consoles/index.html</code> Con tarjetas métricas en vivo, tablas de sesiones/tokens y enlaces de profundización a la interfaz de usuario gráfica (compatible con Prometheus 3.x, consulta directamente la API HTTP)</span>',
     '<span class="caption-icon">📈</span> <span><strong>Observability · Prometheus Graph</strong> — run PromQL against scraped CCAM series (e.g. <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>, <code>rate(ccam_tokens_total[5m])</code>) with starter expressions from the CCAM console and recording rules in <code>monitoring/prometheus/ccam-rules.yml</code></span>':
       '<span class="caption-icon">📈</span> <span><strong>Observabilidad · Gráfico Prometheus</strong> - Ejecute PromQL contra series CCAM raspadas (por ejemplo, <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>, <code>rate(ccam_tokens_total[5m])</code>) con expresiones iniciales de la consola CCAM y reglas de grabación en <code>monitoring/prometheus/ccam-rules.yml</code></span>',
-    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login (<code>admin</code> / <code>admin</code> on port 3000): fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data</span>':
-      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM - Descripción general</strong> — panel de control de la página de inicio predeterminado después de iniciar sesión (<code>admin</code> / <code>admin</code> en el puerto 3000): instantánea de la flota, totales de la base de datos, gráficos de desglose y tarifas en vivo <code>/api/metrics</code> rasguños - sin muestras ni datos sintéticos</span>',
+    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login on port 3000: fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks use <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — panel de inicio predeterminado después de iniciar sesión en el puerto 3000: instantánea de la flota, totales de la base de datos, gráficos de desglose y tasas de scrapes de <code>/api/metrics</code> en vivo, sin datos de muestra ni sintéticos. Solo el ayudante local administrado por npm usa <code>admin</code> / <code>admin</code>; las pilas de contenedores usan <code>deployments/secrets/grafana-admin-password</code>.</span>',
     '<span class="caption-icon">🔥</span> <span><strong>Prometheus · CCAM console</strong> — static HTML at <code>/consoles/index.html</code> (Prometheus 3.x compatible): live metric cards, session/token tables, and one-click Graph drill-down links that query the Prometheus HTTP API directly</span>':
       '<span class="caption-icon">🔥</span> <span><strong>Prometeo · Consola CCAM</strong> — HTML estático en <code>/consoles/index.html</code> (Compatible con Prometheus 3.x): tarjetas métricas en vivo, tablas de sesiones/tokens y enlaces de profundización gráfica con un solo clic que consultan la API HTTP de Prometheus directamente.</span>',
     '<span class="caption-icon">📈</span> <span><strong>Prometheus · Graph</strong> — ad-hoc PromQL against scraped CCAM series; starter expressions ship in the CCAM console and <code>monitoring/README.md</code>, with derived rates in <code>monitoring/prometheus/ccam-rules.yml</code></span>':
@@ -4329,8 +4402,8 @@ window.__WIKI_CONTENT_I18N = {
     "<strong>Quick start (npm):</strong> run the dashboard on loopback, then <code>npm run monitoring:install</code> once and <code>npm run monitoring:up</code>. Open Grafana at <code>http://localhost:3000</code> and Prometheus at <code>http://localhost:9090</code>. The pre-built CCAM console is at <code>http://localhost:9090/consoles/index.html</code> (also reachable from the Prometheus UI under <strong>Consoles</strong>). For an all-Docker path use <code>npm run monitoring:docker:up</code> or <code>npm run docker:full:up</code> for dashboard + Prometheus + Grafana together. Verify with <code>npm run monitoring:verify</code> — the <code>ccam</code> scrape target should read <strong>UP</strong>.":
       "<strong>Inicio rápido (npm):</strong> Ejecuta el panel de control en bucle, luego <code>npm run monitoring:install</code> Una vez y <code>npm run monitoring:up</code>. Grafana en <code>http://localhost:3000</code> Y Prometeo en <code>http://localhost:9090</code>. console CCAM preconstruida está en <code>http://localhost:9090/consoles/index.html</code> (también accesible desde la interfaz de usuario de Prometheus en <strong>Consolas</strong>). Para un uso de ruta todo-Docker <code>npm run monitoring:docker:up</code> Oregón <code>npm run docker:full:up</code> Para panel de control + Prometheus + Grafana juntos. Verifique con <code>npm run monitoring:verify</code> — el <code>ccam</code> El objetivo de la raspadura debería leer <strong>UP</strong>.",
     "Four Grafana boards": "Cuatro tableros Grafana",
-    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. Credentials default to <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>.":
-      "<strong>CCAM - Visión general</strong> (página de inicio predeterminada), <strong>CCAM - Sesiones y agentes</strong>, <strong>CCAM - Tokens y eventos</strong>, y <strong>CCAM — Plataforma</strong> — todo provisto de <code>monitoring/grafana/dashboards/</code> Con PromQL contra tu raspado en vivo. Las credenciales por defecto son <code>admin</code> / <code>admin</code> a través de <code>monitoring/grafana.defaults.env</code>.",
+    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. The npm-only local helper uses <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>. Container stacks read the password from <code>deployments/secrets/grafana-admin-password</code>.":
+      "<strong>CCAM — Overview</strong> (inicio predeterminado), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong> y <strong>CCAM — Platform</strong> se aprovisionan desde <code>monitoring/grafana/dashboards/</code> con PromQL sobre el scrape en vivo. Solo el ayudante local administrado por npm usa <code>admin</code> / <code>admin</code> mediante <code>monitoring/grafana.defaults.env</code>. Las pilas de contenedores leen la contraseña desde <code>deployments/secrets/grafana-admin-password</code>.",
     "Prometheus console": "Consola Prometheus",
     "Prometheus 3.x dropped the legacy console template libraries, so CCAM ships a <strong>static HTML console</strong> at <code>monitoring/prometheus/consoles/index.html</code> that fetches <code>/api/v1/query</code> directly — live cards, session tables, and Graph links without Go-template errors on <code>/consoles/index.html</code>.":
       "Prometheus 3.x eliminó las bibliotecas de plantillas de consola heredadas, por lo que CCAM incluye un <strong>Consola HTML estática</strong> att <code>monitoring/prometheus/consoles/index.html</code> Que recoge <code>/api/v1/query</code> Directamente: tarjetas en vivo, tablas de sesión y enlaces a gráficos sin errores de plantilla Go en <code>/consoles/index.html</code>.",
@@ -5399,12 +5472,12 @@ window.__WIKI_CONTENT_I18N = {
     "The Dockerfile uses three stages to minimize the final image size:":
       "El Dockerfile utiliza tres etapas para minimizar el tamaño final de la imagen:",
     Stage: "etapa",
-    "Installs production <code>node_modules</code> on <code>node:22-alpine</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
-      "Instala producción <code>node_modules</code> en <code>node:22-alpine</code>. <code>better-sqlite3</code> Es opcional: si las construcciones preestablecidas no están disponibles, el servidor recurre a las construcciones integradas. <code>node:sqlite</code>",
+    "Installs production <code>node_modules</code> on digest-pinned <code>node:24.19.0-alpine3.24</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
+      "Instala los <code>node_modules</code> de producción sobre <code>node:24.19.0-alpine3.24</code> fijado por digest. <code>better-sqlite3</code> es opcional; si no hay precompilados, el servidor usa el <code>node:sqlite</code> integrado",
     "Runs <code>npm ci</code> + <code>vite build</code> to produce optimized static assets":
       "Corre <code>npm ci</code> + <code>vite build</code> Para producir activos estáticos optimizados",
-    "Clean <code>node:22-alpine</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
-      "limpio <code>node:22-alpine</code> Con solo <code>node_modules</code>, código del servidor y <code>client/dist</code>",
+    "Clean digest-pinned <code>node:24.19.0-alpine3.24</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
+      "<code>node:24.19.0-alpine3.24</code> limpio y fijado por digest, solo con <code>node_modules</code>, código del servidor y <code>client/dist</code>",
     "<strong>Hook note</strong>": "<strong>Nota de gancho</strong>",
     "Claude Code hooks run on the host, not inside the container. The containerized server receives hook events via HTTP on <code>localhost:4820</code>. Run <code>npm run install-hooks</code> on the host after starting the container.":
       "Los ganchos de Claude Code se ejecutan en el host, no dentro del contenedor. El servidor contenedorizado recibe eventos de gancho a través de HTTP en <code>localhost:4820</code>. carrera <code>npm run install-hooks</code> En el host después de iniciar el contenedor.",
@@ -5487,14 +5560,14 @@ window.__WIKI_CONTENT_I18N = {
       "Probado en batalla, minimalista, bien entendido. Fastify sería una exageración; crudo <code>http</code> El módulo requeriría demasiada plantilla para el enrutamiento.",
     "Fastest, most lightweight WebSocket library for Node. No Socket.IO overhead needed — we only push typed JSON messages one-way.":
       "La biblioteca WebSocket más rápida y ligera para Node. No se necesita sobrecarga de Socket.IO, solo enviamos mensajes JSON de tipo de forma bidireccional.",
-    "Stable, widely known, strong TypeScript support. No Server Components or RSC needed for a client-rendered local SPA.":
-      "Sostenible, ampliamente conocido, fuerte soporte para TypeScript. No se necesitan componentes de servidor ni RSC para un SPA local renderizado por el cliente.",
+    "Current supported client runtime with strong TypeScript support. CCAM remains a client-rendered SPA and does not enable Server Components or RSC.":
+      "Runtime de cliente actualmente compatible y con sólido soporte de TypeScript. CCAM sigue siendo una SPA renderizada en el cliente y no habilita Server Components ni RSC.",
     "Fast builds, native ESM, excellent dev experience. Proxy config handles the dev server split cleanly with no ejection.":
       "Construcciones rápidas, ESM nativo, excelente experiencia de desarrollo. La configuración del proxy maneja la división del servidor de desarrollo de forma limpia sin expulsión.",
     "Utility-first approach keeps styles colocated with markup. No CSS module boilerplate. Custom dark theme config for the dark UI.":
       "El enfoque de priorizar la utilidad mantiene los estilos colocalizados con el marcado. Sin plantilla de módulo CSS. Configuración personalizada del tema oscuro para la interfaz de usuario oscura.",
-    "Standard routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without prop drilling.":
-      "Ruta estándar para React SPAs. Rutas de diseño con <code>&lt;Outlet&gt;</code> Dar una composición de cáscara limpia sin perforación de propósitos.",
+    "Standard declarative routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without enabling framework or RSC modes.":
+      "Enrutamiento declarativo estándar para SPA React. Las rutas de diseño con <code>&lt;Outlet&gt;</code> ofrecen una composición limpia sin habilitar modos framework o RSC.",
     "Tree-shakeable icon library — only imports what's used (~20 icons). No heavy icon font.":
       "Biblioteca de iconos que se pueden sacudir como un árbol: solo importa lo que se utiliza (~20 iconos). Sin fuente de iconos pesada.",
     "Catches null/undefined bugs at compile time. <code>noUncheckedIndexedAccess</code> prevents array bounds issues in analytics aggregations.":
@@ -6062,10 +6135,10 @@ window.__WIKI_CONTENT_I18N = {
       "<strong>SQLite</strong> (better-sqlite3 / node:sqlite)",
     "<strong>Express</strong>": "<strong>Expresar</strong>",
     "<strong>ws</strong>": "<strong>ws</strong>",
-    "<strong>React 18</strong>": "<strong>React 18</strong>",
-    "<strong>Vite 6</strong>": "<strong>Vite 6</strong>",
+    "<strong>React 19</strong>": "<strong>React 19</strong>",
+    "<strong>Vite 7</strong>": "<strong>Vite 7</strong>",
     "<strong>Tailwind CSS</strong>": "<strong>Tailwind CSS</strong>",
-    "<strong>React Router 6</strong>": "<strong>React Router 6</strong>",
+    "<strong>React Router 8</strong>": "<strong>React Router 8</strong>",
     "<strong>Lucide React</strong>": "<strong>Lucide React</strong>",
     "<strong>TypeScript Strict</strong>": "<strong>TypeScript estricto</strong>",
     "<strong>D3.js + d3-sankey</strong>": "<strong>D3.js + d3-sankey</strong>",

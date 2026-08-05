@@ -7,13 +7,14 @@
 
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import type { ReactElement } from "react";
 // render is used inside renderCard helper
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router";
 import { AgentCard } from "../AgentCard";
 import type { Agent } from "../../lib/types";
 import { formatModelName, fmtCost } from "../../lib/format";
 
-function renderCard(element: JSX.Element) {
+function renderCard(element: ReactElement) {
   return render(<MemoryRouter>{element}</MemoryRouter>);
 }
 

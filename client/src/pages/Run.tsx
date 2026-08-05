@@ -80,7 +80,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   Play,
@@ -939,7 +939,7 @@ export function Run() {
       if (msg.type === "run_stream") {
         const p = msg.data as RunStreamPayload;
         if (handle && p.id === handle.id) {
-          // React 18 auto-batches async setStates, which collapses bursts of
+          // React auto-batches async setStates, which collapses bursts of
           // stream_event deltas (and the final `assistant` envelope that
           // follows them) into a single render - visually erasing the
           // streaming effect. flushSync forces a commit per envelope so the

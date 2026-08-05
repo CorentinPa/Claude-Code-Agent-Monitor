@@ -198,6 +198,7 @@ All dashboard fetches reject HTTP redirects. Binary transcript-image responses a
 | --- | --- | --- |
 | `MCP_DASHBOARD_BASE_URL` | `http://127.0.0.1:4820` | Local dashboard URL. Only direct loopback and approved container-host aliases are accepted |
 | `MCP_DASHBOARD_API_TOKEN` | unset | Bearer token when the dashboard uses `DASHBOARD_TOKEN`; falls back to `DASHBOARD_API_TOKEN` |
+| `MCP_DASHBOARD_API_TOKEN_FILE` | unset | File-backed dashboard token for Docker/Kubernetes secrets |
 | `MCP_DASHBOARD_TIMEOUT_MS` | `10000` | Request timeout |
 | `MCP_DASHBOARD_RETRY_COUNT` | `2` | Extra attempts for GET requests only |
 | `MCP_DASHBOARD_RETRY_BACKOFF_MS` | `250` | Exponential backoff base |
@@ -206,9 +207,11 @@ All dashboard fetches reject HTTP redirects. Binary transcript-image responses a
 | `MCP_TRANSPORT` | `stdio` | `stdio`, `http`, or `repl` |
 | `MCP_HTTP_HOST` | `127.0.0.1` | HTTP transport bind host |
 | `MCP_HTTP_PORT` | `8819` | HTTP transport port |
+| `MCP_HTTP_AUTH_TOKEN` | unset | Bearer token required by `/mcp`, `/sse`, and `/messages`; `/health` remains probeable |
+| `MCP_HTTP_AUTH_TOKEN_FILE` | unset | File-backed MCP client token |
 | `MCP_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, or `error` |
 
-Direct loopback URLs (`127.0.0.1`, `localhost`, or `::1`) may use a bearer token over HTTP because the request never leaves the machine. A tokenized container-host alias such as `host.docker.internal`, `gateway.docker.internal`, or `host.containers.internal` must use HTTPS. Startup fails instead of sending the token over plain container-network HTTP.
+Direct loopback URLs (`127.0.0.1`, `localhost`, or `::1`) and the private Compose service `agent-monitor` may use a bearer token over HTTP. A tokenized container-host alias such as `host.docker.internal`, `gateway.docker.internal`, or `host.containers.internal` must use HTTPS. Startup fails instead of sending the token over an unsafe route.
 
 ## Host Configuration
 
@@ -242,6 +245,7 @@ npm run extensions:validate
 
 - Dashboard unreachable: run `ccam status`, then `ccam start` or `npm run dev`.
 - Auth failure: set `MCP_DASHBOARD_API_TOKEN` or its `DASHBOARD_API_TOKEN` fallback to the same value as `DASHBOARD_TOKEN`.
+- MCP HTTP `401`: set `MCP_HTTP_AUTH_TOKEN` or `_FILE`, then send `Authorization: Bearer <token>` or `x-mcp-token`.
 - Tokenized container-host alias rejected: terminate TLS for the dashboard and use an `https://` base URL, or run the MCP process on the host and use direct loopback HTTP.
 - Upload or image is too large: keep each history file at or below 50 MiB, each upload call at or below 100 MiB total, transcript images at or below 10 MiB, and backup exports at or below 25 MiB.
 - Mutation denied: set `MCP_DASHBOARD_ALLOW_MUTATIONS=true` for that MCP process.

@@ -177,7 +177,7 @@ graph TB
     end
     
     subgraph "Backend"
-        Express[Express Server<br/>Node.js 20+]
+        Express[Express Server<br/>Node.js 22.22+]
         DB[(SQLite Database)]
         WS[WebSocket Server]
     end
@@ -214,8 +214,8 @@ graph TB
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | React 18, TypeScript 5.7, Vite 6, Tailwind CSS |
-| **Backend** | Node.js 20+, Express 4.21, WebSocket |
+| **Frontend** | React 19, TypeScript 5.7, Vite 7, Tailwind CSS |
+| **Backend** | Node.js 22.22+, Express 4.22, WebSocket |
 | **Database** | SQLite 3 (better-sqlite3 or node:sqlite) |
 | **Integration** | Claude Code Hooks, MCP Server |
 
