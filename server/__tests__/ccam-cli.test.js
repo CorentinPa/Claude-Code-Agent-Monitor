@@ -32,6 +32,7 @@ process.env.DASHBOARD_LIVENESS_PROBE = "0";
 
 const { createApp, startServer } = require("../index");
 const { db } = require("../db");
+const { getUpdatesStatus } = require("../lib/update-check");
 
 const CLI = path.resolve(__dirname, "..", "..", "bin", "ccam.js");
 
@@ -87,6 +88,12 @@ function post(urlPath, body) {
 
 before(async () => {
   const app = createApp();
+  // Keep this CLI-to-HTTP integration test deterministic and offline. The
+  // dedicated update-check suite exercises fetch/branch/ref behavior; this
+  // suite only verifies that the real CLI formats the route payload correctly.
+  // A live network fetch may legally run for 120s, longer than the CLI test
+  // harness's 20s subprocess guard, and previously produced exit code null in CI.
+  app.locals.updateStatusProvider = () => getUpdatesStatus(undefined, { skipFetch: true });
   server = await startServer(app, 0);
   PORT = server.address().port;
   // Seed one session via the real hook path so list commands have a row.
@@ -555,9 +562,9 @@ describe("ccam CLI — import & administration", () => {
   });
 
   it("update-check reports the checkout's update status", async () => {
-    // The test process runs inside the real repo clone, so the route always
-    // reports git_repo: true; the CLI exits 0 whether the checkout is behind,
-    // current, or the remote is unreachable (fetch errors are informational).
+    // The route uses the app-local offline provider configured in before().
+    // Branch/ref behavior remains real, but no external GitHub fetch can race
+    // the test harness timeout.
     const { code, out } = await ccam("update-check");
     assert.equal(code, 0);
     assert.match(out, /Dashboard updates/);
