@@ -46,8 +46,7 @@
     "fastOutput": "Fast Output",
     "gpt": {
       "title": "OpenAI GPT Model Pricing",
-      "description": "Published OpenAI API rates for Codex usage. Standard requests use Short rates at or below 272K input tokens and Long rates above 272K; Fast mode uses its own rate card.",
-      "unit": "USD per 1M tokens",
+      "description": "Published OpenAI API rates for Codex usage. Standard requests use Short rates at or below 272K input tokens and Long rates above 272K; Fast mode uses its own rate card. USD per 1M tokens.",
       "tooltip": {
         "title": "How GPT pricing works",
         "howItWorks": "How it works",

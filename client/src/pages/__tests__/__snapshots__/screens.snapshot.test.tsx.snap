@@ -8125,12 +8125,7 @@ exports[`screen snapshots > Settings 1`] = `
             <p
               class="text-xs text-gray-500 mt-0.5"
             >
-              Published OpenAI API rates for Codex usage. Standard requests use Short rates at or below 272K input tokens and Long rates above 272K; Fast mode uses its own rate card.
-            </p>
-            <p
-              class="mt-1 text-[11px] font-medium uppercase tracking-wider text-emerald-300/80"
-            >
-              USD per 1M tokens
+              Published OpenAI API rates for Codex usage. Standard requests use Short rates at or below 272K input tokens and Long rates above 272K; Fast mode uses its own rate card. USD per 1M tokens.
             </p>
           </div>
           <div

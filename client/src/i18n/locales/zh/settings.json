@@ -46,8 +46,7 @@
     "fastOutput": "快速输出",
     "gpt": {
       "title": "OpenAI GPT 模型定价",
-      "description": "用于 Codex 的公开 OpenAI API 费率。标准请求在输入令牌不超过 272K 时使用短上下文费率，超过 272K 时使用长上下文费率；快速模式使用单独的费率表。",
-      "unit": "每 100 万 Token（美元）",
+      "description": "用于 Codex 的公开 OpenAI API 费率。标准请求在输入令牌不超过 272K 时使用短上下文费率，超过 272K 时使用长上下文费率；快速模式使用单独的费率表。每 100 万 Token（美元）。",
       "tooltip": {
         "title": "GPT 定价的工作原理",
         "howItWorks": "工作原理",

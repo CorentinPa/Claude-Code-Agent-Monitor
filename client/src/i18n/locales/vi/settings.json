@@ -46,8 +46,7 @@
     "fastOutput": "Fast Output",
     "gpt": {
       "title": "Định giá mô hình GPT của OpenAI",
-      "description": "Đơn giá API OpenAI công bố cho mức dùng Codex. Yêu cầu chuẩn dùng mức Short với đầu vào không quá 272K token và Long khi vượt 272K; Fast mode dùng bảng giá riêng.",
-      "unit": "USD trên 1M token",
+      "description": "Đơn giá API OpenAI công bố cho mức dùng Codex. Yêu cầu chuẩn dùng mức Short với đầu vào không quá 272K token và Long khi vượt 272K; Fast mode dùng bảng giá riêng. USD trên 1M token.",
       "tooltip": {
         "title": "Cách hoạt động của định giá GPT",
         "howItWorks": "Cách hoạt động",

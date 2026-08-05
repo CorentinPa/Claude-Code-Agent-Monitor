@@ -46,8 +46,7 @@
     "fastOutput": "Fast Output",
     "gpt": {
       "title": "OpenAI GPT 모델 가격 정책",
-      "description": "Codex 사용을 위한 공개 OpenAI API 요금입니다. 표준 요청은 입력 토큰이 272K 이하일 때 Short, 초과일 때 Long 요율을 사용하며 Fast 모드는 별도 요금표를 사용합니다.",
-      "unit": "토큰 100만 개당 USD",
+      "description": "Codex 사용을 위한 공개 OpenAI API 요금입니다. 표준 요청은 입력 토큰이 272K 이하일 때 Short, 초과일 때 Long 요율을 사용하며 Fast 모드는 별도 요금표를 사용합니다. 토큰 100만 개당 USD입니다.",
       "tooltip": {
         "title": "GPT 가격 산정 방식",
         "howItWorks": "작동 방식",

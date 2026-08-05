@@ -546,11 +546,13 @@ describe("screen snapshots", () => {
     const claudeAdd = claude.getByRole("button", { name: "Add Model" });
     const gptReset = gpt.getByRole("button", { name: "Reset Defaults" });
     const gptAdd = gpt.getByRole("button", { name: "Add Model" });
-    const unit = gpt.getByText("USD per 1M tokens");
+    const subtitle = gpt.getByText(/Published OpenAI API rates.*USD per 1M tokens\./);
 
     expect(gptReset.className).toBe(claudeReset.className);
     expect(gptAdd.className).toBe(claudeAdd.className);
-    expect(unit.compareDocumentPosition(gptReset) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      subtitle.compareDocumentPosition(gptReset) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
     expect(
       gptReset.compareDocumentPosition(gptAdd) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();

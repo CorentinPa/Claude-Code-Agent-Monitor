@@ -609,9 +609,6 @@ function GptPricingTable({
             <PricingInfoTooltip provider="gpt" />
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">{t("pricing.gpt.description")}</p>
-          <p className="mt-1 text-[11px] font-medium uppercase tracking-wider text-emerald-300/80">
-            {t("pricing.gpt.unit")}
-          </p>
         </div>
         <div className="mt-3 flex items-center gap-2">
           <button

@@ -46,8 +46,7 @@
     "fastOutput": "Salida Rápida",
     "gpt": {
       "title": "Precios de modelos GPT de OpenAI",
-      "description": "Tarifas de API de OpenAI publicadas para el uso de Codex. Las solicitudes estándar usan tarifas cortas con 272K tokens de entrada o menos y largas por encima de 272K; el modo rápido tiene su propia tabla de tarifas.",
-      "unit": "USD por 1M de tokens",
+      "description": "Tarifas de API de OpenAI publicadas para el uso de Codex. Las solicitudes estándar usan tarifas cortas con 272K tokens de entrada o menos y largas por encima de 272K; el modo rápido tiene su propia tabla de tarifas. USD por 1M de tokens.",
       "tooltip": {
         "title": "Cómo funcionan los precios de GPT",
         "howItWorks": "Cómo funciona",
