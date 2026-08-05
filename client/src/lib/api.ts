@@ -638,6 +638,7 @@ export const api = {
       limit?: number;
       offset?: number;
       provider?: "claude" | "codex";
+      include_transient?: boolean;
     }) => {
       const qs = new URLSearchParams();
       // Only append params that were actually supplied so the URL stays minimal.
@@ -651,6 +652,7 @@ export const api = {
       if (params?.sort_desc !== undefined) qs.set("sort_desc", String(params.sort_desc));
       if (params?.limit) qs.set("limit", String(params.limit));
       if (params?.offset) qs.set("offset", String(params.offset));
+      if (params?.include_transient) qs.set("include_transient", "1");
       applyScope(qs); // narrow to the active machine and product scope
       // A provider-specific picker (for example Run Agent resume) must be
       // able to narrow a globally-both dashboard to its native session type.
@@ -786,12 +788,19 @@ export const api = {
      * @param params.offset     Row offset.
      * @returns `{ agents }` — the matching agents (note: no `total` here).
      */
-    list: (params?: { status?: string; session_id?: string; limit?: number; offset?: number }) => {
+    list: (params?: {
+      status?: string;
+      session_id?: string;
+      limit?: number;
+      offset?: number;
+      include_transient?: boolean;
+    }) => {
       const qs = new URLSearchParams();
       if (params?.status) qs.set("status", params.status);
       if (params?.session_id) qs.set("session_id", params.session_id);
       if (params?.limit) qs.set("limit", String(params.limit));
       if (params?.offset) qs.set("offset", String(params.offset));
+      if (params?.include_transient) qs.set("include_transient", "1");
       applyScope(qs); // narrow to the active data scope (source machines)
       const q = qs.toString();
       return request<{ agents: Agent[] }>(`/agents${q ? `?${q}` : ""}`);

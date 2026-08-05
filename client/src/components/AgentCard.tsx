@@ -2,8 +2,8 @@
  * @file AgentCard.tsx
  * @description Defines the AgentCard component that displays a summary of an
  * agent's name, status, task, current tool, timestamps, and native Codex
- * title plus a latest-two-human-turn context. The card is clickable and
- * navigates to session details while visually distinguishing active agents.
+ * title plus a latest-two-human-turn context. Durable cards navigate to session
+ * details while the brief pre-identity Codex process card stays non-navigable.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -107,6 +107,15 @@ interface AgentCardProps {
   onClick?: () => void;
 }
 
+function isTransientProcessCard(metadata: string | null | undefined): boolean {
+  if (!metadata) return false;
+  try {
+    return JSON.parse(metadata)?.pre_identity_process === true;
+  } catch {
+    return false;
+  }
+}
+
 export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation("kanban");
@@ -155,6 +164,7 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
     ? session?.prompt_preview?.trim() || agent.task?.trim() || null
     : agent.task?.trim() || null;
   const taskPreviewLines = promptPreviewLines(taskPreview);
+  const isTransient = isTransientProcessCard(agent.metadata);
   // A subagent's own model lives in its metadata (resolved from its transcript,
   // not the parent session's — see issue #185). Use it everywhere this card
   // shows a model so a Haiku QA agent under an Opus orchestrator reads as
@@ -205,7 +215,7 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
   function handleClick() {
     if (onClick) {
       onClick();
-    } else {
+    } else if (!isTransient) {
       navigate(`/sessions/${agent.session_id}`);
     }
   }
@@ -213,7 +223,9 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
   return (
     <div
       onClick={handleClick}
-      className={`card-hover p-4 cursor-pointer overflow-hidden ${
+      className={`card-hover p-4 overflow-hidden ${
+        isTransient ? "cursor-default" : "cursor-pointer"
+      } ${
         isWaiting
           ? "border-l-2 border-l-yellow-500/60"
           : isActive

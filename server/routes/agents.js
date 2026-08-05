@@ -9,6 +9,7 @@ const { broadcast } = require("../websocket");
 const { attachAgentCosts } = require("./pricing");
 const { parseSources, sessionIdInSourcesClause } = require("../lib/source-filter");
 const { parseProviders, sessionIdInProvidersClause } = require("../lib/provider-filter");
+const { getCodexProcessAgents } = require("../lib/codex-process-overlay");
 
 const router = Router();
 
@@ -27,6 +28,8 @@ router.get("/", (req, res) => {
   const offset = parseInt(req.query.offset) || 0;
   const status = req.query.status;
   const session_id = req.query.session_id;
+  const includeTransient =
+    req.query.include_transient === "1" || req.query.include_transient === "true";
   const sources = parseSources(req);
   const providers = parseProviders(req);
 
@@ -68,9 +71,30 @@ router.get("/", (req, res) => {
     rows = stmts.listAgents.all(limit, offset);
   }
 
-  // Attach each agent's OWN cost (from its metadata token buckets) so subagent
-  // cards can show their real cost instead of the session total.
-  res.json({ agents: attachAgentCosts(rows), limit, offset });
+  const includesLocal = !sources || sources.includes("local");
+  const includesCodex = !providers || providers.includes("codex");
+  const transient =
+    includeTransient &&
+    status === "waiting" &&
+    !session_id &&
+    includesLocal &&
+    includesCodex &&
+    offset === 0
+      ? getCodexProcessAgents(
+          db
+            .prepare(
+              `SELECT id, cwd FROM sessions
+               WHERE provider = 'codex' AND status = 'active'
+                 AND (source = 'local' OR source IS NULL)`
+            )
+            .all()
+        )
+      : [];
+
+  // Attach each persisted agent's OWN cost (from its metadata token buckets)
+  // and prepend the in-memory, pre-identity Codex cards without persisting or
+  // pricing them.
+  res.json({ agents: [...transient, ...attachAgentCosts(rows)], limit, offset });
 });
 
 router.get("/:id", (req, res) => {

@@ -424,6 +424,15 @@ function startBackgroundServices() {
   } catch (err) {
     console.warn("Codex session sync failed to start:", err.message);
   }
+  // A new Codex TUI has no provider session id until its first prompt. Keep a
+  // process-only card in memory for that brief window. Durable rollout/state
+  // ingestion remains unchanged and takes over as soon as Codex exposes an id.
+  try {
+    const { startCodexProcessOverlay } = require("./lib/codex-process-overlay");
+    startCodexProcessOverlay({ broadcast });
+  } catch (err) {
+    console.warn("Codex startup overlay failed to start:", err.message);
+  }
   // Pull Claude Code history from enabled remote (SSH) sources on an interval so
   // usage collected on other machines shows up here in near real time. Off by
   // default cost-wise: the loop only does work when the user has configured at

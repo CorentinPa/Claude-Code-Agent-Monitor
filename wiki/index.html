@@ -3707,9 +3707,12 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             file is retried without delaying the rest.
           </p>
           <p>
-            A Codex <code>SessionStart</code> creates a Waiting session and main-agent card
-            immediately from its stable session ID, even before the rollout exists or has been
-            flushed. When rollout JSONL arrives, it enriches that same row without duplication.
+            A fresh interactive Codex process first appears as an in-memory Waiting card, including
+            while Codex is still at its trust screen or first prompt and has no stable session ID.
+            The card is local-only, non-navigable, excluded from durable APIs unless
+            <code>include_transient=true</code>, and removed on process exit. A
+            <code>SessionStart</code> hook, native live-thread row, or rollout then creates the
+            durable session and main-agent rows without copying the temporary card into history.
           </p>
           <p>
             Codex <code>response_item</code> tool calls are indexed exactly once through a separate
@@ -6962,7 +6965,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=66" defer></script>
+    <script src="i18n-content.js?v=67" defer></script>
     <script src="script.js?v=49" defer></script>
     <script>
       (function () {

@@ -6,8 +6,8 @@
  */
 window.__WIKI_CONTENT_I18N = {
   zh: {
-    "A Codex <code>SessionStart</code> creates a Waiting session and main-agent card immediately from its stable session ID, even before the rollout exists or has been flushed. When rollout JSONL arrives, it enriches that same row without duplication.":
-      "Codex <code>SessionStart</code> 会立即使用稳定的 session ID 创建等待中的会话和主 agent 卡片，即使 rollout 尚不存在或尚未 flush。rollout JSONL 到达后会补充同一行，不会产生重复。",
+    "A fresh interactive Codex process first appears as an in-memory Waiting card, including while Codex is still at its trust screen or first prompt and has no stable session ID. The card is local-only, non-navigable, excluded from durable APIs unless <code>include_transient=true</code>, and removed on process exit. A <code>SessionStart</code> hook, native live-thread row, or rollout then creates the durable session and main-agent rows without copying the temporary card into history.":
+      "新的交互式 Codex 进程会先显示为仅存在于内存中的等待卡片，即使 Codex 仍停留在信任确认界面或首个提示符，尚未获得稳定的 session ID。该卡片仅限本机、不可跳转，除非使用 <code>include_transient=true</code>，否则不会出现在持久 API 中，并会在进程退出时移除。随后 <code>SessionStart</code> Hook、原生 live-thread 行或 rollout 会创建持久会话和主 agent 行，而不会把临时卡片复制到历史记录中。",
     "<strong>React 19</strong>": "<strong>React 19</strong>",
     "<strong>Vite 7</strong>": "<strong>Vite 7</strong>",
     "<strong>React Router 8</strong>": "<strong>React Router 8</strong>",
@@ -1441,8 +1441,8 @@ window.__WIKI_CONTENT_I18N = {
       "<strong>服务端分页</strong>的表格，列出每一个已记录的会话。每一页只获取对应的数据片段，因此无论会话数量多少，成本计算都保持有界。针对 <code>id</code>、<code>name</code> 和 <code>cwd</code> 的不区分大小写搜索在服务端运行，并带有 300 ms 防抖；状态过滤器可与搜索组合以精确缩小范围。可搜索的复选框项目选择器支持选择多个目录；完整长路径仍可查看，紧凑的触发器文字让筛选栏保持易读。排序使用相同的自定义下拉模式。每一行显示会话的真实名称（从 transcript 实时同步：<code>/rename</code> 或 <code>claude -n</code> 标题，否则使用自动标题，再否则使用首条用户 prompt，并回退到短 ID）、状态徽章、agent 数量、时长、模型和预估成本。点击任意行即可深入查看完整的会话详情视图，包含对话记录和 agent 层级。",
   },
   vi: {
-    "A Codex <code>SessionStart</code> creates a Waiting session and main-agent card immediately from its stable session ID, even before the rollout exists or has been flushed. When rollout JSONL arrives, it enriches that same row without duplication.":
-      "Codex <code>SessionStart</code> tạo ngay phiên và thẻ agent chính ở trạng thái Đang chờ từ session ID ổn định, ngay cả khi rollout chưa tồn tại hoặc chưa được flush. Khi JSONL rollout đến, nó làm giàu chính hàng đó mà không tạo bản sao.",
+    "A fresh interactive Codex process first appears as an in-memory Waiting card, including while Codex is still at its trust screen or first prompt and has no stable session ID. The card is local-only, non-navigable, excluded from durable APIs unless <code>include_transient=true</code>, and removed on process exit. A <code>SessionStart</code> hook, native live-thread row, or rollout then creates the durable session and main-agent rows without copying the temporary card into history.":
+      "Một tiến trình Codex tương tác mới trước tiên xuất hiện dưới dạng thẻ Đang chờ chỉ tồn tại trong bộ nhớ, kể cả khi Codex vẫn ở màn hình xác nhận tin cậy hoặc prompt đầu tiên và chưa có session ID ổn định. Thẻ này chỉ tồn tại cục bộ, không thể điều hướng, không xuất hiện trong API bền vững trừ khi dùng <code>include_transient=true</code>, và bị xóa khi tiến trình thoát. Sau đó Hook <code>SessionStart</code>, hàng live-thread gốc hoặc rollout sẽ tạo các hàng phiên và agent chính bền vững mà không sao chép thẻ tạm thời vào lịch sử.",
     "<strong>React 19</strong>": "<strong>React 19</strong>",
     "<strong>Vite 7</strong>": "<strong>Vite 7</strong>",
     "<strong>React Router 8</strong>": "<strong>React Router 8</strong>",

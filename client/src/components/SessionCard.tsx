@@ -4,8 +4,8 @@
  * Mirrors AgentCard's information hierarchy (icon · title · meta line) but
  * surfaces session-relevant fields: model, agent count, cost, last activity,
  * and a meaningful provider-native title with its latest two human prompts
- * (or a stable short session ID). Clicking the card navigates to the detail
- * page.
+ * (or a stable short session ID). Durable cards navigate to details; the brief
+ * pre-identity Codex process card stays non-navigable until a real ID exists.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -76,6 +76,15 @@ interface SessionCardProps {
   onClick?: () => void;
 }
 
+function isTransientProcessCard(metadata: string | null | undefined): boolean {
+  if (!metadata) return false;
+  try {
+    return JSON.parse(metadata)?.pre_identity_process === true;
+  } catch {
+    return false;
+  }
+}
+
 function formatCost(cost: number): string {
   if (!Number.isFinite(cost) || cost <= 0) return "$0";
   if (cost >= 1) return `$${cost.toFixed(2)}`;
@@ -122,16 +131,19 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
   // their own native title while the latest two durable human turns explain
   // what the session is doing.
   const promptPreviewLinesForCard = promptPreviewLines(session.prompt_preview);
+  const isTransient = isTransientProcessCard(session.metadata);
 
   function handleClick() {
     if (onClick) onClick();
-    else navigate(`/sessions/${session.id}`);
+    else if (!isTransient) navigate(`/sessions/${session.id}`);
   }
 
   return (
     <div
       onClick={handleClick}
-      className={`card-hover p-4 cursor-pointer animate-fade-in overflow-hidden ${
+      className={`card-hover p-4 animate-fade-in overflow-hidden ${
+        isTransient ? "cursor-default" : "cursor-pointer"
+      } ${
         isWaiting
           ? "border-l-2 border-l-yellow-500/60"
           : isActive

@@ -134,6 +134,7 @@ returns the same optional field.
 | `sort_desc` | boolean | `true` | Use descending order; set to `false` for ascending order |
 | `sources` | string | - | Comma-separated data-source ids to include (the built-in local history is `local`; remote SSH machines use their `remote_sources.id`). Omit for all sources. Also accepted on `/api/events`, `/api/agents`, `/api/stats`, `/api/analytics`, and `/api/pricing/cost`. See [Remote Data Sources](#remote-data-sources) |
 | `providers` | string | - | Comma-separated product providers: `claude`, `codex`, or both. It composes with `sources` and is accepted by the scoped list, aggregate, facet, per-session detail, cost, and workflow routes. Codex workflow responses include its recorded `response_item` tool calls, token/model totals, and `context_compacted` events; only Claude Code's Workflow-tool run journals are unavailable for Codex. |
+| `include_transient` | boolean | `false` | Opt in to local, in-memory Codex startup cards before Codex exposes a stable session ID. On `/api/sessions`, this is honored only on the first page when `status` is absent or `active`; on `/api/agents`, only on the first `status=waiting` page without `session_id`. These cards are prepended without changing durable `total`, pagination, analytics, pricing, workflows, alerts, or history. |
 
 **Example Request:**
 
