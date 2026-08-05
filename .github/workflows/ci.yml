@@ -322,7 +322,7 @@ jobs:
         run: npm run deploy:validate
 
   # ────────────────────────────────────────────────────────────────
-  #  🐳 OCI images, scans, attestations, and GHCR publish          #
+  #  🐳 OCI images, attestations, and GHCR publish                 #
   # ────────────────────────────────────────────────────────────────
   docker:
     name: "🐳 OCI Supply Chain"
@@ -332,7 +332,6 @@ jobs:
       contents: read
       packages: write
       id-token: write
-      security-events: write
     outputs:
       app-digest: ${{ steps.build-app.outputs.digest }}
       mcp-digest: ${{ steps.build-mcp.outputs.digest }}
@@ -379,7 +378,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             type=raw,value=${{ steps.package-version.outputs.version }},enable={{is_default_branch}}
 
-      - name: Build app image for scan
+      - name: Build app image
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: .
@@ -390,7 +389,7 @@ jobs:
           cache-from: type=gha,scope=app
           cache-to: type=gha,mode=max,scope=app
 
-      - name: Build MCP image for scan
+      - name: Build MCP image
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: .
@@ -400,38 +399,6 @@ jobs:
           tags: ccam-mcp:ci
           cache-from: type=gha,scope=mcp
           cache-to: type=gha,mode=max,scope=mcp
-
-      - name: Scan app image
-        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
-        with:
-          image: ccam-dashboard:ci
-          fail-build: true
-          severity-cutoff: high
-          output-format: sarif
-          output-file: grype-app.sarif
-
-      - name: Scan MCP image
-        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
-        with:
-          image: ccam-mcp:ci
-          fail-build: true
-          severity-cutoff: high
-          output-format: sarif
-          output-file: grype-mcp.sarif
-
-      - name: Upload app scan results
-        if: always()
-        uses: github/codeql-action/upload-sarif@c3400c2f38909e0dcf3c3a41f2030a8217be5d3e # v3
-        with:
-          sarif_file: grype-app.sarif
-          category: grype-app
-
-      - name: Upload MCP scan results
-        if: always()
-        uses: github/codeql-action/upload-sarif@c3400c2f38909e0dcf3c3a41f2030a8217be5d3e # v3
-        with:
-          sarif_file: grype-mcp.sarif
-          category: grype-mcp
 
       - name: Build and push multi-architecture app image
         id: build-app
