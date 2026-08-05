@@ -48,7 +48,17 @@
       "title": "OpenAI GPT 模型定价",
       "description": "用于 Codex 的公开 OpenAI API 费率。标准请求在输入令牌不超过 272K 时使用短上下文费率，超过 272K 时使用长上下文费率；快速模式使用单独的费率表。",
       "unit": "每 100 万 Token（美元）",
-      "unavailableNote": "每个金额均为每 100 万 Token 的美元。破折号表示 OpenAI 未公布该上下文或快速模式费率，因此仪表盘会将匹配用量标记为未定价，而不会猜测价格。",
+      "tooltip": {
+        "title": "GPT 定价的工作原理",
+        "howItWorks": "工作原理",
+        "howItWorksBody": "所有金额均为每 100 万 Token 的美元。Codex 标准请求在输入 Token 不超过 272K 时使用短上下文费率，超过 272K 时使用长上下文费率。快速模式使用独立费率表。新输入、缓存输入、缓存写入和输出分别计价。",
+        "patternsTitle": "模式语法",
+        "patternsBody": "模式使用 SQL 风格的 % 通配符。仪表盘会先评估最具体的模型模式，并使用第一个与上报 model id 匹配的规则。",
+        "manualUpdates": "价格必须手动更新",
+        "manualUpdatesBody": "OpenAI 会在官网公布 API 价格变动，但没有实时数据源。当模型或费率变化时，请更新或添加匹配规则，以便新记录的用量能正确计价。",
+        "apiPricing": "未公布的费率保持未定价",
+        "apiPricingBody": "破折号表示 OpenAI 未公布该上下文或快速模式费率。匹配用量会被标记为未定价，而不是进行估算。这些是按量付费 API 费率，仅供参考，不代表订阅套餐账单。"
+      },
       "name": "名称",
       "short": "标准 · 短上下文 ≤272K",
       "long": "标准 · 长上下文 >272K",

@@ -305,7 +305,7 @@ Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Ag
 | **Transcript 缓存** | 从 JSONL Transcript 实时提取：Token、压缩、API 错误（`isApiErrorMessage` 条目存储为 `APIError` 事件）、回合耗时（存储为 `TurnDuration` 事件）、思考块计数和用量附加信息（service_tier、speed、inference_geo）。会话元数据实时丰富这些字段 |
 | **通知** | 基于 Web Push (VAPID) 的持久化浏览器通知。即使 Dashboard 标签页未聚焦或浏览器已关闭也能送达。特别针对 macOS 音效支持进行了配置。支持按事件配置开关及订阅管理 |
 | **更新提醒** | 服务端定期以非阻塞方式执行 `git fetch`，将本地检出与所选规范远程的默认分支对比。**支持分支与 fork：** 若同时存在 `upstream` 和 `origin`，优先使用 `upstream`（fork 的常规约定）；命令也会根据用户处境调整——只有在本地分支真正跟踪规范引用时才建议 `git pull --ff-only`，否则给出 `git fetch`（fork 场景下加上 fast-forward 合并），让命令永不撒谎。侧边栏还有常驻的"检查更新"按钮及状态徽标。Dashboard **不会**自行拉取或重启——用户在终端中手动执行命令——因此该机制不会破坏开发会话、pm2/systemd/Docker 进程管理，也不会留下孤立进程 |
-| **设置** | 系统信息、Hook 状态、模型定价管理、通知偏好、数据导出**与恢复**（Import History 面板的 **Restore backup** 模式接受一个不超过 25 MiB 的导出 `.json`，并以幂等、非覆盖方式重新导入，因此可将多台机器的历史合并到一个仪表盘）、会话清理。**模型定价**区块在标题旁提供一个信息浮层（`i` 图标），讲解规则匹配方式（首条匹配的模式生效）、SQL 风格 `%` 通配符的语法及具体示例（`claude-opus-4-7%`、`claude-%-haiku`、精确 id），并提醒：当 Anthropic 公布新价格时必须手动更新——已存储的会话仍保留入库时所用价格。每条规则的编辑器还带有一个可折叠的 Introductory rates 区块（一个 YYYY-MM-DD 促销截止日期 + 按类别的介绍性价格）；将日期留空表示没有促销，而空日期会清除任何已存储的介绍性价格。CLAUDE_HOME 区块与 Import History 面板已完整覆盖 en/vi/zh 三语 i18n |
+| **设置** | 系统信息、Hook 状态、模型定价管理、通知偏好、数据导出**与恢复**（Import History 面板的 **Restore backup** 模式接受一个不超过 25 MiB 的导出 `.json`，并以幂等、非覆盖方式重新导入，因此可将多台机器的历史合并到一个仪表盘）、会话清理。Model Pricing 将 **Anthropic Claude Model Pricing** 与 **OpenAI GPT Model Pricing** 分开显示，两者使用相同的标题布局，并在 **Add Model** 左侧提供按提供方生效的 **Reset Defaults**。标题旁的信息浮层说明首条匹配规则、SQL 风格 `%` 通配符、手动价格更新与 API 费率注意事项；GPT 浮层还说明每百万 Token 的美元单位、272K Short/Long 分界、Fast mode，以及未公布的费率为何保持未定价而不是被估算。Claude Code、Codex 数据位置与 Import History 均完整支持 i18n。 |
 > **提供方范围与数据位置：** 设置会让 Claude Code / Codex / 两者的选择在整个应用中保持一致，并可在无需重启仪表盘的情况下更改任一会话数据目录。
 >
 > **本地安全边界：** Run Agent 接受任意已存在的绝对工作目录，并在使用前规范化路径，因此仍支持从主目录和最近项目启动。托管 Webhook 提供方必须使用 HTTPS；generic 与 n8n 可为本地/自托管接收方使用 HTTP，投递不会跟随重定向。
@@ -1138,7 +1138,7 @@ npm run monitoring:docker:up
 | `POST` | `/api/settings/clear-data` | 删除所有会话、Agent、事件、Token 用量 |
 | `POST` | `/api/settings/reinstall-hooks` | 重新安装 Claude Code Hook |
 | `POST` | `/api/settings/install-hooks` | 安装 Claude Code、Codex 或两者的 Hook；保留无关 Hook |
-| `POST` | `/api/settings/reset-pricing` | 重置 Claude 与 GPT 定价为默认值 |
+| `POST` | `/api/settings/reset-pricing` | 将 Claude、Codex 或两者的定价重置为默认值 |
 | `GET` | `/api/settings/export` | 以 JSON 下载方式导出所有数据 |
 | `POST` | `/api/settings/import` | 从 `/export` 恢复一个不超过 25 MiB 的导出包（multipart `file` 或 JSON `{ path }`）。幂等且非破坏性——已存在的会话会被整体跳过 |
 | `POST` | `/api/settings/cleanup` | 废弃过期会话、清除旧数据 |

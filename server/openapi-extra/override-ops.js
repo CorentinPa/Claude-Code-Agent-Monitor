@@ -182,6 +182,7 @@ const REINSTALL_HOOKS_EXAMPLE = {
 
 const RESET_PRICING_EXAMPLE = {
   ok: true,
+  provider: "claude",
   pricing: [
     {
       model_pattern: "claude-opus-4*",
@@ -208,6 +209,7 @@ const RESET_PRICING_EXAMPLE = {
       updated_at: "2026-06-26T00:00:00.000Z",
     },
   ],
+  gpt_pricing: [],
 };
 
 const EXPORT_EXAMPLE = {
@@ -1100,10 +1102,27 @@ const paths = {
   "/api/settings/reset-pricing": {
     post: {
       tags: ["Settings"],
-      summary: "Reset pricing table to defaults",
+      summary: "Reset pricing defaults",
       description:
-        "⚠ DESTRUCTIVE to pricing customizations. Deletes EVERY row in both model_pricing and gpt_model_pricing, then re-seeds the dashboard's built-in Claude and GPT rate cards. Any custom rates or custom model patterns you added are permanently lost — there is no undo. Captured session/token data is untouched (only the pricing rules used to *compute* cost change). The response returns the freshly-seeded tables.",
+        "⚠ DESTRUCTIVE to pricing customizations. With `provider: claude` or `provider: codex`, deletes and re-seeds only that provider's pricing table so the other provider's custom rules remain untouched. Omitting the body preserves the legacy CLI/MCP behavior and resets both tables. Custom rates or model patterns in the selected scope are permanently lost — there is no undo. Captured session/token data is untouched. The response returns both current tables and identifies the reset scope.",
       operationId: "resetPricing",
+      requestBody: {
+        required: false,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                provider: { type: "string", enum: ["claude", "codex"] },
+              },
+            },
+            examples: {
+              claude: { value: { provider: "claude" } },
+              codex: { value: { provider: "codex" } },
+            },
+          },
+        },
+      },
       responses: {
         200: {
           description: "Pricing defaults restored",
@@ -1112,6 +1131,12 @@ const paths = {
               schema: { $ref: "#/components/schemas/ResetPricingResponse" },
               example: RESET_PRICING_EXAMPLE,
             },
+          },
+        },
+        400: {
+          description: "Invalid provider",
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } },
           },
         },
       },

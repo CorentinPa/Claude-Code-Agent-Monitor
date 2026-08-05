@@ -140,7 +140,9 @@ describe("i18n resources", () => {
       "pricing.navClaude",
       "pricing.navGpt",
       "pricing.gpt.title",
-      "pricing.gpt.unavailableNote",
+      "pricing.gpt.tooltip.title",
+      "pricing.gpt.tooltip.howItWorksBody",
+      "pricing.gpt.tooltip.apiPricingBody",
     ];
 
     for (const language of ["en", "zh", "vi", "ko", "es"]) {

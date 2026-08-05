@@ -1347,10 +1347,15 @@ function createOpenApiSpec() {
         },
         ResetPricingResponse: {
           type: "object",
-          required: ["ok", "pricing"],
+          required: ["ok", "provider", "pricing", "gpt_pricing"],
           properties: {
             ok: { type: "boolean", enum: [true] },
+            provider: { type: "string", enum: ["claude", "codex", "both"] },
             pricing: { type: "array", items: { $ref: "#/components/schemas/PricingRule" } },
+            gpt_pricing: {
+              type: "array",
+              items: { $ref: "#/components/schemas/GptPricingRule" },
+            },
           },
         },
         ExportResponse: {
@@ -2507,6 +2512,19 @@ function createOpenApiSpec() {
           tags: ["Settings"],
           summary: "Reset pricing table to defaults",
           operationId: "resetPricing",
+          requestBody: {
+            required: false,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    provider: { type: "string", enum: ["claude", "codex"] },
+                  },
+                },
+              },
+            },
+          },
           responses: {
             200: {
               description: "Pricing defaults restored",

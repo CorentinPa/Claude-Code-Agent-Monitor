@@ -1371,7 +1371,8 @@ window.__WIKI_CONTENT_I18N = {
     "System info, DB stats, hook installation status": "系统信息、DB 统计、钩子安装状态",
     "Delete all sessions, agents, events, token usage": "删除所有会话、智能体、事件、令牌用量",
     "Reinstall Claude Code hooks": "重新安装 Claude Code 钩子",
-    "Reset pricing rules to defaults": "将定价规则重置为默认值",
+    "Reset Claude, Codex, or both pricing tables to defaults":
+      "将 Claude、Codex 或两者的定价表重置为默认值",
     "Export all data as JSON download": "将所有数据导出为 JSON 下载",
     "Abandon stale sessions (by hours), purge old data (by days)":
       "放弃陈旧会话（按小时），清除旧数据（按天）",
@@ -2827,7 +2828,8 @@ window.__WIKI_CONTENT_I18N = {
     "Delete all sessions, agents, events, token usage":
       "Xóa tất cả phiên, agent, sự kiện, mức dùng token",
     "Reinstall Claude Code hooks": "Cài đặt lại các hook của Claude Code",
-    "Reset pricing rules to defaults": "Đặt lại quy tắc định giá về mặc định",
+    "Reset Claude, Codex, or both pricing tables to defaults":
+      "Đặt lại bảng giá Claude, Codex hoặc cả hai về mặc định",
     "Export all data as JSON download": "Xuất tất cả dữ liệu dưới dạng tải về JSON",
     "Abandon stale sessions (by hours), purge old data (by days)":
       "Bỏ các phiên cũ (theo giờ), xóa dữ liệu cũ (theo ngày)",
@@ -4244,7 +4246,8 @@ window.__WIKI_CONTENT_I18N = {
     "Delete all sessions, agents, events, token usage":
       "모든 세션, 에이전트, 이벤트, 토큰 사용량 삭제",
     "Reinstall Claude Code hooks": "Claude Code 훅 재설치",
-    "Reset pricing rules to defaults": "가격 규칙을 기본값으로 재설정",
+    "Reset Claude, Codex, or both pricing tables to defaults":
+      "Claude, Codex 또는 두 가격표를 기본값으로 재설정",
     "Export all data as JSON download": "모든 데이터를 JSON 파일로 내보내기",
     "Abandon stale sessions (by hours), purge old data (by days)":
       "오래된 세션 중단 처리(시간 단위), 오래된 데이터 삭제(일 단위)",
@@ -5692,8 +5695,8 @@ window.__WIKI_CONTENT_I18N = {
     "Delete all sessions, agents, events, token usage":
       "Borrar todas las sesiones, agentes, eventos, uso de tokens",
     "Reinstall Claude Code hooks": "Reinstalar los ganchos de Claude Code",
-    "Reset pricing rules to defaults":
-      "Restablecer las reglas de precios a los valores predeterminados",
+    "Reset Claude, Codex, or both pricing tables to defaults":
+      "Restablecer las tablas de precios de Claude, Codex o ambas a los valores predeterminados",
     "Export all data as JSON download": "Exportar todos los datos como descarga JSON",
     "Abandon stale sessions (by hours), purge old data (by days)":
       "Abandone sesiones obsoletas (por horas), purgue datos antiguos (por días)",

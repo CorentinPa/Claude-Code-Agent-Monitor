@@ -48,7 +48,17 @@
       "title": "Định giá mô hình GPT của OpenAI",
       "description": "Đơn giá API OpenAI công bố cho mức dùng Codex. Yêu cầu chuẩn dùng mức Short với đầu vào không quá 272K token và Long khi vượt 272K; Fast mode dùng bảng giá riêng.",
       "unit": "USD trên 1M token",
-      "unavailableNote": "Mọi số tiền đều là USD trên 1M token. Dấu gạch ngang nghĩa là OpenAI không công bố mức giá ngữ cảnh hoặc Fast mode đó, vì vậy dashboard đánh dấu usage phù hợp là chưa có giá thay vì đoán.",
+      "tooltip": {
+        "title": "Cách hoạt động của định giá GPT",
+        "howItWorks": "Cách hoạt động",
+        "howItWorksBody": "Mọi số tiền đều là USD trên 1M token. Yêu cầu Codex chuẩn dùng mức Short khi đầu vào không quá 272K token và mức Long khi vượt 272K. Fast mode dùng bảng giá riêng. Đầu vào mới, đầu vào đã cache, ghi cache và đầu ra được định giá riêng.",
+        "patternsTitle": "Cú pháp mẫu",
+        "patternsBody": "Mẫu dùng ký tự đại diện % kiểu SQL. Dashboard đánh giá các mẫu model cụ thể nhất trước và dùng quy tắc đầu tiên khớp với model id được báo cáo.",
+        "manualUpdates": "Bạn phải cập nhật giá thủ công",
+        "manualUpdatesBody": "OpenAI công bố thay đổi giá API trên website và không có nguồn dữ liệu trực tiếp. Hãy cập nhật hoặc thêm quy tắc khớp khi model hay đơn giá thay đổi để usage mới được định giá chính xác.",
+        "apiPricing": "Mức giá chưa công bố vẫn chưa được định giá",
+        "apiPricingBody": "Dấu gạch ngang nghĩa là OpenAI không công bố mức giá cho ngữ cảnh hoặc Fast mode đó. Usage khớp sẽ được đánh dấu chưa có giá thay vì bị ước đoán. Đây là đơn giá API trả theo lượng dùng để tham khảo, không phải cách tính phí của gói thuê bao."
+      },
       "name": "Tên",
       "short": "Chuẩn · Short ≤272K",
       "long": "Chuẩn · Long >272K",

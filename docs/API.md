@@ -753,6 +753,8 @@ DELETE /api/pricing/gpt/:pattern
 
 These endpoints manage the separate GPT rate card used only for Codex sessions. Each row has four USD-per-million-token rates for each of three groups: `short_*` for standard requests at or below 272K input tokens, `long_*` for larger standard requests, and `fast_*` for Fast mode. The four rates are input, cached input, cache writes, and output. Every present rate must be a finite non-negative number. A published but unavailable tier is stored as an all-zero group and surfaced in cost responses as unpriced, rather than silently guessing a price.
 
+`POST /api/settings/reset-pricing` accepts an optional JSON body `{ "provider": "claude" }` or `{ "provider": "codex" }` to reset only that provider's table. Omitting the body preserves the CLI/MCP compatibility behavior and resets both tables. The response returns `provider`, `pricing`, and `gpt_pricing`.
+
 ```json
 {
   "model_pattern": "gpt-5.6-terra%",

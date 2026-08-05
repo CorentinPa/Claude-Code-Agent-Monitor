@@ -247,7 +247,9 @@ export function registerPricingTools(context: ToolContext): void {
   // Policy: MUTATIONS required. Calls POST /api/settings/reset-pricing,
   // which deletes ALL rules (including custom ones) and reseeds the
   // built-in defaults, then re-applies any active intro-rate promos so they
-  // aren't lost. Output: { ok: true, pricing: [...] } — the reseeded list.
+  // aren't lost. With no provider body, this intentionally preserves the
+  // compatibility behavior of resetting both Claude and GPT tables. Output:
+  // { ok, provider: "both", pricing, gpt_pricing }.
   register(
     "dashboard_reset_pricing_defaults",
     "Reset pricing rules to dashboard defaults.",

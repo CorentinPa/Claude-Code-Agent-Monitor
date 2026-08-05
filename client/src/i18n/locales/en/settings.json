@@ -48,7 +48,17 @@
       "title": "OpenAI GPT Model Pricing",
       "description": "Published OpenAI API rates for Codex usage. Standard requests use Short rates at or below 272K input tokens and Long rates above 272K; Fast mode uses its own rate card.",
       "unit": "USD per 1M tokens",
-      "unavailableNote": "Every amount is USD per 1M tokens. An em dash means OpenAI does not publish that context or Fast-mode rate, so the dashboard marks matching usage as unpriced instead of guessing.",
+      "tooltip": {
+        "title": "How GPT pricing works",
+        "howItWorks": "How it works",
+        "howItWorksBody": "Every amount is USD per 1M tokens. Standard Codex requests use Short rates at or below 272K input tokens and Long rates above 272K. Fast mode uses its own rate card. Fresh input, cached input, cache writes, and output are priced separately.",
+        "patternsTitle": "Pattern syntax",
+        "patternsBody": "Patterns use SQL-style % wildcards. The dashboard evaluates the most specific model patterns first and uses the first rule that matches the reported model id.",
+        "manualUpdates": "You must update prices manually",
+        "manualUpdatesBody": "OpenAI publishes API pricing changes on its website; there is no live feed. Update or add a matching rule when models or rates change so newly recorded usage is priced correctly.",
+        "apiPricing": "Unpublished rates stay unpriced",
+        "apiPricingBody": "An em dash means OpenAI does not publish that context or Fast-mode rate. Matching usage is marked unpriced instead of being estimated. These are pay-as-you-go API rates for reference, not subscription-plan billing."
+      },
       "name": "Name",
       "short": "Standard · Short ≤272K",
       "long": "Standard · Long >272K",

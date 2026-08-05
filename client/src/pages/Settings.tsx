@@ -362,21 +362,21 @@ function Toggle({
 }
 
 /**
- * Info popover for the Model Pricing section. Hover or focus the icon to see a
- * three-section explanation: how prices are applied, how pattern matching
- * works, and a reminder that prices must be edited manually when Anthropic
- * publishes new rates. All copy is i18n-driven (settings.pricing.tooltip.*).
+ * Provider-aware info popover for the Claude and GPT pricing sections. Hover or
+ * focus the icon to see how rules match, how rates are applied, and which
+ * provider-specific pricing caveats operators must maintain manually.
  *
  * The popover is fixed-positioned and clamped to the viewport so it never
  * gets clipped by the sidebar or screen edges, mirroring the pattern used by
  * the Workflows stat tooltips.
  */
-function PricingInfoTooltip() {
+function PricingInfoTooltip({ provider = "claude" }: { provider?: "claude" | "gpt" }) {
   const { t } = useTranslation("settings");
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number }>({ left: 0, top: 0 });
+  const key = provider === "gpt" ? "pricing.gpt.tooltip" : "pricing.tooltip";
 
   const positionPopover = useCallback(() => {
     const btn = buttonRef.current;
@@ -417,7 +417,7 @@ function PricingInfoTooltip() {
       <button
         ref={buttonRef}
         type="button"
-        aria-label={t("pricing.tooltip.title")}
+        aria-label={t(`${key}.title`)}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
         onFocus={() => setOpen(true)}
@@ -433,29 +433,27 @@ function PricingInfoTooltip() {
           className="fixed z-50 p-3 bg-[#12121f] border border-[#2a2a4a] rounded-lg shadow-2xl text-[11px] text-gray-300 pointer-events-none"
           style={{ left: pos.left, top: pos.top, width: 320 }}
         >
-          <p className="text-xs font-semibold text-gray-100 mb-2">{t("pricing.tooltip.title")}</p>
+          <p className="text-xs font-semibold text-gray-100 mb-2">{t(`${key}.title`)}</p>
 
           <p className="font-semibold text-gray-200 uppercase tracking-wider text-[9px] mb-1">
-            {t("pricing.tooltip.howItWorks")}
+            {t(`${key}.howItWorks`)}
           </p>
-          <p className="text-gray-400 leading-snug mb-2.5">{t("pricing.tooltip.howItWorksBody")}</p>
+          <p className="text-gray-400 leading-snug mb-2.5">{t(`${key}.howItWorksBody`)}</p>
 
           <p className="font-semibold text-gray-200 uppercase tracking-wider text-[9px] mb-1">
-            {t("pricing.tooltip.patternsTitle")}
+            {t(`${key}.patternsTitle`)}
           </p>
-          <p className="text-gray-400 leading-snug mb-2.5">{t("pricing.tooltip.patternsBody")}</p>
+          <p className="text-gray-400 leading-snug mb-2.5">{t(`${key}.patternsBody`)}</p>
 
           <p className="font-semibold text-amber-300 uppercase tracking-wider text-[9px] mb-1">
-            {t("pricing.tooltip.manualUpdates")}
+            {t(`${key}.manualUpdates`)}
           </p>
-          <p className="text-gray-400 leading-snug mb-2.5">
-            {t("pricing.tooltip.manualUpdatesBody")}
-          </p>
+          <p className="text-gray-400 leading-snug mb-2.5">{t(`${key}.manualUpdatesBody`)}</p>
 
           <p className="font-semibold text-amber-300 uppercase tracking-wider text-[9px] mb-1">
-            {t("pricing.tooltip.apiPricing")}
+            {t(`${key}.apiPricing`)}
           </p>
-          <p className="text-gray-400 leading-snug">{t("pricing.tooltip.apiPricingBody")}</p>
+          <p className="text-gray-400 leading-snug">{t(`${key}.apiPricingBody`)}</p>
         </div>
       )}
     </>
@@ -487,7 +485,17 @@ function emptyGptDraft(): GptDraft {
   ]) as GptDraft;
 }
 
-function GptPricingTable() {
+function GptPricingTable({
+  resetRevision,
+  resetConfirming,
+  resetLoading,
+  onReset,
+}: {
+  resetRevision: number;
+  resetConfirming: boolean;
+  resetLoading: boolean;
+  onReset: () => void;
+}) {
   const { t } = useTranslation("settings");
   const [rules, setRules] = useState<GptModelPricing[]>([]);
   const [draft, setDraft] = useState<GptDraft>(emptyGptDraft);
@@ -508,7 +516,7 @@ function GptPricingTable() {
     reload().catch((err) =>
       setError(err instanceof Error ? err.message : t("messages.failedLoad"))
     );
-  }, [reload, t]);
+  }, [reload, t, resetRevision]);
 
   // Match the Claude pricing editor: adding a model takes the operator straight
   // to the new row instead of leaving it below a long, horizontally-scrollable
@@ -593,34 +601,47 @@ function GptPricingTable() {
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+      <div className="mb-4">
         <div>
-          <h4 className="text-sm font-medium text-gray-200">{t("pricing.gpt.title")}</h4>
-          <p className="mt-1 max-w-3xl text-xs leading-relaxed text-gray-500">
-            {t("pricing.gpt.description")}
-          </p>
+          <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-gray-500" />
+            {t("pricing.gpt.title")}
+            <PricingInfoTooltip provider="gpt" />
+          </h3>
+          <p className="text-xs text-gray-500 mt-0.5">{t("pricing.gpt.description")}</p>
           <p className="mt-1 text-[11px] font-medium uppercase tracking-wider text-emerald-300/80">
             {t("pricing.gpt.unit")}
           </p>
         </div>
-        <button
-          type="button"
-          className="btn-ghost text-xs"
-          disabled={editingRow}
-          onClick={() => {
-            setDraft(emptyGptDraft());
-            setAdding(true);
-          }}
-        >
-          <Plus className="h-3.5 w-3.5" />
-          {t("pricing.addModel")}
-        </button>
+        <div className="mt-3 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onReset}
+            disabled={editingRow || resetLoading}
+            className={`text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50 inline-flex items-center gap-1.5 ${
+              resetConfirming
+                ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                : "text-gray-400 hover:text-gray-300 hover:bg-surface-4"
+            }`}
+          >
+            <RotateCcw className="w-3 h-3" />
+            {resetConfirming ? t("pricing.resetConfirm") : t("pricing.resetDefaults")}
+          </button>
+          <button
+            type="button"
+            className="btn-primary text-xs disabled:opacity-50"
+            disabled={editingRow}
+            onClick={() => {
+              setDraft(emptyGptDraft());
+              setAdding(true);
+            }}
+          >
+            <Plus className="w-3.5 h-3.5" />
+            {t("pricing.addModel")}
+          </button>
+        </div>
       </div>
       {error && <p className="mb-3 rounded bg-red-500/10 p-2 text-xs text-red-300">{error}</p>}
-      <div className="mb-3 flex gap-2 rounded-lg border border-sky-500/20 bg-sky-500/[0.05] px-3 py-2.5 text-xs leading-relaxed text-gray-400">
-        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-300" />
-        <span>{t("pricing.gpt.unavailableNote")}</span>
-      </div>
       <div className="card overflow-x-auto">
         <table className="w-full min-w-[1260px] text-left text-xs">
           <thead className="bg-surface-3 text-[10px] uppercase tracking-wide text-gray-500">
@@ -943,6 +964,7 @@ export function Settings() {
     isError: boolean;
   } | null>(null);
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
+  const [pricingResetRevision, setPricingResetRevision] = useState(0);
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(loadNotifPrefs);
   const [tabbyEnabled, setTabbyEnabled] = useState(() => tabbyPrefs.getEnabled());
   const setTabby = useCallback((v: boolean) => {
@@ -1224,10 +1246,15 @@ export function Settings() {
       return t("danger.clearedResult", { count: total });
     });
 
-  const handleResetPricing = () =>
-    runAction("reset-pricing", async () => {
-      const res = await api.settings.resetPricing();
-      return t("pricing.resetResult", { count: res.pricing.length });
+  const handleResetPricing = (
+    actionKey = "reset-pricing",
+    provider: "claude" | "codex" = "claude"
+  ) =>
+    runAction(actionKey, async () => {
+      const res = await api.settings.resetPricing(provider);
+      setPricingResetRevision((revision) => revision + 1);
+      const count = provider === "codex" ? res.gpt_pricing.length : res.pricing.length;
+      return t("pricing.resetResult", { count });
     });
 
   const handleCleanup = () =>
@@ -1688,7 +1715,7 @@ export function Settings() {
             <button
               onClick={() =>
                 confirmAction === "reset-pricing"
-                  ? handleResetPricing()
+                  ? handleResetPricing("reset-pricing", "claude")
                   : setConfirmAction("reset-pricing")
               }
               disabled={isEditing || actionLoading !== null}
@@ -1874,7 +1901,17 @@ export function Settings() {
 
       {/* ─── OPENAI GPT PRICING ─── */}
       <section id="gpt-pricing" className="scroll-mt-24">
-        <GptPricingTable />
+        <GptPricingTable
+          resetRevision={pricingResetRevision}
+          resetConfirming={confirmAction === "reset-pricing-gpt"}
+          resetLoading={actionLoading !== null}
+          onReset={() =>
+            confirmAction === "reset-pricing-gpt"
+              ? handleResetPricing("reset-pricing-gpt", "codex")
+              : setConfirmAction("reset-pricing-gpt")
+          }
+        />
+        {actionBanner(["reset-pricing-gpt"])}
       </section>
 
       {/* ─── HOOK CONFIGURATION ─── */}

@@ -581,7 +581,7 @@ Because sync runs non-interactively (`ssh -o BatchMode=yes`), the connection mus
 | `POST` | `/api/settings/reimport`       | Re-import legacy sessions from `~/.claude/`      |
 | `POST` | `/api/settings/reinstall-hooks`| Reinstall Claude Code hooks                      |
 | `POST` | `/api/settings/install-hooks` | Install selected Claude Code and/or Codex hook sets; preserves unrelated hook entries |
-| `POST` | `/api/settings/reset-pricing`  | Reset pricing table to defaults                  |
+| `POST` | `/api/settings/reset-pricing`  | Reset Claude, Codex, or both pricing tables to defaults |
 | `GET`  | `/api/settings/export`         | Export all data (sessions, agents, events, token_usage, workflows, dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) as one versioned JSON attachment |
 | `POST` | `/api/settings/import`         | Restore one bundle up to 25 MiB from `/export`. Multipart `file`, or JSON `{ path }` (server reads it). Idempotent + non-destructive: sessions already present are skipped whole |
 | `POST` | `/api/settings/cleanup`        | Abandon stale sessions and purge old data        |

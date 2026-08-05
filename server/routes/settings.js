@@ -223,23 +223,40 @@ router.post("/install-hooks", (req, res) => {
 });
 
 // POST /api/settings/reset-pricing — reset pricing to defaults
-router.post("/reset-pricing", (_req, res) => {
-  db.prepare("DELETE FROM model_pricing").run();
-  db.prepare("DELETE FROM gpt_model_pricing").run();
-
-  const seedPricing = db.prepare(
-    "INSERT OR IGNORE INTO model_pricing (model_pattern, display_name, input_per_mtok, output_per_mtok, cache_read_per_mtok, cache_write_per_mtok, cache_write_1h_per_mtok, fast_input_per_mtok, fast_output_per_mtok) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-  );
-  for (const [pattern, name, inp, out, cr, cw, cw1h, fin, fout] of DEFAULT_PRICING) {
-    seedPricing.run(pattern, name, inp, out, cr, cw, cw1h, fin, fout);
+router.post("/reset-pricing", (req, res) => {
+  const provider = req.body?.provider;
+  if (provider !== undefined && provider !== "claude" && provider !== "codex") {
+    return res.status(400).json({
+      error: { code: "INVALID_INPUT", message: "provider must be claude or codex" },
+    });
   }
-  // Re-apply time-limited intro rates (e.g. Sonnet 5) — the seed above only
-  // carries standard rates, so without this a reset silently drops the promo.
-  applyIntroPricing(db);
-  seedGptPricing(db);
+  const resetClaude = provider !== "codex";
+  const resetCodex = provider !== "claude";
+
+  if (resetClaude) {
+    db.prepare("DELETE FROM model_pricing").run();
+    const seedPricing = db.prepare(
+      "INSERT OR IGNORE INTO model_pricing (model_pattern, display_name, input_per_mtok, output_per_mtok, cache_read_per_mtok, cache_write_per_mtok, cache_write_1h_per_mtok, fast_input_per_mtok, fast_output_per_mtok) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    );
+    for (const [pattern, name, inp, out, cr, cw, cw1h, fin, fout] of DEFAULT_PRICING) {
+      seedPricing.run(pattern, name, inp, out, cr, cw, cw1h, fin, fout);
+    }
+    // Re-apply time-limited intro rates (e.g. Sonnet 5) — the seed above only
+    // carries standard rates, so without this a reset silently drops the promo.
+    applyIntroPricing(db);
+  }
+  if (resetCodex) {
+    db.prepare("DELETE FROM gpt_model_pricing").run();
+    seedGptPricing(db);
+  }
 
   const pricing = stmts.listPricing.all();
-  res.json({ ok: true, pricing, gpt_pricing: stmts.listGptPricing.all() });
+  res.json({
+    ok: true,
+    provider: provider || "both",
+    pricing,
+    gpt_pricing: stmts.listGptPricing.all(),
+  });
 });
 
 // GET /api/settings/export — export all data as JSON

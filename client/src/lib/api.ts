@@ -1089,9 +1089,15 @@ export const api = {
      *
      * @returns `{ ok, pricing }` — the full default rule list now in effect.
      */
-    resetPricing: () =>
-      request<{ ok: boolean; pricing: ModelPricing[] }>("/settings/reset-pricing", {
+    resetPricing: (provider?: "claude" | "codex") =>
+      request<{
+        ok: boolean;
+        provider: "claude" | "codex" | "both";
+        pricing: ModelPricing[];
+        gpt_pricing: GptModelPricing[];
+      }>("/settings/reset-pricing", {
         method: "POST",
+        body: provider ? JSON.stringify({ provider }) : undefined,
       }),
     /**
      * Direct download URL for GET /api/settings/export (a full DB dump);
