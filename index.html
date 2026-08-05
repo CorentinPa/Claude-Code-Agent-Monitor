@@ -2783,7 +2783,9 @@
             <div class="feature-icon rose">🪝</div>
             <h3>Hooks-driven capture</h3>
             <p>
-              Auto-installs into <code>~/.claude/settings.json</code>. SessionStart, PreToolUse,
+              Auto-installs into Claude Code and Codex hook settings. Claude Code creates a session
+              at <code>SessionStart</code>; Codex also falls back to its local live-thread index when a
+              startup hook is awaiting trust approval. SessionStart, PreToolUse,
               PostToolUse, Stop, SubagentStop, Notification - every event lands in SQLite within
               milliseconds.
             </p>

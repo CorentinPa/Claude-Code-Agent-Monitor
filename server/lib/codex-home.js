@@ -1,8 +1,8 @@
 /**
  * @file Resolves and safely updates the local Codex state directory and its
- * append-only rollout transcripts and native session titles. A Settings change
- * persists a dashboard-only override and notifies the live synchronizer without
- * changing the Codex CLI.
+ * append-only rollout transcripts, live-thread state, and native session titles.
+ * A Settings change persists a dashboard-only override and notifies the live
+ * synchronizer without changing the Codex CLI.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -32,6 +32,28 @@ function getCodexSessionsDir() {
 
 function getCodexSessionIndexPath() {
   return path.join(getCodexHome(), "session_index.jsonl");
+}
+
+/**
+ * Codex writes the currently live threads to a versioned SQLite file. The
+ * version is intentionally discovered instead of hard-coded because it has
+ * changed across CLI releases (for example, `state_5.sqlite`).
+ */
+function getCodexStateDbPath() {
+  const home = getCodexHome();
+  try {
+    const candidates = fs
+      .readdirSync(home)
+      .filter((name) => /^state_\d+\.sqlite$/.test(name))
+      .sort((left, right) => {
+        const leftVersion = Number(left.match(/\d+/)?.[0] || 0);
+        const rightVersion = Number(right.match(/\d+/)?.[0] || 0);
+        return rightVersion - leftVersion;
+      });
+    return candidates.length ? path.join(home, candidates[0]) : null;
+  } catch {
+    return null;
+  }
 }
 
 function getCodexHooksPath() {
@@ -119,6 +141,7 @@ module.exports = {
   getCodexHome,
   getCodexSessionsDir,
   getCodexSessionIndexPath,
+  getCodexStateDbPath,
   getCodexSessionTitles,
   getCodexSessionTitle,
   getCodexHooksPath,

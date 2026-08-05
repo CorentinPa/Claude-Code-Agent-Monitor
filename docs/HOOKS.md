@@ -193,7 +193,7 @@ Use a hook token separate from the browser/dashboard token.
 > (Escape hatch for running Claude Code *inside* the same container:
 > `CCAM_ALLOW_CONTAINER_HOOKS=1 npm run install-hooks`.)
 
-For Codex, the installer writes only this dashboard's lifecycle entries to `~/.codex/hooks.json`. Each entry runs `scripts/codex-hook-handler.js`, which immediately POSTs the rollout path — or a version-dependent session/thread id that the server resolves against the rollout tree — to `POST /api/hooks/codex` and exits. The server acknowledges `202` before parsing, then incrementally consumes `~/.codex/sessions/**/rollout-*.jsonl`; duplicate hook and watcher notifications are idempotent through a durable byte cursor. Newest rollouts are scanned first, a bad historical file remains eligible for retry without blocking the rest, and long cold scans yield between small batches so fresh sessions reach the dashboard promptly. Supported lifecycle notifications are `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, and `SessionEnd`. `PreToolUse` intentionally ingests the just-completed model turn before a long-running tool delays its matching `PostToolUse` notification.
+For Codex, the installer writes only this dashboard's lifecycle entries to `~/.codex/hooks.json`. Each entry runs `scripts/codex-hook-handler.js`, which immediately POSTs the rollout path — or a version-dependent session/thread id that the server resolves against the rollout tree — to `POST /api/hooks/codex` and exits. The server acknowledges `202` before parsing, then incrementally consumes `~/.codex/sessions/**/rollout-*.jsonl`; duplicate hook and watcher notifications are idempotent through a durable byte cursor. If Codex defers a new hook for trust approval, the synchronizer reads the very recent native `state_*.sqlite` live-thread row and creates the same startup card before the rollout is flushed. Newest rollouts are scanned first, a bad historical file remains eligible for retry without blocking the rest, and long cold scans yield between small batches so fresh sessions reach the dashboard promptly. Supported lifecycle notifications are `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, and `SessionEnd`. `PreToolUse` intentionally ingests the just-completed model turn before a long-running tool delays its matching `PostToolUse` notification.
 
 Codex's append-only rollout is authoritative for live state: `user_message` and `task_started` clear the waiting overlay and set the main agent to `working`; `task_complete` keeps the session `active` but makes its cards **Waiting** with `awaiting_reason = stop`; and `turn_aborted` makes them **Waiting** with `awaiting_reason = interrupted`. Only `SessionEnd` is terminal. A new rollout turn reactivates a session prematurely completed by a missed or mistimed lifecycle notification. After a restart or partial write, the synchronizer reconciles the latest stored Codex lifecycle event and conservatively changes a silent `working` turn to interrupted Waiting after 90 seconds; the next rollout event self-heals it.
 
@@ -254,6 +254,8 @@ ls -la .githooks/
 ```
 
 ---
+
+> **Codex startup:** A `SessionStart` hook with a stable session/thread ID creates the session and main-agent rows as **Waiting** immediately, even before Codex creates or flushes its rollout. If that hook is delayed for trust approval, the native live-thread index creates the same row instead. Normal rollout ingestion later enriches the row without duplication.
 
 ## Hook Types
 

@@ -558,8 +558,8 @@ function startWorkflowPoll(broadcast) {
  * plus a small safety-net poll. Codex hooks call the same incremental ingestor,
  * so repeated notifications are harmless: its durable byte cursor means an
  * unchanged file performs no token/event writes and emits no websocket frames.
- * Fresh files are prioritized and the sweep yields cooperatively, which keeps
- * a large historical rollout tree from delaying an active session's first card.
+ * Fresh files are prioritized and the sweep reads Codex's native live-thread
+ * index first, so a large historical rollout tree cannot delay a new card.
  */
 function startCodexSessionSync(broadcast) {
   const fs = require("fs");
@@ -570,6 +570,7 @@ function startCodexSessionSync(broadcast) {
     ingestCodexTranscript,
     reconcileCodexSessionLiveness,
     refreshCodexSessionTitles,
+    syncCodexStateSessions,
   } = require("./lib/codex-ingest");
   const fingerprints = new Map();
   let running = false;
@@ -599,6 +600,10 @@ function startCodexSessionSync(broadcast) {
       // as soon as Codex creates the directory instead of polling forever.
       watchSessionsDir();
       watchCodexHome();
+      // Hooks are the lowest-latency signal, but Codex may delay a new hook
+      // until the user approves it. Its local thread row is written at CLI
+      // launch, so use it to create the same Waiting card immediately.
+      for (const result of syncCodexStateSessions()) publish(result);
       // `/rename` updates Codex's root-level session index instead of adding a
       // rollout line. Refresh those titles before evaluating transcript bytes
       // so cards change in real time even for an otherwise idle session.
@@ -726,7 +731,14 @@ function startCodexSessionSync(broadcast) {
     if (homeWatcher || !fs.existsSync(codexHome)) return;
     try {
       const nextWatcher = fs.watch(codexHome, { recursive: false }, (_event, filename) => {
-        if (!filename || path.basename(String(filename)) === "session_index.jsonl") schedule();
+        const name = filename && path.basename(String(filename));
+        if (
+          !name ||
+          name === "session_index.jsonl" ||
+          /^state_\d+\.sqlite(?:-(wal|shm))?$/.test(name)
+        ) {
+          schedule();
+        }
       });
       homeWatcher = nextWatcher;
       nextWatcher.on("error", () => {
