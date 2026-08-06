@@ -46,9 +46,18 @@
     "fastOutput": "Fast Output",
     "gpt": {
       "title": "OpenAI GPT 모델 가격 정책",
-      "description": "Codex 사용을 위한 공개 OpenAI API 요금입니다. 표준 요청은 입력 토큰이 272K 이하일 때 Short, 초과일 때 Long 요율을 사용하며 Fast 모드는 별도 요금표를 사용합니다.",
-      "unit": "토큰 100만 개당 USD",
-      "unavailableNote": "모든 금액은 토큰 100만 개당 USD입니다. 대시는 OpenAI가 해당 컨텍스트 또는 Fast 모드 요율을 공개하지 않았음을 뜻하므로, 대시보드는 추정하지 않고 일치하는 사용량을 미가격으로 표시합니다.",
+      "description": "Codex 사용을 위한 공개 OpenAI API 요금입니다. 표준 요청은 입력 토큰이 272K 이하일 때 Short, 초과일 때 Long 요율을 사용하며 Fast 모드는 별도 요금표를 사용합니다. 토큰 100만 개당 USD입니다.",
+      "tooltip": {
+        "title": "GPT 가격 산정 방식",
+        "howItWorks": "작동 방식",
+        "howItWorksBody": "모든 금액은 토큰 100만 개당 USD입니다. 표준 Codex 요청은 입력 토큰이 272K 이하이면 Short, 초과하면 Long 요율을 사용합니다. Fast 모드는 별도 요금표를 사용합니다. 신규 입력, 캐시 입력, 캐시 쓰기, 출력은 각각 따로 계산됩니다.",
+        "patternsTitle": "패턴 문법",
+        "patternsBody": "패턴은 SQL 스타일의 % 와일드카드를 사용합니다. 대시보드는 가장 구체적인 모델 패턴부터 평가하고 보고된 model id와 처음 일치하는 규칙을 사용합니다.",
+        "manualUpdates": "가격은 수동으로 업데이트해야 합니다",
+        "manualUpdatesBody": "OpenAI는 웹사이트에 API 가격 변경 사항을 게시하며 실시간 피드는 없습니다. 모델이나 요금이 바뀌면 새 사용량이 올바르게 계산되도록 일치하는 규칙을 수정하거나 추가하세요.",
+        "apiPricing": "공개되지 않은 요금은 미가격으로 유지됩니다",
+        "apiPricingBody": "대시는 OpenAI가 해당 컨텍스트 또는 Fast 모드 요율을 공개하지 않았음을 뜻합니다. 일치하는 사용량은 추정하지 않고 미가격으로 표시됩니다. 이는 참고용 종량제 API 요금이며 구독 요금제 청구 방식이 아닙니다."
+      },
       "name": "이름",
       "short": "표준 · Short ≤272K",
       "long": "표준 · Long >272K",

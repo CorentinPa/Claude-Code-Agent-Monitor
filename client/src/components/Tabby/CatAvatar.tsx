@@ -91,7 +91,7 @@ if (typeof window !== "undefined") {
 
 export function CatAvatar({ mood, reducedMotion, hovered = false, size = 60 }: CatAvatarProps) {
   const rootRef = useRef<SVGSVGElement | null>(null);
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | undefined>(undefined);
   const [pupil, setPupil] = useState({ x: 0, y: 0 });
 
   // Pupils follow the cursor whenever motion is allowed and the eyes are open.

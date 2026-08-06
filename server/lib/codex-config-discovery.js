@@ -82,8 +82,23 @@ function relativeToAllowed(file) {
   const home = getCodexHome();
   const resolved = path.resolve(file);
   const projectInstructions = path.resolve(process.cwd(), "AGENTS.md");
-  if (resolved === projectInstructions || resolved.startsWith(`${home}${path.sep}`))
-    return resolved;
+  if (resolved !== projectInstructions && !resolved.startsWith(`${home}${path.sep}`)) return null;
+  try {
+    const canonical = fs.realpathSync(resolved);
+    const canonicalHome = fs.realpathSync(home);
+    const canonicalInstructions = fs.existsSync(projectInstructions)
+      ? fs.realpathSync(projectInstructions)
+      : projectInstructions;
+    if (
+      canonical === canonicalInstructions ||
+      canonical === canonicalHome ||
+      canonical.startsWith(`${canonicalHome}${path.sep}`)
+    ) {
+      return canonical;
+    }
+  } catch {
+    return null;
+  }
   return null;
 }
 function summary(file) {

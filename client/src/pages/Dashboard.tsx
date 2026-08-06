@@ -70,7 +70,7 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
@@ -1017,10 +1017,10 @@ export function Dashboard() {
         [
           api.stats.get(),
           api.agents.list({ status: "working", limit: 20 }),
-          api.agents.list({ status: "waiting", limit: 20 }),
+          api.agents.list({ status: "waiting", limit: 20, include_transient: true }),
           api.events.list({ limit: 30 }),
           api.pricing.totalCost(),
-          api.sessions.list({ status: "active", limit: 100 }),
+          api.sessions.list({ status: "active", limit: 100, include_transient: true }),
         ]
       );
       setStats(statsRes);

@@ -1,9 +1,9 @@
 /**
  * @file Incrementally ingests Codex rollout JSONL transcripts into dashboard
  * sessions, events, response-item tool calls, costs, native `/rename` titles,
- * latest human-prompt card context, and the active/waiting lifecycle shown on
- * dashboard cards. Independent byte cursors make watcher/hook notifications
- * idempotent and real-time safe.
+ * latest human-prompt card context, startup placeholders from hooks or Codex's
+ * live-thread state, and dashboard card lifecycle. Independent byte cursors
+ * make watcher/hook notifications idempotent and real-time safe.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -12,6 +12,7 @@ const path = require("path");
 const { db, stmts } = require("../db");
 const {
   getCodexSessionsDir,
+  getCodexStateDbPath,
   getCodexSessionTitle,
   getCodexSessionTitles,
 } = require("./codex-home");
@@ -37,6 +38,7 @@ const LIFECYCLE_EVENT_TYPES = new Set([
   "turn_aborted",
 ]);
 const DEFAULT_WORKING_IDLE_MS = 90_000;
+const LIVE_THREAD_MAX_AGE_MS = 15 * 60 * 1_000;
 
 // Hooks generally identify a Codex thread but do not consistently include its
 // rollout path. Keep this small, disposable index so a hook can ingest the
@@ -324,7 +326,7 @@ function createCodexSession(meta, transcriptPath) {
     getCodexSessionTitle(sessionId) || "Codex session",
     "active",
     cwd,
-    "unknown",
+    meta?.model || meta?.model_name || "unknown",
     "local",
     startedAt,
     startedAt,
@@ -333,11 +335,114 @@ function createCodexSession(meta, transcriptPath) {
   // Keep the canonical transcript pointer on the session row too. The session
   // detail/transcript APIs, retention tools, and live-status checks all read
   // this column rather than provider-specific metadata.
-  stmts.setSessionTranscriptPath.run(transcriptPath, sessionId);
+  if (typeof transcriptPath === "string" && transcriptPath) {
+    stmts.setSessionTranscriptPath.run(transcriptPath, sessionId);
+  }
   const agentId = `codex:${sessionId}`;
   stmts.insertAgent.run(agentId, sessionId, "Codex", "main", null, "working", null, null, metadata);
   session = stmts.getSession.get(sessionId);
   return session;
+}
+
+/**
+ * Read Codex's native live-thread index as a hook-independent startup signal.
+ * A CLI can defer a newly configured hook for trust review, while its local
+ * state row is written at launch and already contains the stable session ID.
+ * Only very recent rows become placeholders; older sessions remain owned by
+ * normal rollout discovery, avoiding an unexpected history import at startup.
+ */
+function syncCodexStateSessions(options = {}) {
+  const maxAgeMs = options.maxAgeMs ?? LIVE_THREAD_MAX_AGE_MS;
+  const statePath = getCodexStateDbPath();
+  if (!statePath || !fs.existsSync(statePath)) return [];
+
+  let stateDb;
+  try {
+    const Database = require("better-sqlite3");
+    stateDb = new Database(statePath, { readonly: true, fileMustExist: true });
+    const threads = stateDb
+      .prepare(
+        `SELECT id, rollout_path, created_at, cwd, model, model_provider, cli_version
+         FROM threads
+         WHERE archived = 0
+         ORDER BY created_at DESC
+         LIMIT 50`
+      )
+      .all();
+    const now = Date.now();
+    const changed = [];
+    for (const thread of threads) {
+      const createdAtMs = Number(thread.created_at) * 1_000;
+      if (!thread.id || !Number.isFinite(createdAtMs) || now - createdAtMs > maxAgeMs) continue;
+      if (stmts.getSession.get(thread.id)) continue;
+
+      const transcriptPath =
+        typeof thread.rollout_path === "string" && fs.existsSync(thread.rollout_path)
+          ? thread.rollout_path
+          : null;
+      const session = createCodexSession(
+        {
+          id: thread.id,
+          timestamp: new Date(createdAtMs).toISOString(),
+          cwd: thread.cwd,
+          model: thread.model,
+          model_provider: thread.model_provider,
+          cli_version: thread.cli_version,
+        },
+        transcriptPath
+      );
+      if (!session) continue;
+      setCodexWaiting(thread.id, "session_start");
+      changed.push({
+        changed: true,
+        created: true,
+        session: stmts.getSession.get(thread.id),
+        agent: stmts.getAgent.get(`codex:${thread.id}`),
+        events: [],
+      });
+    }
+    return changed;
+  } catch {
+    // The native state format is optional and evolves with Codex. Rollout
+    // ingestion remains authoritative when this read is unavailable.
+    return [];
+  } finally {
+    try {
+      stateDb?.close();
+    } catch {
+      // Read-only diagnostic access must never affect dashboard startup.
+    }
+  }
+}
+
+/**
+ * Normalize the stable identity Codex supplies to lifecycle hooks. A rollout
+ * is sometimes created or flushed after SessionStart, so this lets the hook
+ * create the same initial, prompt-waiting card that Claude's SessionStart
+ * creates without depending on a readable transcript yet.
+ */
+function codexHookMeta(data) {
+  if (!data || typeof data !== "object") return null;
+  const id = [
+    data.session_id,
+    data.sessionId,
+    data.thread_id,
+    data.threadId,
+    data.session?.id,
+    data.thread?.id,
+    data.context?.session_id,
+    data.context?.thread_id,
+  ].find((candidate) => typeof candidate === "string" && candidate.trim());
+  if (!id) return null;
+  return {
+    id,
+    timestamp: data.timestamp || data.started_at || data.startedAt,
+    cwd: data.cwd || data.session?.cwd || data.context?.cwd,
+    model: data.model || data.model_name || data.session?.model || data.context?.model,
+    cli_version: data.cli_version || data.cliVersion,
+    model_provider: data.model_provider || data.modelProvider,
+    git: data.git,
+  };
 }
 
 /**
@@ -717,7 +822,7 @@ function applyCodexHookLifecycle(result, hookType) {
     changed =
       stmts.updateAgent.run(null, "completed", null, null, endedAt, null, agentId).changes > 0 ||
       changed;
-  } else if (normalized === "sessionstart" && !result.changed) {
+  } else if (normalized === "sessionstart") {
     // A Codex SessionStart/Stop hook is emitted at an interactive prompt, not
     // a process exit. Match Claude's SessionStart/Stop semantics: retain the
     // active session while surfacing it as Waiting for another user turn.
@@ -790,9 +895,31 @@ function reconcileCodexSessionLiveness({ workingIdleMs = DEFAULT_WORKING_IDLE_MS
  * Codex flushes its final event, but the dashboard should still stop showing a
  * stale active session immediately.
  */
-function ingestCodexHook(transcriptPath, hookType) {
-  const result = ingestCodexTranscript(transcriptPath);
+function ingestCodexHook(transcriptPath, hookType, hookData) {
+  const result = transcriptPath
+    ? ingestCodexTranscript(transcriptPath)
+    : { changed: false, events: [] };
   if (result.session) return applyCodexHookLifecycle(result, hookType);
+  const normalized = String(hookType || "")
+    .replace(/[_\s-]/g, "")
+    .toLowerCase();
+  if (normalized === "sessionstart") {
+    const meta = codexHookMeta(hookData);
+    const existing = meta && stmts.getSession.get(meta.id);
+    const session = meta && (existing || createCodexSession(meta, transcriptPath));
+    if (session) {
+      return applyCodexHookLifecycle(
+        {
+          changed: false,
+          created: !existing,
+          session,
+          agent: stmts.getAgent.get(`codex:${session.id}`),
+          events: [],
+        },
+        hookType
+      );
+    }
+  }
   if (!isCodexTranscript(transcriptPath)) return result;
   const state = stmts.getCodexIngestState.get(transcriptPath);
   const sessionId = state?.session_id || sessionIdFromPath(transcriptPath);
@@ -815,5 +942,6 @@ module.exports = {
   applyCodexTranscriptLifecycle,
   reconcileCodexSessionLiveness,
   refreshCodexSessionTitles,
+  syncCodexStateSessions,
   isCodexTranscript,
 };

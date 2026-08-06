@@ -6,6 +6,75 @@
  */
 window.__WIKI_CONTENT_I18N = {
   zh: {
+    "A fresh interactive Codex process first appears as an in-memory Waiting card, including while Codex is still at its trust screen or first prompt and has no stable session ID. The card is local-only, non-navigable, excluded from durable APIs unless <code>include_transient=true</code>, and removed on process exit. A <code>SessionStart</code> hook, native live-thread row, or rollout then creates the durable session and main-agent rows without copying the temporary card into history.":
+      "新的交互式 Codex 进程会先显示为仅存在于内存中的等待卡片，即使 Codex 仍停留在信任确认界面或首个提示符，尚未获得稳定的 session ID。该卡片仅限本机、不可跳转，除非使用 <code>include_transient=true</code>，否则不会出现在持久 API 中，并会在进程退出时移除。随后 <code>SessionStart</code> Hook、原生 live-thread 行或 rollout 会创建持久会话和主 agent 行，而不会把临时卡片复制到历史记录中。",
+    "<strong>React 19</strong>": "<strong>React 19</strong>",
+    "<strong>Vite 7</strong>": "<strong>Vite 7</strong>",
+    "<strong>React Router 8</strong>": "<strong>React Router 8</strong>",
+    "The OCI runtime is non-root, uses Tini as PID 1, includes Git, OpenSSH, and SQLite, and becomes read-only except for persistent data/config volumes and tmpfs. Docker Compose and Podman Compose use the same file.":
+      "OCI 运行时以非 root 用户运行，使用 Tini 作为 PID 1，包含 Git、OpenSSH 与 SQLite，并且除持久化数据/配置卷和 tmpfs 外，根文件系统均为只读。Docker Compose 与 Podman Compose 使用同一份文件。",
+    "Dashboard, MCP, Nginx, Prometheus, and Grafana bind host loopback by default. Nginx proxies the UI, authenticated API, and WebSocket, while hooks, metrics, and MCP remain blocked at the edge unless explicitly enabled.":
+      "Dashboard、MCP、Nginx、Prometheus 与 Grafana 默认仅绑定宿主机 loopback。Nginx 代理 UI、认证 API 与 WebSocket，而 Hook、指标和 MCP 默认在边缘被阻止，除非显式启用。",
+    "Run exactly one dashboard container per data volume. Install hooks on the host. Remote hook destinations must use HTTPS plus <code>CCAM_HOOK_TOKEN</code>.":
+      "每个数据卷必须只运行一个 Dashboard 容器。请在宿主机安装 Hook。远程 Hook 目标必须使用 HTTPS，并提供 <code>CCAM_HOOK_TOKEN</code>。",
+    "The dashboard image runs as UID/GID 1000 with a read-only root filesystem, dropped capabilities, <code>no-new-privileges</code>, health checks, and persistent <code>/app/data</code> plus <code>/app/config</code> volumes. Claude and Codex homes mount read-only at <code>/home/node/.claude</code> and <code>/home/node/.codex</code>.":
+      "Dashboard 镜像以 UID/GID 1000 运行，根文件系统只读，丢弃所有 capability，启用 <code>no-new-privileges</code> 与健康检查，并持久化 <code>/app/data</code> 和 <code>/app/config</code> 卷。Claude 与 Codex home 分别只读挂载到 <code>/home/node/.claude</code> 和 <code>/home/node/.codex</code>。",
+    'The optional <code>agent-runtime</code> image target adds pinned Claude Code and Codex CLIs for container-native Run Agent workflows. Cloud deployments use one Recreate-managed dashboard replica on a retained ReadWriteOnce PVC through Helm, Kustomize, or Terraform-to-existing-Kubernetes. See <a href="../DEPLOYMENT.md">DEPLOYMENT.md</a>.':
+      '可选的 <code>agent-runtime</code> 镜像目标加入固定版本的 Claude Code 与 Codex CLI，用于容器原生 Run Agent 工作流。云部署通过 Helm、Kustomize 或面向现有 Kubernetes 的 Terraform，在保留的 ReadWriteOnce PVC 上运行一个由 Recreate 管理的 Dashboard 副本。参见 <a href="../DEPLOYMENT.md">DEPLOYMENT.md</a>。',
+    "Protects MCP <code>/mcp</code>, <code>/sse</code>, and <code>/messages</code>; <code>/health</code> remains available to probes":
+      "保护 MCP <code>/mcp</code>、<code>/sse</code> 和 <code>/messages</code>；<code>/health</code> 仍可供探针访问",
+    "File-backed dashboard REST and WebSocket token for Docker or Kubernetes secrets":
+      "供 Docker 或 Kubernetes Secret 使用的文件型 Dashboard REST 与 WebSocket Token",
+    "Independent credential for authenticated remote <code>/api/hooks/*</code> ingestion":
+      "用于认证远程 <code>/api/hooks/*</code> 采集的独立凭据",
+    "Writable dotenv path used when Settings persists Claude or Codex home overrides":
+      "Settings 持久化 Claude 或 Codex home 覆盖值时使用的可写 dotenv 路径",
+    "Optional remote hook destination; non-loopback URLs require HTTPS and a hook token":
+      "可选的远程 Hook 目标；非 loopback URL 必须使用 HTTPS 和 Hook Token",
+    "Rootless Docker and Podman stacks cover the dashboard, authenticated MCP, Nginx, Prometheus, and Grafana. Read-only root filesystems, file-backed secrets, health checks, WebSocket proxying, private metrics, backup tooling, and one-writer SQLite safeguards ship together.":
+      "Rootless Docker 与 Podman 栈覆盖 Dashboard、认证 MCP、Nginx、Prometheus 和 Grafana，并一起提供只读根文件系统、文件型 Secret、健康检查、WebSocket 代理、私有指标、备份工具与单 writer SQLite 保护。",
+    "hooks, metrics, MCP blocked by default": "Hook、指标和 MCP 默认被阻止",
+    "private bearer scrape": "私有 Bearer 抓取",
+    "password file": "密码文件",
+    "One SQLite writer": "一个 SQLite writer",
+    "Base URL used by the local MCP server when calling dashboard APIs. Direct loopback HTTP is allowed with a bearer token; tokenized container-host aliases require HTTPS.":
+      "本地 MCP 服务器调用仪表板 API 时使用的基础 URL。直接回环 HTTP 可携带 Bearer Token；带 Token 的容器主机别名必须使用 HTTPS。",
+    "Bearer token for a protected dashboard. Falls back to <code>DASHBOARD_API_TOKEN</code>.":
+      "受保护仪表板的 Bearer Token。未设置时回退到 <code>DASHBOARD_API_TOKEN</code>。",
+    "Restore one export bundle up to 25 MiB (multipart <code>file</code> or JSON <code>{ path }</code>). The restore is idempotent and non-destructive, so it can consolidate machines.":
+      "恢复一个不超过 25 MiB 的导出包（multipart <code>file</code> 或 JSON <code>{ path }</code>）。恢复过程幂等且非破坏性，因此可用于合并多台机器的数据。",
+    "All dashboard requests reject redirects. Direct loopback HTTP may carry the dashboard bearer token, while tokenized container-host aliases require HTTPS. History uploads are capped at 50 MiB per file and 100 MiB per call, binary responses at 10 MiB, and backup restore at 25 MiB. Only GET requests retry automatically.":
+      "所有仪表板请求都会拒绝重定向。直接回环 HTTP 可携带仪表板 Bearer Token，而带 Token 的容器主机别名必须使用 HTTPS。历史上传限制为单文件 50 MiB、每次调用合计 100 MiB，二进制响应限制为 10 MiB，备份恢复限制为 25 MiB。只有 GET 请求会自动重试。",
+    "Configuration file reads canonicalize the target and allowed roots, so symlinks cannot escape the trusted Claude directories.":
+      "配置文件读取会规范化目标路径和允许的根目录，因此符号链接无法逃逸受信任的 Claude 目录。",
+    "Codex preview targets are canonicalized before containment checks. Edits reject symlinked path components and refuse content containing <code>[redacted]</code>.":
+      "Codex 预览目标会在包含检查前规范化。编辑操作拒绝含符号链接的路径组件，并拒绝包含 <code>[redacted]</code> 的内容。",
+    "Redirects are rejected rather than forwarding credentials or signed headers to another URL.":
+      "系统会拒绝重定向，而不是把凭据或签名请求头转发到另一个 URL。",
+    "Hosted providers require HTTPS. Generic and n8n targets may use HTTP for local or self-hosted receivers.":
+      "托管提供方必须使用 HTTPS。Generic 和 n8n 目标可为本地或自托管接收方使用 HTTP。",
+    "Stakeholder-ready executive, cost, reliability, and workflow reports with explicit scope and evidence":
+      "面向利益相关者的执行摘要、成本、可靠性和工作流报告，保留明确范围与证据",
+    "Long Analytics legends use compact pages with localized controls. Legends that fit on one page stay unchanged.":
+      "较长的 Analytics 图例使用带本地化控件的紧凑分页。能放入一页的图例保持不变。",
+    "Data-driven Workflows legends also paginate when labels would make a chart card too tall, while keeping every label reachable.":
+      "当标签会让图表卡片过高时，数据驱动的 Workflows 图例也会分页，同时保证每个标签都可访问。",
+    "First-run readiness follows the selected scope: Claude Code requires Claude hooks, Codex requires Codex hooks, and Both requires both. Ready selections open the dashboard immediately; otherwise only missing selected providers appear in setup.":
+      "首次运行的就绪检查遵循所选范围：Claude Code 需要 Claude Hook，Codex 需要 Codex Hook，选择两者则两套都需要。已就绪的选择会立即打开仪表板；否则设置中只显示缺失的已选提供方。",
+    "Local MCP sidecar with three transport modes and 97 typed tools across 16 domain modules. It covers the complete supported app surface, including scoped data, transcripts and images, Claude/GPT pricing, workflows, alerts, webhooks, imports and restore, Claude/Codex config, Run Agent, remote sources, push, and maintenance. Every transport shares one validated catalog with bearer-token support and tiered mutation/destructive gates.":
+      "本地 MCP sidecar 支持三种传输模式，并在 16 个领域模块中提供 97 个类型化工具。它覆盖应用支持的完整操作面，包括带作用域的数据、Transcript 与图片、Claude/GPT 定价、工作流、告警、Webhook、导入与恢复、Claude/Codex 配置、Run Agent、远程数据源、推送和维护。所有传输共享同一套已验证目录，并支持 Bearer Token 与分层变更/破坏性门控。",
+    "One shared marketplace ships 14 plugins for Claude Code and Codex, with 66 packaged skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, and 2 MCP-enabled plugins. Every skill includes canonical frontmatter and OpenAI metadata. The skills.sh CLI discovers 74 repository skills from the same public source. Install with <code>claude plugin marketplace add</code>, <code>codex plugin marketplace add</code>, or <code>npx skills add</code>.":
+      "同一个 Marketplace 为 Claude Code 和 Codex 提供 14 个插件，其中包含 66 个打包技能、18 个 Claude 子 Agent、34 个 Claude 命令、3 个 CLI 辅助工具和 2 个启用 MCP 的插件。每个技能都包含规范的 Frontmatter 和 OpenAI 元数据。skills.sh CLI 可从同一公开源发现 74 个仓库技能。可使用 <code>claude plugin marketplace add</code>、<code>codex plugin marketplace add</code> 或 <code>npx skills add</code> 安装。",
+    "The Agent Monitor ships one shared marketplace containing 14 plugins for Claude Code and Codex, 66 packaged plugin skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, 3 hook configurations, and 2 MCP-enabled plugins. The skills.sh CLI discovers 74 total repository skills. Product-specific manifests stay separate while skill instructions and validation remain shared.":
+      "Agent Monitor 提供一个共享 Marketplace，其中包含面向 Claude Code 和 Codex 的 14 个插件、66 个打包插件技能、18 个 Claude 子 Agent、34 个 Claude 命令、3 个 CLI 辅助工具、3 个 Hook 配置以及 2 个启用 MCP 的插件。skills.sh CLI 可发现仓库中的全部 74 个技能。产品专用 Manifest 保持独立，而技能说明与验证流程保持共享。",
+    "Each plugin carries product-specific Claude Code and Codex manifests. The catalogs live at <code>.claude-plugin/marketplace.json</code> and <code>.agents/plugins/marketplace.json</code>. Each plugin directory contains:":
+      "每个插件都包含产品专用的 Claude Code 和 Codex Manifest。Catalog 位于 <code>.claude-plugin/marketplace.json</code> 和 <code>.agents/plugins/marketplace.json</code>。每个插件目录包含：",
+    "Safe monitored Claude Code/Codex launch, follow-up, stop, resume, and run history":
+      "安全地监控 Claude Code/Codex 的启动、跟进、停止、恢复和运行历史。",
+    "Alert rules, webhook providers, push notifications, and SSH remote collection":
+      "告警规则、Webhook 提供方、推送通知和 SSH 远程采集。",
+    "Claude/Codex config, hooks, provider imports, backup restore, updates, and MCP operations":
+      "Claude/Codex 配置、Hook、提供方导入、备份恢复、更新和 MCP 运维。",
     "Remote sessions never emit live hooks to this dashboard, so a healthy Claude Code or Codex provider mirror remains exempt from the local process-liveness reap and watchdog transcript scan. Every successful provider sync still reconciles live status from the matching mirrored transcript: activity is judged from the <b>newest event timestamp inside the JSONL</b> (falling back to mirror mtime); within <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) keeps the session <code>active</code>, otherwise it is reconciled to <code>completed</code>. If that provider's SSH sync fails, is unavailable, or is stranded in <code>syncing</code> longer than <code>DASHBOARD_STALE_MINUTES</code> — and an active session is itself older than that same window — the ordinary stale-session sweep marks it <code>abandoned</code> and completes its agents. A later fresh mirror reactivates a session that is still writing, so unavailable providers never leave permanent Waiting cards.":
       "远程会话从不向此仪表盘发送实时 Hook，因此健康的 Claude Code 或 Codex provider 镜像仍不参与本地进程存活回收和 watchdog transcript 扫描。每次成功的 provider 同步都会从对应的镜像 transcript 协调实时状态：活动性根据 <b>JSONL 内最新事件时间戳</b>（回退到镜像 mtime）判断；位于 <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code>（默认 10 分钟）内会使会话保持 <code>active</code>，否则协调为 <code>completed</code>。若该 provider 的 SSH 同步失败、不可用，或在 <code>syncing</code> 中停滞超过 <code>DASHBOARD_STALE_MINUTES</code>，且活跃会话本身也超过同一窗口，常规 stale-session 扫描会将其标记为 <code>abandoned</code> 并完成其 agents。后续的新鲜镜像会重新激活仍在写入的会话，因此不可用 provider 不会留下永久的 Waiting 卡片。",
     '<span class="caption-icon">🛰️</span> <span><strong>Settings · Remote Data Sources</strong> — pull Claude Code and Codex activity from other machines over SSH: optionally set independent Remote Claude home and Remote Codex home paths, test each provider, sync manually or on a background poller, and switch the global data scope between local, all sources, or a specific machine with per-session source badges</span>':
@@ -44,14 +113,14 @@ window.__WIKI_CONTENT_I18N = {
       "可选的 Codex 主目录。默认使用 <code>CODEX_HOME</code> 或 <code>~/.codex</code>。",
     "Safety-net interval (ms) for incremental Codex rollout scanning. Default <code>4000</code>; <code>0</code> disables polling but keeps the watcher.":
       "增量扫描 Codex rollout 的兜底间隔（毫秒）。默认 <code>4000</code>；<code>0</code> 会禁用轮询但保留文件监视器。",
-    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. Login <code>admin</code> / <code>admin</code> on port 3000</span>':
-      '<span class="caption-icon">📊</span> <span><strong>可观测性 · Grafana</strong> — 默认首页仪表盘 <em>CCAM — Overview</em>（自动配置四个看板）：实时舰队快照、数据库累计总量、分解图与速率，来自 <code>/api/metrics</code> 抓取。端口 3000 登录 <code>admin</code> / <code>admin</code></span>',
+    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks read the admin password from <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>可观测性 · Grafana</strong> — 默认首页仪表盘 <em>CCAM — Overview</em>（自动配置四个看板）：实时舰队快照、数据库累计总量、分解图与速率，来自 <code>/api/metrics</code> 抓取。仅 npm 本地辅助栈使用 <code>admin</code> / <code>admin</code>；容器栈从 <code>deployments/secrets/grafana-admin-password</code> 读取管理员密码。</span>',
     '<span class="caption-icon">🔥</span> <span><strong>Observability · Prometheus console</strong> — pre-built landing page at <code>/consoles/index.html</code> with live metric cards, session/token tables, and drill-down links into the Graph UI (Prometheus 3.x compatible — queries the HTTP API directly)</span>':
       '<span class="caption-icon">🔥</span> <span><strong>可观测性 · Prometheus 控制台</strong> — <code>/consoles/index.html</code> 预置落地页：实时指标卡片、会话/Token 表，以及钻取到 Graph UI 的链接（兼容 Prometheus 3.x — 直接查询 HTTP API）</span>',
     '<span class="caption-icon">📈</span> <span><strong>Observability · Prometheus Graph</strong> — run PromQL against scraped CCAM series (e.g. <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>, <code>rate(ccam_tokens_total[5m])</code>) with starter expressions from the CCAM console and recording rules in <code>monitoring/prometheus/ccam-rules.yml</code></span>':
       '<span class="caption-icon">📈</span> <span><strong>可观测性 · Prometheus Graph</strong> — 对已抓取的 CCAM 序列运行 PromQL（如 <code>sum(ccam_sessions)</code>、<code>ccam_events_total</code>、<code>rate(ccam_tokens_total[5m])</code>），入门表达式见 CCAM 控制台与 <code>monitoring/prometheus/ccam-rules.yml</code> 记录规则</span>',
-    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login (<code>admin</code> / <code>admin</code> on port 3000): fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data</span>':
-      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — 登录后默认首页（端口 3000：<code>admin</code> / <code>admin</code>）：舰队快照、数据库累计、分解图与速率，全部来自实时 <code>/api/metrics</code> 抓取 — 无示例或合成数据</span>',
+    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login on port 3000: fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks use <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — 登录后端口 3000 的默认首页：舰队快照、数据库累计、分解图与速率，全部来自实时 <code>/api/metrics</code> 抓取 — 无示例或合成数据。仅 npm 本地辅助栈使用 <code>admin</code> / <code>admin</code>；容器栈使用 <code>deployments/secrets/grafana-admin-password</code>。</span>',
     '<span class="caption-icon">🔥</span> <span><strong>Prometheus · CCAM console</strong> — static HTML at <code>/consoles/index.html</code> (Prometheus 3.x compatible): live metric cards, session/token tables, and one-click Graph drill-down links that query the Prometheus HTTP API directly</span>':
       '<span class="caption-icon">🔥</span> <span><strong>Prometheus · CCAM 控制台</strong> — <code>/consoles/index.html</code> 静态 HTML（兼容 Prometheus 3.x）：实时指标卡片、会话/Token 表，以及一键钻取 Graph 的链接，直接查询 Prometheus HTTP API</span>',
     '<span class="caption-icon">📈</span> <span><strong>Prometheus · Graph</strong> — ad-hoc PromQL against scraped CCAM series; starter expressions ship in the CCAM console and <code>monitoring/README.md</code>, with derived rates in <code>monitoring/prometheus/ccam-rules.yml</code></span>':
@@ -61,8 +130,8 @@ window.__WIKI_CONTENT_I18N = {
     "<strong>Quick start (npm):</strong> run the dashboard on loopback, then <code>npm run monitoring:install</code> once and <code>npm run monitoring:up</code>. Open Grafana at <code>http://localhost:3000</code> and Prometheus at <code>http://localhost:9090</code>. The pre-built CCAM console is at <code>http://localhost:9090/consoles/index.html</code> (also reachable from the Prometheus UI under <strong>Consoles</strong>). For an all-Docker path use <code>npm run monitoring:docker:up</code> or <code>npm run docker:full:up</code> for dashboard + Prometheus + Grafana together. Verify with <code>npm run monitoring:verify</code> — the <code>ccam</code> scrape target should read <strong>UP</strong>.":
       "<strong>快速开始（npm）：</strong>在回环地址运行仪表盘，然后执行一次 <code>npm run monitoring:install</code> 与 <code>npm run monitoring:up</code>。Grafana：<code>http://localhost:3000</code>，Prometheus：<code>http://localhost:9090</code>。预置 CCAM 控制台：<code>http://localhost:9090/consoles/index.html</code>（也可在 Prometheus UI 的 <strong>Consoles</strong> 下打开）。全 Docker 路径：<code>npm run monitoring:docker:up</code> 或 <code>npm run docker:full:up</code>。用 <code>npm run monitoring:verify</code> 验证 — <code>ccam</code> 抓取目标应为 <strong>UP</strong>。",
     "Four Grafana boards": "四个 Grafana 看板",
-    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. Credentials default to <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>.":
-      "<strong>CCAM — Overview</strong>（默认首页）、<strong>CCAM — Sessions &amp; Agents</strong>、<strong>CCAM — Tokens &amp; Events</strong> 与 <strong>CCAM — Platform</strong> — 均从 <code>monitoring/grafana/dashboards/</code> 配置，PromQL 针对实时抓取。凭据默认为 <code>monitoring/grafana.defaults.env</code> 中的 <code>admin</code> / <code>admin</code>。",
+    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. The npm-only local helper uses <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>. Container stacks read the password from <code>deployments/secrets/grafana-admin-password</code>.":
+      "<strong>CCAM — Overview</strong>（默认首页）、<strong>CCAM — Sessions &amp; Agents</strong>、<strong>CCAM — Tokens &amp; Events</strong> 与 <strong>CCAM — Platform</strong> — 均从 <code>monitoring/grafana/dashboards/</code> 配置，PromQL 针对实时抓取。仅 npm 本地辅助栈通过 <code>monitoring/grafana.defaults.env</code> 使用 <code>admin</code> / <code>admin</code>；容器栈从 <code>deployments/secrets/grafana-admin-password</code> 读取密码。",
     "Prometheus console": "Prometheus 控制台",
     "Prometheus 3.x dropped the legacy console template libraries, so CCAM ships a <strong>static HTML console</strong> at <code>monitoring/prometheus/consoles/index.html</code> that fetches <code>/api/v1/query</code> directly — live cards, session tables, and Graph links without Go-template errors on <code>/consoles/index.html</code>.":
       "Prometheus 3.x 移除了旧版控制台模板库，因此 CCAM 在 <code>monitoring/prometheus/consoles/index.html</code> 提供<strong>静态 HTML 控制台</strong>，直接请求 <code>/api/v1/query</code> — 实时卡片、会话表与 Graph 链接，<code>/consoles/index.html</code> 不再出现 Go 模板错误。",
@@ -1104,12 +1173,12 @@ window.__WIKI_CONTENT_I18N = {
     "The Dockerfile uses three stages to minimize the final image size:":
       "Dockerfile 使用三个阶段来最小化最终镜像的体积：",
     Stage: "阶段",
-    "Installs production <code>node_modules</code> on <code>node:22-alpine</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
-      "在 <code>node:22-alpine</code> 上安装生产环境的 <code>node_modules</code>。<code>better-sqlite3</code> 是可选的——如果预构建不可用，服务器会回退到内置的 <code>node:sqlite</code>",
+    "Installs production <code>node_modules</code> on digest-pinned <code>node:24.19.0-alpine3.24</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
+      "在固定摘要的 <code>node:24.19.0-alpine3.24</code> 上安装生产环境的 <code>node_modules</code>。<code>better-sqlite3</code> 是可选的——如果预构建不可用，服务器会回退到内置的 <code>node:sqlite</code>",
     "Runs <code>npm ci</code> + <code>vite build</code> to produce optimized static assets":
       "运行 <code>npm ci</code> + <code>vite build</code> 以生成经过优化的静态资源",
-    "Clean <code>node:22-alpine</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
-      "干净的 <code>node:22-alpine</code>，仅包含 <code>node_modules</code>、服务器代码和 <code>client/dist</code>",
+    "Clean digest-pinned <code>node:24.19.0-alpine3.24</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
+      "干净的固定摘要 <code>node:24.19.0-alpine3.24</code>，仅包含 <code>node_modules</code>、服务器代码和 <code>client/dist</code>",
     "<strong>Hook note</strong>": "<strong>Hook 说明</strong>",
     "Claude Code hooks run on the host, not inside the container. The containerized server receives hook events via HTTP on <code>localhost:4820</code>. Run <code>npm run install-hooks</code> on the host after starting the container.":
       "Claude Code 的 hooks 在主机上运行，而不是在容器内部运行。容器化的服务器通过 HTTP 在 <code>localhost:4820</code> 上接收 hook 事件。启动容器后，请在主机上运行 <code>npm run install-hooks</code>。",
@@ -1186,14 +1255,14 @@ window.__WIKI_CONTENT_I18N = {
       "久经考验、精简、易于理解。Fastify 会显得过度；原始的 <code>http</code> 模块在路由方面需要过多的样板代码。",
     "Fastest, most lightweight WebSocket library for Node. No Socket.IO overhead needed — we only push typed JSON messages one-way.":
       "Node 上最快、最轻量的 WebSocket 库。无需 Socket.IO 的额外开销——我们只单向推送带类型的 JSON 消息。",
-    "Stable, widely known, strong TypeScript support. No Server Components or RSC needed for a client-rendered local SPA.":
-      "稳定、广为人知、对 TypeScript 支持强。对于客户端渲染的本地 SPA，无需 Server Components 或 RSC。",
+    "Current supported client runtime with strong TypeScript support. CCAM remains a client-rendered SPA and does not enable Server Components or RSC.":
+      "当前受支持的客户端运行时，对 TypeScript 支持强。CCAM 仍是客户端渲染的 SPA，不启用 Server Components 或 RSC。",
     "Fast builds, native ESM, excellent dev experience. Proxy config handles the dev server split cleanly with no ejection.":
       "构建快速、原生 ESM、出色的开发体验。代理配置可干净地处理开发服务器的拆分，无需弹出（eject）。",
     "Utility-first approach keeps styles colocated with markup. No CSS module boilerplate. Custom dark theme config for the dark UI.":
       "实用优先的方式让样式与标记就近放置。没有 CSS module 样板代码。为深色 UI 提供自定义深色主题配置。",
-    "Standard routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without prop drilling.":
-      "React SPA 的标准路由。使用 <code>&lt;Outlet&gt;</code> 的布局路由可在不进行属性透传（prop drilling）的情况下实现干净的外壳组合。",
+    "Standard declarative routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without enabling framework or RSC modes.":
+      "React SPA 的标准声明式路由。使用 <code>&lt;Outlet&gt;</code> 的布局路由可实现干净的外壳组合，同时不启用 framework 或 RSC 模式。",
     "Tree-shakeable icon library — only imports what's used (~20 icons). No heavy icon font.":
       "可摇树优化的图标库——只导入用到的部分（约 20 个图标）。没有沉重的图标字体。",
     "Catches null/undefined bugs at compile time. <code>noUncheckedIndexedAccess</code> prevents array bounds issues in analytics aggregations.":
@@ -1302,7 +1371,8 @@ window.__WIKI_CONTENT_I18N = {
     "System info, DB stats, hook installation status": "系统信息、DB 统计、钩子安装状态",
     "Delete all sessions, agents, events, token usage": "删除所有会话、智能体、事件、令牌用量",
     "Reinstall Claude Code hooks": "重新安装 Claude Code 钩子",
-    "Reset pricing rules to defaults": "将定价规则重置为默认值",
+    "Reset Claude, Codex, or both pricing tables to defaults":
+      "将 Claude、Codex 或两者的定价表重置为默认值",
     "Export all data as JSON download": "将所有数据导出为 JSON 下载",
     "Abandon stale sessions (by hours), purge old data (by days)":
       "放弃陈旧会话（按小时），清除旧数据（按天）",
@@ -1372,6 +1442,81 @@ window.__WIKI_CONTENT_I18N = {
       "<strong>服务端分页</strong>的表格，列出每一个已记录的会话。每一页只获取对应的数据片段，因此无论会话数量多少，成本计算都保持有界。针对 <code>id</code>、<code>name</code> 和 <code>cwd</code> 的不区分大小写搜索在服务端运行，并带有 300 ms 防抖；状态过滤器可与搜索组合以精确缩小范围。可搜索的复选框项目选择器支持选择多个目录；完整长路径仍可查看，紧凑的触发器文字让筛选栏保持易读。排序使用相同的自定义下拉模式。每一行显示会话的真实名称（从 transcript 实时同步：<code>/rename</code> 或 <code>claude -n</code> 标题，否则使用自动标题，再否则使用首条用户 prompt，并回退到短 ID）、状态徽章、agent 数量、时长、模型和预估成本。点击任意行即可深入查看完整的会话详情视图，包含对话记录和 agent 层级。",
   },
   vi: {
+    "A fresh interactive Codex process first appears as an in-memory Waiting card, including while Codex is still at its trust screen or first prompt and has no stable session ID. The card is local-only, non-navigable, excluded from durable APIs unless <code>include_transient=true</code>, and removed on process exit. A <code>SessionStart</code> hook, native live-thread row, or rollout then creates the durable session and main-agent rows without copying the temporary card into history.":
+      "Một tiến trình Codex tương tác mới trước tiên xuất hiện dưới dạng thẻ Đang chờ chỉ tồn tại trong bộ nhớ, kể cả khi Codex vẫn ở màn hình xác nhận tin cậy hoặc prompt đầu tiên và chưa có session ID ổn định. Thẻ này chỉ tồn tại cục bộ, không thể điều hướng, không xuất hiện trong API bền vững trừ khi dùng <code>include_transient=true</code>, và bị xóa khi tiến trình thoát. Sau đó Hook <code>SessionStart</code>, hàng live-thread gốc hoặc rollout sẽ tạo các hàng phiên và agent chính bền vững mà không sao chép thẻ tạm thời vào lịch sử.",
+    "<strong>React 19</strong>": "<strong>React 19</strong>",
+    "<strong>Vite 7</strong>": "<strong>Vite 7</strong>",
+    "<strong>React Router 8</strong>": "<strong>React Router 8</strong>",
+    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks read the admin password from <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Khả năng quan sát · Grafana</strong> — dashboard mặc định <em>CCAM — Overview</em> với bốn bảng được cấp sẵn: ảnh chụp đội hình trực tiếp, tổng số cơ sở dữ liệu, biểu đồ phân rã và tốc độ từ các lần scrape <code>/api/metrics</code>. Trình hỗ trợ cục bộ chỉ dùng npm sử dụng <code>admin</code> / <code>admin</code>; stack container đọc mật khẩu quản trị từ <code>deployments/secrets/grafana-admin-password</code>.</span>',
+    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login on port 3000: fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks use <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — dashboard mặc định sau khi đăng nhập trên cổng 3000: ảnh chụp đội hình, tổng số cơ sở dữ liệu, biểu đồ phân rã và tốc độ từ scrape <code>/api/metrics</code> trực tiếp — không có dữ liệu mẫu hay tổng hợp. Trình hỗ trợ cục bộ chỉ dùng npm sử dụng <code>admin</code> / <code>admin</code>; stack container dùng <code>deployments/secrets/grafana-admin-password</code>.</span>',
+    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. The npm-only local helper uses <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>. Container stacks read the password from <code>deployments/secrets/grafana-admin-password</code>.":
+      "<strong>CCAM — Overview</strong> (trang mặc định), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong> và <strong>CCAM — Platform</strong> đều được cấp từ <code>monitoring/grafana/dashboards/</code> với PromQL trên dữ liệu scrape trực tiếp. Trình hỗ trợ cục bộ chỉ dùng npm sử dụng <code>admin</code> / <code>admin</code> qua <code>monitoring/grafana.defaults.env</code>. Stack container đọc mật khẩu từ <code>deployments/secrets/grafana-admin-password</code>.",
+    "The OCI runtime is non-root, uses Tini as PID 1, includes Git, OpenSSH, and SQLite, and becomes read-only except for persistent data/config volumes and tmpfs. Docker Compose and Podman Compose use the same file.":
+      "OCI runtime chạy non-root, dùng Tini làm PID 1, có Git, OpenSSH và SQLite, đồng thời chỉ cho phép ghi vào volume dữ liệu/cấu hình bền vững và tmpfs. Docker Compose và Podman Compose dùng cùng một tệp.",
+    "Dashboard, MCP, Nginx, Prometheus, and Grafana bind host loopback by default. Nginx proxies the UI, authenticated API, and WebSocket, while hooks, metrics, and MCP remain blocked at the edge unless explicitly enabled.":
+      "Dashboard, MCP, Nginx, Prometheus và Grafana mặc định chỉ bind host loopback. Nginx proxy UI, API có xác thực và WebSocket, còn hook, metric và MCP bị chặn ở edge trừ khi được bật rõ ràng.",
+    "Run exactly one dashboard container per data volume. Install hooks on the host. Remote hook destinations must use HTTPS plus <code>CCAM_HOOK_TOKEN</code>.":
+      "Chỉ chạy đúng một dashboard container trên mỗi data volume. Cài hook trên host. Đích hook từ xa phải dùng HTTPS cùng <code>CCAM_HOOK_TOKEN</code>.",
+    "The dashboard image runs as UID/GID 1000 with a read-only root filesystem, dropped capabilities, <code>no-new-privileges</code>, health checks, and persistent <code>/app/data</code> plus <code>/app/config</code> volumes. Claude and Codex homes mount read-only at <code>/home/node/.claude</code> and <code>/home/node/.codex</code>.":
+      "Image dashboard chạy bằng UID/GID 1000 với root filesystem chỉ-đọc, bỏ mọi capability, bật <code>no-new-privileges</code>, health check và volume bền vững <code>/app/data</code> cùng <code>/app/config</code>. Claude và Codex home được mount chỉ-đọc tại <code>/home/node/.claude</code> và <code>/home/node/.codex</code>.",
+    'The optional <code>agent-runtime</code> image target adds pinned Claude Code and Codex CLIs for container-native Run Agent workflows. Cloud deployments use one Recreate-managed dashboard replica on a retained ReadWriteOnce PVC through Helm, Kustomize, or Terraform-to-existing-Kubernetes. See <a href="../DEPLOYMENT.md">DEPLOYMENT.md</a>.':
+      'Image target <code>agent-runtime</code> tùy chọn thêm Claude Code và Codex CLI được ghim phiên bản cho workflow Run Agent chạy native trong container. Triển khai cloud dùng một replica dashboard do Recreate quản lý trên PVC ReadWriteOnce được giữ lại qua Helm, Kustomize hoặc Terraform cho Kubernetes có sẵn. Xem <a href="../DEPLOYMENT.md">DEPLOYMENT.md</a>.',
+    "Protects MCP <code>/mcp</code>, <code>/sse</code>, and <code>/messages</code>; <code>/health</code> remains available to probes":
+      "Bảo vệ MCP <code>/mcp</code>, <code>/sse</code> và <code>/messages</code>; <code>/health</code> vẫn mở cho probe",
+    "File-backed dashboard REST and WebSocket token for Docker or Kubernetes secrets":
+      "Token REST và WebSocket của dashboard đọc từ tệp cho Secret Docker hoặc Kubernetes",
+    "Independent credential for authenticated remote <code>/api/hooks/*</code> ingestion":
+      "Credential độc lập cho remote <code>/api/hooks/*</code> ingestion có xác thực",
+    "Writable dotenv path used when Settings persists Claude or Codex home overrides":
+      "Đường dẫn dotenv có quyền ghi khi Settings lưu override Claude hoặc Codex home",
+    "Optional remote hook destination; non-loopback URLs require HTTPS and a hook token":
+      "Đích hook từ xa tùy chọn; URL không phải loopback yêu cầu HTTPS và hook token",
+    "Rootless Docker and Podman stacks cover the dashboard, authenticated MCP, Nginx, Prometheus, and Grafana. Read-only root filesystems, file-backed secrets, health checks, WebSocket proxying, private metrics, backup tooling, and one-writer SQLite safeguards ship together.":
+      "Stack Docker và Podman rootless bao gồm dashboard, MCP có xác thực, Nginx, Prometheus và Grafana. Root filesystem chỉ-đọc, Secret từ tệp, health check, WebSocket proxy, metric riêng tư, công cụ backup và bảo vệ SQLite một writer được cung cấp cùng nhau.",
+    "hooks, metrics, MCP blocked by default": "hook, metric và MCP bị chặn mặc định",
+    "private bearer scrape": "scrape Bearer riêng tư",
+    "password file": "tệp mật khẩu",
+    "One SQLite writer": "Một SQLite writer",
+    "Base URL used by the local MCP server when calling dashboard APIs. Direct loopback HTTP is allowed with a bearer token; tokenized container-host aliases require HTTPS.":
+      "URL cơ sở mà máy chủ MCP cục bộ dùng để gọi API dashboard. HTTP loopback trực tiếp được phép mang bearer token; alias host container có token phải dùng HTTPS.",
+    "Bearer token for a protected dashboard. Falls back to <code>DASHBOARD_API_TOKEN</code>.":
+      "Bearer token cho dashboard được bảo vệ. Nếu không đặt, dùng <code>DASHBOARD_API_TOKEN</code> làm fallback.",
+    "Restore one export bundle up to 25 MiB (multipart <code>file</code> or JSON <code>{ path }</code>). The restore is idempotent and non-destructive, so it can consolidate machines.":
+      "Khôi phục một gói xuất tối đa 25 MiB (multipart <code>file</code> hoặc JSON <code>{ path }</code>). Việc khôi phục có tính idempotent và không phá hủy, nên có thể hợp nhất dữ liệu từ nhiều máy.",
+    "All dashboard requests reject redirects. Direct loopback HTTP may carry the dashboard bearer token, while tokenized container-host aliases require HTTPS. History uploads are capped at 50 MiB per file and 100 MiB per call, binary responses at 10 MiB, and backup restore at 25 MiB. Only GET requests retry automatically.":
+      "Mọi yêu cầu tới dashboard đều từ chối redirect. HTTP loopback trực tiếp có thể mang bearer token của dashboard, còn alias host container có token phải dùng HTTPS. Upload lịch sử giới hạn 50 MiB mỗi tệp và 100 MiB mỗi lần gọi, phản hồi nhị phân 10 MiB, khôi phục backup 25 MiB. Chỉ yêu cầu GET được tự động thử lại.",
+    "Configuration file reads canonicalize the target and allowed roots, so symlinks cannot escape the trusted Claude directories.":
+      "Khi đọc tệp cấu hình, hệ thống chuẩn hóa đích và các root được phép, nên symlink không thể thoát khỏi thư mục Claude tin cậy.",
+    "Codex preview targets are canonicalized before containment checks. Edits reject symlinked path components and refuse content containing <code>[redacted]</code>.":
+      "Đích preview Codex được chuẩn hóa trước khi kiểm tra phạm vi. Thao tác sửa từ chối thành phần đường dẫn symlink và nội dung chứa <code>[redacted]</code>.",
+    "Redirects are rejected rather than forwarding credentials or signed headers to another URL.":
+      "Redirect bị từ chối thay vì chuyển tiếp thông tin xác thực hoặc header đã ký sang URL khác.",
+    "Hosted providers require HTTPS. Generic and n8n targets may use HTTP for local or self-hosted receivers.":
+      "Nhà cung cấp được lưu trữ yêu cầu HTTPS. Đích Generic và n8n có thể dùng HTTP cho bên nhận cục bộ hoặc tự lưu trữ.",
+    "Stakeholder-ready executive, cost, reliability, and workflow reports with explicit scope and evidence":
+      "Báo cáo điều hành, chi phí, độ tin cậy và workflow sẵn sàng cho stakeholder, với phạm vi và bằng chứng rõ ràng",
+    "Long Analytics legends use compact pages with localized controls. Legends that fit on one page stay unchanged.":
+      "Chú giải Analytics dài dùng các trang gọn với điều khiển đã bản địa hóa. Chú giải vừa một trang giữ nguyên.",
+    "Data-driven Workflows legends also paginate when labels would make a chart card too tall, while keeping every label reachable.":
+      "Chú giải Workflows theo dữ liệu cũng được phân trang khi nhãn làm thẻ biểu đồ quá cao, đồng thời mọi nhãn vẫn truy cập được.",
+    "First-run readiness follows the selected scope: Claude Code requires Claude hooks, Codex requires Codex hooks, and Both requires both. Ready selections open the dashboard immediately; otherwise only missing selected providers appear in setup.":
+      "Kiểm tra sẵn sàng lần đầu bám theo phạm vi đã chọn: Claude Code cần hook Claude, Codex cần hook Codex, còn Cả hai cần đủ hai bộ. Lựa chọn đã sẵn sàng mở dashboard ngay; nếu chưa, phần thiết lập chỉ hiển thị những nguồn đã chọn còn thiếu.",
+    "Local MCP sidecar with three transport modes and 97 typed tools across 16 domain modules. It covers the complete supported app surface, including scoped data, transcripts and images, Claude/GPT pricing, workflows, alerts, webhooks, imports and restore, Claude/Codex config, Run Agent, remote sources, push, and maintenance. Every transport shares one validated catalog with bearer-token support and tiered mutation/destructive gates.":
+      "MCP sidecar cục bộ hỗ trợ ba chế độ transport và 97 công cụ được định kiểu trong 16 mô-đun miền. Nó bao phủ toàn bộ bề mặt hành động được ứng dụng hỗ trợ, gồm dữ liệu có scope, transcript và ảnh, định giá Claude/GPT, workflow, alert, webhook, import và restore, cấu hình Claude/Codex, Run Agent, remote source, push và bảo trì. Mọi transport dùng chung một catalog đã xác thực, hỗ trợ Bearer Token và các cổng mutation/destructive theo cấp.",
+    "One shared marketplace ships 14 plugins for Claude Code and Codex, with 66 packaged skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, and 2 MCP-enabled plugins. Every skill includes canonical frontmatter and OpenAI metadata. The skills.sh CLI discovers 74 repository skills from the same public source. Install with <code>claude plugin marketplace add</code>, <code>codex plugin marketplace add</code>, or <code>npx skills add</code>.":
+      "Một Marketplace dùng chung cung cấp 14 plugin cho Claude Code và Codex, cùng 66 skill đóng gói, 18 Claude subagent, 34 lệnh Claude, 3 tiện ích CLI và 2 plugin có MCP. Mỗi skill đều có Frontmatter chuẩn và metadata OpenAI. CLI skills.sh phát hiện 74 skill trong repo từ cùng một nguồn công khai. Cài bằng <code>claude plugin marketplace add</code>, <code>codex plugin marketplace add</code> hoặc <code>npx skills add</code>.",
+    "The Agent Monitor ships one shared marketplace containing 14 plugins for Claude Code and Codex, 66 packaged plugin skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, 3 hook configurations, and 2 MCP-enabled plugins. The skills.sh CLI discovers 74 total repository skills. Product-specific manifests stay separate while skill instructions and validation remain shared.":
+      "Agent Monitor cung cấp một Marketplace dùng chung gồm 14 plugin cho Claude Code và Codex, 66 plugin skill đóng gói, 18 Claude subagent, 34 lệnh Claude, 3 tiện ích CLI, 3 cấu hình hook và 2 plugin có MCP. CLI skills.sh phát hiện tổng cộng 74 skill trong repo. Manifest riêng theo sản phẩm vẫn tách biệt, còn hướng dẫn và xác thực skill được dùng chung.",
+    "Each plugin carries product-specific Claude Code and Codex manifests. The catalogs live at <code>.claude-plugin/marketplace.json</code> and <code>.agents/plugins/marketplace.json</code>. Each plugin directory contains:":
+      "Mỗi plugin mang Manifest riêng cho Claude Code và Codex. Các Catalog nằm tại <code>.claude-plugin/marketplace.json</code> và <code>.agents/plugins/marketplace.json</code>. Mỗi thư mục plugin chứa:",
+    "Safe monitored Claude Code/Codex launch, follow-up, stop, resume, and run history":
+      "Khởi chạy, theo dõi, dừng, tiếp tục và xem lịch sử chạy Claude Code/Codex một cách an toàn.",
+    "Alert rules, webhook providers, push notifications, and SSH remote collection":
+      "Quy tắc cảnh báo, nhà cung cấp webhook, thông báo push và thu thập từ xa qua SSH.",
+    "Claude/Codex config, hooks, provider imports, backup restore, updates, and MCP operations":
+      "Cấu hình Claude/Codex, hook, import theo provider, khôi phục bản sao lưu, cập nhật và vận hành MCP.",
     "Remote sessions never emit live hooks to this dashboard, so a healthy Claude Code or Codex provider mirror remains exempt from the local process-liveness reap and watchdog transcript scan. Every successful provider sync still reconciles live status from the matching mirrored transcript: activity is judged from the <b>newest event timestamp inside the JSONL</b> (falling back to mirror mtime); within <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) keeps the session <code>active</code>, otherwise it is reconciled to <code>completed</code>. If that provider's SSH sync fails, is unavailable, or is stranded in <code>syncing</code> longer than <code>DASHBOARD_STALE_MINUTES</code> — and an active session is itself older than that same window — the ordinary stale-session sweep marks it <code>abandoned</code> and completes its agents. A later fresh mirror reactivates a session that is still writing, so unavailable providers never leave permanent Waiting cards.":
       "Phiên từ xa không bao giờ gửi hook trực tiếp đến bảng điều khiển này, vì vậy mirror provider Claude Code hoặc Codex khỏe mạnh vẫn được loại khỏi quá trình thu hồi tiến trình cục bộ và quét transcript của watchdog. Mỗi lần đồng bộ provider thành công vẫn điều hòa trạng thái live từ transcript mirror tương ứng: hoạt động được đánh giá từ <b>dấu thời gian sự kiện mới nhất trong JSONL</b> (dự phòng mtime bản sao); nằm trong <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (mặc định 10 phút) giữ phiên ở <code>active</code>, nếu không nó được điều hòa thành <code>completed</code>. Nếu đồng bộ SSH của provider đó thất bại, không khả dụng, hoặc bị kẹt ở <code>syncing</code> lâu hơn <code>DASHBOARD_STALE_MINUTES</code> — và bản thân phiên active cũng cũ hơn cùng cửa sổ — lượt quét stale-session thông thường sẽ đánh dấu nó là <code>abandoned</code> và hoàn tất agent. Một mirror mới sau đó sẽ kích hoạt lại phiên vẫn đang ghi, vì vậy provider không khả dụng không bao giờ để lại thẻ Waiting vĩnh viễn.",
     '<span class="caption-icon">🛰️</span> <span><strong>Settings · Remote Data Sources</strong> — pull Claude Code and Codex activity from other machines over SSH: optionally set independent Remote Claude home and Remote Codex home paths, test each provider, sync manually or on a background poller, and switch the global data scope between local, all sources, or a specific machine with per-session source badges</span>':
@@ -2471,12 +2616,12 @@ window.__WIKI_CONTENT_I18N = {
     "The Dockerfile uses three stages to minimize the final image size:":
       "Dockerfile sử dụng ba giai đoạn để giảm thiểu kích thước image cuối cùng:",
     Stage: "Giai đoạn",
-    "Installs production <code>node_modules</code> on <code>node:22-alpine</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
-      "Cài đặt <code>node_modules</code> sản xuất trên <code>node:22-alpine</code>. <code>better-sqlite3</code> là tùy chọn — nếu không có bản dựng sẵn, máy chủ sẽ quay về dùng <code>node:sqlite</code> tích hợp sẵn",
+    "Installs production <code>node_modules</code> on digest-pinned <code>node:24.19.0-alpine3.24</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
+      "Cài đặt <code>node_modules</code> sản xuất trên <code>node:24.19.0-alpine3.24</code> được cố định digest. <code>better-sqlite3</code> là tùy chọn — nếu không có bản dựng sẵn, máy chủ sẽ quay về dùng <code>node:sqlite</code> tích hợp sẵn",
     "Runs <code>npm ci</code> + <code>vite build</code> to produce optimized static assets":
       "Chạy <code>npm ci</code> + <code>vite build</code> để tạo ra các tài nguyên tĩnh được tối ưu hóa",
-    "Clean <code>node:22-alpine</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
-      "Bản <code>node:22-alpine</code> sạch chỉ với <code>node_modules</code>, mã máy chủ và <code>client/dist</code>",
+    "Clean digest-pinned <code>node:24.19.0-alpine3.24</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
+      "Bản <code>node:24.19.0-alpine3.24</code> sạch, được cố định digest, chỉ gồm <code>node_modules</code>, mã máy chủ và <code>client/dist</code>",
     "<strong>Hook note</strong>": "<strong>Lưu ý về hook</strong>",
     "Claude Code hooks run on the host, not inside the container. The containerized server receives hook events via HTTP on <code>localhost:4820</code>. Run <code>npm run install-hooks</code> on the host after starting the container.":
       "Các hook của Claude Code chạy trên máy chủ, không phải bên trong container. Máy chủ được container hóa nhận các sự kiện hook qua HTTP trên <code>localhost:4820</code>. Hãy chạy <code>npm run install-hooks</code> trên máy chủ sau khi khởi động container.",
@@ -2558,14 +2703,14 @@ window.__WIKI_CONTENT_I18N = {
       "Đã được kiểm chứng kỹ, tối giản, dễ hiểu. Fastify sẽ là quá mức cần thiết; mô-đun <code>http</code> thuần sẽ đòi hỏi quá nhiều mã soạn sẵn cho việc định tuyến.",
     "Fastest, most lightweight WebSocket library for Node. No Socket.IO overhead needed — we only push typed JSON messages one-way.":
       "Thư viện WebSocket nhanh nhất, nhẹ nhất cho Node. Không cần thêm chi phí của Socket.IO — chúng ta chỉ đẩy các thông điệp JSON có kiểu theo một chiều.",
-    "Stable, widely known, strong TypeScript support. No Server Components or RSC needed for a client-rendered local SPA.":
-      "Ổn định, được biết đến rộng rãi, hỗ trợ TypeScript mạnh mẽ. Không cần Server Components hay RSC cho một SPA cục bộ được render phía client.",
+    "Current supported client runtime with strong TypeScript support. CCAM remains a client-rendered SPA and does not enable Server Components or RSC.":
+      "Runtime client hiện được hỗ trợ với TypeScript mạnh mẽ. CCAM vẫn là SPA render phía client và không bật Server Components hay RSC.",
     "Fast builds, native ESM, excellent dev experience. Proxy config handles the dev server split cleanly with no ejection.":
       "Build nhanh, ESM gốc, trải nghiệm phát triển tuyệt vời. Cấu hình proxy xử lý việc tách máy chủ phát triển một cách gọn gàng mà không cần eject.",
     "Utility-first approach keeps styles colocated with markup. No CSS module boilerplate. Custom dark theme config for the dark UI.":
       "Cách tiếp cận ưu tiên tiện ích (utility-first) giữ cho style nằm cạnh markup. Không có mã soạn sẵn của CSS module. Cấu hình chủ đề tối tùy chỉnh cho giao diện tối.",
-    "Standard routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without prop drilling.":
-      "Định tuyến tiêu chuẩn cho các SPA React. Các route bố cục với <code>&lt;Outlet&gt;</code> mang lại sự kết hợp lớp vỏ gọn gàng mà không cần truyền prop xuyên cấp (prop drilling).",
+    "Standard declarative routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without enabling framework or RSC modes.":
+      "Định tuyến khai báo tiêu chuẩn cho SPA React. Các route bố cục với <code>&lt;Outlet&gt;</code> tạo lớp vỏ gọn gàng mà không bật chế độ framework hay RSC.",
     "Tree-shakeable icon library — only imports what's used (~20 icons). No heavy icon font.":
       "Thư viện biểu tượng có thể tree-shake — chỉ nhập những gì được dùng (~20 biểu tượng). Không có font biểu tượng nặng nề.",
     "Catches null/undefined bugs at compile time. <code>noUncheckedIndexedAccess</code> prevents array bounds issues in analytics aggregations.":
@@ -2683,7 +2828,8 @@ window.__WIKI_CONTENT_I18N = {
     "Delete all sessions, agents, events, token usage":
       "Xóa tất cả phiên, agent, sự kiện, mức dùng token",
     "Reinstall Claude Code hooks": "Cài đặt lại các hook của Claude Code",
-    "Reset pricing rules to defaults": "Đặt lại quy tắc định giá về mặc định",
+    "Reset Claude, Codex, or both pricing tables to defaults":
+      "Đặt lại bảng giá Claude, Codex hoặc cả hai về mặc định",
     "Export all data as JSON download": "Xuất tất cả dữ liệu dưới dạng tải về JSON",
     "Abandon stale sessions (by hours), purge old data (by days)":
       "Bỏ các phiên cũ (theo giờ), xóa dữ liệu cũ (theo ngày)",
@@ -2756,6 +2902,53 @@ window.__WIKI_CONTENT_I18N = {
       "Bảng <strong>phân trang phía máy chủ</strong> liệt kê mọi phiên đã ghi. Mỗi trang chỉ lấy phần dữ liệu của mình nên việc tính chi phí luôn có giới hạn, dù có bao nhiêu phiên. Tìm kiếm không phân biệt hoa thường trên <code>id</code>, <code>name</code> và <code>cwd</code> chạy ở phía máy chủ với độ trễ chống dội 300 ms; bộ lọc trạng thái kết hợp với tìm kiếm để thu hẹp chính xác. Bộ chọn dự án dạng hộp kiểm có thể tìm kiếm hỗ trợ chọn nhiều thư mục; đường dẫn dài vẫn có thể xem đầy đủ, còn văn bản gọn trên nút giữ thanh lọc dễ đọc. Sắp xếp dùng cùng mẫu menu tùy chỉnh. Mỗi hàng hiển thị tên thật của phiên (đồng bộ trực tiếp từ bản ghi: tiêu đề <code>/rename</code> hoặc <code>claude -n</code>, nếu không thì tiêu đề tự động, nếu vẫn không có thì prompt đầu tiên của người dùng, với dự phòng là ID ngắn), huy hiệu trạng thái, số lượng agent, thời lượng, mô hình và chi phí ước tính. Nhấp vào bất kỳ hàng nào để đi sâu vào chế độ xem chi tiết đầy đủ của phiên với bản ghi hội thoại và phân cấp agent.",
   },
   ko: {
+    "<strong>React 19</strong>": "<strong>React 19</strong>",
+    "<strong>Vite 7</strong>": "<strong>Vite 7</strong>",
+    "<strong>React Router 8</strong>": "<strong>React Router 8</strong>",
+    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks read the admin password from <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>관측성 · Grafana</strong> — 네 개의 보드가 자동 프로비저닝되는 기본 홈 대시보드 <em>CCAM — Overview</em>: 실시간 플릿 스냅샷, 데이터베이스 합계, 분해 차트, <code>/api/metrics</code> 스크레이프 기반 비율을 제공합니다. npm 전용 로컬 도우미만 <code>admin</code> / <code>admin</code>을 사용하며, 컨테이너 스택은 <code>deployments/secrets/grafana-admin-password</code>에서 관리자 비밀번호를 읽습니다.</span>',
+    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login on port 3000: fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks use <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — 포트 3000 로그인 후 기본 홈 대시보드로 플릿 스냅샷, 데이터베이스 합계, 분해 차트, 실시간 <code>/api/metrics</code> 스크레이프 비율을 보여주며 샘플이나 합성 데이터는 없습니다. npm 전용 로컬 도우미만 <code>admin</code> / <code>admin</code>을 사용하고 컨테이너 스택은 <code>deployments/secrets/grafana-admin-password</code>를 사용합니다.</span>',
+    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. The npm-only local helper uses <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>. Container stacks read the password from <code>deployments/secrets/grafana-admin-password</code>.":
+      "<strong>CCAM — Overview</strong>(기본 홈), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, <strong>CCAM — Platform</strong>은 모두 <code>monitoring/grafana/dashboards/</code>에서 프로비저닝되고 실시간 스크레이프에 PromQL을 사용합니다. npm 전용 로컬 도우미는 <code>monitoring/grafana.defaults.env</code>를 통해 <code>admin</code> / <code>admin</code>을 사용합니다. 컨테이너 스택은 <code>deployments/secrets/grafana-admin-password</code>에서 비밀번호를 읽습니다.",
+    "Base URL used by the local MCP server when calling dashboard APIs. Direct loopback HTTP is allowed with a bearer token; tokenized container-host aliases require HTTPS.":
+      "로컬 MCP 서버가 대시보드 API를 호출할 때 사용하는 기본 URL입니다. 직접 루프백 HTTP는 Bearer Token을 사용할 수 있지만 토큰이 있는 컨테이너 호스트 별칭은 HTTPS가 필요합니다.",
+    "Bearer token for a protected dashboard. Falls back to <code>DASHBOARD_API_TOKEN</code>.":
+      "보호된 대시보드용 Bearer Token입니다. 설정되지 않으면 <code>DASHBOARD_API_TOKEN</code>을 사용합니다.",
+    "Restore one export bundle up to 25 MiB (multipart <code>file</code> or JSON <code>{ path }</code>). The restore is idempotent and non-destructive, so it can consolidate machines.":
+      "최대 25 MiB의 내보내기 번들 하나를 복원합니다(multipart <code>file</code> 또는 JSON <code>{ path }</code>). 복원은 멱등적이고 비파괴적이므로 여러 머신의 데이터를 통합할 수 있습니다.",
+    "All dashboard requests reject redirects. Direct loopback HTTP may carry the dashboard bearer token, while tokenized container-host aliases require HTTPS. History uploads are capped at 50 MiB per file and 100 MiB per call, binary responses at 10 MiB, and backup restore at 25 MiB. Only GET requests retry automatically.":
+      "모든 대시보드 요청은 리디렉션을 거부합니다. 직접 루프백 HTTP는 대시보드 Bearer Token을 사용할 수 있지만 토큰이 있는 컨테이너 호스트 별칭은 HTTPS가 필요합니다. 기록 업로드는 파일당 50 MiB 및 호출당 총 100 MiB, 바이너리 응답은 10 MiB, 백업 복원은 25 MiB로 제한됩니다. GET 요청만 자동 재시도됩니다.",
+    "Configuration file reads canonicalize the target and allowed roots, so symlinks cannot escape the trusted Claude directories.":
+      "구성 파일 읽기는 대상과 허용된 루트를 정규화하므로 심볼릭 링크가 신뢰된 Claude 디렉터리 밖으로 벗어날 수 없습니다.",
+    "Codex preview targets are canonicalized before containment checks. Edits reject symlinked path components and refuse content containing <code>[redacted]</code>.":
+      "Codex 미리보기 대상은 포함 검사를 하기 전에 정규화됩니다. 편집은 심볼릭 링크 경로 구성 요소와 <code>[redacted]</code>가 포함된 내용을 거부합니다.",
+    "Redirects are rejected rather than forwarding credentials or signed headers to another URL.":
+      "자격 증명이나 서명된 헤더를 다른 URL로 전달하지 않고 리디렉션을 거부합니다.",
+    "Hosted providers require HTTPS. Generic and n8n targets may use HTTP for local or self-hosted receivers.":
+      "호스팅 제공자는 HTTPS가 필요합니다. Generic 및 n8n 대상은 로컬 또는 자체 호스팅 수신기에 HTTP를 사용할 수 있습니다.",
+    "Stakeholder-ready executive, cost, reliability, and workflow reports with explicit scope and evidence":
+      "명확한 범위와 근거를 갖춘 이해관계자용 경영진, 비용, 안정성, 워크플로 보고서",
+    "Long Analytics legends use compact pages with localized controls. Legends that fit on one page stay unchanged.":
+      "긴 Analytics 범례는 현지화된 컨트롤이 있는 작은 페이지를 사용합니다. 한 페이지에 맞는 범례는 그대로 유지됩니다.",
+    "Data-driven Workflows legends also paginate when labels would make a chart card too tall, while keeping every label reachable.":
+      "데이터 기반 Workflows 범례도 레이블 때문에 차트 카드가 너무 길어질 때 페이지로 나뉘며, 모든 레이블에 계속 접근할 수 있습니다.",
+    "First-run readiness follows the selected scope: Claude Code requires Claude hooks, Codex requires Codex hooks, and Both requires both. Ready selections open the dashboard immediately; otherwise only missing selected providers appear in setup.":
+      "첫 실행 준비 상태는 선택한 범위를 따릅니다. Claude Code는 Claude Hook, Codex는 Codex Hook, 둘 다를 선택하면 두 세트가 모두 필요합니다. 준비된 선택은 즉시 대시보드를 열고, 그렇지 않으면 누락된 선택 제공자만 설정에 표시됩니다.",
+    "Local MCP sidecar with three transport modes and 97 typed tools across 16 domain modules. It covers the complete supported app surface, including scoped data, transcripts and images, Claude/GPT pricing, workflows, alerts, webhooks, imports and restore, Claude/Codex config, Run Agent, remote sources, push, and maintenance. Every transport shares one validated catalog with bearer-token support and tiered mutation/destructive gates.":
+      "로컬 MCP sidecar는 세 가지 전송 모드와 16개 도메인 모듈의 97개 타입 지정 도구를 제공합니다. 스코프 데이터, 트랜스크립트와 이미지, Claude/GPT 가격, 워크플로, 알림, Webhook, 가져오기와 복원, Claude/Codex 구성, Run Agent, 원격 소스, 푸시 및 유지보수를 포함한 전체 지원 앱 표면을 다룹니다. 모든 전송은 Bearer Token과 계층형 변경/파괴 게이트가 적용된 하나의 검증된 카탈로그를 공유합니다.",
+    "One shared marketplace ships 14 plugins for Claude Code and Codex, with 66 packaged skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, and 2 MCP-enabled plugins. Every skill includes canonical frontmatter and OpenAI metadata. The skills.sh CLI discovers 74 repository skills from the same public source. Install with <code>claude plugin marketplace add</code>, <code>codex plugin marketplace add</code>, or <code>npx skills add</code>.":
+      "하나의 공유 Marketplace가 Claude Code와 Codex용 14개 플러그인, 66개 패키지 스킬, 18개 Claude 서브에이전트, 34개 Claude 명령, 3개 CLI 도우미, 2개의 MCP 플러그인을 제공합니다. 모든 스킬은 표준 Frontmatter와 OpenAI 메타데이터를 포함합니다. skills.sh CLI는 동일한 공개 소스에서 74개의 저장소 스킬을 찾습니다. <code>claude plugin marketplace add</code>, <code>codex plugin marketplace add</code> 또는 <code>npx skills add</code>로 설치합니다.",
+    "The Agent Monitor ships one shared marketplace containing 14 plugins for Claude Code and Codex, 66 packaged plugin skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, 3 hook configurations, and 2 MCP-enabled plugins. The skills.sh CLI discovers 74 total repository skills. Product-specific manifests stay separate while skill instructions and validation remain shared.":
+      "Agent Monitor는 Claude Code와 Codex용 14개 플러그인, 66개 패키지 플러그인 스킬, 18개 Claude 서브에이전트, 34개 Claude 명령, 3개 CLI 도우미, 3개 Hook 구성, 2개의 MCP 플러그인을 포함한 하나의 공유 Marketplace를 제공합니다. skills.sh CLI는 저장소 전체에서 74개 스킬을 찾습니다. 제품별 Manifest는 분리하고 스킬 지침과 검증은 공유합니다.",
+    "Each plugin carries product-specific Claude Code and Codex manifests. The catalogs live at <code>.claude-plugin/marketplace.json</code> and <code>.agents/plugins/marketplace.json</code>. Each plugin directory contains:":
+      "각 플러그인은 제품별 Claude Code 및 Codex Manifest를 포함합니다. Catalog는 <code>.claude-plugin/marketplace.json</code>과 <code>.agents/plugins/marketplace.json</code>에 있습니다. 각 플러그인 디렉터리에는 다음이 포함됩니다.",
+    "Safe monitored Claude Code/Codex launch, follow-up, stop, resume, and run history":
+      "안전한 Claude Code/Codex 실행, 후속 메시지, 중지, 재개 및 실행 기록.",
+    "Alert rules, webhook providers, push notifications, and SSH remote collection":
+      "알림 규칙, Webhook 제공자, 푸시 알림 및 SSH 원격 수집.",
+    "Claude/Codex config, hooks, provider imports, backup restore, updates, and MCP operations":
+      "Claude/Codex 구성, Hook, 제공자 가져오기, 백업 복원, 업데이트 및 MCP 운영.",
     "Remote sessions never emit live hooks to this dashboard, so a healthy Claude Code or Codex provider mirror remains exempt from the local process-liveness reap and watchdog transcript scan. Every successful provider sync still reconciles live status from the matching mirrored transcript: activity is judged from the <b>newest event timestamp inside the JSONL</b> (falling back to mirror mtime); within <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) keeps the session <code>active</code>, otherwise it is reconciled to <code>completed</code>. If that provider's SSH sync fails, is unavailable, or is stranded in <code>syncing</code> longer than <code>DASHBOARD_STALE_MINUTES</code> — and an active session is itself older than that same window — the ordinary stale-session sweep marks it <code>abandoned</code> and completes its agents. A later fresh mirror reactivates a session that is still writing, so unavailable providers never leave permanent Waiting cards.":
       "원격 세션은 이 대시보드에 실시간 hook을 보내지 않으므로 정상 Claude Code 또는 Codex provider 미러는 로컬 프로세스 liveness 회수와 watchdog transcript 스캔에서 계속 제외됩니다. 성공한 각 provider 동기화는 해당 미러 transcript에서 실시간 상태를 조정합니다. 활동은 <b>JSONL 내부 최신 이벤트 타임스탬프</b> (미러 mtime 폴백)로 판단하며, <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (기본 10분) 안이면 세션을 <code>active</code>로 유지하고 그 밖에는 <code>completed</code>로 조정합니다. 해당 provider의 SSH 동기화가 실패하거나 사용할 수 없거나 <code>DASHBOARD_STALE_MINUTES</code>보다 오래 <code>syncing</code>에 멈춰 있고 active 세션 자체도 같은 창보다 오래되면, 일반 stale-session 스윕이 이를 <code>abandoned</code>로 표시하고 agent를 완료합니다. 나중에 새 미러가 들어오면 여전히 쓰고 있는 세션을 다시 활성화하므로 사용할 수 없는 provider가 영구적인 Waiting 카드를 남기지 않습니다.",
     '<span class="caption-icon">🛰️</span> <span><strong>Settings · Remote Data Sources</strong> — pull Claude Code and Codex activity from other machines over SSH: optionally set independent Remote Claude home and Remote Codex home paths, test each provider, sync manually or on a background poller, and switch the global data scope between local, all sources, or a specific machine with per-session source badges</span>':
@@ -3847,12 +4040,12 @@ window.__WIKI_CONTENT_I18N = {
     "The Dockerfile uses three stages to minimize the final image size:":
       "Dockerfile은 최종 이미지 크기를 최소화하기 위해 세 단계를 사용합니다.",
     Stage: "단계",
-    "Installs production <code>node_modules</code> on <code>node:22-alpine</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
-      "<code>node:22-alpine</code>에 프로덕션용 <code>node_modules</code>를 설치합니다. <code>better-sqlite3</code>는 선택 사항입니다 — 사전 빌드가 없을 경우 서버는 내장된 <code>node:sqlite</code>로 대체됩니다",
+    "Installs production <code>node_modules</code> on digest-pinned <code>node:24.19.0-alpine3.24</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
+      "digest가 고정된 <code>node:24.19.0-alpine3.24</code>에 프로덕션용 <code>node_modules</code>를 설치합니다. <code>better-sqlite3</code>는 선택 사항이며 사전 빌드가 없으면 서버가 내장 <code>node:sqlite</code>로 대체합니다",
     "Runs <code>npm ci</code> + <code>vite build</code> to produce optimized static assets":
       "<code>npm ci</code> + <code>vite build</code>를 실행하여 최적화된 정적 자산을 생성합니다",
-    "Clean <code>node:22-alpine</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
-      "<code>node_modules</code>, 서버 코드, <code>client/dist</code>만 포함한 깔끔한 <code>node:22-alpine</code>",
+    "Clean digest-pinned <code>node:24.19.0-alpine3.24</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
+      "<code>node_modules</code>, 서버 코드, <code>client/dist</code>만 포함한 깔끔한 digest 고정 <code>node:24.19.0-alpine3.24</code>",
     "<strong>Hook note</strong>": "<strong>Hook 참고 사항</strong>",
     "Claude Code hooks run on the host, not inside the container. The containerized server receives hook events via HTTP on <code>localhost:4820</code>. Run <code>npm run install-hooks</code> on the host after starting the container.":
       "Claude Code의 hook은 컨테이너 내부가 아니라 호스트에서 실행됩니다. 컨테이너화된 서버는 <code>localhost:4820</code>에서 HTTP를 통해 hook 이벤트를 수신합니다. 컨테이너를 시작한 후 호스트에서 <code>npm run install-hooks</code>를 실행하십시오.",
@@ -3933,14 +4126,14 @@ window.__WIKI_CONTENT_I18N = {
       "검증되었고, 최소한이며, 널리 이해되고 있습니다. Fastify는 과할 수 있고, 원시 <code>http</code> 모듈은 라우팅에 너무 많은 보일러플레이트 코드가 필요합니다.",
     "Fastest, most lightweight WebSocket library for Node. No Socket.IO overhead needed — we only push typed JSON messages one-way.":
       "Node에서 가장 빠르고 가벼운 WebSocket 라이브러리입니다. 타입이 지정된 JSON 메시지를 단방향으로 전송하기만 하므로 Socket.IO의 오버헤드가 필요하지 않습니다.",
-    "Stable, widely known, strong TypeScript support. No Server Components or RSC needed for a client-rendered local SPA.":
-      "안정적이고, 널리 알려져 있으며, TypeScript 지원이 뛰어납니다. 클라이언트 렌더링 방식의 로컬 SPA에는 Server Components나 RSC가 필요하지 않습니다.",
+    "Current supported client runtime with strong TypeScript support. CCAM remains a client-rendered SPA and does not enable Server Components or RSC.":
+      "현재 지원되는 클라이언트 런타임이며 TypeScript 지원이 뛰어납니다. CCAM은 클라이언트 렌더링 SPA로 유지되며 Server Components나 RSC를 활성화하지 않습니다.",
     "Fast builds, native ESM, excellent dev experience. Proxy config handles the dev server split cleanly with no ejection.":
       "빌드 속도가 빠르고, 네이티브 ESM을 지원하며, 개발 경험이 뛰어납니다. 프록시 설정이 개발 서버 분리를 이젝트(eject) 없이 깔끔하게 처리합니다.",
     "Utility-first approach keeps styles colocated with markup. No CSS module boilerplate. Custom dark theme config for the dark UI.":
       "유틸리티 우선 접근 방식으로 스타일을 마크업과 함께 배치할 수 있습니다. CSS 모듈 보일러플레이트가 필요 없습니다. 다크 UI를 위한 커스텀 다크 테마 설정을 제공합니다.",
-    "Standard routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without prop drilling.":
-      "React SPA를 위한 표준 라우팅입니다. <code>&lt;Outlet&gt;</code>을 사용한 레이아웃 라우트는 prop drilling 없이 깔끔한 셸 구성을 제공합니다.",
+    "Standard declarative routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without enabling framework or RSC modes.":
+      "React SPA를 위한 표준 선언형 라우팅입니다. <code>&lt;Outlet&gt;</code> 레이아웃 라우트는 framework 또는 RSC 모드를 활성화하지 않고 깔끔한 셸 구성을 제공합니다.",
     "Tree-shakeable icon library — only imports what's used (~20 icons). No heavy icon font.":
       "트리 셰이킹이 가능한 아이콘 라이브러리로, 사용되는 아이콘만 임포트합니다(약 20개). 무거운 아이콘 폰트가 필요 없습니다.",
     "Catches null/undefined bugs at compile time. <code>noUncheckedIndexedAccess</code> prevents array bounds issues in analytics aggregations.":
@@ -4053,7 +4246,8 @@ window.__WIKI_CONTENT_I18N = {
     "Delete all sessions, agents, events, token usage":
       "모든 세션, 에이전트, 이벤트, 토큰 사용량 삭제",
     "Reinstall Claude Code hooks": "Claude Code 훅 재설치",
-    "Reset pricing rules to defaults": "가격 규칙을 기본값으로 재설정",
+    "Reset Claude, Codex, or both pricing tables to defaults":
+      "Claude, Codex 또는 두 가격표를 기본값으로 재설정",
     "Export all data as JSON download": "모든 데이터를 JSON 파일로 내보내기",
     "Abandon stale sessions (by hours), purge old data (by days)":
       "오래된 세션 중단 처리(시간 단위), 오래된 데이터 삭제(일 단위)",
@@ -4124,6 +4318,44 @@ window.__WIKI_CONTENT_I18N = {
       "<strong>서버 페이지네이션</strong> 테이블은 기록된 모든 세션을 보여줍니다. 각 페이지는 해당 구간만 가져오므로 세션 수와 관계없이 비용 계산 범위가 제한됩니다. <code>id</code>, <code>name</code>, <code>cwd</code>에 대한 대소문자 구분 없는 검색은 300 ms 디바운스와 함께 서버 측에서 실행되며 상태 필터와 조합할 수 있습니다. 검색 가능한 체크박스 프로젝트 선택기로 여러 디렉터리를 고를 수 있고, 긴 경로는 전체를 확인할 수 있으며 간결한 트리거 텍스트가 필터 바를 읽기 쉽게 유지합니다. 정렬도 같은 맞춤 드롭다운 패턴을 사용합니다. 각 행은 세션의 실제 이름(트랜스크립트에서 실시간으로 동기화됨: <code>/rename</code> 또는 <code>claude -n</code> 제목, 없으면 자동 생성된 제목, 그마저도 없으면 첫 사용자 프롬프트, 최종적으로 짧은 ID로 대체), 상태 배지, 에이전트 수, 지속 시간, 모델, 예상 비용을 표시합니다. 행을 클릭하면 대화 트랜스크립트와 에이전트 계층 구조가 포함된 전체 세션 상세 화면으로 이동합니다.",
   },
   es: {
+    "Base URL used by the local MCP server when calling dashboard APIs. Direct loopback HTTP is allowed with a bearer token; tokenized container-host aliases require HTTPS.":
+      "URL base que usa el servidor MCP local al llamar a las API del panel. HTTP de loopback directo puede llevar un Bearer Token; los alias de host de contenedor con token requieren HTTPS.",
+    "Bearer token for a protected dashboard. Falls back to <code>DASHBOARD_API_TOKEN</code>.":
+      "Bearer Token para un panel protegido. Usa <code>DASHBOARD_API_TOKEN</code> como respaldo.",
+    "Restore one export bundle up to 25 MiB (multipart <code>file</code> or JSON <code>{ path }</code>). The restore is idempotent and non-destructive, so it can consolidate machines.":
+      "Restaura un paquete exportado de hasta 25 MiB (multipart <code>file</code> o JSON <code>{ path }</code>). La restauración es idempotente y no destructiva, por lo que permite consolidar máquinas.",
+    "All dashboard requests reject redirects. Direct loopback HTTP may carry the dashboard bearer token, while tokenized container-host aliases require HTTPS. History uploads are capped at 50 MiB per file and 100 MiB per call, binary responses at 10 MiB, and backup restore at 25 MiB. Only GET requests retry automatically.":
+      "Todas las solicitudes al panel rechazan redirecciones. HTTP de loopback directo puede llevar el Bearer Token del panel, mientras que los alias de host de contenedor con token requieren HTTPS. Las cargas de historial se limitan a 50 MiB por archivo y 100 MiB por llamada, las respuestas binarias a 10 MiB y la restauración de copias a 25 MiB. Solo las solicitudes GET se reintentan automáticamente.",
+    "Configuration file reads canonicalize the target and allowed roots, so symlinks cannot escape the trusted Claude directories.":
+      "Las lecturas de archivos de configuración canonizan el destino y las raíces permitidas, por lo que los enlaces simbólicos no pueden salir de los directorios Claude confiables.",
+    "Codex preview targets are canonicalized before containment checks. Edits reject symlinked path components and refuse content containing <code>[redacted]</code>.":
+      "Los destinos de vista previa de Codex se canonizan antes de comprobar su contención. Las ediciones rechazan componentes de ruta con enlaces simbólicos y contenido que incluya <code>[redacted]</code>.",
+    "Redirects are rejected rather than forwarding credentials or signed headers to another URL.":
+      "Las redirecciones se rechazan en lugar de reenviar credenciales o encabezados firmados a otra URL.",
+    "Hosted providers require HTTPS. Generic and n8n targets may use HTTP for local or self-hosted receivers.":
+      "Los proveedores alojados requieren HTTPS. Los destinos Generic y n8n pueden usar HTTP para receptores locales o autohospedados.",
+    "Stakeholder-ready executive, cost, reliability, and workflow reports with explicit scope and evidence":
+      "Informes ejecutivos, de costos, fiabilidad y flujos de trabajo listos para interesados, con alcance y evidencia explícitos",
+    "Long Analytics legends use compact pages with localized controls. Legends that fit on one page stay unchanged.":
+      "Las leyendas largas de Analytics usan páginas compactas con controles localizados. Las que caben en una página no cambian.",
+    "Data-driven Workflows legends also paginate when labels would make a chart card too tall, while keeping every label reachable.":
+      "Las leyendas de Workflows basadas en datos también se paginan cuando las etiquetas alargarían demasiado una tarjeta, sin dejar ninguna etiqueta inaccesible.",
+    "First-run readiness follows the selected scope: Claude Code requires Claude hooks, Codex requires Codex hooks, and Both requires both. Ready selections open the dashboard immediately; otherwise only missing selected providers appear in setup.":
+      "La preparación inicial sigue el ámbito elegido: Claude Code requiere hooks de Claude, Codex requiere hooks de Codex y Ambos requiere los dos conjuntos. Las selecciones listas abren el panel de inmediato; de lo contrario, la configuración solo muestra los proveedores seleccionados que faltan.",
+    "Local MCP sidecar with three transport modes and 97 typed tools across 16 domain modules. It covers the complete supported app surface, including scoped data, transcripts and images, Claude/GPT pricing, workflows, alerts, webhooks, imports and restore, Claude/Codex config, Run Agent, remote sources, push, and maintenance. Every transport shares one validated catalog with bearer-token support and tiered mutation/destructive gates.":
+      "El sidecar MCP local ofrece tres modos de transporte y 97 herramientas tipadas en 16 módulos de dominio. Cubre toda la superficie compatible de la aplicación, incluidos datos con ámbito, transcripciones e imágenes, precios Claude/GPT, flujos de trabajo, alertas, webhooks, importación y restauración, configuración Claude/Codex, Run Agent, fuentes remotas, push y mantenimiento. Todos los transportes comparten un catálogo validado con Bearer Token y puertas de mutación/destrucción por niveles.",
+    "One shared marketplace ships 14 plugins for Claude Code and Codex, with 66 packaged skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, and 2 MCP-enabled plugins. Every skill includes canonical frontmatter and OpenAI metadata. The skills.sh CLI discovers 74 repository skills from the same public source. Install with <code>claude plugin marketplace add</code>, <code>codex plugin marketplace add</code>, or <code>npx skills add</code>.":
+      "Un Marketplace compartido distribuye 14 plugins para Claude Code y Codex, con 66 habilidades empaquetadas, 18 subagentes de Claude, 34 comandos de Claude, 3 utilidades CLI y 2 plugins con MCP. Cada habilidad incluye Frontmatter canónico y metadatos OpenAI. La CLI de skills.sh descubre 74 habilidades del repositorio desde la misma fuente pública. Instala con <code>claude plugin marketplace add</code>, <code>codex plugin marketplace add</code> o <code>npx skills add</code>.",
+    "The Agent Monitor ships one shared marketplace containing 14 plugins for Claude Code and Codex, 66 packaged plugin skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, 3 hook configurations, and 2 MCP-enabled plugins. The skills.sh CLI discovers 74 total repository skills. Product-specific manifests stay separate while skill instructions and validation remain shared.":
+      "Agent Monitor incluye un Marketplace compartido con 14 plugins para Claude Code y Codex, 66 habilidades de plugin empaquetadas, 18 subagentes de Claude, 34 comandos de Claude, 3 utilidades CLI, 3 configuraciones de hooks y 2 plugins con MCP. La CLI de skills.sh descubre 74 habilidades totales del repositorio. Los Manifest específicos de cada producto permanecen separados, mientras que las instrucciones y la validación de habilidades se comparten.",
+    "Each plugin carries product-specific Claude Code and Codex manifests. The catalogs live at <code>.claude-plugin/marketplace.json</code> and <code>.agents/plugins/marketplace.json</code>. Each plugin directory contains:":
+      "Cada plugin incluye Manifest específicos para Claude Code y Codex. Los Catalog viven en <code>.claude-plugin/marketplace.json</code> y <code>.agents/plugins/marketplace.json</code>. Cada directorio de plugin contiene:",
+    "Safe monitored Claude Code/Codex launch, follow-up, stop, resume, and run history":
+      "Inicio, seguimiento, detención, reanudación e historial de ejecuciones de Claude Code/Codex con supervisión segura.",
+    "Alert rules, webhook providers, push notifications, and SSH remote collection":
+      "Reglas de alerta, proveedores de webhook, notificaciones push y recopilación remota por SSH.",
+    "Claude/Codex config, hooks, provider imports, backup restore, updates, and MCP operations":
+      "Configuración Claude/Codex, hooks, importaciones por proveedor, restauración de copias, actualizaciones y operaciones MCP.",
     "Remote sessions never emit live hooks to this dashboard, so a healthy Claude Code or Codex provider mirror remains exempt from the local process-liveness reap and watchdog transcript scan. Every successful provider sync still reconciles live status from the matching mirrored transcript: activity is judged from the <b>newest event timestamp inside the JSONL</b> (falling back to mirror mtime); within <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (default 10 minutes) keeps the session <code>active</code>, otherwise it is reconciled to <code>completed</code>. If that provider's SSH sync fails, is unavailable, or is stranded in <code>syncing</code> longer than <code>DASHBOARD_STALE_MINUTES</code> — and an active session is itself older than that same window — the ordinary stale-session sweep marks it <code>abandoned</code> and completes its agents. A later fresh mirror reactivates a session that is still writing, so unavailable providers never leave permanent Waiting cards.":
       "Las sesiones remotas nunca emiten hooks en vivo a este panel, por lo que una réplica sana del proveedor Claude Code o Codex sigue excluida de la comprobación local de procesos y del análisis de transcript del watchdog. Cada sincronización correcta de proveedor reconcilia el estado en vivo desde el transcript reflejado correspondiente: la actividad se determina a partir de la <b>marca de tiempo del evento más reciente dentro del JSONL</b> (con mtime de la réplica como respaldo); estar dentro de <code>DASHBOARD_REMOTE_ACTIVE_WINDOW_MS</code> (10 minutos de forma predeterminada) mantiene la sesión <code>active</code>; de lo contrario se reconcilia como <code>completed</code>. Si falla la sincronización SSH de ese proveedor, no está disponible o permanece en <code>syncing</code> más de <code>DASHBOARD_STALE_MINUTES</code> —y una sesión activa supera esa misma ventana— el barrido normal de sesiones obsoletas la marca <code>abandoned</code> y completa sus agentes. Una réplica nueva posterior reactiva una sesión que sigue escribiendo, por lo que los proveedores no disponibles nunca dejan tarjetas En espera permanentes.",
     '<span class="caption-icon">🛰️</span> <span><strong>Settings · Remote Data Sources</strong> — pull Claude Code and Codex activity from other machines over SSH: optionally set independent Remote Claude home and Remote Codex home paths, test each provider, sync manually or on a background poller, and switch the global data scope between local, all sources, or a specific machine with per-session source badges</span>':
@@ -4160,14 +4392,14 @@ window.__WIKI_CONTENT_I18N = {
       "Las llamadas de herramienta <code>response_item</code> de Codex se indexan exactamente una vez mediante un cursor de rollout independiente; por eso Workflows con ámbito de proveedor muestra flujos de herramientas registrados, detalles de sesión, totales de tokens/modelos y recuentos de <code>context_compacted</code> sin repetir el ciclo de vida ni la contabilidad de tokens. Dynamic Workflows permanece oculto en el ámbito exclusivo de Codex porque sus journals en disco son una función de Claude Code.",
     "Safety-net interval (ms) for incremental Codex rollout scanning. Default <code>4000</code>; <code>0</code> disables polling but keeps the watcher.":
       "Intervalo de seguridad (ms) para el análisis incremental de rollouts de Codex. El valor predeterminado es <code>4000</code>; <code>0</code> desactiva el sondeo, pero conserva el vigilante.",
-    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. Login <code>admin</code> / <code>admin</code> on port 3000</span>':
-      '<span class="caption-icon">📊</span> <span><strong>Observabilidad · Grafana</strong> — panel de control de inicio predeterminado <em>CCAM - Visión general</em> (cuatro tableros provistos automáticamente): instantánea de la flota en vivo, totales de la base de datos, gráficos de desglose y tarifas de <code>/api/metrics</code> Rasguños. acceso <code>admin</code> / <code>admin</code> En el puerto 3000</span>',
+    '<span class="caption-icon">📊</span> <span><strong>Observability · Grafana</strong> — default home dashboard <em>CCAM — Overview</em> (four boards auto-provisioned): live fleet snapshot, database totals, breakdown charts, and rates from <code>/api/metrics</code> scrapes. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks read the admin password from <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Observabilidad · Grafana</strong> — panel de inicio predeterminado <em>CCAM — Overview</em> con cuatro tableros aprovisionados automáticamente: instantánea de la flota, totales de la base de datos, gráficos de desglose y tasas de los scrapes de <code>/api/metrics</code>. Solo el ayudante local administrado por npm usa <code>admin</code> / <code>admin</code>; las pilas de contenedores leen la contraseña de administración desde <code>deployments/secrets/grafana-admin-password</code>.</span>',
     '<span class="caption-icon">🔥</span> <span><strong>Observability · Prometheus console</strong> — pre-built landing page at <code>/consoles/index.html</code> with live metric cards, session/token tables, and drill-down links into the Graph UI (Prometheus 3.x compatible — queries the HTTP API directly)</span>':
       '<span class="caption-icon">🔥</span> <span><strong>Observabilidad · Consola Prometheus</strong> — página de destino preconstruida en <code>/consoles/index.html</code> Con tarjetas métricas en vivo, tablas de sesiones/tokens y enlaces de profundización a la interfaz de usuario gráfica (compatible con Prometheus 3.x, consulta directamente la API HTTP)</span>',
     '<span class="caption-icon">📈</span> <span><strong>Observability · Prometheus Graph</strong> — run PromQL against scraped CCAM series (e.g. <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>, <code>rate(ccam_tokens_total[5m])</code>) with starter expressions from the CCAM console and recording rules in <code>monitoring/prometheus/ccam-rules.yml</code></span>':
       '<span class="caption-icon">📈</span> <span><strong>Observabilidad · Gráfico Prometheus</strong> - Ejecute PromQL contra series CCAM raspadas (por ejemplo, <code>sum(ccam_sessions)</code>, <code>ccam_events_total</code>, <code>rate(ccam_tokens_total[5m])</code>) con expresiones iniciales de la consola CCAM y reglas de grabación en <code>monitoring/prometheus/ccam-rules.yml</code></span>',
-    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login (<code>admin</code> / <code>admin</code> on port 3000): fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data</span>':
-      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM - Descripción general</strong> — panel de control de la página de inicio predeterminado después de iniciar sesión (<code>admin</code> / <code>admin</code> en el puerto 3000): instantánea de la flota, totales de la base de datos, gráficos de desglose y tarifas en vivo <code>/api/metrics</code> rasguños - sin muestras ni datos sintéticos</span>',
+    '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — default home dashboard after login on port 3000: fleet snapshot, database totals, breakdown charts, and rates from live <code>/api/metrics</code> scrapes — no sample or synthetic data. The npm-only local helper uses <code>admin</code> / <code>admin</code>; container stacks use <code>deployments/secrets/grafana-admin-password</code>.</span>':
+      '<span class="caption-icon">📊</span> <span><strong>Grafana · CCAM — Overview</strong> — panel de inicio predeterminado después de iniciar sesión en el puerto 3000: instantánea de la flota, totales de la base de datos, gráficos de desglose y tasas de scrapes de <code>/api/metrics</code> en vivo, sin datos de muestra ni sintéticos. Solo el ayudante local administrado por npm usa <code>admin</code> / <code>admin</code>; las pilas de contenedores usan <code>deployments/secrets/grafana-admin-password</code>.</span>',
     '<span class="caption-icon">🔥</span> <span><strong>Prometheus · CCAM console</strong> — static HTML at <code>/consoles/index.html</code> (Prometheus 3.x compatible): live metric cards, session/token tables, and one-click Graph drill-down links that query the Prometheus HTTP API directly</span>':
       '<span class="caption-icon">🔥</span> <span><strong>Prometeo · Consola CCAM</strong> — HTML estático en <code>/consoles/index.html</code> (Compatible con Prometheus 3.x): tarjetas métricas en vivo, tablas de sesiones/tokens y enlaces de profundización gráfica con un solo clic que consultan la API HTTP de Prometheus directamente.</span>',
     '<span class="caption-icon">📈</span> <span><strong>Prometheus · Graph</strong> — ad-hoc PromQL against scraped CCAM series; starter expressions ship in the CCAM console and <code>monitoring/README.md</code>, with derived rates in <code>monitoring/prometheus/ccam-rules.yml</code></span>':
@@ -4177,8 +4409,8 @@ window.__WIKI_CONTENT_I18N = {
     "<strong>Quick start (npm):</strong> run the dashboard on loopback, then <code>npm run monitoring:install</code> once and <code>npm run monitoring:up</code>. Open Grafana at <code>http://localhost:3000</code> and Prometheus at <code>http://localhost:9090</code>. The pre-built CCAM console is at <code>http://localhost:9090/consoles/index.html</code> (also reachable from the Prometheus UI under <strong>Consoles</strong>). For an all-Docker path use <code>npm run monitoring:docker:up</code> or <code>npm run docker:full:up</code> for dashboard + Prometheus + Grafana together. Verify with <code>npm run monitoring:verify</code> — the <code>ccam</code> scrape target should read <strong>UP</strong>.":
       "<strong>Inicio rápido (npm):</strong> Ejecuta el panel de control en bucle, luego <code>npm run monitoring:install</code> Una vez y <code>npm run monitoring:up</code>. Grafana en <code>http://localhost:3000</code> Y Prometeo en <code>http://localhost:9090</code>. console CCAM preconstruida está en <code>http://localhost:9090/consoles/index.html</code> (también accesible desde la interfaz de usuario de Prometheus en <strong>Consolas</strong>). Para un uso de ruta todo-Docker <code>npm run monitoring:docker:up</code> Oregón <code>npm run docker:full:up</code> Para panel de control + Prometheus + Grafana juntos. Verifique con <code>npm run monitoring:verify</code> — el <code>ccam</code> El objetivo de la raspadura debería leer <strong>UP</strong>.",
     "Four Grafana boards": "Cuatro tableros Grafana",
-    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. Credentials default to <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>.":
-      "<strong>CCAM - Visión general</strong> (página de inicio predeterminada), <strong>CCAM - Sesiones y agentes</strong>, <strong>CCAM - Tokens y eventos</strong>, y <strong>CCAM — Plataforma</strong> — todo provisto de <code>monitoring/grafana/dashboards/</code> Con PromQL contra tu raspado en vivo. Las credenciales por defecto son <code>admin</code> / <code>admin</code> a través de <code>monitoring/grafana.defaults.env</code>.",
+    "<strong>CCAM — Overview</strong> (default home), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong>, and <strong>CCAM — Platform</strong> — all provisioned from <code>monitoring/grafana/dashboards/</code> with PromQL against your live scrape. The npm-only local helper uses <code>admin</code> / <code>admin</code> via <code>monitoring/grafana.defaults.env</code>. Container stacks read the password from <code>deployments/secrets/grafana-admin-password</code>.":
+      "<strong>CCAM — Overview</strong> (inicio predeterminado), <strong>CCAM — Sessions &amp; Agents</strong>, <strong>CCAM — Tokens &amp; Events</strong> y <strong>CCAM — Platform</strong> se aprovisionan desde <code>monitoring/grafana/dashboards/</code> con PromQL sobre el scrape en vivo. Solo el ayudante local administrado por npm usa <code>admin</code> / <code>admin</code> mediante <code>monitoring/grafana.defaults.env</code>. Las pilas de contenedores leen la contraseña desde <code>deployments/secrets/grafana-admin-password</code>.",
     "Prometheus console": "Consola Prometheus",
     "Prometheus 3.x dropped the legacy console template libraries, so CCAM ships a <strong>static HTML console</strong> at <code>monitoring/prometheus/consoles/index.html</code> that fetches <code>/api/v1/query</code> directly — live cards, session tables, and Graph links without Go-template errors on <code>/consoles/index.html</code>.":
       "Prometheus 3.x eliminó las bibliotecas de plantillas de consola heredadas, por lo que CCAM incluye un <strong>Consola HTML estática</strong> att <code>monitoring/prometheus/consoles/index.html</code> Que recoge <code>/api/v1/query</code> Directamente: tarjetas en vivo, tablas de sesión y enlaces a gráficos sin errores de plantilla Go en <code>/consoles/index.html</code>.",
@@ -5247,12 +5479,12 @@ window.__WIKI_CONTENT_I18N = {
     "The Dockerfile uses three stages to minimize the final image size:":
       "El Dockerfile utiliza tres etapas para minimizar el tamaño final de la imagen:",
     Stage: "etapa",
-    "Installs production <code>node_modules</code> on <code>node:22-alpine</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
-      "Instala producción <code>node_modules</code> en <code>node:22-alpine</code>. <code>better-sqlite3</code> Es opcional: si las construcciones preestablecidas no están disponibles, el servidor recurre a las construcciones integradas. <code>node:sqlite</code>",
+    "Installs production <code>node_modules</code> on digest-pinned <code>node:24.19.0-alpine3.24</code>. <code>better-sqlite3</code> is optional — if prebuilds are unavailable, the server falls back to built-in <code>node:sqlite</code>":
+      "Instala los <code>node_modules</code> de producción sobre <code>node:24.19.0-alpine3.24</code> fijado por digest. <code>better-sqlite3</code> es opcional; si no hay precompilados, el servidor usa el <code>node:sqlite</code> integrado",
     "Runs <code>npm ci</code> + <code>vite build</code> to produce optimized static assets":
       "Corre <code>npm ci</code> + <code>vite build</code> Para producir activos estáticos optimizados",
-    "Clean <code>node:22-alpine</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
-      "limpio <code>node:22-alpine</code> Con solo <code>node_modules</code>, código del servidor y <code>client/dist</code>",
+    "Clean digest-pinned <code>node:24.19.0-alpine3.24</code> with only <code>node_modules</code>, server code, and <code>client/dist</code>":
+      "<code>node:24.19.0-alpine3.24</code> limpio y fijado por digest, solo con <code>node_modules</code>, código del servidor y <code>client/dist</code>",
     "<strong>Hook note</strong>": "<strong>Nota de gancho</strong>",
     "Claude Code hooks run on the host, not inside the container. The containerized server receives hook events via HTTP on <code>localhost:4820</code>. Run <code>npm run install-hooks</code> on the host after starting the container.":
       "Los ganchos de Claude Code se ejecutan en el host, no dentro del contenedor. El servidor contenedorizado recibe eventos de gancho a través de HTTP en <code>localhost:4820</code>. carrera <code>npm run install-hooks</code> En el host después de iniciar el contenedor.",
@@ -5335,14 +5567,14 @@ window.__WIKI_CONTENT_I18N = {
       "Probado en batalla, minimalista, bien entendido. Fastify sería una exageración; crudo <code>http</code> El módulo requeriría demasiada plantilla para el enrutamiento.",
     "Fastest, most lightweight WebSocket library for Node. No Socket.IO overhead needed — we only push typed JSON messages one-way.":
       "La biblioteca WebSocket más rápida y ligera para Node. No se necesita sobrecarga de Socket.IO, solo enviamos mensajes JSON de tipo de forma bidireccional.",
-    "Stable, widely known, strong TypeScript support. No Server Components or RSC needed for a client-rendered local SPA.":
-      "Sostenible, ampliamente conocido, fuerte soporte para TypeScript. No se necesitan componentes de servidor ni RSC para un SPA local renderizado por el cliente.",
+    "Current supported client runtime with strong TypeScript support. CCAM remains a client-rendered SPA and does not enable Server Components or RSC.":
+      "Runtime de cliente actualmente compatible y con sólido soporte de TypeScript. CCAM sigue siendo una SPA renderizada en el cliente y no habilita Server Components ni RSC.",
     "Fast builds, native ESM, excellent dev experience. Proxy config handles the dev server split cleanly with no ejection.":
       "Construcciones rápidas, ESM nativo, excelente experiencia de desarrollo. La configuración del proxy maneja la división del servidor de desarrollo de forma limpia sin expulsión.",
     "Utility-first approach keeps styles colocated with markup. No CSS module boilerplate. Custom dark theme config for the dark UI.":
       "El enfoque de priorizar la utilidad mantiene los estilos colocalizados con el marcado. Sin plantilla de módulo CSS. Configuración personalizada del tema oscuro para la interfaz de usuario oscura.",
-    "Standard routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without prop drilling.":
-      "Ruta estándar para React SPAs. Rutas de diseño con <code>&lt;Outlet&gt;</code> Dar una composición de cáscara limpia sin perforación de propósitos.",
+    "Standard declarative routing for React SPAs. Layout routes with <code>&lt;Outlet&gt;</code> give clean shell composition without enabling framework or RSC modes.":
+      "Enrutamiento declarativo estándar para SPA React. Las rutas de diseño con <code>&lt;Outlet&gt;</code> ofrecen una composición limpia sin habilitar modos framework o RSC.",
     "Tree-shakeable icon library — only imports what's used (~20 icons). No heavy icon font.":
       "Biblioteca de iconos que se pueden sacudir como un árbol: solo importa lo que se utiliza (~20 iconos). Sin fuente de iconos pesada.",
     "Catches null/undefined bugs at compile time. <code>noUncheckedIndexedAccess</code> prevents array bounds issues in analytics aggregations.":
@@ -5463,8 +5695,8 @@ window.__WIKI_CONTENT_I18N = {
     "Delete all sessions, agents, events, token usage":
       "Borrar todas las sesiones, agentes, eventos, uso de tokens",
     "Reinstall Claude Code hooks": "Reinstalar los ganchos de Claude Code",
-    "Reset pricing rules to defaults":
-      "Restablecer las reglas de precios a los valores predeterminados",
+    "Reset Claude, Codex, or both pricing tables to defaults":
+      "Restablecer las tablas de precios de Claude, Codex o ambas a los valores predeterminados",
     "Export all data as JSON download": "Exportar todos los datos como descarga JSON",
     "Abandon stale sessions (by hours), purge old data (by days)":
       "Abandone sesiones obsoletas (por horas), purgue datos antiguos (por días)",
@@ -5910,10 +6142,10 @@ window.__WIKI_CONTENT_I18N = {
       "<strong>SQLite</strong> (better-sqlite3 / node:sqlite)",
     "<strong>Express</strong>": "<strong>Expresar</strong>",
     "<strong>ws</strong>": "<strong>ws</strong>",
-    "<strong>React 18</strong>": "<strong>React 18</strong>",
-    "<strong>Vite 6</strong>": "<strong>Vite 6</strong>",
+    "<strong>React 19</strong>": "<strong>React 19</strong>",
+    "<strong>Vite 7</strong>": "<strong>Vite 7</strong>",
     "<strong>Tailwind CSS</strong>": "<strong>Tailwind CSS</strong>",
-    "<strong>React Router 6</strong>": "<strong>React Router 6</strong>",
+    "<strong>React Router 8</strong>": "<strong>React Router 8</strong>",
     "<strong>Lucide React</strong>": "<strong>Lucide React</strong>",
     "<strong>TypeScript Strict</strong>": "<strong>TypeScript estricto</strong>",
     "<strong>D3.js + d3-sankey</strong>": "<strong>D3.js + d3-sankey</strong>",

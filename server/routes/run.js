@@ -92,7 +92,13 @@ function sanitiseCwd(input) {
     e.code = "EBADCWD";
     throw e;
   }
-  return resolved;
+  try {
+    return fs.realpathSync(resolved);
+  } catch {
+    const e = new Error(`cwd is not readable: ${resolved}`);
+    e.code = "EBADCWD";
+    throw e;
+  }
 }
 
 const ALLOWED_PERMISSION_MODES = new Set(["acceptEdits", "default", "plan", "bypassPermissions"]);

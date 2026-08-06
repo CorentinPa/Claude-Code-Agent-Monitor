@@ -663,6 +663,62 @@ describe("Settings and GPT pricing API", () => {
       );
     }
   });
+
+  it("resets one provider without overwriting the other provider's custom rules", async () => {
+    const claudePattern = "test-claude-custom%";
+    const gptPattern = "test-gpt-custom%";
+    stmts.upsertPricing.run(claudePattern, "Custom Claude", 1, 2, 0.1, 1.25, 2, 0, 0);
+    stmts.upsertGptPricing.run(
+      gptPattern,
+      "Custom GPT",
+      1,
+      0.1,
+      1.25,
+      2,
+      3,
+      0.3,
+      3.75,
+      6,
+      4,
+      0.4,
+      5,
+      8
+    );
+
+    const codexReset = await post("/api/settings/reset-pricing", { provider: "codex" });
+    assert.equal(codexReset.status, 200);
+    assert.equal(codexReset.body.provider, "codex");
+    assert.ok(stmts.getPricing.get(claudePattern), "Claude custom rule must survive a GPT reset");
+    assert.equal(stmts.getGptPricing.get(gptPattern), undefined);
+
+    stmts.upsertGptPricing.run(
+      gptPattern,
+      "Custom GPT",
+      1,
+      0.1,
+      1.25,
+      2,
+      3,
+      0.3,
+      3.75,
+      6,
+      4,
+      0.4,
+      5,
+      8
+    );
+    const claudeReset = await post("/api/settings/reset-pricing", { provider: "claude" });
+    assert.equal(claudeReset.status, 200);
+    assert.equal(claudeReset.body.provider, "claude");
+    assert.equal(stmts.getPricing.get(claudePattern), undefined);
+    assert.ok(stmts.getGptPricing.get(gptPattern), "GPT custom rule must survive a Claude reset");
+
+    const invalid = await post("/api/settings/reset-pricing", { provider: "other" });
+    assert.equal(invalid.status, 400);
+    assert.equal(invalid.body.error.code, "INVALID_INPUT");
+
+    await post("/api/settings/reset-pricing");
+  });
 });
 
 // ============================================================

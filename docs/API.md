@@ -134,6 +134,7 @@ returns the same optional field.
 | `sort_desc` | boolean | `true` | Use descending order; set to `false` for ascending order |
 | `sources` | string | - | Comma-separated data-source ids to include (the built-in local history is `local`; remote SSH machines use their `remote_sources.id`). Omit for all sources. Also accepted on `/api/events`, `/api/agents`, `/api/stats`, `/api/analytics`, and `/api/pricing/cost`. See [Remote Data Sources](#remote-data-sources) |
 | `providers` | string | - | Comma-separated product providers: `claude`, `codex`, or both. It composes with `sources` and is accepted by the scoped list, aggregate, facet, per-session detail, cost, and workflow routes. Codex workflow responses include its recorded `response_item` tool calls, token/model totals, and `context_compacted` events; only Claude Code's Workflow-tool run journals are unavailable for Codex. |
+| `include_transient` | boolean | `false` | Opt in to local, in-memory Codex startup cards before Codex exposes a stable session ID. On `/api/sessions`, this is honored only on the first page when `status` is absent or `active`; on `/api/agents`, only on the first `status=waiting` page without `session_id`. These cards are prepended without changing durable `total`, pagination, analytics, pricing, workflows, alerts, or history. |
 
 **Example Request:**
 
@@ -752,6 +753,8 @@ DELETE /api/pricing/gpt/:pattern
 
 These endpoints manage the separate GPT rate card used only for Codex sessions. Each row has four USD-per-million-token rates for each of three groups: `short_*` for standard requests at or below 272K input tokens, `long_*` for larger standard requests, and `fast_*` for Fast mode. The four rates are input, cached input, cache writes, and output. Every present rate must be a finite non-negative number. A published but unavailable tier is stored as an all-zero group and surfaced in cost responses as unpriced, rather than silently guessing a price.
 
+`POST /api/settings/reset-pricing` accepts an optional JSON body `{ "provider": "claude" }` or `{ "provider": "codex" }` to reset only that provider's table. Omitting the body preserves the CLI/MCP compatibility behavior and resets both tables. The response returns `provider`, `pricing`, and `gpt_pricing`.
+
 ```json
 {
   "model_pattern": "gpt-5.6-terra%",
@@ -869,6 +872,22 @@ curl http://localhost:4820/api/sessions/sess_abc123/notifications
   ]
 }
 ```
+
+### Webhooks
+
+The `/api/webhooks/*` namespace manages alert-delivery targets and their audit log.
+
+```http
+GET    /api/webhooks/providers
+GET    /api/webhooks
+POST   /api/webhooks
+PATCH  /api/webhooks/:id
+DELETE /api/webhooks/:id
+POST   /api/webhooks/:id/test
+GET    /api/webhooks/:id/deliveries
+```
+
+Hosted provider URLs require HTTPS. The `generic` and `n8n` types may use HTTP for local or self-hosted receivers. Delivery rejects redirects, so provider credentials, custom headers, and HMAC signatures are never forwarded to a second destination. List and mutation responses mask URLs and redact secrets.
 
 ### Remote Data Sources
 
@@ -1037,14 +1056,27 @@ curl "http://localhost:4820/api/sessions?sources=local,4d1f0e2a-7b9c-4c33-8a21-9
 
 | Method | Path | Description |
 | --- | --- | --- |
+| `GET` | `/api/settings/info` | Database, hook, server, process, and transcript-cache status |
+| `GET` | `/api/settings/export` | Download a versioned full-dashboard JSON bundle |
+| `POST` | `/api/settings/import` | Restore an export by multipart `file` or JSON `{ "path": "/absolute/file" }`; idempotent and non-destructive |
+| `POST` | `/api/settings/install-hooks` | Install the selected `claude` and/or `codex` hook sets |
+| `POST` | `/api/settings/cleanup` | Abandon stale sessions and/or purge old terminal sessions |
+| `POST` | `/api/settings/clear-data` | Delete captured sessions, agents, events, token usage, fired alerts, and webhook delivery history |
 | `GET` / `PUT` | `/api/settings/claude-home` | Read or update the Claude Code transcript/configuration root |
 | `GET` / `PUT` | `/api/settings/codex-home` | Read or update the Codex rollout/hooks root; saving re-arms the live watcher and schedules an immediate session scan |
 
 Both home updates accept `{ "path": "/absolute/path" }` (a leading `~/` is expanded). The resolved path must exist and be a directory; invalid input returns `400 INVALID_PATH`. Codex changes are persisted as `DASHBOARD_CODEX_HOME` and notify the background synchronizer after the response so a large history cannot delay the Settings action.
 
+`POST /api/settings/import` accepts one export file up to 25 MiB. Multipart
+callers use field `file`; CLI/MCP callers may send an absolute server-side
+`path`. The restore skips existing sessions as a whole and inserts independent
+run, alert-rule, and pricing rows only when absent. It never overwrites existing
+rows. Malformed JSON returns `400 INVALID_JSON`, an invalid bundle returns
+`400 INVALID_FORMAT`, and an oversized file returns `413 IMPORT_TOO_LARGE`.
+
 ### Agent Config
 
-The `/api/cc-config/*` namespace powers the Claude Config Explorer page. All read endpoints are pure file reads under `CLAUDE_HOME` and the project's `.claude/` dir; mutations are limited to low-risk text-file artifacts (skills, subagents, slash commands, output styles, memory) and always create a timestamped backup before writing. Plugins, MCP servers, hooks-in-settings, and live `settings.json` files stay read-only because they are written concurrently by the running Claude Code CLI.
+The `/api/cc-config/*` namespace powers the Claude Config Explorer page. All read endpoints are pure file reads under `CLAUDE_HOME` and the project's `.claude/` dir; requested files and allowed roots are canonicalized with `realpath`, so a symlink cannot escape those roots. Mutations are limited to low-risk text-file artifacts (skills, subagents, slash commands, output styles, memory) and always create a timestamped backup before writing. Plugins, MCP servers, hooks-in-settings, and live `settings.json` files stay read-only because they are written concurrently by the running Claude Code CLI.
 
 ```http
 GET /api/cc-config/overview
@@ -1096,7 +1128,7 @@ Content-Type: application/json
 { "name": "deep-review" }
 ```
 
-The normal file endpoint also accepts this repository's `AGENTS.md`, rejects every other path, and caps returned bodies at 256 KiB. The editor endpoint is stricter: only `config.toml`, named profile overlays, `hooks.json`, user `*.rules`, user `skills/**/SKILL.md`, and the Codex or current-project `AGENTS.md` are editable. It returns unredacted local text so a user can edit without turning secret placeholders into real file contents. `POST /profiles` creates a commented, non-overwriting profile template, then the UI opens it in that editor. The UI also exposes a one-click **Copy path** control for every managed artifact. `DELETE /file` is narrower still: it can back up then remove a named profile, `hooks.json`, a user rule, a whole user skill directory, or a Codex/project instruction file. `config.toml` is edit-only and always rejected for deletion. The dashboard does **not** validate TOML, JSON, hook, rule, skill, or instruction syntax. Every overwrite and allowed deletion receives a timestamped backup; writes are capped at 256 KiB and atomic. `codex_config_changed` is emitted over WebSocket when relevant configuration, skill, rule, or plugin files change.
+The normal file endpoint also accepts this repository's `AGENTS.md`, rejects every other path, canonicalizes the target before checking containment, and caps returned bodies at 256 KiB. The editor endpoint is stricter: only `config.toml`, named profile overlays, `hooks.json`, user `*.rules`, user `skills/**/SKILL.md`, and the Codex or current-project `AGENTS.md` are editable. Reads and writes reject symlinked path components beneath the trusted root, and writes also verify the canonical parent remains contained. The editor returns unredacted local text so a user can edit without turning secret placeholders into real file contents. `POST /profiles` creates a commented, non-overwriting profile template, then the UI opens it in that editor. The UI also exposes a one-click **Copy path** control for every managed artifact. `DELETE /file` is narrower still: it can back up then remove a named profile, `hooks.json`, a user rule, a whole user skill directory, or a Codex/project instruction file. `config.toml` is edit-only and always rejected for deletion. The dashboard does **not** validate TOML, JSON, hook, rule, skill, or instruction syntax. Every overwrite and allowed deletion receives a timestamped backup; writes are capped at 256 KiB and atomic. A write containing the preview marker `[redacted]` is rejected so a copied redacted preview cannot overwrite real secrets. `codex_config_changed` is emitted over WebSocket when relevant configuration, skill, rule, or plugin files change.
 
 ### Import History
 
@@ -1133,7 +1165,7 @@ providers return `400 INVALID_PROVIDER`.
 
 ### Run Agent
 
-The `/api/run/*` namespace spawns and supervises Claude Code subprocesses **and native interactive Codex app-server threads** from the dashboard. Every route enforces a same-origin / loopback-Origin guard; browser requests must come from `localhost`, `127.0.0.1`, `::1`, or `0.0.0.0`. CLI / curl requests with no `Origin` header pass through. When `DASHBOARD_TOKEN` is set, a valid token is also required here (like the rest of `/api/*` — see [Authentication](#authentication)).
+The `/api/run/*` namespace spawns and supervises Claude Code subprocesses **and native interactive Codex app-server threads** from the dashboard. Every route enforces a same-origin / loopback-Origin guard; browser requests must come from `localhost`, `127.0.0.1`, `::1`, or `0.0.0.0`. CLI / curl requests with no `Origin` header pass through. When `DASHBOARD_TOKEN` is set, a valid token is also required here (like the rest of `/api/*` — see [Authentication](#authentication)). A supplied `cwd` must be an existing absolute directory and is canonicalized with `realpath`. It intentionally may be outside the repository so Run Agent can operate from the user's home or any recent project.
 
 ```http
 GET    /api/run                       List all handles + concurrency state

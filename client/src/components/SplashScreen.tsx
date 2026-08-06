@@ -5,9 +5,9 @@
  * a time-aware greeting, a bold (localized) tagline, and two subtexts reveal
  * in a staggered cascade. Before entering the dashboard, it asks which product
  * data to show (Claude Code, Codex beta, or both) and persists that global
- * choice so every scoped view immediately agrees. It then gates first entry
- * behind an optional, provider-aware hook setup so live session data is ready
- * before the dashboard opens.
+ * choice so every scoped view immediately agrees. It checks only the selected
+ * providers and skips hook setup entirely when their dashboard hooks are ready.
+ * Missing selected hooks are offered in a focused setup gate before entry.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -79,6 +79,21 @@ type HookStatus = {
   >;
 };
 
+/** Providers whose live dashboard hooks must be ready for a selected scope. */
+export function hookProvidersForScope(provider: ProviderScope): HookProvider[] {
+  return provider === "both" ? ["claude", "codex"] : [provider];
+}
+
+/** Selected providers that still need dashboard hooks. Unknown status is missing. */
+export function missingHookProviders(
+  provider: ProviderScope,
+  status: HookStatus | null | undefined
+): HookProvider[] {
+  return hookProvidersForScope(provider).filter(
+    (hookProvider) => !status?.providers?.[hookProvider]?.installed
+  );
+}
+
 /** Map the local hour to a greeting bucket. */
 function greetingKey(hour: number): "morning" | "afternoon" | "evening" | "night" {
   if (hour >= 5 && hour < 12) return "morning";
@@ -102,12 +117,14 @@ export function SplashScreen() {
   const [hookGateOpen, setHookGateOpen] = useState(false);
   const [checkingHooks, setCheckingHooks] = useState(false);
   const [hookStatus, setHookStatus] = useState<HookStatus | null>(null);
+  const [hookProvidersToInstall, setHookProvidersToInstall] = useState<HookProvider[]>([]);
   const [installingHooks, setInstallingHooks] = useState(false);
   const [hooksInstalled, setHooksInstalled] = useState(false);
   const [installOutput, setInstallOutput] = useState<string[]>([]);
   const [installFailure, setInstallFailure] = useState<string | null>(null);
   const splashContentRef = useRef<HTMLDivElement>(null);
   const hookGateActionRef = useRef<HTMLButtonElement>(null);
+  const hookCheckInFlightRef = useRef(false);
 
   // Pick the tagline + subtext pair ONCE per mount from the localized pools.
   // Falls back to the singular keys if a locale ships no array. Must run as an
@@ -135,37 +152,55 @@ export function SplashScreen() {
     setMounted(false);
   };
 
-  const selectedHookProviders: HookProvider[] =
-    provider === "both" ? ["claude", "codex"] : [provider];
+  const selectedHookProviders = hookProvidersForScope(provider);
 
-  const openHookGate = () => {
+  const continueFromProviderChoice = async () => {
+    if (hookCheckInFlightRef.current) return;
+    hookCheckInFlightRef.current = true;
     setHookStatus(null);
     setInstallOutput([]);
     setInstallFailure(null);
     setHooksInstalled(false);
-    setHookGateOpen(true);
+    setCheckingHooks(true);
+    try {
+      const info = await api.settings.info();
+      const missing = missingHookProviders(provider, info.hooks);
+      if (missing.length === 0) {
+        finishOnboarding();
+        return;
+      }
+      setHookStatus(info.hooks);
+      setHookProvidersToInstall(missing);
+      setHookGateOpen(true);
+    } catch {
+      setHookProvidersToInstall(selectedHookProviders);
+      setInstallFailure(t("hookGate.checkFailed"));
+      setHookGateOpen(true);
+    } finally {
+      hookCheckInFlightRef.current = false;
+      setCheckingHooks(false);
+    }
   };
 
-  const hasExistingHooks = selectedHookProviders.some((hookProvider) => {
+  const hasExistingHooks = hookProvidersToInstall.some((hookProvider) => {
     const providerStatus = hookStatus?.providers?.[hookProvider];
-    return (
-      providerStatus?.installed ||
-      providerStatus?.has_dashboard_hooks ||
-      providerStatus?.has_existing_hooks
-    );
+    return providerStatus?.has_dashboard_hooks || providerStatus?.has_existing_hooks;
   });
 
   const installSelectedHooks = async () => {
     setInstallingHooks(true);
     setInstallFailure(null);
     try {
-      const result = await api.settings.installHooks(selectedHookProviders);
-      const output = selectedHookProviders.flatMap(
+      const result = await api.settings.installHooks(hookProvidersToInstall);
+      const output = hookProvidersToInstall.flatMap(
         (hookProvider) => result.results[hookProvider]?.output || []
       );
-      const allInstalled = selectedHookProviders.every(
-        (hookProvider) => result.results[hookProvider]?.ok
-      );
+      const allInstalled = hookProvidersToInstall.every((hookProvider) => {
+        return (
+          result.results[hookProvider]?.ok &&
+          result.hooks.providers[hookProvider]?.installed === true
+        );
+      });
       setInstallOutput(output);
       setHooksInstalled(allInstalled);
       if (!allInstalled) setInstallFailure(t("hookGate.failure"));
@@ -175,28 +210,6 @@ export function SplashScreen() {
       setInstallingHooks(false);
     }
   };
-
-  useEffect(() => {
-    if (!hookGateOpen) return;
-
-    let cancelled = false;
-    setCheckingHooks(true);
-    api.settings
-      .info()
-      .then((info) => {
-        if (!cancelled) setHookStatus(info.hooks);
-      })
-      .catch(() => {
-        if (!cancelled) setInstallFailure(t("hookGate.checkFailed"));
-      })
-      .finally(() => {
-        if (!cancelled) setCheckingHooks(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [hookGateOpen, t]);
 
   useEffect(() => {
     if (!hookGateOpen) return;
@@ -268,6 +281,7 @@ export function SplashScreen() {
                 role="radio"
                 aria-checked={provider === value}
                 onClick={() => setProvider(value)}
+                disabled={checkingHooks}
                 className={`splash-provider-card ${provider === value ? "is-selected" : ""}`}
               >
                 <span className="splash-provider-card-name">
@@ -277,8 +291,20 @@ export function SplashScreen() {
               </button>
             ))}
           </div>
-          <button type="button" className="splash-continue" onClick={openHookGate}>
-            {t("provider.continue")}
+          <button
+            type="button"
+            className="splash-continue"
+            onClick={continueFromProviderChoice}
+            disabled={checkingHooks}
+          >
+            {checkingHooks ? (
+              <>
+                <LoaderCircle className="splash-hook-gate-spinner" size={16} aria-hidden="true" />
+                {t("hookGate.checking")}
+              </>
+            ) : (
+              t("provider.continue")
+            )}
           </button>
         </div>
       </div>
@@ -307,7 +333,7 @@ export function SplashScreen() {
               <div className="splash-hook-gate-summary">
                 <span>{t("hookGate.selectedProviders")}</span>
                 <div className="splash-hook-gate-provider-list">
-                  {selectedHookProviders.map((hookProvider) => (
+                  {hookProvidersToInstall.map((hookProvider) => (
                     <span key={hookProvider} className="splash-hook-gate-provider">
                       {hookProvider === "claude" ? "Claude Code" : "Codex"}
                       {hookProvider === "codex" && <em>{t("provider.beta")}</em>}
@@ -325,16 +351,7 @@ export function SplashScreen() {
                 className={`splash-hook-gate-status ${hasExistingHooks ? "is-warning" : ""}`}
                 aria-live="polite"
               >
-                {checkingHooks ? (
-                  <>
-                    <LoaderCircle
-                      className="splash-hook-gate-spinner"
-                      size={15}
-                      aria-hidden="true"
-                    />
-                    <span>{t("hookGate.checking")}</span>
-                  </>
-                ) : hooksInstalled ? (
+                {hooksInstalled ? (
                   <>
                     <CheckCircle2 size={15} aria-hidden="true" />
                     <span>{t("hookGate.installed")}</span>
@@ -687,13 +704,15 @@ const SPLASH_CSS = `
   border: 1px solid rgba(129, 140, 248, 0.2); border-radius: 0.75rem;
   background: rgba(20, 20, 33, 0.78); transition: 160ms ease; cursor: pointer;
 }
-.splash-provider-card:hover { border-color: rgba(165, 180, 252, 0.55); background: rgba(31, 31, 53, 0.94); }
+.splash-provider-card:hover:not(:disabled) { border-color: rgba(165, 180, 252, 0.55); background: rgba(31, 31, 53, 0.94); }
 .splash-provider-card.is-selected { color: #e5e7ff; border-color: #818cf8; background: rgba(79, 70, 229, 0.18); box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.25), 0 8px 28px rgba(49, 46, 129, 0.2); }
+.splash-provider-card:disabled { cursor: wait; opacity: 0.65; }
 .splash-provider-card-name { display: block; color: inherit; font-size: 0.78rem; font-weight: 650; margin-bottom: 0.35rem; }
 .splash-provider-card em { font-style: normal; color: #fbbf24; font-size: 0.6rem; margin-left: 0.2rem; text-transform: uppercase; letter-spacing: 0.07em; }
 .splash-provider-card span:last-child { display: block; font-size: 0.67rem; line-height: 1.35; }
-.splash-continue { margin-top: 0.9rem; border: 0; border-radius: 0.55rem; background: #6366f1; color: #fff; padding: 0.55rem 1.25rem; font-size: 0.78rem; font-weight: 650; cursor: pointer; transition: 160ms ease; }
-.splash-continue:hover { background: #818cf8; transform: translateY(-1px); }
+.splash-continue { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; margin-top: 0.9rem; border: 0; border-radius: 0.55rem; background: #6366f1; color: #fff; padding: 0.55rem 1.25rem; font-size: 0.78rem; font-weight: 650; cursor: pointer; transition: 160ms ease; }
+.splash-continue:hover:not(:disabled) { background: #818cf8; transform: translateY(-1px); }
+.splash-continue:disabled { cursor: wait; opacity: 0.7; }
 .splash-hook-gate-backdrop {
   position: fixed; inset: 0; z-index: 4; display: grid; place-items: center; padding: 1.25rem;
   background: rgba(4, 4, 10, 0.68); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);

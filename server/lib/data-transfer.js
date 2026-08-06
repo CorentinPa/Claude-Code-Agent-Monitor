@@ -176,7 +176,7 @@ function importExportBundle(db, bundle) {
     errors: 0,
   };
 
-  const sessionExists = db.prepare("SELECT 1 FROM sessions WHERE id = ?").pluck();
+  const sessionExists = db.prepare("SELECT 1 AS present FROM sessions WHERE id = ?");
 
   const insert = {
     sessions: makeInserter(db, "sessions"),

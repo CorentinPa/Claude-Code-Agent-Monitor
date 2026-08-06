@@ -146,8 +146,12 @@ export function KanbanBoard() {
     // main-agent cards (they have no task and a generic name on their
     // own - the session metadata is what makes the card useful).
     const [agentResults, sessionsRes] = await Promise.all([
-      Promise.all(AGENT_FETCH_STATUSES.map((status) => api.agents.list({ status }))),
-      api.sessions.list({ limit: 10000 }),
+      Promise.all(
+        AGENT_FETCH_STATUSES.map((status) =>
+          api.agents.list({ status, include_transient: status === "waiting" })
+        )
+      ),
+      api.sessions.list({ limit: 10000, include_transient: true }),
     ]);
     setAgents(agentResults.flatMap((r) => r.agents));
     setSessions(sessionsRes.sessions);
@@ -163,7 +167,13 @@ export function KanbanBoard() {
     // active set (see grouping below).
     const persistedStatuses = SESSION_COLUMNS.filter((s) => s !== "waiting");
     const results = await Promise.all(
-      persistedStatuses.map((status) => api.sessions.list({ status, limit: 10000 }))
+      persistedStatuses.map((status) =>
+        api.sessions.list({
+          status,
+          limit: 10000,
+          include_transient: status === "active",
+        })
+      )
     );
     setSessions(results.flatMap((r) => r.sessions));
   }, [dataScope]);

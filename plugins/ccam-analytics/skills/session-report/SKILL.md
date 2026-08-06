@@ -1,4 +1,5 @@
 ---
+name: session-report
 description: >
   Generate a comprehensive session report with per-model token usage
   (input, output, cache_read, cache_write including compaction baselines),

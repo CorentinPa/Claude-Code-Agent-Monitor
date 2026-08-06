@@ -1,7 +1,7 @@
 /**
  * @file Verifies incremental Codex rollout ingestion: session metadata, token
- * deltas, context bands, duplicate safety, transcript-derived prompt context,
- * and transcript-driven card lifecycle transitions.
+ * deltas, context bands, duplicate safety, native live-thread startup cards,
+ * transcript-derived prompt context, and transcript-driven card lifecycle.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -10,6 +10,7 @@ const assert = require("node:assert/strict");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const Database = require("better-sqlite3");
 
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "ccam-codex-ingest-"));
 process.env.DASHBOARD_DB_PATH = path.join(TMP, "dashboard.db");
@@ -23,6 +24,7 @@ const {
   ingestCodexTranscript,
   reconcileCodexSessionLiveness,
   refreshCodexSessionTitles,
+  syncCodexStateSessions,
 } = require("../lib/codex-ingest");
 
 const SESSION_ID = "019a4ba6-a2b6-75f0-b186-bddd23ae4f2f";
@@ -52,6 +54,34 @@ function append(record) {
 
 function record(type, payload) {
   return { timestamp: "2026-08-01T12:00:00.000Z", type, payload };
+}
+
+function writeLiveThread(thread) {
+  const statePath = path.join(process.env.DASHBOARD_CODEX_HOME, "state_5.sqlite");
+  fs.mkdirSync(path.dirname(statePath), { recursive: true });
+  const state = new Database(statePath);
+  state.exec(`
+    CREATE TABLE IF NOT EXISTS threads (
+      id TEXT PRIMARY KEY,
+      rollout_path TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      cwd TEXT NOT NULL,
+      model TEXT,
+      model_provider TEXT,
+      cli_version TEXT,
+      archived INTEGER NOT NULL DEFAULT 0
+    )
+  `);
+  state
+    .prepare(
+      `
+      INSERT OR REPLACE INTO threads
+        (id, rollout_path, created_at, cwd, model, model_provider, cli_version, archived)
+      VALUES (@id, @rollout_path, @created_at, @cwd, @model, @model_provider, @cli_version, @archived)
+    `
+    )
+    .run(thread);
+  state.close();
 }
 
 after(() => {
@@ -249,6 +279,108 @@ describe("Codex rollout ingestor", () => {
     assert.equal(result.changed, true);
     assert.equal(stmts.getSession.get(SESSION_ID).status, "completed");
     assert.equal(stmts.getAgent.get(`codex:${SESSION_ID}`).status, "completed");
+  });
+
+  it("creates a Waiting card directly from SessionStart before Codex flushes a rollout", () => {
+    const sessionId = "019fd06f-f70e-7420-922e-16bf51732ce6";
+    const rollout = path.join(
+      process.env.DASHBOARD_CODEX_HOME,
+      "sessions",
+      "2026",
+      "08",
+      "04",
+      `rollout-2026-08-04T22-40-26-${sessionId}.jsonl`
+    );
+    const started = ingestCodexHook(null, "SessionStart", {
+      session_id: sessionId,
+      cwd: "/workspace/fresh-codex-session",
+      model: "gpt-5.6-terra",
+      timestamp: "2026-08-04T22:40:26.000Z",
+    });
+
+    assert.equal(started.created, true);
+    assert.equal(started.changed, true);
+    assert.equal(started.session.id, sessionId);
+    assert.equal(started.session.model, "gpt-5.6-terra");
+    assert.equal(started.session.transcript_path, null);
+    assert.equal(started.session.awaiting_reason, "session_start");
+    assert.equal(stmts.getAgent.get(`codex:${sessionId}`).status, "waiting");
+
+    fs.mkdirSync(path.dirname(rollout), { recursive: true });
+    fs.writeFileSync(
+      rollout,
+      `${JSON.stringify(
+        record("session_meta", {
+          id: sessionId,
+          cwd: "/workspace/fresh-codex-session",
+          model_provider: "openai",
+        })
+      )}\n`
+    );
+    const enriched = ingestCodexTranscript(rollout);
+
+    assert.equal(enriched.created, false, "the rollout enriches the hook-created row");
+    assert.equal(enriched.session.id, sessionId);
+    assert.equal(enriched.session.transcript_path, rollout);
+    assert.equal(
+      db.prepare("SELECT COUNT(*) AS count FROM sessions WHERE id = ?").get(sessionId).count,
+      1,
+      "a delayed rollout never creates a duplicate session"
+    );
+  });
+
+  it("creates a Waiting card from Codex's live-thread state when SessionStart is delayed", () => {
+    const sessionId = "019fd086-d75c-7a91-9743-2788d849c223";
+    const rollout = path.join(
+      process.env.DASHBOARD_CODEX_HOME,
+      "sessions",
+      "2026",
+      "08",
+      "04",
+      `rollout-2026-08-04T23-20-00-${sessionId}.jsonl`
+    );
+    writeLiveThread({
+      id: sessionId,
+      rollout_path: rollout,
+      created_at: Math.floor(Date.now() / 1_000),
+      cwd: "/workspace/live-codex-session",
+      model: "gpt-5.6-terra",
+      model_provider: "openai",
+      cli_version: "0.146.0",
+      archived: 0,
+    });
+
+    const started = syncCodexStateSessions();
+
+    assert.equal(started.length, 1);
+    assert.equal(started[0].created, true);
+    assert.equal(started[0].session.id, sessionId);
+    assert.equal(started[0].session.model, "gpt-5.6-terra");
+    assert.equal(started[0].session.transcript_path, null);
+    assert.equal(started[0].session.awaiting_reason, "session_start");
+    assert.equal(stmts.getAgent.get(`codex:${sessionId}`).status, "waiting");
+    assert.equal(syncCodexStateSessions().length, 0, "the live-thread scan is idempotent");
+
+    fs.mkdirSync(path.dirname(rollout), { recursive: true });
+    fs.writeFileSync(
+      rollout,
+      `${JSON.stringify(
+        record("session_meta", {
+          id: sessionId,
+          cwd: "/workspace/live-codex-session",
+          model_provider: "openai",
+        })
+      )}\n`
+    );
+    const enriched = ingestCodexTranscript(rollout);
+
+    assert.equal(enriched.created, false, "the rollout enriches the live-thread row");
+    assert.equal(enriched.session.transcript_path, rollout);
+    assert.equal(
+      db.prepare("SELECT COUNT(*) AS count FROM sessions WHERE id = ?").get(sessionId).count,
+      1,
+      "a delayed rollout never creates a duplicate session"
+    );
   });
 
   it("self-heals a completed Codex session when its rollout receives a new turn", () => {

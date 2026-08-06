@@ -182,6 +182,7 @@ const REINSTALL_HOOKS_EXAMPLE = {
 
 const RESET_PRICING_EXAMPLE = {
   ok: true,
+  provider: "claude",
   pricing: [
     {
       model_pattern: "claude-opus-4*",
@@ -208,6 +209,7 @@ const RESET_PRICING_EXAMPLE = {
       updated_at: "2026-06-26T00:00:00.000Z",
     },
   ],
+  gpt_pricing: [],
 };
 
 const EXPORT_EXAMPLE = {
@@ -594,7 +596,7 @@ const paths = {
       tags: ["Webhooks"],
       summary: "List supported providers + their config fields (for the UI)",
       description:
-        "Returns the redacted provider catalog the webhook-target editor renders. For each of the 14 supported providers (Slack, Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream) plus the `generic` family, it lists: a human label, the provider family, whether the URL must be https / is user-supplied, and the per-provider config field definitions (key, label, type, required, options, and whether the field is secret). No secret values are ever included — this is purely the *shape* of the form, not stored credentials.",
+        "Returns the redacted provider catalog the webhook-target editor renders. For each of the 14 supported providers (Slack, Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty, Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream) plus the `generic` family, it lists: a human label, the provider family, whether the URL must be HTTPS / is user-supplied, and the per-provider config field definitions (key, label, type, required, options, and whether the field is secret). Hosted providers require HTTPS; `generic` and `n8n` may use HTTP for local or self-hosted receivers. No secret values are ever included — this is purely the *shape* of the form, not stored credentials.",
       operationId: "listWebhookProviders",
       responses: {
         200: {
@@ -695,7 +697,7 @@ const paths = {
       tags: ["Webhooks"],
       summary: "Create a webhook target",
       description:
-        "Creates a webhook target that fires when alerts match. `name` and `type` are required. `url` is required for most providers but is derived or defaulted for a few (Telegram and Opsgenie derive it from config; PagerDuty defaults it) — consult GET /api/webhooks/providers for which fields each provider needs. `config` carries provider-specific params (e.g. `{ chat_id }` for Telegram, `{ routing_key, severity }` for PagerDuty, `{ api_key, region }` for Opsgenie). `secret` (HMAC-SHA256 signing) and custom `headers` apply only to the generic family and are silently ignored for other providers. `rule_ids` optionally scopes the target to specific alert rules; omit it to fire for all rules. The response is the created target, REDACTED the same way as the list endpoint (URL masked, secrets shown only as `has_secret`/`••••`).",
+        "Creates a webhook target that fires when alerts match. `name` and `type` are required. `url` is required for most providers but is derived or defaulted for a few (Telegram and Opsgenie derive it from config; PagerDuty defaults it) — consult GET /api/webhooks/providers for which fields each provider needs. Hosted providers require HTTPS; `generic` and `n8n` may use HTTP for local or self-hosted receivers. Delivery rejects redirects, so credentials, custom headers, and HMAC signatures are never forwarded to a second destination. `config` carries provider-specific params (e.g. `{ chat_id }` for Telegram, `{ routing_key, severity }` for PagerDuty, `{ api_key, region }` for Opsgenie). `secret` (HMAC-SHA256 signing) and custom `headers` apply only to the generic family and are silently ignored for other providers. `rule_ids` optionally scopes the target to specific alert rules; omit it to fire for all rules. The response is the created target, REDACTED the same way as the list endpoint (URL masked, secrets shown only as `has_secret`/`••••`).",
       operationId: "createWebhook",
       requestBody: {
         required: true,
@@ -1100,10 +1102,27 @@ const paths = {
   "/api/settings/reset-pricing": {
     post: {
       tags: ["Settings"],
-      summary: "Reset pricing table to defaults",
+      summary: "Reset pricing defaults",
       description:
-        "⚠ DESTRUCTIVE to pricing customizations. Deletes EVERY row in both model_pricing and gpt_model_pricing, then re-seeds the dashboard's built-in Claude and GPT rate cards. Any custom rates or custom model patterns you added are permanently lost — there is no undo. Captured session/token data is untouched (only the pricing rules used to *compute* cost change). The response returns the freshly-seeded tables.",
+        "⚠ DESTRUCTIVE to pricing customizations. With `provider: claude` or `provider: codex`, deletes and re-seeds only that provider's pricing table so the other provider's custom rules remain untouched. Omitting the body preserves the legacy CLI/MCP behavior and resets both tables. Custom rates or model patterns in the selected scope are permanently lost — there is no undo. Captured session/token data is untouched. The response returns both current tables and identifies the reset scope.",
       operationId: "resetPricing",
+      requestBody: {
+        required: false,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                provider: { type: "string", enum: ["claude", "codex"] },
+              },
+            },
+            examples: {
+              claude: { value: { provider: "claude" } },
+              codex: { value: { provider: "codex" } },
+            },
+          },
+        },
+      },
       responses: {
         200: {
           description: "Pricing defaults restored",
@@ -1112,6 +1131,12 @@ const paths = {
               schema: { $ref: "#/components/schemas/ResetPricingResponse" },
               example: RESET_PRICING_EXAMPLE,
             },
+          },
+        },
+        400: {
+          description: "Invalid provider",
+          content: {
+            "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } },
           },
         },
       },
@@ -1144,7 +1169,7 @@ const paths = {
       tags: ["Settings"],
       summary: "Restore (import) a previously exported data bundle",
       description:
-        'Restores a bundle produced by GET /api/settings/export. Supply it either as `multipart/form-data` with a single `file` field (browser upload) or as a JSON body `{ "path": "<absolute path>" }` (the server reads the file from disk — used by the `ccam import-data` CLI, and it also sidesteps the global 1 MB JSON body cap for large bundles). The restore is idempotent and NON-DESTRUCTIVE: it is session-atomic, so a session already present (matched by its UUID) is skipped whole together with its agents/events/token_usage/workflows, and independent config rows (dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) are inserted only when absent. Nothing existing is overwritten — ideal for consolidating several machines into one dashboard. The response reports per-table counts.',
+        'Restores one bundle up to 25 MiB produced by GET /api/settings/export. Supply it either as `multipart/form-data` with a single `file` field (browser upload) or as a JSON body `{ "path": "<absolute path>" }` (the server reads the file from disk — used by the `ccam import-data` CLI, and it also sidesteps the global 1 MB JSON body cap for large bundles). The restore is idempotent and NON-DESTRUCTIVE: it is session-atomic, so a session already present (matched by its UUID) is skipped whole together with its agents/events/token_usage/workflows, and independent config rows (dashboard_runs, alert_rules, model_pricing, gpt_model_pricing) are inserted only when absent. Nothing existing is overwritten — ideal for consolidating several machines into one dashboard. The response reports per-table counts.',
       operationId: "importData",
       requestBody: {
         required: true,
@@ -1200,6 +1225,9 @@ const paths = {
         },
         400: {
           description: "Missing file, invalid JSON, or unrecognized export format",
+        },
+        413: {
+          description: "The export bundle exceeds the 25 MiB restore limit",
         },
       },
     },

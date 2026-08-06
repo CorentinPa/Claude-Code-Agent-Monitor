@@ -85,13 +85,38 @@ function profileTemplate(name) {
   ].join("\n");
 }
 
-// An allowlisted lexical path can still be a symlink into an unrelated
-// location. Codex's own managed configuration should be plain local files, so
-// reject symlinks rather than following them while reading or overwriting.
-function rejectSymlink(file) {
+// An allowlisted lexical path can still escape through a symlinked parent.
+// Validate every existing path component and require its canonical parent to
+// remain inside the canonical allowlisted root before any read or mutation.
+function rejectSymlinkEscape(file) {
+  const home = getCodexHome();
+  const projectInstructions = path.resolve(process.cwd(), "AGENTS.md");
+  const allowedRoot = file === projectInstructions ? path.dirname(projectInstructions) : home;
+  const canonicalRoot = fs.realpathSync(allowedRoot);
+  const relative = path.relative(allowedRoot, path.resolve(file));
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw makeError("ESYMLINK", "Configuration path resolves outside its allowed root");
+  }
+  let current = allowedRoot;
+  for (const segment of relative.split(path.sep).filter(Boolean)) {
+    current = path.join(current, segment);
+    try {
+      if (fs.lstatSync(current).isSymbolicLink()) {
+        throw makeError("ESYMLINK", "Configuration path must not contain symbolic links");
+      }
+    } catch (error) {
+      if (error?.code === "ENOENT") break;
+      throw error;
+    }
+  }
+  const parent = path.dirname(file);
   try {
-    if (fs.lstatSync(file).isSymbolicLink()) {
-      throw makeError("ESYMLINK", "Configuration target must not be a symbolic link");
+    const canonicalParent = fs.realpathSync(parent);
+    if (
+      canonicalParent !== canonicalRoot &&
+      !canonicalParent.startsWith(`${canonicalRoot}${path.sep}`)
+    ) {
+      throw makeError("ESYMLINK", "Configuration path resolves outside its allowed root");
     }
   } catch (error) {
     if (error?.code !== "ENOENT") throw error;
@@ -101,7 +126,7 @@ function rejectSymlink(file) {
 function readEditableFile(file) {
   const target = editablePath(file);
   if (!target) throw makeError("EEDITDENIED", "This Codex file is not editable from the dashboard");
-  rejectSymlink(target);
+  rejectSymlinkEscape(target);
   let stat = null;
   try {
     stat = fs.statSync(target);
@@ -125,8 +150,14 @@ function readEditableFile(file) {
 function writeEditableFile({ file, content }) {
   const target = editablePath(file);
   if (!target) throw makeError("EEDITDENIED", "This Codex file is not editable from the dashboard");
-  rejectSymlink(target);
+  rejectSymlinkEscape(target);
   if (typeof content !== "string") throw makeError("EBADCONTENT", "content must be a string");
+  if (content.includes("[redacted]")) {
+    throw makeError(
+      "EREDACTED",
+      "Refusing to save redacted preview content; open the explicit editor to load the original file"
+    );
+  }
   if (Buffer.byteLength(content, "utf8") > MAX_FILE_BYTES) {
     throw makeError("ETOOLARGE", `content exceeds ${MAX_FILE_BYTES} bytes`);
   }
@@ -177,7 +208,7 @@ function deleteEditableFile({ file }) {
       "This Codex file cannot be deleted from the dashboard; config.toml is edit-only"
     );
   }
-  rejectSymlink(target);
+  rejectSymlinkEscape(target);
   let existing;
   try {
     existing = fs.statSync(target);
@@ -210,7 +241,7 @@ function createProfile({ name }) {
     );
   }
   const file = path.join(getCodexHome(), `${name}${PROFILE_SUFFIX}`);
-  rejectSymlink(file);
+  rejectSymlinkEscape(file);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   let fd = null;
   const text = profileTemplate(name);

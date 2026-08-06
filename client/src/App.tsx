@@ -66,7 +66,7 @@
  * - `.claude/skills/file-headers/` — mandatory `@author` header policy.
  * ============================================================================= */
 
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router";
 import { useCallback } from "react";
 import { Layout } from "./components/Layout";
 import { DocumentTitle } from "./components/DocumentTitle";

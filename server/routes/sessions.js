@@ -15,6 +15,7 @@ const { broadcast } = require("../websocket");
 const { calculateProviderCost, attachAgentCosts } = require("./pricing");
 const { parseSources, sourceColumnClause } = require("../lib/source-filter");
 const { parseProviders, providerColumnClause } = require("../lib/provider-filter");
+const { getCodexProcessSessions } = require("../lib/codex-process-overlay");
 const {
   getClaudeHome,
   getProjectsDir,
@@ -194,6 +195,8 @@ router.get("/", (req, res) => {
   const limit = Math.min(parseInt(req.query.limit) || 50, 10000);
   const offset = parseInt(req.query.offset) || 0;
   const status = req.query.status;
+  const includeTransient =
+    req.query.include_transient === "1" || req.query.include_transient === "true";
   const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
   const cwds = Array.isArray(req.query.cwd)
     ? req.query.cwd.filter((cwd) => typeof cwd === "string" && cwd)
@@ -202,6 +205,8 @@ router.get("/", (req, res) => {
       : [];
   const sortBy = req.query.sort_by || "time"; // "time", "duration", "price"
   const sortDesc = req.query.sort_desc !== "false";
+  const sources = parseSources(req);
+  const providers = parseProviders(req);
 
   let where = [];
   let params = [];
@@ -221,12 +226,12 @@ router.get("/", (req, res) => {
   }
   // Data-scope filter: restrict to sessions collected from a chosen set of
   // machines (local + any configured remote sources). Absent = all sources.
-  const sourceFilter = sourceColumnClause(parseSources(req));
+  const sourceFilter = sourceColumnClause(sources);
   if (sourceFilter.clause) {
     where.push(sourceFilter.clause);
     params.push(...sourceFilter.params);
   }
-  const providerFilter = providerColumnClause(parseProviders(req));
+  const providerFilter = providerColumnClause(providers);
   if (providerFilter.clause) {
     where.push(providerFilter.clause);
     params.push(...providerFilter.params);
@@ -349,6 +354,37 @@ router.get("/", (req, res) => {
           : 0;
       }
     }
+  }
+
+  const includesLocal = !sources || sources.includes("local");
+  const includesCodex = !providers || providers.includes("codex");
+  const normalizedQuery = q.toLowerCase();
+  const transient =
+    includeTransient &&
+    (!status || status === "active") &&
+    includesLocal &&
+    includesCodex &&
+    offset === 0
+      ? getCodexProcessSessions(
+          db
+            .prepare(
+              `SELECT id, cwd FROM sessions
+               WHERE provider = 'codex' AND status = 'active'
+                 AND (source = 'local' OR source IS NULL)`
+            )
+            .all()
+        )
+          .filter(
+            (session) =>
+              !normalizedQuery ||
+              [session.id, session.name, session.cwd].some((value) =>
+                value?.toLowerCase().includes(normalizedQuery)
+              )
+          )
+          .filter((session) => cwds.length === 0 || cwds.includes(session.cwd))
+      : [];
+  if (transient.length > 0) {
+    rows = [...transient, ...rows];
   }
 
   res.json({ sessions: rows, limit, offset, total });

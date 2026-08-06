@@ -1093,14 +1093,18 @@ router.post("/codex", (req, res) => {
   const hookType = req.body?.hook_type || req.body?.event_type || "unknown";
   const data = req.body?.data || req.body || {};
   const transcriptPath = codexTranscriptPath(data);
-  if (!transcriptPath) {
+  const isSessionStart =
+    String(hookType)
+      .replace(/[_\s-]/g, "")
+      .toLowerCase() === "sessionstart";
+  if (!transcriptPath && !isSessionStart) {
     return res.status(202).json({ ok: true, queued: false, reason: "No transcript path supplied" });
   }
   res.status(202).json({ ok: true, queued: true });
   setImmediate(() => {
     try {
       const { ingestCodexHook } = require("../lib/codex-ingest");
-      const result = ingestCodexHook(transcriptPath, hookType);
+      const result = ingestCodexHook(transcriptPath, hookType, data);
       if (!result?.changed || !result.session) return;
       broadcast(result.created ? "session_created" : "session_updated", result.session);
       if (result.agent) broadcast(result.created ? "agent_created" : "agent_updated", result.agent);

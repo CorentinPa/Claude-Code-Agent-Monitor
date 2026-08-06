@@ -156,7 +156,7 @@ const paths = {
       tags: ["CodexConfig"],
       summary: "Read one safe Codex configuration file",
       description:
-        "Reads one file contained by CODEX_HOME, or this repository's AGENTS.md. TOML and JSON secret-like values are redacted; files are capped at 256 KiB. Paths outside those roots are refused.",
+        "Reads one file contained by CODEX_HOME, or this repository's AGENTS.md. The target is canonicalized before containment is checked, so a symlink cannot escape the trusted roots. TOML and JSON secret-like values are redacted; files are capped at 256 KiB. Paths outside those roots are refused.",
       operationId: "codexConfigFile",
       parameters: [
         {
@@ -187,7 +187,7 @@ const paths = {
       tags: ["CodexConfig"],
       summary: "Save one editable Codex configuration file",
       description:
-        "Atomically saves config.toml, hooks.json, user rules, user skill SKILL.md files, or Codex/project AGENTS.md only. A timestamped backup is created before every overwrite. The dashboard does not validate TOML, JSON, hook, or instruction syntax.",
+        "Atomically saves config.toml, named profile overlays, hooks.json, user rules, user skill SKILL.md files, or Codex/project AGENTS.md only. Existing path components may not be symbolic links, the canonical parent must remain inside the trusted root, and content containing the redacted-preview marker `[redacted]` is refused. A timestamped backup is created before every overwrite. The dashboard does not validate TOML, JSON, hook, or instruction syntax.",
       operationId: "codexConfigWriteFile",
       requestBody: {
         required: true,
@@ -250,7 +250,7 @@ const paths = {
       tags: ["CodexConfig"],
       summary: "Read one editable Codex file for local editing",
       description:
-        "Returns unredacted content only for the editable allowlist. Use the normal /file endpoint for redacted read-only previews.",
+        "Returns unredacted content only for the editable allowlist. Existing path components may not be symbolic links. Use the normal /file endpoint for redacted read-only previews.",
       operationId: "codexConfigEditableFile",
       parameters: [
         {

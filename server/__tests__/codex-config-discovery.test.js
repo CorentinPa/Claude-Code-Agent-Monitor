@@ -241,4 +241,35 @@ describe("codex config discovery", () => {
     fs.writeFileSync(hooked, JSON.stringify({ hooks: { SessionStart: [{}] } }));
     fs.rmSync(outside, { force: true });
   });
+
+  it("rejects a symlinked parent that escapes the Codex skills root", () => {
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), "codex-config-parent-"));
+    const linkedSkill = path.join(HOME, "skills", "linked");
+    fs.symlinkSync(outside, linkedSkill, "dir");
+    const target = path.join(linkedSkill, "SKILL.md");
+    fs.writeFileSync(path.join(outside, "SKILL.md"), "# outside\n");
+
+    const read = discovery.readFileSafe(target);
+    assert.match(read.error, /inside Codex home|not readable/);
+    assert.throws(() => mutate.readEditableFile(target), /symbolic link/);
+    assert.throws(
+      () => mutate.writeEditableFile({ file: target, content: "# replaced\n" }),
+      /symbolic link/
+    );
+    assert.equal(fs.readFileSync(path.join(outside, "SKILL.md"), "utf8"), "# outside\n");
+
+    fs.unlinkSync(linkedSkill);
+    fs.rmSync(outside, { recursive: true, force: true });
+  });
+
+  it("refuses to save redacted preview content", () => {
+    assert.throws(
+      () =>
+        mutate.writeEditableFile({
+          file: path.join(HOME, "config.toml"),
+          content: 'api_key = "[redacted]"\n',
+        }),
+      /Refusing to save redacted preview/
+    );
+  });
 });

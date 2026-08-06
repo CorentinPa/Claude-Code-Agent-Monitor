@@ -133,7 +133,7 @@ const paths = {
       tags: ["Sessions"],
       summary: "List sessions",
       description:
-        "Returns a paginated list of sessions, newest real activity first, each enriched with a SQL `agent_count` (LEFT JOIN onto agents), a `last_activity` timestamp derived from the latest durable session event (falling back to its lifecycle timestamp for eventless historical rows, never mutable bookkeeping `updated_at`), a card-ready optional `prompt_preview` (up to two newest distinct real human prompts, oldest to newest and newline-separated; Claude persists this bounded summary from local JSONL, Codex derives it from durable user-message events, and historical rows fall back to the main task), and a `cost` computed from the session's token usage against the current pricing rules. The `status`, `q`, and repeatable `cwd` filters compose (AND), while repeated `cwd` values include any matching project directory; `q` is a case-insensitive LIKE across `id`, `name`, and `cwd`. `total` reflects all rows matching the filters independent of `limit`/`offset` so paginators stay accurate, while `cost` is only calculated for the rows on the returned page (when `sort_by=price` it is computed across all matching rows so the price sort is correct). The endpoint is read-only with no side effects; `metadata` on each session is returned as a raw JSON-encoded string, not a parsed object.",
+        "Returns a paginated list of durable sessions, newest real activity first, each enriched with a SQL `agent_count` (LEFT JOIN onto agents), a `last_activity` timestamp derived from the latest durable session event (falling back to its lifecycle timestamp for eventless historical rows, never mutable bookkeeping `updated_at`), a card-ready optional `prompt_preview` (up to two newest distinct real human prompts, oldest to newest and newline-separated; Claude persists this bounded summary from local JSONL, Codex derives it from durable user-message events, and historical rows fall back to the main task), and a `cost` computed from the session's token usage against the current pricing rules. The `status`, `q`, and repeatable `cwd` filters compose (AND), while repeated `cwd` values include any matching project directory; `q` is a case-insensitive LIKE across `id`, `name`, and `cwd`. `total` reflects durable rows matching the filters independent of `limit`/`offset` so ordinary paginators stay accurate, while `cost` is only calculated for the durable rows on the returned page (when `sort_by=price` it is computed across all matching durable rows so the price sort is correct). The optional `include_transient=true` dashboard overlay prepends local pre-identity Codex process cards only on the first active/all page; those cards are never persisted or counted in `total`, so the durable pagination contract remains unchanged. The endpoint is read-only with no side effects; `metadata` on each session is returned as a raw JSON-encoded string, not a parsed object.",
       operationId: "listSessions",
       parameters: [
         { $ref: "#/components/parameters/SessionStatusQuery", example: "active" },
@@ -172,6 +172,14 @@ const paths = {
         {
           $ref: "#/components/parameters/SourcesQuery",
           example: "local,4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11",
+        },
+        {
+          name: "include_transient",
+          in: "query",
+          schema: { type: "boolean", default: false },
+          description:
+            "Opt in to local, in-memory Codex cards that exist before the CLI exposes a durable session id. Honored only on the first page when status is absent or `active`; transient cards are prepended without changing durable `total`, pagination, analytics, or history.",
+          example: true,
         },
         { $ref: "#/components/parameters/LimitQuery", example: 50 },
         { $ref: "#/components/parameters/OffsetQuery", example: 0 },
@@ -656,7 +664,7 @@ const paths = {
       tags: ["Agents"],
       summary: "List agents",
       description:
-        "Returns agents, most recent first. Filters are applied with precedence rather than composition: when `session_id` is supplied it wins and returns every agent for that session (ignoring `status` and pagination); otherwise a `status` filter returns paginated agents in that lifecycle state; otherwise all agents are returned paginated. `limit` defaults to 10000 when not a positive integer. Read-only, no side effects. Each agent's `metadata` is returned as a raw JSON-encoded string, not a parsed object.",
+        "Returns durable agents, most recent first. Filters are applied with precedence rather than composition: when `session_id` is supplied it wins and returns every agent for that session (ignoring `status` and pagination); otherwise a `status` filter returns paginated agents in that lifecycle state; otherwise all agents are returned paginated. `limit` defaults to 10000 when not a positive integer. The optional `include_transient=true` dashboard overlay prepends local pre-identity Codex main-agent cards only to the first `status=waiting` page without a `session_id`; those cards are never persisted, priced, or included in analytics/history. Read-only, no side effects. Each agent's `metadata` is returned as a raw JSON-encoded string, not a parsed object.",
       operationId: "listAgents",
       parameters: [
         { $ref: "#/components/parameters/AgentStatusQuery", example: "working" },
@@ -667,6 +675,14 @@ const paths = {
         {
           $ref: "#/components/parameters/SourcesQuery",
           example: "local,4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11",
+        },
+        {
+          name: "include_transient",
+          in: "query",
+          schema: { type: "boolean", default: false },
+          description:
+            "Opt in to local, in-memory Codex main-agent cards before the CLI exposes a durable session id. Honored only on the first `status=waiting` page without `session_id`.",
+          example: true,
         },
         { $ref: "#/components/parameters/LimitQuery", example: 50 },
         { $ref: "#/components/parameters/OffsetQuery", example: 0 },

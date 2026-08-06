@@ -532,7 +532,7 @@ const schemas = {
       cwd: {
         type: "string",
         description:
-          "Absolute working directory for the child. Must exist as a directory at request time. Omitted/empty defaults to the dashboard server's cwd. Non-absolute or missing paths are rejected with EBADCWD.",
+          "Absolute working directory for the child. Must exist as a directory at request time and is canonicalized with realpath before use. It intentionally may be outside this repository so Run Agent can launch in a home directory or any recent project. Omitted/empty defaults to the dashboard server's cwd. Non-absolute or missing paths are rejected with EBADCWD.",
         example: "/Users/dev/projects/my-app",
       },
       model: {
@@ -967,7 +967,7 @@ const paths = {
       tags: ["Run"],
       summary: "Autocomplete files within a cwd",
       description:
-        "Walks the given `cwd` and returns up to 40 file paths (relative to that cwd, shortest first) for the prompt editor's `@` references. The cwd is validated via the same sanitiser as spawning (must be an existing absolute directory). Dotfiles (except .env/.gitignore) and heavy build dirs (node_modules, .git, dist, build, out, .next, coverage, target, .venv, __pycache__, etc.) are skipped; the walk is bounded (≤5000 entries visited). Read-only — no process is spawned. The loopback same-origin guard applies.",
+        "Walks the given `cwd` and returns up to 40 file paths (relative to that cwd, shortest first) for the prompt editor's `@` references. The cwd is validated via the same sanitiser as spawning: it must be an existing absolute directory, is canonicalized with realpath, and intentionally may be outside this repository. Dotfiles (except .env/.gitignore) and heavy build dirs (node_modules, .git, dist, build, out, .next, coverage, target, .venv, __pycache__, etc.) are skipped; the walk is bounded (≤5000 entries visited). Read-only — no process is spawned. The loopback same-origin guard applies.",
       operationId: "runFiles",
       parameters: [
         {
@@ -976,7 +976,7 @@ const paths = {
           required: false,
           schema: { type: "string" },
           description:
-            "Absolute directory to walk. Must exist; defaults to the dashboard server's cwd when omitted. Invalid values yield 400 EBADCWD.",
+            "Absolute directory to walk. Must exist and is canonicalized with realpath; defaults to the dashboard server's cwd when omitted. It may be outside this repository. Invalid values yield 400 EBADCWD.",
           example: "/Users/dev/projects/my-app",
         },
         {

@@ -2374,7 +2374,7 @@
               <span class="marquee-item"><span class="dot emerald"></span>Conversation mode</span>
               <span class="marquee-item"><span class="dot amber"></span>One-shot headless</span>
               <span class="marquee-item"><span class="dot pink"></span>Resume sessions</span>
-              <span class="marquee-item"><span class="dot violet"></span>MCP server (25 tools)</span>
+              <span class="marquee-item"><span class="dot violet"></span>MCP server (97 tools)</span>
               <span class="marquee-item"><span class="dot rose"></span>Plugin marketplace</span>
               <span class="marquee-item"><span class="dot"></span>VS Code extension</span>
               <span class="marquee-item"><span class="dot cyan"></span>WebSocket push</span>
@@ -2401,7 +2401,7 @@
               <span class="marquee-item"><span class="dot emerald"></span>Conversation mode</span>
               <span class="marquee-item"><span class="dot amber"></span>One-shot headless</span>
               <span class="marquee-item"><span class="dot pink"></span>Resume sessions</span>
-              <span class="marquee-item"><span class="dot violet"></span>MCP server (25 tools)</span>
+              <span class="marquee-item"><span class="dot violet"></span>MCP server (97 tools)</span>
               <span class="marquee-item"><span class="dot rose"></span>Plugin marketplace</span>
               <span class="marquee-item"><span class="dot"></span>VS Code extension</span>
               <span class="marquee-item"><span class="dot cyan"></span>WebSocket push</span>
@@ -2607,7 +2607,8 @@
             <p>
               Hooks fire to the local server in milliseconds. WebSocket push updates the UI
               before you've taken your finger off the keyboard. A brief branding splash greets you
-              on load, and pulsing skeletons (never blank spinners) fill in while data streams.
+              on load, skips hook setup when the selected providers are already ready, and pulsing
+              skeletons (never blank spinners) fill in while data streams.
             </p>
           </div>
           <div class="value-card" style="--card-glow: rgba(52, 211, 153, 0.5)">
@@ -2638,7 +2639,7 @@
           <h2 class="section-title">Everything you need, on your machine.</h2>
           <p class="section-lead">
             Hooks-driven session capture, deep analytics, in-browser Claude spawning, full
-            configuration inspector, and a typed local MCP server with 25 tools.
+            configuration inspector, and a typed local MCP server with 97 tools across the full app surface.
           </p>
         </div>
         <div class="features-grid reveal-stagger">
@@ -2766,7 +2767,7 @@
             <div class="feature-icon violet">🔌</div>
             <h3>Local MCP server</h3>
             <p>
-              Twenty-five typed tools across six domains run over stdio, HTTP plus SSE, or an
+              Ninety-seven typed tools across 16 domains run over stdio, HTTP plus SSE, or an
               interactive REPL with strict local safety gates.
             </p>
           </div>
@@ -2782,7 +2783,10 @@
             <div class="feature-icon rose">🪝</div>
             <h3>Hooks-driven capture</h3>
             <p>
-              Auto-installs into <code>~/.claude/settings.json</code>. SessionStart, PreToolUse,
+              Auto-installs into Claude Code and Codex hook settings. Claude Code creates a session
+              at <code>SessionStart</code>; Codex shows an in-memory card as soon as its interactive
+              TUI process starts, then hands off to its hook, live-thread row, or rollout without
+              persisting the temporary card. SessionStart, PreToolUse,
               PostToolUse, Stop, SubagentStop, Notification - every event lands in SQLite within
               milliseconds.
             </p>
@@ -2791,16 +2795,16 @@
             <div class="feature-icon indigo">📦</div>
             <h3>Plugin marketplace</h3>
             <p>
-              Ten official plugins add analytics, cost guardrails, productivity, developer tools,
-              session forensics, workflow intelligence, and quality checks.
+              Fourteen shared Claude Code and Codex plugins add analytics, reporting, safe run
+              control, integrations, platform operations, session forensics, and workflow intelligence.
             </p>
           </div>
           <div class="feature-card">
             <div class="feature-icon indigo">✦</div>
             <h3>Extensible by default</h3>
             <p>
-              The marketplace includes 53 skills, 14 agents, 30 slash commands, three CLI tools,
-              and three hook configurations.
+              The marketplace includes 66 packaged skills, 18 Claude subagents, 34 Claude commands,
+              and two MCP-enabled plugins. The skills.sh CLI discovers 74 repository skills.
             </p>
           </div>
           <div class="feature-card">
@@ -2999,7 +3003,7 @@
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
                 <h4>Analytics</h4>
-                <p>Token usage, tool frequency, activity heatmap, session trends</p>
+                <p>Token usage, activity heatmap, session trends, and paginated long legends</p>
               </div>
             </div>
           </div>
@@ -3152,7 +3156,7 @@
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
                 <h4>Workflows</h4>
-                <p>D3-powered orchestration DAG, tool Sankey, collaboration network</p>
+                <p>D3 orchestration, tool Sankey, collaboration network, bounded legends</p>
               </div>
             </div>
           </div>
@@ -3194,7 +3198,7 @@
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
                 <h4>Settings</h4>
-                <p>Claude and Codex pricing, provider-scoped data, live-configurable session homes, first-run hook setup, and real-time lifecycle states that keep active, waiting, and completed cards accurate — including compact two-request task history for either provider</p>
+                <p>Claude and Codex pricing, provider-scoped data, live-configurable session homes, selection-aware first-run hook readiness, and real-time lifecycle states that keep active, waiting, and completed cards accurate — including compact two-request task history for either provider</p>
               </div>
             </div>
           </div>
@@ -3274,7 +3278,7 @@
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
                 <h4>Grafana · CCAM Overview</h4>
-                <p>Four auto-provisioned dashboards — fleet totals, breakdowns, and rates from live /api/metrics scrapes (admin / admin on :3000)</p>
+                <p>Four auto-provisioned dashboards — fleet totals, breakdowns, and rates from bearer-authenticated /api/metrics scrapes</p>
               </div>
             </div>
           </div>
@@ -3943,9 +3947,9 @@
           </p>
         </div>
         <div class="stack-grid reveal" id="stack-grid">
-          <div class="stack-item"><div class="stack-item-icon">⚛️</div><div class="stack-item-name">React 18</div><div class="stack-item-desc">+ TypeScript 5</div></div>
-          <div class="stack-item"><div class="stack-item-icon">⚡</div><div class="stack-item-name">Vite 6</div><div class="stack-item-desc">HMR + bundle</div></div>
-          <div class="stack-item"><div class="stack-item-icon">🚂</div><div class="stack-item-name">Express 4</div><div class="stack-item-desc">Node.js 20+</div></div>
+          <div class="stack-item"><div class="stack-item-icon">⚛️</div><div class="stack-item-name">React 19</div><div class="stack-item-desc">+ TypeScript 5</div></div>
+          <div class="stack-item"><div class="stack-item-icon">⚡</div><div class="stack-item-name">Vite 7</div><div class="stack-item-desc">HMR + bundle</div></div>
+          <div class="stack-item"><div class="stack-item-icon">🚂</div><div class="stack-item-name">Express 4</div><div class="stack-item-desc">Node.js 22.22+</div></div>
           <div class="stack-item"><div class="stack-item-icon">🗃️</div><div class="stack-item-name">SQLite</div><div class="stack-item-desc">better-sqlite3 + WAL</div></div>
           <div class="stack-item"><div class="stack-item-icon">🔌</div><div class="stack-item-name">WebSocket</div><div class="stack-item-desc">RFC 6455 push</div></div>
           <div class="stack-item"><div class="stack-item-icon">📡</div><div class="stack-item-name">MCP 1.0</div><div class="stack-item-desc">stdio / HTTP / REPL</div></div>
@@ -3956,7 +3960,7 @@
           <div class="stack-item"><div class="stack-item-icon">🔔</div><div class="stack-item-name">Web Push</div><div class="stack-item-desc">VAPID</div></div>
           <div class="stack-item"><div class="stack-item-icon">🐳</div><div class="stack-item-name">Docker</div><div class="stack-item-desc">+ Podman</div></div>
           <div class="stack-item"><div class="stack-item-icon">☸️</div><div class="stack-item-name">Kubernetes</div><div class="stack-item-desc">+ Kustomize + Helm</div></div>
-          <div class="stack-item"><div class="stack-item-icon">🌿</div><div class="stack-item-name">Terraform</div><div class="stack-item-desc">AWS / GCP / Azure / OCI</div></div>
+          <div class="stack-item"><div class="stack-item-icon">🌿</div><div class="stack-item-name">Terraform</div><div class="stack-item-desc">Kubernetes provider neutral</div></div>
           <div class="stack-item"><div class="stack-item-icon">🔥</div><div class="stack-item-name">Prometheus</div><div class="stack-item-desc">+ Grafana (4 boards)</div></div>
           <div class="stack-item"><div class="stack-item-icon">📈</div><div class="stack-item-name">Mermaid</div><div class="stack-item-desc">10.x diagrams</div></div>
           <div class="stack-item"><div class="stack-item-icon">🧪</div><div class="stack-item-name">Vitest</div><div class="stack-item-desc">+ Testing Library</div></div>
@@ -3970,7 +3974,7 @@
           <div class="stack-item"><div class="stack-item-icon">🎬</div><div class="stack-item-name">PostCSS</div><div class="stack-item-desc">+ Autoprefixer</div></div>
           <div class="stack-item"><div class="stack-item-icon">🔄</div><div class="stack-item-name">workbox</div><div class="stack-item-desc">service worker (planned)</div></div>
           <div class="stack-item"><div class="stack-item-icon">🐙</div><div class="stack-item-name">GitHub Actions</div><div class="stack-item-desc">CI / release</div></div>
-          <div class="stack-item"><div class="stack-item-icon">🦊</div><div class="stack-item-name">GitLab CI</div><div class="stack-item-desc">pipelines</div></div>
+          <div class="stack-item"><div class="stack-item-icon">🔏</div><div class="stack-item-name">Cosign</div><div class="stack-item-desc">keyless image signatures</div></div>
           <div class="stack-item"><div class="stack-item-icon">📦</div><div class="stack-item-name">VS Code</div><div class="stack-item-desc">extension API</div></div>
           <div class="stack-item"><div class="stack-item-icon">🐍</div><div class="stack-item-name">Python 3</div><div class="stack-item-desc">statusline script</div></div>
           <div class="stack-item"><div class="stack-item-icon">☁️</div><div class="stack-item-name">Coralogix</div><div class="stack-item-desc">observability</div></div>

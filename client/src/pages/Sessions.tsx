@@ -62,7 +62,7 @@
  * ----------------------------------------------------------------------------- */
 
 import { useEffect, useState, useCallback, useSyncExternalStore } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import {
   FolderOpen,

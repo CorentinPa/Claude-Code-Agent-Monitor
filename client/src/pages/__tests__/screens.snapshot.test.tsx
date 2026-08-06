@@ -18,8 +18,8 @@ if (nodeProcess) nodeProcess.env.TZ = "UTC";
 
 import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from "vitest";
 import type { ReactNode } from "react";
-import { render, act } from "@testing-library/react";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { render, act, fireEvent, screen, within } from "@testing-library/react";
+import { MemoryRouter, Routes, Route } from "react-router";
 import i18n from "i18next";
 
 // ── Mock the API layer with deterministic, crash-safe empty fixtures ──────────
@@ -258,8 +258,11 @@ vi.mock("../../lib/api", async (importOriginal) => {
       },
       pricing: {
         list: r({ pricing: [] }),
+        listGpt: r({ pricing: [] }),
         upsert: r({ pricing: {} }),
+        upsertGpt: r({ pricing: {} }),
         delete: r({ ok: true }),
+        deleteGpt: r({ ok: true }),
         totalCost: r(cost),
         sessionCost: r(cost),
       },
@@ -276,7 +279,7 @@ vi.mock("../../lib/api", async (importOriginal) => {
         clearData: r({ ok: true, cleared: {} }),
         reimport: r({ ok: true, imported: 0, skipped: 0, errors: 0 }),
         reinstallHooks: r({ ok: true, hooks: { installed: true, hooks: {} } }),
-        resetPricing: r({ ok: true, pricing: [] }),
+        resetPricing: r({ ok: true, provider: "both", pricing: [], gpt_pricing: [] }),
         exportData: () => "/api/settings/export",
         cleanup: r({
           ok: true,
@@ -420,6 +423,7 @@ import { CcConfig } from "../CcConfig";
 import { Run } from "../Run";
 import { Settings } from "../Settings";
 import { NotFound } from "../NotFound";
+import { api } from "../../lib/api";
 
 // jsdom lacks these browser APIs that chart / responsive components rely on.
 class ObserverStub {
@@ -523,6 +527,55 @@ describe("screen snapshots", () => {
   });
   it("Settings", async () => {
     await snapshot(<Settings />, "/settings");
+  });
+  it("aligns GPT pricing controls with Claude and keeps rate caveats in the tooltip", async () => {
+    render(
+      <MemoryRouter initialEntries={["/settings"]}>
+        <Settings />
+      </MemoryRouter>
+    );
+    await settle();
+
+    const claudeSection = document.getElementById("claude-pricing");
+    const gptSection = document.getElementById("gpt-pricing");
+    expect(claudeSection).not.toBeNull();
+    expect(gptSection).not.toBeNull();
+    const claude = within(claudeSection as HTMLElement);
+    const gpt = within(gptSection as HTMLElement);
+    const claudeReset = claude.getByRole("button", { name: "Reset Defaults" });
+    const claudeAdd = claude.getByRole("button", { name: "Add Model" });
+    const gptReset = gpt.getByRole("button", { name: "Reset Defaults" });
+    const gptAdd = gpt.getByRole("button", { name: "Add Model" });
+    const subtitle = gpt.getByText(/Published OpenAI API rates.*USD per 1M tokens\./);
+
+    expect(gptReset.className).toBe(claudeReset.className);
+    expect(gptAdd.className).toBe(claudeAdd.className);
+    expect(
+      subtitle.compareDocumentPosition(gptReset) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      gptReset.compareDocumentPosition(gptAdd) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      gpt.queryByText(/An em dash means OpenAI does not publish that context or Fast-mode rate/)
+    ).not.toBeInTheDocument();
+
+    const infoButton = gpt.getByRole("button", { name: "How GPT pricing works" });
+    fireEvent.focus(infoButton);
+    expect(gpt.getByRole("tooltip")).toBeInTheDocument();
+    expect(gpt.getByText("Unpublished rates stay unpriced")).toBeInTheDocument();
+    expect(
+      gpt.getByText(/An em dash means OpenAI does not publish that context or Fast-mode rate/)
+    ).toBeInTheDocument();
+    fireEvent.blur(infoButton);
+    expect(gpt.queryByRole("tooltip")).not.toBeInTheDocument();
+
+    fireEvent.click(gptReset);
+    expect(gpt.getByRole("button", { name: "Confirm Reset" })).toBeInTheDocument();
+    fireEvent.click(gpt.getByRole("button", { name: "Confirm Reset" }));
+    await settle();
+    expect(vi.mocked(api.settings.resetPricing)).toHaveBeenCalledWith("codex");
+    expect(screen.queryByText(/Every amount is USD per 1M tokens/)).not.toBeInTheDocument();
   });
   it("Not found", async () => {
     await snapshot(<NotFound />, "/nope");

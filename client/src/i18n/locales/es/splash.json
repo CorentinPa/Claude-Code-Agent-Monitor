@@ -24,8 +24,8 @@
   "hookGate": {
     "kicker": "Seguimiento en vivo",
     "title": "Configura la monitorización en vivo",
-    "description": "Instala hooks locales ligeros para que las nuevas sesiones y eventos aparezcan en cuanto ocurran.",
-    "selectedProviders": "Proveedores seleccionados",
+    "description": "Instala hooks locales ligeros solo para los proveedores seleccionados que todavía los necesitan.",
+    "selectedProviders": "Hooks aún necesarios para",
     "realTime": "Los hooks envían eventos del ciclo de vida a este panel local en tiempo real. Tus datos permanecen en esta máquina.",
     "checking": "Comprobando la configuración de hooks existente...",
     "installed": "Hooks instalados y listos para la monitorización en vivo",

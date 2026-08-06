@@ -7,8 +7,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter, useLocation } from "react-router";
 import { SessionCard } from "../SessionCard";
 import type { Session } from "../../lib/types";
 
@@ -27,6 +27,10 @@ function makeSession(overrides: Partial<Session> = {}): Session {
     provider: "codex",
     ...overrides,
   };
+}
+
+function LocationProbe() {
+  return <span data-testid="location">{useLocation().pathname}</span>;
 }
 
 describe("SessionCard", () => {
@@ -79,5 +83,25 @@ describe("SessionCard", () => {
 
     expect(screen.getByText("Investigate the remote sync delay.")).toBeInTheDocument();
     expect(screen.getByText("Then preserve the normal idle sweep.")).toBeInTheDocument();
+  });
+
+  it("does not navigate before a transient Codex process has a durable session id", () => {
+    const metadata = JSON.stringify({ transient: true, pre_identity_process: true });
+    const { container } = render(
+      <MemoryRouter initialEntries={["/kanban"]}>
+        <SessionCard
+          session={makeSession({
+            id: "codex-process:4312:abc123",
+            name: "Codex session",
+            metadata,
+          })}
+        />
+        <LocationProbe />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByText("Codex · codex-pr"));
+    expect(screen.getByTestId("location")).toHaveTextContent("/kanban");
+    expect(container.querySelector(".card-hover")?.className).toContain("cursor-default");
   });
 });

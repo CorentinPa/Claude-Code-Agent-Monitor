@@ -162,6 +162,29 @@ On a browser's first dashboard visit, select the provider data to display and th
 > [!IMPORTANT]
 > **Hooks are a host-side step.** Claude Code runs on your host, so the hook
 > command must reference a `hook-handler.js` path that exists on the **host**.
+
+### Remote and cloud hook delivery
+
+Hook handlers use localhost discovery by default. To forward live Claude Code or
+Codex events to a remote dashboard, configure the host that runs the agent:
+
+```bash
+export CCAM_DASHBOARD_URL=https://agent-monitor.example.com
+export CCAM_HOOK_TOKEN_FILE=/secure/path/hook-token
+```
+
+Non-loopback `CCAM_DASHBOARD_URL` values must use HTTPS and must provide
+`CCAM_HOOK_TOKEN` or `CCAM_HOOK_TOKEN_FILE`. The handler sends the credential as
+`x-ccam-hook-token`; the dashboard verifies it against
+`DASHBOARD_HOOK_TOKEN` or `DASHBOARD_HOOK_TOKEN_FILE` with constant-time token
+matching. The hook remains fail-safe and non-blocking: invalid configuration,
+connection failures, timeouts, or authentication failures never block Claude
+Code or Codex.
+
+The supplied Nginx edge returns `404` for `/api/hooks/*` by default. Remote hook
+ingestion is enabled explicitly by mounting
+`deployments/nginx/snippets/hooks-proxy.conf` and terminating TLS before Nginx.
+Use a hook token separate from the browser/dashboard token.
 > Run `npm run install-hooks` on the host — never inside a container. When run
 > inside Docker/Podman, the installer **refuses** and exits non-zero (issue
 > #193): a container-internal path written into a bind-mounted `~/.claude` would
@@ -170,7 +193,7 @@ On a browser's first dashboard visit, select the provider data to display and th
 > (Escape hatch for running Claude Code *inside* the same container:
 > `CCAM_ALLOW_CONTAINER_HOOKS=1 npm run install-hooks`.)
 
-For Codex, the installer writes only this dashboard's lifecycle entries to `~/.codex/hooks.json`. Each entry runs `scripts/codex-hook-handler.js`, which immediately POSTs the rollout path — or a version-dependent session/thread id that the server resolves against the rollout tree — to `POST /api/hooks/codex` and exits. The server acknowledges `202` before parsing, then incrementally consumes `~/.codex/sessions/**/rollout-*.jsonl`; duplicate hook and watcher notifications are idempotent through a durable byte cursor. Newest rollouts are scanned first, a bad historical file remains eligible for retry without blocking the rest, and long cold scans yield between small batches so fresh sessions reach the dashboard promptly. Supported lifecycle notifications are `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, and `SessionEnd`. `PreToolUse` intentionally ingests the just-completed model turn before a long-running tool delays its matching `PostToolUse` notification.
+For Codex, the installer writes only this dashboard's lifecycle entries to `~/.codex/hooks.json`. Each entry runs `scripts/codex-hook-handler.js`, which immediately POSTs the rollout path — or a version-dependent session/thread id that the server resolves against the rollout tree — to `POST /api/hooks/codex` and exits. The server acknowledges `202` before parsing, then incrementally consumes `~/.codex/sessions/**/rollout-*.jsonl`; duplicate hook and watcher notifications are idempotent through a durable byte cursor. Before Codex creates either a hook identity or a native live-thread row, a one-second process probe exposes an in-memory Waiting card to the live Dashboard and Kanban reads. It never writes a session, agent, event, token, workflow, alert, or history row, and disappears when the process exits or durable Codex data takes its place. If Codex defers a new hook for trust approval after assigning an id, the synchronizer reads the very recent native `state_*.sqlite` live-thread row and creates the durable startup card before the rollout is flushed. Newest rollouts are scanned first, a bad historical file remains eligible for retry without blocking the rest, and long cold scans yield between small batches so fresh sessions reach the dashboard promptly. Supported lifecycle notifications are `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, and `SessionEnd`. `PreToolUse` intentionally ingests the just-completed model turn before a long-running tool delays its matching `PostToolUse` notification.
 
 Codex's append-only rollout is authoritative for live state: `user_message` and `task_started` clear the waiting overlay and set the main agent to `working`; `task_complete` keeps the session `active` but makes its cards **Waiting** with `awaiting_reason = stop`; and `turn_aborted` makes them **Waiting** with `awaiting_reason = interrupted`. Only `SessionEnd` is terminal. A new rollout turn reactivates a session prematurely completed by a missed or mistimed lifecycle notification. After a restart or partial write, the synchronizer reconciles the latest stored Codex lifecycle event and conservatively changes a silent `working` turn to interrupted Waiting after 90 seconds; the next rollout event self-heals it.
 
@@ -231,6 +254,8 @@ ls -la .githooks/
 ```
 
 ---
+
+> **Codex startup:** A fresh interactive Codex process first appears as an in-memory **Waiting** card, including while Codex is still at its trust screen or first prompt and has no stable session/thread ID. The card is local-only, non-navigable, excluded from durable APIs unless `include_transient=true`, and removed on process exit. A `SessionStart` hook, native live-thread row, or rollout then creates the durable session and main-agent rows without copying the temporary card into history.
 
 ## Hook Types
 
@@ -448,124 +473,32 @@ Triggered when a Claude Code session ends.
 
 ## Hook Handler Implementation
 
-### hook-handler.js Architecture
+### Hook transport architecture
 
 ```mermaid
-graph TB
-    CLI[CLI Args] --> Parse[Parse Hook Type]
-    Stdin[stdin] --> ReadJSON[Read JSON]
-    
-    Parse --> HookType{Hook Type?}
-    ReadJSON --> Payload[Event Payload]
-    
-    HookType -->|session-start| Endpoint1[POST /hooks/session-start]
-    HookType -->|pre-tool-use| Endpoint2[POST /hooks/pre-tool-use]
-    HookType -->|post-tool-use| Endpoint3[POST /hooks/post-tool-use]
-    HookType -->|stop| Endpoint4[POST /hooks/stop]
-    HookType -->|subagent-stop| Endpoint5[POST /hooks/subagent-stop]
-    HookType -->|notification| Endpoint6[POST /hooks/notification]
-    HookType -->|session-end| Endpoint7[POST /hooks/session-end]
-    
-    Payload --> Endpoint1
-    Payload --> Endpoint2
-    Payload --> Endpoint3
-    Payload --> Endpoint4
-    Payload --> Endpoint5
-    Payload --> Endpoint6
-    Payload --> Endpoint7
-    
-    Endpoint1 --> HTTP[HTTP POST]
-    Endpoint2 --> HTTP
-    Endpoint3 --> HTTP
-    Endpoint4 --> HTTP
-    Endpoint5 --> HTTP
-    Endpoint6 --> HTTP
-    Endpoint7 --> HTTP
-    
-    HTTP --> Response{Success?}
-    Response -->|Yes| Exit0[exit 0]
-    Response -->|No| Exit1[exit 1]
-    
-    style HTTP fill:#10B981
-    style Exit0 fill:#10B981
-    style Exit1 fill:#EF4444
+flowchart LR
+  STDIN["Hook JSON on stdin"] --> WRAP["Add hook_type"]
+  WRAP --> TARGET{"CCAM_DASHBOARD_URL set?"}
+  TARGET -->|No| LOCAL["Discover local dashboard ports"]
+  TARGET -->|Yes| VALIDATE["Require HTTP(S); remote requires HTTPS + hook token"]
+  LOCAL --> SEND["Fire-and-forget POST"]
+  VALIDATE --> SEND
+  SEND --> EVENT["/api/hooks/event or /api/hooks/codex"]
+  SEND --> EXIT["Always exit 0; 2.5s safety net"]
 ```
 
-### Implementation
+The real handlers are intentionally small. `scripts/hook-handler.js` and
+`scripts/codex-hook-handler.js` parse stdin and delegate delivery to
+`scripts/hook-transport.js`. Local mode fans out to one live dashboard per
+unique SQLite data directory. Remote mode uses `CCAM_DASHBOARD_URL`, requires
+HTTPS outside loopback, reads `CCAM_HOOK_TOKEN` or `CCAM_HOOK_TOKEN_FILE`, and
+sends `x-ccam-hook-token`. Requests resolve when the body is flushed, not when
+the dashboard replies, so a slow or unavailable server never delays the agent
+CLI. Parse errors are wrapped as raw input, and all network/configuration errors
+fail silently with exit code 0.
 
-```javascript
-#!/usr/bin/env node
-// scripts/hook-handler.js
-
-const http = require('http');
-const fs = require('fs');
-
-const HOOK_TYPE = process.argv[2];
-const SERVER_URL = 'http://localhost:4820';
-const TIMEOUT = 5000; // 5s timeout
-
-// Read JSON from stdin
-let inputData = '';
-process.stdin.setEncoding('utf8');
-process.stdin.on('data', (chunk) => inputData += chunk);
-
-process.stdin.on('end', () => {
-  try {
-    const payload = JSON.parse(inputData);
-    sendToServer(HOOK_TYPE, payload);
-  } catch (err) {
-    console.error('[hook-handler] JSON parse error:', err);
-    process.exit(1);
-  }
-});
-
-function sendToServer(hookType, payload) {
-  const postData = JSON.stringify(payload);
-  
-  const options = {
-    hostname: 'localhost',
-    port: 4820,
-    path: `/hooks/${hookType}`,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData)
-    },
-    timeout: TIMEOUT
-  };
-  
-  const req = http.request(options, (res) => {
-    let responseData = '';
-    res.on('data', (chunk) => responseData += chunk);
-    res.on('end', () => {
-      if (res.statusCode === 200) {
-        process.exit(0);
-      } else {
-        console.error(`[hook-handler] Server error: ${res.statusCode}`);
-        process.exit(1);
-      }
-    });
-  });
-  
-  req.on('error', (err) => {
-    console.error('[hook-handler] Request error:', err);
-    process.exit(1);
-  });
-  
-  req.on('timeout', () => {
-    console.error('[hook-handler] Request timeout');
-    req.destroy();
-    process.exit(1);
-  });
-  
-  req.write(postData);
-  req.end();
-}
-```
-
-> **Port resolution & fan-out.** The snippet above shows a single fixed `4820`
-> for clarity. The real `scripts/hook-handler.js` resolves hook targets at
-> runtime via `server/lib/server-info.js`:
+> **Port resolution & fan-out.** In local mode, `scripts/hook-handler.js`
+> resolves targets at runtime through `server/lib/server-info.js`:
 >
 > 1. If `CLAUDE_DASHBOARD_PORT` is set in the environment, the handler treats
 >    it as an explicit operator override and POSTs to that single port —
