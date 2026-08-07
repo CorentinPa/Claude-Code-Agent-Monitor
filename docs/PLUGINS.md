@@ -40,15 +40,40 @@ The repository does not need a PR to the `vercel-labs/skills` source repository.
 # List all 74 repository skills without installing
 npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
 
-# Install one skill for Claude Code and Codex
+# Install one skill into the current project for Claude Code and Codex
 npx skills add hoangsonww/Claude-Code-Agent-Monitor \
   --skill mcp-server \
   --agent claude-code \
-  --agent codex
+  --agent codex \
+  --yes
 
-# Install all discovered skills
+# Verify project-scoped installation
+npx skills list --json
+
+# Install the same skill globally for both agents
+npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+  --skill mcp-server \
+  --agent claude-code \
+  --agent codex \
+  --global \
+  --yes
+
+# Verify global installation
+npx skills list --global --json
+
+# Install all discovered skills for every supported agent in the current project
 npx skills add hoangsonww/Claude-Code-Agent-Monitor --all
+
+# Update project-scoped or global skills
+npx skills update --project --yes
+npx skills update --global --yes
+
+# Remove the selected skill from the current project or global scope
+npx skills remove mcp-server --yes
+npx skills remove --global mcp-server --yes
 ```
+
+Project installs use the current repository's `.agents/skills/` directory and create agent-specific links such as `.claude/skills/mcp-server`. By default, global Claude Code skills resolve under `~/.claude/skills/` and global Codex skills under `~/.codex/skills/`; `CLAUDE_CONFIG_DIR` and `CODEX_HOME` replace those respective base directories. Multi-agent installs may deduplicate files through a shared store and link the agent-specific destinations. The CLI records source and hash metadata in `skills-lock.json` for project installs and a global skill lockfile so later `skills update` runs can check the original GitHub source.
 
 Every bundled skill carries:
 

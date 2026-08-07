@@ -45,6 +45,8 @@ npm run deploy:validate
 
 It checks Dockerfiles, Compose profiles, Nginx syntax, Helm lint and schema rejection, every Kustomize overlay and optional component, Terraform formatting/provider validation, production dependency audits, file headers, and the one-writer invariant.
 
+The dependency audit retries malformed registry or transport responses up to three times with bounded backoff. A valid report containing any vulnerability fails immediately and prints the complete audit payload; malformed reports never pass as clean.
+
 ## Secrets
 
 Production deployments use three independent tokens:
@@ -191,7 +193,7 @@ Render and replace the local image name with an immutable registry reference:
 REGISTRY="ghcr.io/$(gh repo view --json owner -q .owner.login)"
 IMAGE_TAG="$(git rev-parse --short HEAD)"
 kubectl kustomize deployments/kubernetes/overlays/production \
-  | sed "s|ccam-dashboard:2.0.1|${REGISTRY}/claude-code-agent-monitor:${IMAGE_TAG}|g" \
+  | sed "s|ccam-dashboard:2.0.2|${REGISTRY}/claude-code-agent-monitor:${IMAGE_TAG}|g" \
   | kubectl apply --server-side --field-manager=ccam-deployer -f -
 ```
 

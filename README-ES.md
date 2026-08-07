@@ -1825,6 +1825,38 @@ claude plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
 codex plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
 ```
 
+### Instalar habilidades con skills.sh
+
+```bash
+# Enumerar las 74 habilidades sin instalarlas
+npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
+
+# Instalar una habilidad para Claude Code y Codex en el proyecto actual
+npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+  --skill mcp-server \
+  --agent claude-code \
+  --agent codex \
+  --yes
+
+# Verificar, actualizar y eliminar la habilidad del proyecto
+npx skills list --json
+npx skills update --project --yes
+npx skills remove mcp-server --yes
+
+# Añadir --global para instalar a nivel de usuario y administrar ese ámbito
+npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+  --skill mcp-server \
+  --agent claude-code \
+  --agent codex \
+  --global \
+  --yes
+npx skills list --global --json
+npx skills update --global --yes
+npx skills remove --global mcp-server --yes
+```
+
+Las instalaciones de proyecto usan `.agents/skills/` y enlaces específicos de cada agente. Las habilidades globales de Claude Code se instalan de forma predeterminada en `~/.claude/skills/`, o en el subdirectorio `skills/` de `CLAUDE_CONFIG_DIR` cuando se define. Las habilidades globales de Codex se instalan de forma predeterminada en `~/.codex/skills/`, o en el subdirectorio `skills/` de `CODEX_HOME` cuando se define. Las instalaciones para varios agentes pueden deduplicar archivos en un almacén compartido y enlazar esos destinos. La CLI de skills.sh descubre 74 habilidades del repositorio, incluidas 66 habilidades de plugins y las habilidades de mantenimiento del repositorio.
+
 ### Plugins disponibles
 
 | Plugin | Comando de instalación | Habilidades |

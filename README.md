@@ -1847,9 +1847,32 @@ codex plugin add ccam-platform@claude-code-agent-monitor-plugins
 
 # Open Agent Skills / skills.sh-compatible CLI
 npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
+
+# Install one skill for Claude Code and Codex in the current project
+npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+  --skill mcp-server \
+  --agent claude-code \
+  --agent codex \
+  --yes
+
+# Verify, update, and remove the project-scoped skill
+npx skills list --json
+npx skills update --project --yes
+npx skills remove mcp-server --yes
+
+# Add --global to install at user scope, then manage that scope explicitly
+npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+  --skill mcp-server \
+  --agent claude-code \
+  --agent codex \
+  --global \
+  --yes
+npx skills list --global --json
+npx skills update --global --yes
+npx skills remove --global mcp-server --yes
 ```
 
-The `skills` CLI discovers **74 total repository skills**, including the 66 plugin skills and repository-maintenance skills. Every plugin skill has canonical `name`/`description` frontmatter and `agents/openai.yaml` metadata. No upstream PR to `vercel-labs/skills` is needed for installation. The public GitHub repository is the source, and skills.sh visibility follows publication and real install telemetry.
+The `skills` CLI discovers **74 total repository skills**, including the 66 plugin skills and repository-maintenance skills. Project installs use `.agents/skills/` plus agent-specific links. Global Claude Code skills default to `~/.claude/skills/`, or `$CLAUDE_CONFIG_DIR/skills/` when set. Global Codex skills default to `~/.codex/skills/`, or `$CODEX_HOME/skills/` when set. Multi-agent installs may deduplicate files through a shared store and link those destinations. Every plugin skill has canonical `name`/`description` frontmatter and `agents/openai.yaml` metadata. No upstream PR to `vercel-labs/skills` is needed for installation. The public GitHub repository is the source, and skills.sh visibility follows publication and real install telemetry.
 
 New focused packs complement the existing analytics, productivity, quality, sessions, workflows, config, and dashboard plugins:
 

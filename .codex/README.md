@@ -8,7 +8,7 @@ This directory contains all project-scoped Codex extensions:
 - reusable skills in [`skills/`](./skills)
 - runtime configuration in [`config.toml`](./config.toml)
 - a repository plugin marketplace in [`.agents/plugins/marketplace.json`](../.agents/plugins/marketplace.json)
-- 13 shared plugins under [`plugins/`](../plugins), each with `.codex-plugin/plugin.json`
+- 14 shared plugins under [`plugins/`](../plugins), each with `.codex-plugin/plugin.json`
 
 ## What Codex reads
 
@@ -41,18 +41,45 @@ codex plugin list --marketplace claude-code-agent-monitor-plugins --available --
 codex plugin add ccam-platform@claude-code-agent-monitor-plugins
 ```
 
-The marketplace contains 13 plugins and 62 bundled skills. The same plugin
+The marketplace contains 14 plugins and 66 bundled skills. The same plugin
 directories also carry Claude Code manifests, so product metadata stays
 separate while skill instructions remain shared.
 
 ## skills.sh-compatible installation
 
 ```bash
+# List all repository skills without installing
 npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
+
+# Install mcp-server into the current project for Codex
 npx skills add hoangsonww/Claude-Code-Agent-Monitor \
-  --skill mcp-server --agent codex
+  --skill mcp-server \
+  --agent codex \
+  --yes
+
+# Verify the project install
+npx skills list --json
+
+# Install and verify globally
+npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+  --skill mcp-server \
+  --agent codex \
+  --global \
+  --yes
+npx skills list --global --json
+
+# Update or remove the project-scoped skill
+npx skills update --project --yes
+npx skills remove mcp-server --yes
+
+# Update or remove the global skill
+npx skills update --global --yes
+npx skills remove --global mcp-server --yes
 ```
 
-The skills CLI discovers 70 repository skills. Run `npm run extensions:sync`
+The skills CLI discovers 74 repository skills. Codex project installs use
+`.agents/skills/`; global installs use `${CODEX_HOME:-~/.codex}/skills/`.
+Multi-agent installs may deduplicate files through a shared store and create
+agent-specific links. Run `npm run extensions:sync`
 after changing a plugin skill or Claude manifest, then
 `npm run extensions:validate`.
