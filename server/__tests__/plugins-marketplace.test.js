@@ -19,6 +19,50 @@ const PLUGINS_DIR = path.join(REPO_ROOT, "plugins");
 const MARKETPLACE = path.join(REPO_ROOT, ".claude-plugin", "marketplace.json");
 const CODEX_MARKETPLACE = path.join(REPO_ROOT, ".agents", "plugins", "marketplace.json");
 const PROJECT_VERSION = readJson(path.join(REPO_ROOT, "package.json")).version;
+const COUNTED_DOCS = [
+  {
+    file: path.join(REPO_ROOT, "README.md"),
+    plugin: /\b14 plugins\b/,
+    pluginSkills: /\b66 plugin skills\b/,
+    repositorySkills: /\b74 total repository skills\b/,
+  },
+  {
+    file: path.join(REPO_ROOT, "README-CN.md"),
+    plugin: /14 个共享插件/,
+    pluginSkills: /66 个插件技能/,
+    repositorySkills: /74 个仓库技能/,
+  },
+  {
+    file: path.join(REPO_ROOT, "README-ES.md"),
+    plugin: /14 plugins compartidos/,
+    pluginSkills: /66 habilidades empaquetadas/,
+    repositorySkills: /74 habilidades/,
+  },
+  {
+    file: path.join(REPO_ROOT, "README-KO.md"),
+    plugin: /14개 플러그인/,
+    pluginSkills: /66개 번들 스킬/,
+    repositorySkills: /74개 스킬/,
+  },
+  {
+    file: path.join(REPO_ROOT, "README-VN.md"),
+    plugin: /14 plugin/,
+    pluginSkills: /66 skill/,
+    repositorySkills: /74 skill/,
+  },
+  {
+    file: path.join(REPO_ROOT, "docs", "PLUGINS.md"),
+    plugin: /\b14 plugins\b/,
+    pluginSkills: /\b66 bundled plugin skills\b/,
+    repositorySkills: /\b74 total repository skills\b/,
+  },
+  {
+    file: path.join(REPO_ROOT, ".codex", "README.md"),
+    plugin: /\b14 shared plugins\b/,
+    pluginSkills: /\b66 bundled skills\b/,
+    repositorySkills: /\b74 repository skills\b/,
+  },
+];
 const WRITE_CAPABLE = new Set([
   "ccam-config",
   "ccam-cost-guard",
@@ -50,6 +94,16 @@ function listMd(dir) {
   }
 }
 
+function addSkillNamesFromDirectory(names, dir) {
+  for (const skillDir of listDirs(dir)) {
+    const file = path.join(dir, skillDir, "SKILL.md");
+    assert.ok(fs.existsSync(file), `${path.relative(REPO_ROOT, file)} must exist`);
+    const { frontmatter } = parseFrontmatter(fs.readFileSync(file, "utf8"));
+    assert.ok(frontmatter?.name, `${path.relative(REPO_ROOT, file)} must declare a skill name`);
+    names.add(frontmatter.name);
+  }
+}
+
 describe("plugin marketplace", () => {
   const marketplace = readJson(MARKETPLACE);
   const codexMarketplace = readJson(CODEX_MARKETPLACE);
@@ -68,6 +122,44 @@ describe("plugin marketplace", () => {
   it("ships the complete 14-plugin catalog", () => {
     assert.equal(marketplace.plugins.length, 14);
     assert.equal(pluginDirs.length, 14);
+  });
+
+  it("keeps documented marketplace totals in sync with the source tree", () => {
+    const pluginSkillCount = pluginDirs.reduce((total, dir) => {
+      const skillsDir = path.join(PLUGINS_DIR, dir, "skills");
+      return total + (fs.existsSync(skillsDir) ? listDirs(skillsDir).length : 0);
+    }, 0);
+    const uniqueSkillNames = new Set();
+    for (const dir of pluginDirs) {
+      addSkillNamesFromDirectory(uniqueSkillNames, path.join(PLUGINS_DIR, dir, "skills"));
+    }
+    for (const root of [".agents/skills", ".claude/skills", ".codex/skills"]) {
+      addSkillNamesFromDirectory(uniqueSkillNames, path.join(REPO_ROOT, root));
+    }
+    const repositorySkillCount = uniqueSkillNames.size;
+    const expected = {
+      pluginText: `${pluginDirs.length} plugins`,
+      pluginSkillText: `${pluginSkillCount} bundled`,
+      repositorySkillText: `${repositorySkillCount} repository skills`,
+    };
+
+    assert.equal(pluginSkillCount, 66);
+    assert.equal(repositorySkillCount, 74);
+    for (const { file, plugin, pluginSkills, repositorySkills } of COUNTED_DOCS) {
+      const text = fs.readFileSync(file, "utf8");
+      assert.ok(
+        plugin.test(text),
+        `${path.relative(REPO_ROOT, file)} must mention ${expected.pluginText}`
+      );
+      assert.ok(
+        pluginSkills.test(text),
+        `${path.relative(REPO_ROOT, file)} must mention ${expected.pluginSkillText}`
+      );
+      assert.ok(
+        repositorySkills.test(text),
+        `${path.relative(REPO_ROOT, file)} must mention ${expected.repositorySkillText}`
+      );
+    }
   });
 
   it("marketplace entries and plugin dirs are a bijection", () => {
