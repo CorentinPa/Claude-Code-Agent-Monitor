@@ -12,6 +12,7 @@ Use Semantic Versioning as the repository-wide release rule:
 - **Major** (`X+1.0.0`) for backward-incompatible behavior, removed/renamed public contracts, required migrations, or fundamental product/architecture changes.
 
 When a change fits more than one category, use the highest applicable bump. When uncertain between adjacent categories, prefer the higher bump or ask the user before releasing. Never infer the bump from commit count, diff size, or elapsed time alone.
+When the user explicitly requests a concrete version, that instruction overrides automatic classification. State the override and synchronize the requested version exactly.
 
 ## CCAM release workflow
 

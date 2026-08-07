@@ -63,8 +63,8 @@ export function taskProgressSegments(progress: SessionTodoSummary | SessionTodoS
   ].filter((segment) => segment.value > 0);
 }
 
-export function taskSourceLabel(sourceTool: string | null | undefined) {
-  if (!sourceTool) return "Task state";
+export function taskSourceLabel(sourceTool: string | null | undefined, fallbackLabel: string) {
+  if (!sourceTool) return fallbackLabel;
   if (sourceTool === "update_plan") return "Codex update_plan";
   if (sourceTool === "TodoWrite") return "Claude TodoWrite";
   if (sourceTool.startsWith("Task")) return `Claude ${sourceTool}`;

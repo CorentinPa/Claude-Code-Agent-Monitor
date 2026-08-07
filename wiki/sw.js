@@ -8,8 +8,8 @@ const PRECACHE = [
   "./",
   "./index.html",
   "./style.css",
-  "./script.js",
-  "./i18n-content.js",
+  "./script.js?v=51",
+  "./i18n-content.js?v=70",
   "./manifest.json",
   "../favicon.svg",
 ];

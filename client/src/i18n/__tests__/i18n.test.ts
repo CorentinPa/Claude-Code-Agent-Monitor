@@ -95,6 +95,28 @@ describe("i18n resources", () => {
     expect(i18n.t("kanban:session.subagentSummary", { count: 3 })).toBe("3 subagents");
   });
 
+  it("pluralizes task-progress counts in English and Spanish", async () => {
+    await i18n.changeLanguage("en");
+    expect(i18n.t("sessions:taskProgress.more", { count: 1 })).toBe(
+      "+1 more task in Session Detail"
+    );
+    expect(i18n.t("sessions:taskProgress.more", { count: 2 })).toBe(
+      "+2 more tasks in Session Detail"
+    );
+    expect(i18n.t("sessions:taskProgress.hiddenTasks", { count: 1 })).toBe(
+      "1 additional task is not shown."
+    );
+    expect(i18n.t("sessions:taskProgress.hiddenTasks", { count: 2 })).toBe(
+      "2 additional tasks are not shown."
+    );
+
+    await i18n.changeLanguage("es");
+    expect(i18n.t("sessions:taskProgress.doneCount", { count: 1 })).toBe("1 completada");
+    expect(i18n.t("sessions:taskProgress.doneCount", { count: 2 })).toBe("2 completadas");
+    expect(i18n.t("sessions:taskProgress.remainingCount", { count: 1 })).toBe("1 pendiente");
+    expect(i18n.t("sessions:taskProgress.remainingCount", { count: 2 })).toBe("2 pendientes");
+  });
+
   it("ships every first-run hook setup control in each supported locale", () => {
     const keys = [
       "provider.both.label",

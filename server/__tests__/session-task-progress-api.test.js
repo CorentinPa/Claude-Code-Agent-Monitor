@@ -170,4 +170,20 @@ describe("session task progress API", () => {
     assert.equal(response.status, 200);
     assert.equal(response.body.session.todo_snapshot, null);
   });
+
+  it("caps task-progress enrichment on large list requests", async () => {
+    for (let index = 0; index < 105; index++) {
+      insertSession(`task-progress-cap-${String(index).padStart(3, "0")}`, "claude", null);
+    }
+
+    const response = await requestJson("/api/sessions?limit=10000&include_task_progress=true");
+
+    assert.equal(response.status, 200);
+    assert.equal(
+      response.body.sessions.filter((session) =>
+        Object.prototype.hasOwnProperty.call(session, "todo_summary")
+      ).length,
+      100
+    );
+  });
 });

@@ -125,7 +125,7 @@ returns the same optional field.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `limit` | integer | 50 | Maximum sessions to return (1-1000) |
+| `limit` | integer | 50 | Maximum durable sessions to return (up to 10000) |
 | `offset` | integer | 0 | Pagination offset |
 | `status` | string | - | Filter by persisted status: `active`, `completed`, `error`, `abandoned`. The UI **Waiting** state is derived from the `awaiting_input_since` column and is not a queryable enum — filter `status=active` and inspect `awaiting_input_since` (non-null = Waiting) |
 | `q` | string | - | Case-insensitive search across `id`, `name`, and `cwd` |
@@ -135,11 +135,12 @@ returns the same optional field.
 | `sources` | string | - | Comma-separated data-source ids to include (the built-in local history is `local`; remote SSH machines use their `remote_sources.id`). Omit for all sources. Also accepted on `/api/events`, `/api/agents`, `/api/stats`, `/api/analytics`, and `/api/pricing/cost`. See [Remote Data Sources](#remote-data-sources) |
 | `providers` | string | - | Comma-separated product providers: `claude`, `codex`, or both. It composes with `sources` and is accepted by the scoped list, aggregate, facet, per-session detail, cost, and workflow routes. Codex workflow responses include its recorded `response_item` tool calls, token/model totals, and `context_compacted` events; only Claude Code's Workflow-tool run journals are unavailable for Codex. |
 | `include_transient` | boolean | `false` | Opt in to local, in-memory Codex startup cards before Codex exposes a stable session ID. On `/api/sessions`, this is honored only on the first page when `status` is absent or `active`; on `/api/agents`, only on the first `status=waiting` page without `session_id`. These cards are prepended without changing durable `total`, pagination, analytics, pricing, workflows, alerts, or history. |
+| `include_task_progress` | boolean | `false` | Attach nullable `todo_summary` values to at most the first 100 returned rows. Each transcript scan reads only the newest 32 MiB and each summary includes at most five preview tasks. Rows after the enrichment cap omit the field. |
 
 **Example Request:**
 
 ```bash
-curl http://localhost:4820/api/sessions?limit=10&status=active
+curl "http://localhost:4820/api/sessions?limit=10&status=active&include_task_progress=true"
 ```
 
 `last_activity` in every list row is the timestamp of the latest durable session event. It does **not** reuse the mutable `updated_at` bookkeeping timestamp, so a title, card-context, or watchdog repair cannot make an idle session appear newly active. Eventless historical rows fall back to their lifecycle timestamp.
@@ -150,15 +151,47 @@ curl http://localhost:4820/api/sessions?limit=10&status=active
 {
   "sessions": [
     {
-      "id": 1,
-      "session_id": "sess_abc123",
+      "id": "sess_abc123",
+      "name": "Implement task progress",
       "model": "claude-sonnet-4",
       "status": "active",
-      "total_cost": 1.23,
+      "cost": 1.23,
       "agent_count": 3,
-      "tool_count": 12,
-      "created_at": "2024-03-18T12:00:00Z",
-      "updated_at": "2024-03-18T14:30:00Z"
+      "started_at": "2024-03-18T12:00:00Z",
+      "updated_at": "2024-03-18T14:30:00Z",
+      "todo_summary": {
+        "total": 2,
+        "completed": 1,
+        "inProgress": 1,
+        "pending": 0,
+        "cancelled": 0,
+        "unknown": 0,
+        "percentComplete": 50,
+        "activeText": "Implement tracker",
+        "sourceTool": "TaskList",
+        "updatedAt": "2024-03-18T14:29:00Z",
+        "previewItems": [
+          {
+            "id": "task-2",
+            "text": "Implement tracker",
+            "status": "in_progress",
+            "sourceStatus": "in_progress",
+            "order": 1,
+            "agentId": "sess_abc123-main",
+            "agentType": "main",
+            "description": null
+          }
+        ],
+        "overflowCount": 1,
+        "ownerBreakdown": [
+          {
+            "agentId": "sess_abc123-main",
+            "agentType": "main",
+            "completed": 1,
+            "total": 2
+          }
+        ]
+      }
     }
   ],
   "total": 42,
@@ -207,11 +240,12 @@ GET /api/sessions/:id
 ```
 
 Returns single session details. The `session.todo_snapshot` field contains the latest observable,
-owner-attributed task state when Claude emitted `TaskCreate` / `TaskUpdate` / `TaskList`,
-legacy `TodoWrite`, task lifecycle events, or Codex emitted `update_plan`; otherwise it is
-`null`. `GET /api/sessions?include_task_progress=true` exposes the bounded `todo_summary`
-counterpart for list rows, including at most five preview tasks. The list field is opt-in so
-Dashboard/Kanban calls that fetch many rows do not parse transcripts.
+owner-attributed task state when Claude emitted `TaskCreate` / `TaskGet` / `TaskUpdate` /
+`TaskList`, legacy `TodoWrite`, task lifecycle events, or Codex emitted `update_plan`; otherwise
+it is `null`. The parser scans only the newest 32 MiB of each transcript at a complete-line
+boundary, and the full snapshot contains at most 200 task rows.
+`GET /api/sessions?include_task_progress=true` exposes the nullable `todo_summary` counterpart
+for list rows, including at most five preview tasks and enriching at most 100 returned rows.
 
 **Path Parameters:**
 
@@ -230,14 +264,54 @@ curl http://localhost:4820/api/sessions/sess_abc123
 ```json
 {
   "session": {
-    "id": 1,
-    "session_id": "sess_abc123",
+    "id": "sess_abc123",
+    "name": "Implement task progress",
     "model": "claude-sonnet-4",
     "status": "active",
-    "total_cost": 1.23,
-    "created_at": "2024-03-18T12:00:00Z",
-    "updated_at": "2024-03-18T14:30:00Z"
-  }
+    "started_at": "2026-08-07T10:00:00.000Z",
+    "updated_at": "2026-08-07T10:15:00.000Z",
+    "todo_snapshot": {
+      "provider": "claude",
+      "source": "transcript",
+      "sourceTool": "TaskList",
+      "sourceLine": 42,
+      "updatedAt": "2026-08-07T10:14:00.000Z",
+      "explanation": null,
+      "confidence": "full",
+      "items": [
+        {
+          "id": "task-1",
+          "text": "Implement task progress",
+          "status": "in_progress",
+          "sourceStatus": "in_progress",
+          "order": 0,
+          "agentId": "sess_abc123-main",
+          "agentType": "main",
+          "description": null
+        }
+      ],
+      "total": 1,
+      "completed": 0,
+      "inProgress": 1,
+      "pending": 0,
+      "cancelled": 0,
+      "unknown": 0,
+      "percentComplete": 0,
+      "activeText": "Implement task progress",
+      "includesSubagents": false,
+      "ownerBreakdown": [
+        {
+          "agentId": "sess_abc123-main",
+          "agentType": "main",
+          "completed": 0,
+          "total": 1
+        }
+      ]
+    }
+  },
+  "agents": [],
+  "events": [],
+  "workflows": []
 }
 ```
 

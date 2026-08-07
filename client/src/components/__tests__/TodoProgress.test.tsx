@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 import type { SessionTodoSnapshot, SessionTodoSummary } from "../../lib/types";
 import { TodoProgressIndicator } from "../TodoProgressIndicator";
 import { TodoProgressPanel } from "../TodoProgressPanel";
+import { taskSourceLabel } from "../todoProgress";
 
 const items = [
   {
@@ -30,6 +31,56 @@ const items = [
     agentId: "reviewer-1",
     agentType: "reviewer",
     description: "Build the two task progress surfaces",
+  },
+  {
+    id: "task-3",
+    text: "Add API tests",
+    status: "completed" as const,
+    sourceStatus: "completed",
+    order: 2,
+    agentId: "main-1",
+    agentType: "main",
+    description: null,
+  },
+  {
+    id: "task-4",
+    text: "Add UI tests",
+    status: "completed" as const,
+    sourceStatus: "completed",
+    order: 3,
+    agentId: "main-1",
+    agentType: "main",
+    description: null,
+  },
+  {
+    id: "task-5",
+    text: "Update documentation",
+    status: "completed" as const,
+    sourceStatus: "completed",
+    order: 4,
+    agentId: "reviewer-1",
+    agentType: "reviewer",
+    description: null,
+  },
+  {
+    id: "task-6",
+    text: "Run validation",
+    status: "pending" as const,
+    sourceStatus: "pending",
+    order: 5,
+    agentId: "main-1",
+    agentType: "main",
+    description: null,
+  },
+  {
+    id: "task-7",
+    text: "Review the final diff",
+    status: "pending" as const,
+    sourceStatus: "pending",
+    order: 6,
+    agentId: "reviewer-1",
+    agentType: "reviewer",
+    description: null,
   },
 ];
 
@@ -69,15 +120,20 @@ describe("TodoProgressIndicator", () => {
 
     const trigger = screen.getByRole("button", { name: "Task progress: 4 of 7 complete" });
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    expect(trigger).not.toHaveAttribute("aria-describedby");
 
     fireEvent.mouseEnter(trigger);
-    expect(screen.getByRole("tooltip")).toHaveTextContent("4 / 7 complete · 57%");
-    expect(screen.getByRole("tooltip")).toHaveTextContent("Current: Implement tracker");
-    expect(screen.getByRole("tooltip")).toHaveTextContent("reviewer");
-    expect(screen.getByRole("tooltip")).toHaveTextContent("+5 more in Session Detail");
+    const tooltip = screen.getByRole("tooltip");
+    expect(tooltip).toHaveAttribute("id");
+    expect(trigger).toHaveAttribute("aria-describedby", tooltip.id);
+    expect(tooltip).toHaveTextContent("4 / 7 complete · 57%");
+    expect(tooltip).toHaveTextContent("Current: Implement tracker");
+    expect(tooltip).toHaveTextContent("reviewer");
+    expect(tooltip).toHaveTextContent("+5 more tasks in Session Detail");
 
     fireEvent.mouseLeave(trigger);
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    expect(trigger).not.toHaveAttribute("aria-describedby");
 
     fireEvent.focus(trigger);
     expect(screen.getByRole("tooltip")).toHaveTextContent("Claude TaskList");
@@ -102,6 +158,12 @@ describe("TodoProgressIndicator", () => {
   });
 });
 
+describe("taskSourceLabel", () => {
+  it("uses the caller's localized fallback when source metadata is absent", () => {
+    expect(taskSourceLabel(null, "Estado de tareas")).toBe("Estado de tareas");
+  });
+});
+
 describe("TodoProgressPanel", () => {
   it("renders progress, source confidence, tasks, and owner breakdown", () => {
     render(<TodoProgressPanel snapshot={snapshot} />);
@@ -112,6 +174,7 @@ describe("TodoProgressPanel", () => {
     expect(screen.getByText("Derived from task lifecycle events")).toBeInTheDocument();
     expect(screen.getByText("Inspect code")).toBeInTheDocument();
     expect(screen.getByText("Implement tracker")).toBeInTheDocument();
+    expect(screen.getByText("Review the final diff")).toBeInTheDocument();
     expect(screen.getAllByText("reviewer").length).toBeGreaterThan(0);
     expect(screen.getByText("4 / 7 complete")).toBeInTheDocument();
   });

@@ -153,10 +153,9 @@ function createOpenApiSpec() {
           required: false,
           schema: {
             type: "string",
-            enum: ["active", "waiting", "completed", "error", "abandoned"],
+            enum: ["active", "completed", "error", "abandoned"],
           },
-          description:
-            "Filter by session status. `waiting` selects active sessions whose awaiting_input_since overlay is set.",
+          description: "Filter by persisted session status",
         },
         AgentStatusQuery: {
           name: "status",
@@ -292,6 +291,7 @@ function createOpenApiSpec() {
             overflowCount: { type: "integer", minimum: 0 },
             ownerBreakdown: {
               type: "array",
+              maxItems: 200,
               items: { $ref: "#/components/schemas/SessionTodoOwnerSummary" },
             },
           },
@@ -323,6 +323,7 @@ function createOpenApiSpec() {
             confidence: { type: "string", enum: ["full", "partial"] },
             items: {
               type: "array",
+              maxItems: 200,
               items: { $ref: "#/components/schemas/SessionTodoItem" },
             },
             total: { type: "integer" },
@@ -336,6 +337,7 @@ function createOpenApiSpec() {
             includesSubagents: { type: "boolean" },
             ownerBreakdown: {
               type: "array",
+              maxItems: 200,
               items: { $ref: "#/components/schemas/SessionTodoOwnerSummary" },
             },
           },

@@ -30,7 +30,7 @@ export function TodoProgressPanel({ snapshot }: { snapshot: SessionTodoSnapshot 
       <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-3">
         <h3 className="text-sm font-semibold text-gray-200">{t("taskProgress.title")}</h3>
         <span className="rounded border border-blue-500/20 bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-medium text-blue-300">
-          {taskSourceLabel(snapshot.sourceTool)}
+          {taskSourceLabel(snapshot.sourceTool, t("taskProgress.title"))}
         </span>
         {snapshot.includesSubagents && (
           <span className="rounded border border-violet-500/20 bg-violet-500/10 px-1.5 py-0.5 text-[10px] font-medium text-violet-300">

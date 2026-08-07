@@ -1,6 +1,7 @@
 # Version Checklist
 
 - [ ] Classify the release as patch, minor, or major with one concrete reason.
+- [ ] Preserve an explicit user-specified version and record it as an override.
 - [ ] Root package and lockfile agree.
 - [ ] Desktop package and lockfile agree.
 - [ ] OpenAPI version/example and generated YAML agree.

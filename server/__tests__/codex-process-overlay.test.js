@@ -117,6 +117,7 @@ describe("Codex process overlay lifecycle", () => {
     assert.equal(change.removed.length, 0);
     assert.match(change.added[0].id, /^codex-process:4312:/);
     assert.equal(change.added[0].awaiting_reason, "session_start");
+    assert.equal(JSON.parse(change.added[0].metadata).transient_process, true);
 
     const ordinarySessions = await requestJson("/api/sessions?status=active&providers=codex");
     assert.equal(
@@ -125,10 +126,14 @@ describe("Codex process overlay lifecycle", () => {
       "ordinary paginated API callers keep their durable-only contract"
     );
     const sessions = await requestJson(
-      "/api/sessions?status=active&providers=codex&include_transient=1"
+      "/api/sessions?status=active&providers=codex&include_transient=1&include_task_progress=1"
     );
     assert.equal(sessions.status, 200);
-    assert.ok(sessions.body.sessions.some((session) => session.id === change.added[0].id));
+    const transientSession = sessions.body.sessions.find(
+      (session) => session.id === change.added[0].id
+    );
+    assert.ok(transientSession);
+    assert.equal(transientSession.todo_summary, null);
 
     const agents = await requestJson(
       "/api/agents?status=waiting&providers=codex&include_transient=1"

@@ -30,6 +30,7 @@ const {
 } = require("../lib/claude-home");
 
 const router = Router();
+const MAX_TASK_PROGRESS_ROWS = 100;
 
 // A session's mutable `updated_at` also changes for metadata repair, title
 // discovery, and other bookkeeping. The UI's "Last active" label must instead
@@ -97,13 +98,7 @@ function sessionIsInScope(session, req) {
 }
 
 function taskEventsForSession(sessionId) {
-  return db
-    .prepare(
-      `SELECT * FROM events
-       WHERE session_id = ? AND event_type IN ('TaskCreated', 'TaskCompleted')
-       ORDER BY created_at ASC, id ASC`
-    )
-    .all(sessionId);
+  return stmts.listTaskEventsBySession.all(sessionId);
 }
 
 function taskProgressForSession(session, agents, events) {
@@ -120,7 +115,8 @@ function taskProgressForSession(session, agents, events) {
 }
 
 function attachTaskSummaries(sessions) {
-  for (const session of sessions) {
+  for (const [index, session] of sessions.entries()) {
+    if (index >= MAX_TASK_PROGRESS_ROWS) continue;
     if (
       session.metadata &&
       (() => {
@@ -265,9 +261,7 @@ router.get("/", (req, res) => {
     where.push("(s.id LIKE ? OR s.name LIKE ? OR s.cwd LIKE ?)");
     params.push(like, like, like);
   }
-  if (status === "waiting") {
-    where.push("s.status = 'active' AND s.awaiting_input_since IS NOT NULL");
-  } else if (status) {
+  if (status) {
     where.push("s.status = ?");
     params.push(status);
   }

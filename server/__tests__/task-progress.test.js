@@ -136,7 +136,7 @@ describe("task progress extraction", () => {
     assert.equal(result.snapshot.sourceTool, "TodoWrite");
   });
 
-  it("reduces current Claude TaskCreate, TaskUpdate, and TaskList calls", () => {
+  it("reduces current Claude TaskCreate, TaskGet, TaskUpdate, and TaskList calls", () => {
     const root = tempRoot();
     const transcript = path.join(root, "claude-current.jsonl");
     writeJsonl(transcript, [
@@ -153,6 +153,12 @@ describe("task progress extraction", () => {
       }),
       claudeToolResult("2026-08-07T10:01:01.000Z", "update-1", {
         task: { id: "task-1", subject: "Inspect code", status: "in_progress" },
+      }),
+      claudeToolUse("2026-08-07T10:01:30.000Z", "get-1", "TaskGet", {
+        task_id: "task-1",
+      }),
+      claudeToolResult("2026-08-07T10:01:31.000Z", "get-1", {
+        task: { id: "task-1", subject: "Inspect code", status: "completed" },
       }),
       claudeToolUse("2026-08-07T10:02:00.000Z", "list-1", "TaskList", {}),
       claudeToolResult("2026-08-07T10:02:01.000Z", "list-1", {
@@ -174,6 +180,156 @@ describe("task progress extraction", () => {
     assert.equal(result.snapshot.completed, 1);
     assert.equal(result.snapshot.activeText, "Implement tracker");
     assert.equal(result.snapshot.confidence, "full");
+  });
+
+  it("deduplicates repeated task ids in a full snapshot", () => {
+    const root = tempRoot();
+    const transcript = path.join(root, "duplicate-ids.jsonl");
+    writeJsonl(transcript, [
+      claudeToolUse("2026-08-07T10:00:00.000Z", "todo-1", "TodoWrite", {
+        todos: [
+          { id: "task-1", content: "Inspect code", status: "pending" },
+          { id: "task-1", content: "Inspect code", status: "completed" },
+        ],
+      }),
+    ]);
+
+    const result = extractSessionTaskProgress({
+      session: { id: "duplicate-ids", provider: "claude" },
+      mainTranscriptPath: transcript,
+    });
+
+    assert.equal(result.snapshot.total, 1);
+    assert.equal(result.snapshot.completed, 0);
+    assert.equal(result.snapshot.pending, 1);
+    assert.deepEqual(
+      result.snapshot.items.map((item) => item.id),
+      ["task-1"]
+    );
+  });
+
+  it("caps aggregate task and owner arrays at the public response limit", () => {
+    const agents = [];
+    const events = [];
+    for (let index = 0; index < 205; index++) {
+      const agentId = `agent-${index}`;
+      agents.push({ id: agentId, type: "subagent", subagent_type: "worker" });
+      events.push({
+        event_type: "TaskCreated",
+        agent_id: agentId,
+        created_at: `2026-08-07T10:${String(Math.floor(index / 60)).padStart(2, "0")}:${String(
+          index % 60
+        ).padStart(2, "0")}.000Z`,
+        data: JSON.stringify({
+          task_id: `task-${index}`,
+          task_subject: `Task ${index}`,
+        }),
+      });
+    }
+
+    const result = extractSessionTaskProgress({
+      session: { id: "bounded-aggregate", provider: "claude" },
+      agents,
+      events,
+    });
+
+    assert.equal(result.snapshot.items.length, 200);
+    assert.equal(result.snapshot.ownerBreakdown.length, 200);
+    assert.equal(result.summary.ownerBreakdown.length, 200);
+  });
+
+  it("prefers a timestamped owner when another owner has no timestamp", () => {
+    const root = tempRoot();
+    const sessionId = "missing-owner-timestamp";
+    const transcript = path.join(root, `${sessionId}.jsonl`);
+    const subagentTranscript = path.join(root, sessionId, "subagents", "agent-reviewer-1.jsonl");
+    writeJsonl(transcript, [
+      claudeToolUse(undefined, "main-todo", "TodoWrite", {
+        todos: [{ content: "Main task", status: "pending" }],
+      }),
+    ]);
+    writeJsonl(subagentTranscript, [
+      claudeToolUse("2026-08-07T10:01:00.000Z", "sub-todo", "TodoWrite", {
+        todos: [{ content: "Review task", status: "in_progress" }],
+      }),
+    ]);
+    fs.writeFileSync(
+      subagentTranscript.replace(".jsonl", ".meta.json"),
+      JSON.stringify({ agentType: "reviewer" })
+    );
+
+    const result = extractSessionTaskProgress({
+      session: { id: sessionId, provider: "claude" },
+      mainTranscriptPath: transcript,
+      agents: [
+        { id: `${sessionId}-main`, type: "main" },
+        { id: "reviewer-db-id", type: "subagent", subagent_type: "reviewer" },
+      ],
+    });
+
+    assert.equal(result.snapshot.sourceTool, "TodoWrite");
+    assert.equal(result.snapshot.updatedAt, "2026-08-07T10:01:00.000Z");
+    assert.equal(result.snapshot.activeText, "Review task");
+  });
+
+  it("bounds large transcript reads to the tail and stops after the first timestamp", () => {
+    const root = tempRoot();
+    const sessionId = "bounded-tail";
+    const transcript = path.join(root, `${sessionId}.jsonl`);
+    const subagentTranscript = path.join(root, sessionId, "subagents", "agent-reviewer-1.jsonl");
+    const largeBytes = 40 * 1024 * 1024;
+    fs.mkdirSync(path.dirname(subagentTranscript), { recursive: true });
+    fs.writeFileSync(
+      transcript,
+      `${JSON.stringify({ type: "system", timestamp: "2026-08-07T09:00:00.000Z" })}\n`
+    );
+    const descriptor = fs.openSync(subagentTranscript, "w");
+    try {
+      fs.writeSync(
+        descriptor,
+        `${JSON.stringify({ type: "system", timestamp: "2026-08-07T10:00:00.000Z" })}\n`
+      );
+      fs.ftruncateSync(descriptor, largeBytes);
+      fs.writeSync(descriptor, "\n", largeBytes, "utf8");
+      fs.writeSync(
+        descriptor,
+        `${JSON.stringify(
+          claudeToolUse("2026-08-07T10:05:00.000Z", "tail-todo", "TodoWrite", {
+            todos: [{ content: "Tail task", status: "completed" }],
+          })
+        )}\n`,
+        largeBytes + 1,
+        "utf8"
+      );
+    } finally {
+      fs.closeSync(descriptor);
+    }
+
+    const originalReadSync = fs.readSync;
+    let bytesRead = 0;
+    fs.readSync = function countedReadSync(...args) {
+      const count = originalReadSync.apply(this, args);
+      bytesRead += count;
+      return count;
+    };
+    let result;
+    try {
+      result = extractSessionTaskProgress({
+        session: { id: sessionId, provider: "claude" },
+        mainTranscriptPath: transcript,
+        agents: [
+          { id: `${sessionId}-main`, type: "main" },
+          { id: "reviewer-db-id", type: "subagent", subagent_type: "reviewer" },
+        ],
+      });
+    } finally {
+      fs.readSync = originalReadSync;
+    }
+
+    assert.equal(result.snapshot.total, 1);
+    assert.equal(result.snapshot.completed, 1);
+    assert.equal(result.snapshot.items[0].text, "Tail task");
+    assert.ok(bytesRead < largeBytes, `expected fewer than ${largeBytes} bytes, read ${bytesRead}`);
   });
 
   it("labels mutation-only Claude task state as partial", () => {

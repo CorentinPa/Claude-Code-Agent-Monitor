@@ -206,6 +206,7 @@ function overlaySessionId(processInfo) {
 function buildSession(processInfo, startedAt) {
   const metadata = JSON.stringify({
     transient: true,
+    transient_process: true,
     pre_identity_process: true,
     process_pid: processInfo.pid,
   });

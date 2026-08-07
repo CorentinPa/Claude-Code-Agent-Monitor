@@ -526,11 +526,17 @@ export function SessionDetail() {
       if (msg.type === "new_event") {
         const event = msg.data as DashboardEvent;
         if (
-          event.event_type === "TaskCreated" ||
-          event.event_type === "TaskCompleted" ||
-          ["TaskCreate", "TaskUpdate", "TaskList", "TodoWrite", "update_plan"].includes(
-            event.tool_name || ""
-          )
+          event.session_id === id &&
+          (event.event_type === "TaskCreated" ||
+            event.event_type === "TaskCompleted" ||
+            [
+              "TaskCreate",
+              "TaskGet",
+              "TaskUpdate",
+              "TaskList",
+              "TodoWrite",
+              "update_plan",
+            ].includes(event.tool_name || ""))
         ) {
           load();
         }

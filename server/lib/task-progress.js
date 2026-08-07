@@ -12,6 +12,7 @@ const MAX_CACHE_ENTRIES = 200;
 const MAX_ITEMS = 200;
 const MAX_TEXT = 500;
 const MAX_LINE_BYTES = 16 * 1024 * 1024;
+const MAX_SCAN_BYTES = 32 * 1024 * 1024;
 const READ_CHUNK_BYTES = 1024 * 1024;
 const cache = new Map();
 
@@ -266,15 +267,20 @@ function observationsFromEntry(entry, line, owner) {
   return observations;
 }
 
-function parseFileLines(filePath, onLine) {
+function parseFileLines(filePath, onLine, { maxBytes = MAX_SCAN_BYTES, tail = false } = {}) {
   const descriptor = fs.openSync(filePath, "r");
   const buffer = Buffer.allocUnsafe(READ_CHUNK_BYTES);
   let pending = Buffer.alloc(0);
-  let position = 0;
+  const fileSize = fs.fstatSync(descriptor).size;
+  const boundedBytes = Math.max(0, Math.min(fileSize, maxBytes));
+  let position = tail ? fileSize - boundedBytes : 0;
+  const endPosition = tail ? fileSize : boundedBytes;
+  let skipPartialLine = position > 0;
   let lineNumber = 0;
   try {
-    while (true) {
-      const bytesRead = fs.readSync(descriptor, buffer, 0, buffer.length, position);
+    while (position < endPosition) {
+      const bytesToRead = Math.min(buffer.length, endPosition - position);
+      const bytesRead = fs.readSync(descriptor, buffer, 0, bytesToRead, position);
       if (bytesRead <= 0) break;
       position += bytesRead;
       let chunk = buffer.subarray(0, bytesRead);
@@ -282,15 +288,24 @@ function parseFileLines(filePath, onLine) {
       let start = 0;
       for (let index = 0; index < chunk.length; index++) {
         if (chunk[index] !== 0x0a) continue;
+        if (skipPartialLine) {
+          skipPartialLine = false;
+          start = index + 1;
+          continue;
+        }
         lineNumber++;
-        onLine(chunk.toString("utf8", start, index).replace(/\r$/, ""), lineNumber);
+        const keepGoing = onLine(
+          chunk.toString("utf8", start, index).replace(/\r$/, ""),
+          lineNumber
+        );
         start = index + 1;
+        if (keepGoing === false) return;
       }
       pending = chunk.subarray(start);
       if (pending.length > MAX_LINE_BYTES) pending = Buffer.alloc(0);
       else pending = Buffer.from(pending);
     }
-    if (pending.length) {
+    if (pending.length && !skipPartialLine) {
       lineNumber++;
       onLine(pending.toString("utf8").replace(/\r$/, ""), lineNumber);
     }
@@ -324,44 +339,48 @@ function parseTranscript(filePath, owner) {
   const observations = [];
   const pendingCalls = new Map();
   try {
-    parseFileLines(filePath, (line, lineNumber) => {
-      if (!line) return;
-      let entry;
-      try {
-        entry = JSON.parse(line);
-      } catch {
-        return;
-      }
-      const direct = observationsFromEntry(entry, lineNumber, owner);
-      for (const observation of direct) {
-        if (observation.kind === "result") {
-          const call = pendingCalls.get(observation.task.callId);
-          if (!call) continue;
-          const enriched = toolObservation(call.tool, call.input, observation.task.output, {
-            timestamp: observation.timestamp || call.timestamp,
-            line: observation.line,
-            ownerId: owner.id,
-            ownerType: owner.type,
-          });
-          if (enriched) observations.push(enriched);
-          pendingCalls.delete(observation.task.callId);
-          continue;
+    parseFileLines(
+      filePath,
+      (line, lineNumber) => {
+        if (!line) return;
+        let entry;
+        try {
+          entry = JSON.parse(line);
+        } catch {
+          return;
         }
-        observations.push(observation);
-      }
+        const direct = observationsFromEntry(entry, lineNumber, owner);
+        for (const observation of direct) {
+          if (observation.kind === "result") {
+            const call = pendingCalls.get(observation.task.callId);
+            if (!call) continue;
+            const enriched = toolObservation(call.tool, call.input, observation.task.output, {
+              timestamp: observation.timestamp || call.timestamp,
+              line: observation.line,
+              ownerId: owner.id,
+              ownerType: owner.type,
+            });
+            if (enriched) observations.push(enriched);
+            pendingCalls.delete(observation.task.callId);
+            continue;
+          }
+          observations.push(observation);
+        }
 
-      const blocks = entry?.message?.content;
-      if (!Array.isArray(blocks)) return;
-      for (const block of blocks) {
-        if (block?.type === "tool_use" && block.id) {
-          pendingCalls.set(block.id, {
-            tool: block.name,
-            input: block.input,
-            timestamp: entry.timestamp || null,
-          });
+        const blocks = entry?.message?.content;
+        if (!Array.isArray(blocks)) return;
+        for (const block of blocks) {
+          if (block?.type === "tool_use" && block.id) {
+            pendingCalls.set(block.id, {
+              tool: block.name,
+              input: block.input,
+              timestamp: entry.timestamp || null,
+            });
+          }
         }
-      }
-    });
+      },
+      { tail: true }
+    );
   } catch {
     return [];
   }
@@ -399,12 +418,13 @@ function transcriptTimestamp(filePath) {
   let timestamp = null;
   try {
     parseFileLines(filePath, (line) => {
-      if (timestamp || !line) return;
+      if (!line) return;
       try {
         timestamp = JSON.parse(line).timestamp || null;
       } catch {
         /* ignore */
       }
+      if (timestamp) return false;
     });
   } catch {
     return null;
@@ -518,8 +538,9 @@ function applyObservation(ownerStates, observation) {
     state.items.clear();
     state.order = [];
     for (const item of normalizeItems(observation.items, observation)) {
-      state.items.set(item.id, item);
+      if (state.items.has(item.id)) continue;
       state.order.push(item.id);
+      state.items.set(item.id, item);
     }
     return;
   }
@@ -597,19 +618,25 @@ function buildSnapshot(provider, observations) {
     const ownerItems = state.order.map((id) => state.items.get(id)).filter(Boolean);
     if (!ownerItems.length) continue;
     const counts = countItems(ownerItems);
-    ownerBreakdown.push({
-      agentId: state.ownerId,
-      agentType: state.ownerType,
-      completed: counts.completed,
-      total: counts.total,
-    });
-    items.push(...ownerItems);
+    if (ownerBreakdown.length < MAX_ITEMS) {
+      ownerBreakdown.push({
+        agentId: state.ownerId,
+        agentType: state.ownerType,
+        completed: counts.completed,
+        total: counts.total,
+      });
+    }
+    if (items.length < MAX_ITEMS) items.push(...ownerItems.slice(0, MAX_ITEMS - items.length));
   }
   if (!items.length) return null;
   const counts = countItems(items);
+  const stateTime = (state) => {
+    const parsed = Date.parse(state.updatedAt || "");
+    return Number.isFinite(parsed) ? parsed : Number.MIN_SAFE_INTEGER;
+  };
   const latest = [...ownerStates.values()]
     .filter((state) => state.items.size > 0)
-    .sort((left, right) => Date.parse(right.updatedAt || "") - Date.parse(left.updatedAt || ""))[0];
+    .sort((left, right) => stateTime(right) - stateTime(left))[0];
   return {
     provider: provider === "codex" ? "codex" : "claude",
     source: observations.some((observation) => observation.line == null) ? "mixed" : "transcript",
@@ -620,7 +647,7 @@ function buildSnapshot(provider, observations) {
     confidence: [...ownerStates.values()].some((state) => state.confidence === "partial")
       ? "partial"
       : "full",
-    items: items.slice(0, MAX_ITEMS),
+    items,
     ...counts,
     activeText: items.find((item) => item.status === "in_progress")?.text || null,
     includesSubagents: ownerBreakdown.some((owner) => owner.agentType !== "main"),

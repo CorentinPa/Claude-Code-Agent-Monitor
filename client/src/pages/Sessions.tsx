@@ -87,7 +87,11 @@ import { TableRowSkeleton } from "../components/Skeleton";
 import { MultiSelect } from "../components/MultiSelect";
 import { Select } from "../components/Select";
 import { formatDateTime, formatDuration, truncate, fmtCost } from "../lib/format";
-import { effectiveSessionStatus, sessionAwaitingReason } from "../lib/types";
+import {
+  effectiveSessionStatus,
+  isSessionAwaitingInput,
+  sessionAwaitingReason,
+} from "../lib/types";
 import type { Session, DashboardEvent } from "../lib/types";
 
 const PAGE_SIZE = 10;
@@ -167,6 +171,24 @@ export function Sessions() {
   // exist in the database.
   const load = useCallback(async () => {
     try {
+      // Waiting is a presentation state over active sessions, so preserve the
+      // existing client-side filter without expanding the server status enum.
+      if (filter === "waiting") {
+        const res = await api.sessions.list({
+          status: "active",
+          q: search || undefined,
+          cwd: cwds.length > 0 ? cwds : undefined,
+          sort_by: sortBy,
+          sort_desc: sortDesc,
+          include_task_progress: true,
+          limit: 10000,
+          offset: 0,
+        });
+        const waiting = res.sessions.filter(isSessionAwaitingInput);
+        setTotal(waiting.length);
+        setSessions(waiting.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE));
+        return;
+      }
       const params: {
         status?: string;
         q?: string;
@@ -217,7 +239,7 @@ export function Sessions() {
           ev.event_type === "SessionEnd" ||
           ev.event_type === "TaskCreated" ||
           ev.event_type === "TaskCompleted" ||
-          ["TaskCreate", "TaskUpdate", "TaskList", "TodoWrite", "update_plan"].includes(
+          ["TaskCreate", "TaskGet", "TaskUpdate", "TaskList", "TodoWrite", "update_plan"].includes(
             ev.tool_name || ""
           )
         ) {

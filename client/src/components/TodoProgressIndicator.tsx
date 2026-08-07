@@ -4,7 +4,7 @@
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, Circle, CircleDashed, Info, LoaderCircle, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -26,6 +26,7 @@ interface TodoProgressIndicatorProps {
 
 export function TodoProgressIndicator({ progress }: TodoProgressIndicatorProps) {
   const { t } = useTranslation("sessions");
+  const tooltipId = useId();
   const anchorRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState({ left: 0, top: 0 });
@@ -62,6 +63,7 @@ export function TodoProgressIndicator({ progress }: TodoProgressIndicatorProps) 
           completed: progress.completed,
           total: progress.total,
         })}
+        aria-describedby={open ? tooltipId : undefined}
         onMouseEnter={show}
         onMouseLeave={() => setOpen(false)}
         onFocus={show}
@@ -78,6 +80,7 @@ export function TodoProgressIndicator({ progress }: TodoProgressIndicatorProps) 
       {open &&
         createPortal(
           <div
+            id={tooltipId}
             role="tooltip"
             className="fixed z-[99999] w-[340px] max-w-[calc(100vw-24px)] rounded-lg border border-[#2a2a4a] bg-[#12121f] p-3 text-left shadow-2xl"
             style={{ left: position.left, top: position.top }}
@@ -117,7 +120,7 @@ export function TodoProgressIndicator({ progress }: TodoProgressIndicatorProps) 
             )}
 
             <div className="mt-3 flex items-center justify-between border-t border-[#2a2a4a] pt-2 text-[10px] text-gray-500">
-              <span>{taskSourceLabel(progress.sourceTool)}</span>
+              <span>{taskSourceLabel(progress.sourceTool, t("taskProgress.title"))}</span>
               {progress.updatedAt && <span>{timeAgo(progress.updatedAt)}</span>}
             </div>
           </div>,

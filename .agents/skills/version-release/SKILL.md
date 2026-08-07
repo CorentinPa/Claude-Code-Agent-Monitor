@@ -12,6 +12,7 @@ Apply Semantic Versioning across CCAM:
 - **Major** (`X+1.0.0`): breaking public behavior, removed or renamed contracts, required migrations, or fundamental product/architecture changes.
 
 Choose the highest applicable category. If the boundary is ambiguous, prefer the higher bump or ask before release. Do not classify from diff size or commit count alone.
+An explicit user-requested version takes precedence over automatic classification. Record the override, synchronize that exact version, and do not silently substitute a different patch, minor, or major number.
 
 ## Workflow
 

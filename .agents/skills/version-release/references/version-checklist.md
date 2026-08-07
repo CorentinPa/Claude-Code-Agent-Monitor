@@ -1,6 +1,7 @@
 # Version Checklist
 
 - [ ] State why the change is patch, minor, or major.
+- [ ] Any explicit user-specified version was preserved and recorded as an override.
 - [ ] Root and desktop package/lockfile versions agree.
 - [ ] OpenAPI source/example and generated YAML agree.
 - [ ] Version-sensitive snapshots agree.
