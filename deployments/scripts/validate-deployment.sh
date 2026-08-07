@@ -14,6 +14,70 @@ readonly KUSTOMIZE_DIR="${PROJECT_ROOT}/deployments/kubernetes"
 log() { printf '[deployment-check] %s\n' "$*"; }
 fatal() { printf '[deployment-check] ERROR: %s\n' "$*" >&2; exit 1; }
 
+audit_production_dependencies() {
+  local label="$1"
+  shift
+  local attempt=1
+  local max_attempts=3
+  local retry_base_seconds="${CCAM_AUDIT_RETRY_BASE_SECONDS:-2}"
+  local output errors status vulnerabilities stdout_file stderr_file
+
+  if [[ ! "$retry_base_seconds" =~ ^[0-9]+$ ]]; then
+    retry_base_seconds=2
+  fi
+
+  while (( attempt <= max_attempts )); do
+    stdout_file="$(mktemp)"
+    stderr_file="$(mktemp)"
+    "$@" audit --omit=dev --json >"$stdout_file" 2>"$stderr_file" && status=0 || status=$?
+    output="$(cat "$stdout_file")"
+    errors="$(cat "$stderr_file")"
+    rm -f "$stdout_file" "$stderr_file"
+    if ! vulnerabilities="$(
+      printf '%s' "$output" | node -e '
+        let body = "";
+        process.stdin.setEncoding("utf8");
+        process.stdin.on("data", (chunk) => (body += chunk));
+        process.stdin.on("end", () => {
+          try {
+            const parsed = JSON.parse(body);
+            const count = Number(parsed?.metadata?.vulnerabilities?.total);
+            if (!Number.isFinite(count)) process.exit(2);
+            process.stdout.write(String(count));
+          } catch {
+            process.exit(2);
+          }
+        });
+      '
+    )"; then
+      if (( attempt < max_attempts )); then
+        log "${label} audit transport failure (attempt ${attempt}/${max_attempts}); retrying"
+        [[ -n "$errors" ]] && printf '%s\n' "$errors" >&2
+        [[ -n "$output" ]] && printf '%s\n' "$output" >&2
+        sleep $(( attempt * retry_base_seconds ))
+        ((attempt += 1))
+        continue
+      fi
+      [[ -n "$errors" ]] && printf '%s\n' "$errors" >&2
+      [[ -n "$output" ]] && printf '%s\n' "$output" >&2
+      fatal "${label} audit could not retrieve a valid registry report after ${max_attempts} attempts"
+    fi
+
+    if (( vulnerabilities > 0 )); then
+      [[ -n "$errors" ]] && printf '%s\n' "$errors" >&2
+      printf '%s\n' "$output" >&2
+      fatal "${label} production dependency audit found ${vulnerabilities} vulnerability record(s)"
+    fi
+    if (( status != 0 )); then
+      [[ -n "$errors" ]] && printf '%s\n' "$errors" >&2
+      printf '%s\n' "$output" >&2
+      fatal "${label} production dependency audit exited ${status} despite reporting zero vulnerabilities"
+    fi
+    log "${label} production dependency audit passed"
+    return
+  done
+}
+
 need() {
   command -v "$1" >/dev/null 2>&1 || fatal "missing required command: $1"
 }
@@ -134,8 +198,8 @@ YAML
 
 validate_repo() {
   log "Production dependency audits"
-  (cd "${PROJECT_ROOT}" && npm audit --omit=dev >/dev/null)
-  (cd "${PROJECT_ROOT}" && npm --prefix mcp audit --omit=dev >/dev/null)
+  (cd "${PROJECT_ROOT}" && audit_production_dependencies "root" npm)
+  (cd "${PROJECT_ROOT}" && audit_production_dependencies "MCP" npm --prefix mcp)
   log "Authorship headers"
   bash "${PROJECT_ROOT}/.claude/skills/file-headers/scripts/check-headers.sh" >/dev/null
 }
@@ -176,4 +240,6 @@ main() {
   log "all deployment checks passed"
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

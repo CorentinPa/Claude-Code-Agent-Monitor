@@ -45,6 +45,8 @@ npm run deploy:validate
 
 It checks Dockerfiles, Compose profiles, Nginx syntax, Helm lint and schema rejection, every Kustomize overlay and optional component, Terraform formatting/provider validation, production dependency audits, file headers, and the one-writer invariant.
 
+The dependency audit retries malformed registry or transport responses up to three times with bounded backoff. A valid report containing any vulnerability fails immediately and prints the complete audit payload; malformed reports never pass as clean.
+
 ## Secrets
 
 Production deployments use three independent tokens:
