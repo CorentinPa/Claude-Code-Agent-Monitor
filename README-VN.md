@@ -1749,6 +1749,38 @@ claude plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
 codex plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
 ```
 
+### Cài đặt skill bằng skills.sh
+
+```bash
+# Liệt kê toàn bộ 74 skill mà không cài đặt
+npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
+
+# Cài một skill cho Claude Code và Codex trong dự án hiện tại
+npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+  --skill mcp-server \
+  --agent claude-code \
+  --agent codex \
+  --yes
+
+# Xác minh, cập nhật và gỡ skill ở phạm vi dự án
+npx skills list --json
+npx skills update --project --yes
+npx skills remove mcp-server --yes
+
+# Thêm --global để cài ở phạm vi người dùng, rồi quản lý phạm vi đó
+npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+  --skill mcp-server \
+  --agent claude-code \
+  --agent codex \
+  --global \
+  --yes
+npx skills list --global --json
+npx skills update --global --yes
+npx skills remove --global mcp-server --yes
+```
+
+Bản cài theo dự án sử dụng `.agents/skills/` cùng các liên kết dành riêng cho từng agent. Bản cài toàn cục sử dụng các thư mục tương ứng trong thư mục home của người dùng. CLI skills.sh phát hiện 74 skill trong repo, gồm 66 skill plugin và các skill bảo trì repo.
+
 ### Các plugin có sẵn
 
 | Trình cắm | Lệnh cài đặt | Kỹ năng |

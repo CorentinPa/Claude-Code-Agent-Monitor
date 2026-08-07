@@ -1764,13 +1764,46 @@ erDiagram
 
 ## 插件市场
 
-通过官方 Agent Monitor 插件扩展 Claude Code — 分析、生产力工具、开发者工具、AI 洞察和 Dashboard 连接。
+CCAM 为 Claude Code 和 Codex 提供 14 个共享插件、66 个插件技能、18 个 Claude 子 Agent、34 个 Claude 命令、3 个 CLI 工具、3 个 Hook 配置和 2 个支持 MCP 的插件。skills.sh CLI 可发现 74 个仓库技能。
 
 ### 添加市场
 
 ```bash
 claude plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
+codex plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
 ```
+
+### 使用 skills.sh 安装技能
+
+```bash
+# 查看全部 74 个技能，不执行安装
+npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
+
+# 在当前项目中为 Claude Code 和 Codex 安装一个技能
+npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+  --skill mcp-server \
+  --agent claude-code \
+  --agent codex \
+  --yes
+
+# 验证、更新和移除项目级技能
+npx skills list --json
+npx skills update --project --yes
+npx skills remove mcp-server --yes
+
+# 添加 --global 以执行用户级安装，并显式管理全局范围
+npx skills add hoangsonww/Claude-Code-Agent-Monitor \
+  --skill mcp-server \
+  --agent claude-code \
+  --agent codex \
+  --global \
+  --yes
+npx skills list --global --json
+npx skills update --global --yes
+npx skills remove --global mcp-server --yes
+```
+
+项目级安装使用 `.agents/skills/` 及各 Agent 的链接。全局安装使用用户主目录中的对应目录。skills.sh CLI 可发现 74 个仓库技能，其中包括 66 个插件技能和仓库维护技能。
 
 ### 可用插件
 
