@@ -1855,7 +1855,7 @@ npx skills update --global --yes
 npx skills remove --global mcp-server --yes
 ```
 
-Las instalaciones de proyecto usan `.agents/skills/` y enlaces específicos de cada agente. Las instalaciones globales usan los directorios correspondientes dentro del directorio personal del usuario. La CLI de skills.sh descubre 74 habilidades del repositorio, incluidas 66 habilidades de plugins y las habilidades de mantenimiento del repositorio.
+Las instalaciones de proyecto usan `.agents/skills/` y enlaces específicos de cada agente. Las habilidades globales de Claude Code se instalan de forma predeterminada en `~/.claude/skills/`, o en el subdirectorio `skills/` de `CLAUDE_CONFIG_DIR` cuando se define. Las habilidades globales de Codex se instalan de forma predeterminada en `~/.codex/skills/`, o en el subdirectorio `skills/` de `CODEX_HOME` cuando se define. Las instalaciones para varios agentes pueden deduplicar archivos en un almacén compartido y enlazar esos destinos. La CLI de skills.sh descubre 74 habilidades del repositorio, incluidas 66 habilidades de plugins y las habilidades de mantenimiento del repositorio.
 
 ### Plugins disponibles
 

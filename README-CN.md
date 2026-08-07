@@ -1803,7 +1803,7 @@ npx skills update --global --yes
 npx skills remove --global mcp-server --yes
 ```
 
-项目级安装使用 `.agents/skills/` 及各 Agent 的链接。全局安装使用用户主目录中的对应目录。skills.sh CLI 可发现 74 个仓库技能，其中包括 66 个插件技能和仓库维护技能。
+项目级安装使用 `.agents/skills/` 及各 Agent 的链接。Claude Code 全局技能默认位于 `~/.claude/skills/`，设置 `CLAUDE_CONFIG_DIR` 后位于其 `skills/` 子目录。Codex 全局技能默认位于 `~/.codex/skills/`，设置 `CODEX_HOME` 后位于其 `skills/` 子目录。多 Agent 安装可能通过共享存储去重，并链接到这些目标目录。skills.sh CLI 可发现 74 个仓库技能，其中包括 66 个插件技能和仓库维护技能。
 
 ### 可用插件
 

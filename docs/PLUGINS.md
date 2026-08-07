@@ -73,7 +73,7 @@ npx skills remove mcp-server --yes
 npx skills remove --global mcp-server --yes
 ```
 
-Project installs use the current repository's `.agents/skills/` directory and create agent-specific links such as `.claude/skills/mcp-server`. Global installs use the corresponding directories under the user's home directory. The CLI records source and hash metadata in `skills-lock.json` for project installs and `~/.agents/.skill-lock.json` for global installs so later `skills update` runs can check the original GitHub source.
+Project installs use the current repository's `.agents/skills/` directory and create agent-specific links such as `.claude/skills/mcp-server`. By default, global Claude Code skills resolve under `~/.claude/skills/` and global Codex skills under `~/.codex/skills/`; `CLAUDE_CONFIG_DIR` and `CODEX_HOME` replace those respective base directories. Multi-agent installs may deduplicate files through a shared store and link the agent-specific destinations. The CLI records source and hash metadata in `skills-lock.json` for project installs and a global skill lockfile so later `skills update` runs can check the original GitHub source.
 
 Every bundled skill carries:
 

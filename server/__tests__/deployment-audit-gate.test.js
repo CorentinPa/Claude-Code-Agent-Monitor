@@ -15,10 +15,12 @@ const { spawnSync } = require("node:child_process");
 const ROOT = path.resolve(__dirname, "..", "..");
 const VALIDATOR = path.join(ROOT, "deployments", "scripts", "validate-deployment.sh");
 
-function runAuditScenario(fakeNpmBody) {
+function runAuditScenario(fakeNpmBody, retryBaseSeconds = "0") {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "ccam-audit-gate-"));
   const fakeNpm = path.join(tmp, "npm");
+  const fakeSleep = path.join(tmp, "sleep");
   const attempts = path.join(tmp, "attempts");
+  const delays = path.join(tmp, "delays");
   fs.writeFileSync(
     fakeNpm,
     `#!/usr/bin/env bash
@@ -32,6 +34,14 @@ ${fakeNpmBody}
 `
   );
   fs.chmodSync(fakeNpm, 0o755);
+  fs.writeFileSync(
+    fakeSleep,
+    `#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\n' "$1" >>${JSON.stringify(delays)}
+`
+  );
+  fs.chmodSync(fakeSleep, 0o755);
 
   const command = `
     source ${JSON.stringify(VALIDATOR)}
@@ -42,14 +52,17 @@ ${fakeNpmBody}
     env: {
       ...process.env,
       PATH: `${tmp}:${process.env.PATH}`,
-      CCAM_AUDIT_RETRY_BASE_SECONDS: "0",
+      CCAM_AUDIT_RETRY_BASE_SECONDS: retryBaseSeconds,
     },
     encoding: "utf8",
     timeout: 15_000,
   });
   const attemptCount = Number(fs.readFileSync(attempts, "utf8"));
+  const retryDelays = fs.existsSync(delays)
+    ? fs.readFileSync(delays, "utf8").trim().split("\n").filter(Boolean)
+    : [];
   fs.rmSync(tmp, { recursive: true, force: true });
-  return { ...result, attemptCount };
+  return { ...result, attemptCount, retryDelays };
 }
 
 describe("deployment production dependency audit gate", () => {
@@ -92,6 +105,25 @@ exit 0
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.attemptCount, 3);
     assert.match(result.stdout, /transport failure .* retrying/);
+  });
+
+  it("treats a zero-padded retry base as decimal", () => {
+    const result = runAuditScenario(
+      `
+if [[ "$count" -eq 1 ]]; then
+  echo "registry connection reset" >&2
+  exit 1
+fi
+cat <<'JSON'
+{"metadata":{"vulnerabilities":{"total":0}}}
+JSON
+exit 0
+`,
+      "08"
+    );
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.attemptCount, 2);
+    assert.deepEqual(result.retryDelays, ["8"]);
   });
 
   it("fails immediately when the registry returns a real vulnerability report", () => {

@@ -1779,7 +1779,7 @@ npx skills update --global --yes
 npx skills remove --global mcp-server --yes
 ```
 
-Bản cài theo dự án sử dụng `.agents/skills/` cùng các liên kết dành riêng cho từng agent. Bản cài toàn cục sử dụng các thư mục tương ứng trong thư mục home của người dùng. CLI skills.sh phát hiện 74 skill trong repo, gồm 66 skill plugin và các skill bảo trì repo.
+Bản cài theo dự án sử dụng `.agents/skills/` cùng các liên kết dành riêng cho từng agent. Skill Claude Code toàn cục mặc định nằm trong `~/.claude/skills/`, hoặc trong thư mục `skills/` của `CLAUDE_CONFIG_DIR` khi biến này được đặt. Skill Codex toàn cục mặc định nằm trong `~/.codex/skills/`, hoặc trong thư mục `skills/` của `CODEX_HOME` khi biến này được đặt. Bản cài nhiều agent có thể khử trùng lặp qua một kho dùng chung rồi tạo liên kết đến các thư mục đích đó. CLI skills.sh phát hiện 74 skill trong repo, gồm 66 skill plugin và các skill bảo trì repo.
 
 ### Các plugin có sẵn
 

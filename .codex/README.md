@@ -77,8 +77,9 @@ npx skills update --global --yes
 npx skills remove --global mcp-server --yes
 ```
 
-The skills CLI discovers 74 repository skills. Project installs use
-`.agents/skills/`; global installs use `~/.agents/skills/`. Run
-`npm run extensions:sync`
+The skills CLI discovers 74 repository skills. Codex project installs use
+`.agents/skills/`; global installs use `${CODEX_HOME:-~/.codex}/skills/`.
+Multi-agent installs may deduplicate files through a shared store and create
+agent-specific links. Run `npm run extensions:sync`
 after changing a plugin skill or Claude manifest, then
 `npm run extensions:validate`.

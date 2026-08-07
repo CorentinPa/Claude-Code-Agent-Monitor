@@ -24,6 +24,8 @@ audit_production_dependencies() {
 
   if [[ ! "$retry_base_seconds" =~ ^[0-9]+$ ]]; then
     retry_base_seconds=2
+  else
+    retry_base_seconds=$((10#$retry_base_seconds))
   fi
 
   while (( attempt <= max_attempts )); do
