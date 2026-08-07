@@ -34,6 +34,29 @@
   "tableCost": "Chi phí",
   "tableDirectory": "Thư mục",
   "defaultName": "Phiên ",
+  "taskProgress": {
+    "title": "Tiến độ công việc",
+    "aria": "Tiến độ công việc: hoàn thành {{completed}} trên {{total}}",
+    "complete": "hoàn thành",
+    "completeCount": "{{completed}} / {{total}} hoàn thành · {{percent}}%",
+    "completeCountShort": "{{completed}} / {{total}} hoàn thành",
+    "current": "Đang làm: {{task}}",
+    "more": "+{{count}} công việc khác trong chi tiết phiên",
+    "includesSubagents": "Bao gồm subagent",
+    "partialSource": "Suy ra từ sự kiện vòng đời công việc",
+    "owners": "Agent phụ trách",
+    "mainAgent": "Agent chính",
+    "doneCount": "{{count}} đã xong",
+    "remainingCount": "Còn lại {{count}}",
+    "hiddenTasks": "{{count}} công việc bổ sung không được hiển thị.",
+    "status": {
+      "completed": "Đã hoàn thành",
+      "inProgress": "Đang thực hiện",
+      "pending": "Đang chờ",
+      "cancelled": "Đã hủy",
+      "unknown": "Không rõ"
+    }
+  },
   "detail": {
     "waitingBanner": {
       "title": "Đang chờ phản hồi của bạn",

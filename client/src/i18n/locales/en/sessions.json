@@ -34,6 +34,29 @@
   "tableCost": "Cost",
   "tableDirectory": "Directory",
   "defaultName": "Session ",
+  "taskProgress": {
+    "title": "Task Progress",
+    "aria": "Task progress: {{completed}} of {{total}} complete",
+    "complete": "complete",
+    "completeCount": "{{completed}} / {{total}} complete · {{percent}}%",
+    "completeCountShort": "{{completed}} / {{total}} complete",
+    "current": "Current: {{task}}",
+    "more": "+{{count}} more in Session Detail",
+    "includesSubagents": "Includes subagents",
+    "partialSource": "Derived from task lifecycle events",
+    "owners": "Owners",
+    "mainAgent": "Main agent",
+    "doneCount": "{{count}} done",
+    "remainingCount": "{{count}} remaining",
+    "hiddenTasks": "{{count}} additional tasks are not shown.",
+    "status": {
+      "completed": "Completed",
+      "inProgress": "In progress",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "unknown": "Unknown"
+    }
+  },
   "detail": {
     "waitingBanner": {
       "title": "Waiting for your input",

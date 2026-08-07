@@ -1,8 +1,9 @@
 /**
  * @file Express router for session endpoints, allowing creation, retrieval, and
  * updating of sessions with pagination plus status, search, and multi-directory
- * filtering. It computes costs, adds card-ready main-task/Codex prompt context,
- * safely exposes persisted transcript images, and broadcasts live changes.
+ * filtering. It computes costs, derives optional owner-aware task progress,
+ * adds card-ready prompt context, safely exposes transcript images, and
+ * broadcasts live changes.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -16,6 +17,7 @@ const { calculateProviderCost, attachAgentCosts } = require("./pricing");
 const { parseSources, sourceColumnClause } = require("../lib/source-filter");
 const { parseProviders, providerColumnClause } = require("../lib/provider-filter");
 const { getCodexProcessSessions } = require("../lib/codex-process-overlay");
+const { extractSessionTaskProgress } = require("../lib/task-progress");
 const {
   getClaudeHome,
   getProjectsDir,
@@ -92,6 +94,51 @@ function sessionIsInScope(session, req) {
     (!sources || sources.includes(session.source || "local")) &&
     (!providers || providers.includes(session.provider || "claude"))
   );
+}
+
+function taskEventsForSession(sessionId) {
+  return db
+    .prepare(
+      `SELECT * FROM events
+       WHERE session_id = ? AND event_type IN ('TaskCreated', 'TaskCompleted')
+       ORDER BY created_at ASC, id ASC`
+    )
+    .all(sessionId);
+}
+
+function taskProgressForSession(session, agents, events) {
+  const mainTranscriptPath =
+    session.transcript_path && fs.existsSync(session.transcript_path)
+      ? session.transcript_path
+      : resolveSessionTranscriptPath(session, session.id, null, null);
+  return extractSessionTaskProgress({
+    session,
+    agents,
+    events,
+    mainTranscriptPath,
+  });
+}
+
+function attachTaskSummaries(sessions) {
+  for (const session of sessions) {
+    if (
+      session.metadata &&
+      (() => {
+        try {
+          return JSON.parse(session.metadata)?.transient_process === true;
+        } catch {
+          return false;
+        }
+      })()
+    ) {
+      session.todo_summary = null;
+      continue;
+    }
+    const agents = stmts.listAgentsBySession.all(session.id);
+    const events = taskEventsForSession(session.id);
+    session.todo_summary = taskProgressForSession(session, agents, events).summary;
+  }
+  return sessions;
 }
 
 // JSONL entry types the transcript reader turns into renderable messages.
@@ -197,6 +244,8 @@ router.get("/", (req, res) => {
   const status = req.query.status;
   const includeTransient =
     req.query.include_transient === "1" || req.query.include_transient === "true";
+  const includeTaskProgress =
+    req.query.include_task_progress === "1" || req.query.include_task_progress === "true";
   const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
   const cwds = Array.isArray(req.query.cwd)
     ? req.query.cwd.filter((cwd) => typeof cwd === "string" && cwd)
@@ -216,7 +265,9 @@ router.get("/", (req, res) => {
     where.push("(s.id LIKE ? OR s.name LIKE ? OR s.cwd LIKE ?)");
     params.push(like, like, like);
   }
-  if (status) {
+  if (status === "waiting") {
+    where.push("s.status = 'active' AND s.awaiting_input_since IS NOT NULL");
+  } else if (status) {
     where.push("s.status = ?");
     params.push(status);
   }
@@ -387,6 +438,7 @@ router.get("/", (req, res) => {
     rows = [...transient, ...rows];
   }
 
+  if (includeTaskProgress) attachTaskSummaries(rows);
   res.json({ sessions: rows, limit, offset, total });
 });
 
@@ -426,6 +478,7 @@ router.get("/:id", (req, res) => {
   // the session-detail tree show their real cost, not the session total.
   const agents = attachAgentCosts(stmts.listAgentsBySession.all(req.params.id));
   const events = stmts.listEventsBySession.all(req.params.id);
+  session.todo_snapshot = taskProgressForSession(session, agents, events).snapshot;
   // Workflow-tool runs launched within this session (issue #167). Parse the
   // JSON-blob columns so the client gets arrays, not strings.
   const workflows = stmts.listWorkflowsBySession.all(req.params.id).map((w) => {

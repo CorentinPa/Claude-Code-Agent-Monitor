@@ -206,7 +206,12 @@ classDiagram
 GET /api/sessions/:id
 ```
 
-Returns single session details.
+Returns single session details. The `session.todo_snapshot` field contains the latest observable,
+owner-attributed task state when Claude emitted `TaskCreate` / `TaskUpdate` / `TaskList`,
+legacy `TodoWrite`, task lifecycle events, or Codex emitted `update_plan`; otherwise it is
+`null`. `GET /api/sessions?include_task_progress=true` exposes the bounded `todo_summary`
+counterpart for list rows, including at most five preview tasks. The list field is opt-in so
+Dashboard/Kanban calls that fetch many rows do not parse transcripts.
 
 **Path Parameters:**
 

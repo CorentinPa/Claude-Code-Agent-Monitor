@@ -1,8 +1,9 @@
 /**
  * @file Sessions.tsx
  * @description Displays all recorded sessions with searchable multi-project,
- * status, text, and custom sort filters plus server-side pagination. Sessions
- * are updated in real-time based on events received from the event bus.
+ * status, text, and custom sort filters plus server-side pagination. Rows can
+ * show an accessible task-progress donut beside status, updated from event bus
+ * activity.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -80,16 +81,13 @@ import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
 import { SessionStatusBadge } from "../components/StatusBadge";
+import { TodoProgressIndicator } from "../components/TodoProgressIndicator";
 import { EmptyState } from "../components/EmptyState";
 import { TableRowSkeleton } from "../components/Skeleton";
 import { MultiSelect } from "../components/MultiSelect";
 import { Select } from "../components/Select";
 import { formatDateTime, formatDuration, truncate, fmtCost } from "../lib/format";
-import {
-  effectiveSessionStatus,
-  isSessionAwaitingInput,
-  sessionAwaitingReason,
-} from "../lib/types";
+import { effectiveSessionStatus, sessionAwaitingReason } from "../lib/types";
 import type { Session, DashboardEvent } from "../lib/types";
 
 const PAGE_SIZE = 10;
@@ -169,31 +167,13 @@ export function Sessions() {
   // exist in the database.
   const load = useCallback(async () => {
     try {
-      // The "waiting" filter is a UI-only overlay derived from the
-      // awaiting_input_since column - the underlying SessionStatus is
-      // still "active". Map it to a client-side filter on top of the
-      // active set so paging/totals stay consistent with the visible rows.
-      if (filter === "waiting") {
-        const res = await api.sessions.list({
-          status: "active",
-          q: search || undefined,
-          cwd: cwds.length > 0 ? cwds : undefined,
-          sort_by: sortBy,
-          sort_desc: sortDesc,
-          limit: 10000,
-          offset: 0,
-        });
-        const waiting = res.sessions.filter(isSessionAwaitingInput);
-        setTotal(waiting.length);
-        setSessions(waiting.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE));
-        return;
-      }
       const params: {
         status?: string;
         q?: string;
         cwd?: string[];
         sort_by?: SessionSort;
         sort_desc?: boolean;
+        include_task_progress?: boolean;
         limit: number;
         offset: number;
       } = {
@@ -201,6 +181,7 @@ export function Sessions() {
         offset: page * PAGE_SIZE,
         sort_by: sortBy,
         sort_desc: sortDesc,
+        include_task_progress: true,
       };
       if (filter) params.status = filter;
       if (search) params.q = search;
@@ -231,7 +212,15 @@ export function Sessions() {
       }
       if (msg.type === "new_event") {
         const ev = msg.data as DashboardEvent;
-        if (ev.event_type === "Stop" || ev.event_type === "SessionEnd") {
+        if (
+          ev.event_type === "Stop" ||
+          ev.event_type === "SessionEnd" ||
+          ev.event_type === "TaskCreated" ||
+          ev.event_type === "TaskCompleted" ||
+          ["TaskCreate", "TaskUpdate", "TaskList", "TodoWrite", "update_plan"].includes(
+            ev.tool_name || ""
+          )
+        ) {
           load();
         }
       }
@@ -474,11 +463,16 @@ export function Sessions() {
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <SessionStatusBadge
-                        status={effectiveSessionStatus(session)}
-                        reason={sessionAwaitingReason(session)}
-                        provider={session.provider}
-                      />
+                      <div className="flex items-center gap-2">
+                        <SessionStatusBadge
+                          status={effectiveSessionStatus(session)}
+                          reason={sessionAwaitingReason(session)}
+                          provider={session.provider}
+                        />
+                        {session.todo_summary && (
+                          <TodoProgressIndicator progress={session.todo_summary} />
+                        )}
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-400">
                       {formatDateTime(session.last_activity || session.started_at)}

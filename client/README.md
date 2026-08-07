@@ -196,13 +196,16 @@ client/
 │   │   ├── SplashScreen.tsx   # First-run provider choice and live-hook setup gate
 │   │   ├── PaginatedLegend.tsx # Bounded responsive legends for Analytics and Workflows
 │   │   ├── RemoteSources.tsx  # Remote Data Sources settings panel (SSH multi-machine collection)
+│   │   ├── TodoProgressIndicator.tsx # Micro donut + portal tooltip beside Sessions status
+│   │   ├── TodoProgressPanel.tsx # Full owner-aware tracker on Session Detail
+│   │   ├── todoProgress.ts       # Shared task status colors/formatters
 │   │   └── workflows/      # D3.js workflow visualization components (12 files)
 │   │
 │   ├── pages/              # Route pages
 │   │   ├── Dashboard.tsx
 │   │   ├── KanbanBoard.tsx
-│   │   ├── Sessions.tsx       # Server-paginated table with searchable multi-project filtering and custom sort menus; shows each session's real name (synced live from the transcript), falls back to the short ID
-│   │   ├── SessionDetail.tsx  # Agent tree + event timeline + cursor-paginated Conversation tab (slash-command pills/output, rename markers, Codex exec calls)
+│   │   ├── Sessions.tsx       # Server-paginated table with task-progress donut beside status, searchable multi-project filtering, and custom sort menus
+│   │   ├── SessionDetail.tsx  # Overview + full task tracker + agent tree + event timeline + cursor-paginated Conversation tab
 │   │   ├── ActivityFeed.tsx  # Real-time event log; row click expands payload; Session btn navigates
 │   │   ├── Analytics.tsx
 │   │   ├── Workflows.tsx

@@ -58,6 +58,39 @@ const exampleSession = {
   cost: 0.8421,
   awaiting_input_since: null,
   awaiting_reason: null,
+  todo_summary: {
+    total: 3,
+    completed: 1,
+    inProgress: 1,
+    pending: 1,
+    cancelled: 0,
+    unknown: 0,
+    percentComplete: 33,
+    activeText: "Implement task progress UI",
+    sourceTool: "TaskList",
+    updatedAt: "2026-06-25T14:31:50.119Z",
+    previewItems: [
+      {
+        id: "task-1",
+        text: "Inspect task transcripts",
+        status: "completed",
+        sourceStatus: "completed",
+        order: 0,
+        agentId: "b7f3a2c1-4e5d-4a8b-9c2f-1d6e8a0b3c4d-main",
+        agentType: "main",
+        description: null,
+      },
+    ],
+    overflowCount: 2,
+    ownerBreakdown: [
+      {
+        agentId: "b7f3a2c1-4e5d-4a8b-9c2f-1d6e8a0b3c4d-main",
+        agentType: "main",
+        completed: 1,
+        total: 3,
+      },
+    ],
+  },
 };
 
 const exampleCompletedSession = {
@@ -76,6 +109,7 @@ const exampleCompletedSession = {
   cost: 0.1532,
   awaiting_input_since: null,
   awaiting_reason: null,
+  todo_summary: null,
 };
 
 const exampleMainAgent = {
@@ -133,7 +167,7 @@ const paths = {
       tags: ["Sessions"],
       summary: "List sessions",
       description:
-        "Returns a paginated list of durable sessions, newest real activity first, each enriched with a SQL `agent_count` (LEFT JOIN onto agents), a `last_activity` timestamp derived from the latest durable session event (falling back to its lifecycle timestamp for eventless historical rows, never mutable bookkeeping `updated_at`), a card-ready optional `prompt_preview` (up to two newest distinct real human prompts, oldest to newest and newline-separated; Claude persists this bounded summary from local JSONL, Codex derives it from durable user-message events, and historical rows fall back to the main task), and a `cost` computed from the session's token usage against the current pricing rules. The `status`, `q`, and repeatable `cwd` filters compose (AND), while repeated `cwd` values include any matching project directory; `q` is a case-insensitive LIKE across `id`, `name`, and `cwd`. `total` reflects durable rows matching the filters independent of `limit`/`offset` so ordinary paginators stay accurate, while `cost` is only calculated for the durable rows on the returned page (when `sort_by=price` it is computed across all matching durable rows so the price sort is correct). The optional `include_transient=true` dashboard overlay prepends local pre-identity Codex process cards only on the first active/all page; those cards are never persisted or counted in `total`, so the durable pagination contract remains unchanged. The endpoint is read-only with no side effects; `metadata` on each session is returned as a raw JSON-encoded string, not a parsed object.",
+        "Returns a paginated list of durable sessions, newest real activity first, each enriched with agent count, durable last activity, prompt preview, and calculated cost. Set `include_task_progress=true` to attach a nullable owner-aware `todo_summary` derived from the latest observable Claude Task*/TodoWrite or Codex update_plan state, with up to five preview items. The opt-in keeps high-volume Dashboard/Kanban calls from parsing transcripts. The `status`, `q`, and repeatable `cwd` filters compose; `status=waiting` selects active rows whose `awaiting_input_since` is set. `total` remains independent of `limit`/`offset`.",
       operationId: "listSessions",
       parameters: [
         { $ref: "#/components/parameters/SessionStatusQuery", example: "active" },
@@ -179,6 +213,14 @@ const paths = {
           schema: { type: "boolean", default: false },
           description:
             "Opt in to local, in-memory Codex cards that exist before the CLI exposes a durable session id. Honored only on the first page when status is absent or `active`; transient cards are prepended without changing durable `total`, pagination, analytics, or history.",
+          example: true,
+        },
+        {
+          name: "include_task_progress",
+          in: "query",
+          schema: { type: "boolean", default: false },
+          description:
+            "Attach bounded owner-aware `todo_summary` objects to returned durable rows. Intended for the Sessions table; omitted by high-volume Dashboard/Kanban calls.",
           example: true,
         },
         { $ref: "#/components/parameters/LimitQuery", example: 50 },
@@ -270,7 +312,7 @@ const paths = {
       tags: ["Sessions"],
       summary: "Get session details",
       description:
-        "Returns a single session together with all of its agents (chronological) and persisted events. Read-only, no side effects. The session's `metadata` and each event's `data` are returned as raw JSON-encoded strings, not parsed objects. Returns 404 with code `NOT_FOUND` when no session matches the path `id`.",
+        "Returns a single session together with its agents, persisted events, workflow runs, and a nullable full `todo_snapshot`. Task state is reduced from Claude TaskCreate/TaskUpdate/TaskList and lifecycle events, legacy TodoWrite snapshots, or Codex update_plan snapshots; subagent ownership remains visible on items and owner summaries. Read-only, no side effects. Returns 404 with code `NOT_FOUND` when no session matches the path `id`.",
       operationId: "getSession",
       parameters: [
         {
@@ -285,7 +327,29 @@ const paths = {
             "application/json": {
               schema: { $ref: "#/components/schemas/SessionDetailResponse" },
               example: {
-                session: exampleSession,
+                session: {
+                  ...exampleSession,
+                  todo_snapshot: {
+                    provider: "claude",
+                    source: "transcript",
+                    sourceTool: "TaskList",
+                    sourceLine: 42,
+                    updatedAt: "2026-06-25T14:31:50.119Z",
+                    explanation: null,
+                    confidence: "full",
+                    items: exampleSession.todo_summary.previewItems,
+                    total: 3,
+                    completed: 1,
+                    inProgress: 1,
+                    pending: 1,
+                    cancelled: 0,
+                    unknown: 0,
+                    percentComplete: 33,
+                    activeText: "Implement task progress UI",
+                    includesSubagents: false,
+                    ownerBreakdown: exampleSession.todo_summary.ownerBreakdown,
+                  },
+                },
                 agents: [exampleMainAgent, exampleSubagent],
                 events: [exampleEvent],
               },

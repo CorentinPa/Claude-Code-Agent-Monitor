@@ -34,6 +34,29 @@
   "tableCost": "费用",
   "tableDirectory": "目录",
   "defaultName": "会话 ",
+  "taskProgress": {
+    "title": "任务进度",
+    "aria": "任务进度：已完成 {{completed}} / {{total}}",
+    "complete": "已完成",
+    "completeCount": "已完成 {{completed}} / {{total}} · {{percent}}%",
+    "completeCountShort": "已完成 {{completed}} / {{total}}",
+    "current": "当前：{{task}}",
+    "more": "会话详情中还有 {{count}} 项",
+    "includesSubagents": "包含 Subagent",
+    "partialSource": "根据任务生命周期事件推导",
+    "owners": "负责 Agent",
+    "mainAgent": "主 Agent",
+    "doneCount": "已完成 {{count}}",
+    "remainingCount": "剩余 {{count}}",
+    "hiddenTasks": "另有 {{count}} 项任务未显示。",
+    "status": {
+      "completed": "已完成",
+      "inProgress": "进行中",
+      "pending": "待处理",
+      "cancelled": "已取消",
+      "unknown": "未知"
+    }
+  },
   "detail": {
     "waitingBanner": {
       "title": "正在等待你的输入",

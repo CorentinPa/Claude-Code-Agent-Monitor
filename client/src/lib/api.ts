@@ -639,6 +639,7 @@ export const api = {
       offset?: number;
       provider?: "claude" | "codex";
       include_transient?: boolean;
+      include_task_progress?: boolean;
     }) => {
       const qs = new URLSearchParams();
       // Only append params that were actually supplied so the URL stays minimal.
@@ -653,6 +654,7 @@ export const api = {
       if (params?.limit) qs.set("limit", String(params.limit));
       if (params?.offset) qs.set("offset", String(params.offset));
       if (params?.include_transient) qs.set("include_transient", "1");
+      if (params?.include_task_progress) qs.set("include_task_progress", "1");
       applyScope(qs); // narrow to the active machine and product scope
       // A provider-specific picker (for example Run Agent resume) must be
       // able to narrow a globally-both dashboard to its native session type.

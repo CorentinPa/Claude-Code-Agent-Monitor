@@ -985,8 +985,11 @@
                     Each row shows the session's real name (synced live from the transcript — a
                     <code>/rename</code> or <code>claude -n</code> title, else the auto title,
                     else the first user prompt, with a short-ID fallback), status badge, agent
-                    count, duration, model, and estimated
-                    cost. Click any row to drill into the full session detail view with conversation
+                    count, duration, model, estimated cost, and — when the provider exposed task
+                    state — a compact completion donut beside the status badge. Hovering or
+                    focusing the donut opens a viewport-clamped preview with current work,
+                    owner labels, source, and up to five tasks. Click any row to drill into the
+                    full session detail view with conversation
                     transcript and agent hierarchy.
                   </p>
                 </div>
@@ -998,7 +1001,10 @@
                     chronological event timeline showing every tool call name and summary. An
                     overview panel at the top surfaces tile counters for events, tool calls,
                     subagents, compactions, errors, and duration. Top-tool usage bars and a
-                    subagent type breakdown give quick distribution reads. The conversation
+                    subagent type breakdown give quick distribution reads. When observable task
+                    state exists, an owner-aware progress panel appears directly below the
+                    overview with a segmented donut, active task, completion bar, owner
+                    breakdown, and dense task rows. The conversation
                     viewer renders markdown with syntax highlighting, per-tool styled blocks,
                     slash-command pills with their captured TUI output, and inline session-rename
                     markers. Messages typed mid-turn (queued while Claude was still working) appear where Claude actually received them, and harness notifications are attributed to System. Export the entire session as JSON or share the permalink for async
@@ -1533,11 +1539,11 @@
             </div>
             <div class="screenshot-card" id="ss-sessions">
               <img src="../images/sessions.png" alt="Sessions Overview" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">📂</span> <span><strong>Sessions</strong> — searchable, filterable, server-paginated table. Each row shows status badge, agent count, duration, model, and cost. Click any row to drill into session detail</span></div>
+              <div class="screenshot-caption"><span class="caption-icon">📂</span> <span><strong>Sessions</strong> — searchable, filterable, server-paginated table. Rows with task state add a progress donut beside status; hover or focus opens a detailed task preview. Click any row to drill into session detail</span></div>
             </div>
             <div class="screenshot-card" id="ss-session-detail">
               <img src="../images/session-agents.png" alt="Session Detail — Agents tab" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">🤖</span> <span><strong>Session Detail · Agents</strong> — overview tiles (events, tool calls, subagents, errors, duration), top-tool usage bars, subagent type breakdown, and a collapsible parent–child agent hierarchy tree</span></div>
+              <div class="screenshot-caption"><span class="caption-icon">🤖</span> <span><strong>Session Detail · Agents</strong> — overview tiles, an owner-aware task-progress panel when available, top-tool usage, subagent breakdown, and a collapsible parent–child agent hierarchy tree</span></div>
             </div>
             <div class="screenshot-card">
               <img src="../images/session-conversation.png" alt="Session Detail — Conversation tab" width="100%" loading="lazy" decoding="async" />
@@ -6965,8 +6971,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=68" defer></script>
-    <script src="script.js?v=49" defer></script>
+    <script src="i18n-content.js?v=69" defer></script>
+    <script src="script.js?v=50" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

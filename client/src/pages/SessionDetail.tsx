@@ -1,6 +1,7 @@
 /**
  * @file SessionDetail.tsx
- * @description Displays detailed information about a specific session, including its agents, events, and cost breakdown, with real-time updates and an expandable agent hierarchy view.
+ * @description Displays session agents, owner-aware task progress, events, and
+ * cost details with real-time updates and an expandable agent hierarchy.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -91,6 +92,7 @@ import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
 import { AgentCard } from "../components/AgentCard";
 import { SessionOverview } from "../components/SessionOverview";
+import { TodoProgressPanel } from "../components/TodoProgressPanel";
 import { ConversationView } from "../components/conversation/ConversationView";
 import { SessionStatusBadge, AgentStatusBadge, REASON_ICONS } from "../components/StatusBadge";
 import { CopyButton } from "../components/event-views/primitives";
@@ -522,6 +524,16 @@ export function SessionDetail() {
         load();
       }
       if (msg.type === "new_event") {
+        const event = msg.data as DashboardEvent;
+        if (
+          event.event_type === "TaskCreated" ||
+          event.event_type === "TaskCompleted" ||
+          ["TaskCreate", "TaskUpdate", "TaskList", "TodoWrite", "update_plan"].includes(
+            event.tool_name || ""
+          )
+        ) {
+          load();
+        }
         // Debounce bursts into one filter-aware refetch that preserves the
         // current "Load more" pagination size.
         if (eventsRefreshTimerRef.current) clearTimeout(eventsRefreshTimerRef.current);
@@ -806,6 +818,7 @@ export function SessionDetail() {
       {visitedTabs.has("agents") && (
         <div hidden={activeTab !== "agents"}>
           <SessionOverview session={session} agents={agents} />
+          {session.todo_snapshot && <TodoProgressPanel snapshot={session.todo_snapshot} />}
 
           {workflows.length > 0 && (
             <div className="mb-4">
