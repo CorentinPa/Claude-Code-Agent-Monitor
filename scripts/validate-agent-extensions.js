@@ -16,6 +16,7 @@ const { spawnSync } = require("node:child_process");
 const ROOT = path.resolve(__dirname, "..");
 const PLUGINS = path.join(ROOT, "plugins");
 const PROJECT_VERSION = json(path.join(ROOT, "package.json")).version;
+const NATIVE_SHARED_SKILLS = ["repo-onboarding", "version-release"];
 const WRITE_CAPABLE = new Set([
   "ccam-config",
   "ccam-cost-guard",
@@ -42,6 +43,19 @@ function frontmatter(file) {
   const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   assert.ok(match, `${file} is missing YAML frontmatter`);
   return match[1];
+}
+
+for (const skillName of NATIVE_SHARED_SKILLS) {
+  const claudeSkill = path.join(ROOT, ".claude", "skills", skillName, "SKILL.md");
+  const codexSkillRoot = path.join(ROOT, ".agents", "skills", skillName);
+  const codexSkill = path.join(codexSkillRoot, "SKILL.md");
+  const escapedSkillName = skillName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  assert.ok(fs.existsSync(claudeSkill), `Claude skill missing: ${skillName}`);
+  assert.ok(fs.existsSync(codexSkill), `Codex skill missing: ${skillName}`);
+  assert.match(frontmatter(claudeSkill), new RegExp(`^name:\\s*${escapedSkillName}$`, "m"));
+  assert.match(frontmatter(codexSkill), new RegExp(`^name:\\s*${escapedSkillName}$`, "m"));
+  const metadata = fs.readFileSync(path.join(codexSkillRoot, "agents", "openai.yaml"), "utf8");
+  assert.match(metadata, new RegExp(`\\$?${escapedSkillName}\\b`));
 }
 
 function commandAvailable(command) {

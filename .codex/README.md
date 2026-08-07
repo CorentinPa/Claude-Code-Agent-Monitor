@@ -32,6 +32,7 @@ This directory contains all project-scoped Codex extensions:
 - `repo-onboarding` — architecture discovery and verification selection
 - `mcp-maintainer` — MCP server operations and troubleshooting
 - `release-guard` — release readiness checks
+- `version-release` — semantic version classification and synchronized release bumping
 
 ## Plugin marketplace
 
@@ -77,7 +78,7 @@ npx skills update --global --yes
 npx skills remove --global mcp-server --yes
 ```
 
-The skills CLI discovers 74 repository skills. Codex project installs use
+The skills CLI discovers 75 repository skills. Codex project installs use
 `.agents/skills/`; global installs use `${CODEX_HOME:-~/.codex}/skills/`.
 Multi-agent installs may deduplicate files through a shared store and create
 agent-specific links. Run `npm run extensions:sync`
