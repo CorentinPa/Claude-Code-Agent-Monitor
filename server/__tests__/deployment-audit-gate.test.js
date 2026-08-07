@@ -105,6 +105,7 @@ exit 0
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.attemptCount, 3);
     assert.match(result.stdout, /transport failure .* retrying/);
+    assert.match(result.stdout, /audit retrying after 0s/);
   });
 
   it("treats a zero-padded retry base as decimal", () => {
@@ -124,6 +125,7 @@ exit 0
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.attemptCount, 2);
     assert.deepEqual(result.retryDelays, ["8"]);
+    assert.match(result.stdout, /audit retrying after 8s/);
   });
 
   it("fails immediately when the registry returns a real vulnerability report", () => {

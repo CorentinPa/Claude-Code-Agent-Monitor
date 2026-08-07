@@ -56,7 +56,9 @@ audit_production_dependencies() {
         log "${label} audit transport failure (attempt ${attempt}/${max_attempts}); retrying"
         [[ -n "$errors" ]] && printf '%s\n' "$errors" >&2
         [[ -n "$output" ]] && printf '%s\n' "$output" >&2
-        sleep $(( attempt * retry_base_seconds ))
+        local retry_delay=$(( attempt * retry_base_seconds ))
+        log "${label} audit retrying after ${retry_delay}s"
+        sleep "$retry_delay"
         ((attempt += 1))
         continue
       fi
