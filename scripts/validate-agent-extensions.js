@@ -58,6 +58,23 @@ for (const skillName of NATIVE_SHARED_SKILLS) {
   assert.match(metadata, new RegExp(`\\$?${escapedSkillName}\\b`));
 }
 
+for (const root of [".claude/skills/version-release", ".agents/skills/version-release"]) {
+  const skill = fs.readFileSync(path.join(ROOT, root, "SKILL.md"), "utf8");
+  const checklist = fs.readFileSync(
+    path.join(ROOT, root, "references", "version-checklist.md"),
+    "utf8"
+  );
+  for (const required of ["v<version>", "closingIssuesReferences", "gh auth status"]) {
+    assert.ok(skill.includes(required), `${root}/SKILL.md missing ${required}`);
+  }
+  for (const required of ["v<version>", "closingIssuesReferences", "Fresh PR and issue reads"]) {
+    assert.ok(
+      checklist.includes(required),
+      `${root}/references/version-checklist.md missing ${required}`
+    );
+  }
+}
+
 function commandAvailable(command) {
   return spawnSync(command, ["--version"], { stdio: "ignore" }).status === 0;
 }
