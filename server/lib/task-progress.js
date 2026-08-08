@@ -7,6 +7,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { updatePlanArgumentIndexes } = require("./codex-plan-call");
 
 const MAX_CACHE_ENTRIES = 200;
 const MAX_ITEMS = 200;
@@ -52,6 +53,130 @@ function objectValue(value) {
   } catch {
     return null;
   }
+}
+
+function parseDataLiteral(source, startIndex) {
+  let index = startIndex;
+
+  function skipWhitespace() {
+    while (index < source.length && /\s/.test(source[index])) index++;
+  }
+
+  function parseString() {
+    const quote = source[index++];
+    let value = "";
+    while (index < source.length) {
+      const character = source[index++];
+      if (character === quote) return value;
+      if (character !== "\\") {
+        value += character;
+        continue;
+      }
+      if (index >= source.length) throw new Error("unterminated escape");
+      const escaped = source[index++];
+      const escapes = {
+        b: "\b",
+        f: "\f",
+        n: "\n",
+        r: "\r",
+        t: "\t",
+        v: "\v",
+        0: "\0",
+      };
+      if (escaped === "u") {
+        const hex = source.slice(index, index + 4);
+        if (!/^[0-9a-fA-F]{4}$/.test(hex)) throw new Error("invalid unicode escape");
+        value += String.fromCharCode(parseInt(hex, 16));
+        index += 4;
+      } else {
+        value += escapes[escaped] ?? escaped;
+      }
+    }
+    throw new Error("unterminated string");
+  }
+
+  function parseIdentifier() {
+    const match = source.slice(index).match(/^[A-Za-z_$][\w$]*/);
+    if (!match) throw new Error("expected identifier");
+    index += match[0].length;
+    return match[0];
+  }
+
+  function parseValue() {
+    skipWhitespace();
+    const character = source[index];
+    if (character === '"' || character === "'") return parseString();
+    if (character === "{") return parseObject();
+    if (character === "[") return parseArray();
+    const numberMatch = source.slice(index).match(/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/);
+    if (numberMatch) {
+      index += numberMatch[0].length;
+      return Number(numberMatch[0]);
+    }
+    const identifier = parseIdentifier();
+    if (identifier === "true") return true;
+    if (identifier === "false") return false;
+    if (identifier === "null") return null;
+    throw new Error("unsupported literal");
+  }
+
+  function parseObject() {
+    const object = Object.create(null);
+    index++;
+    skipWhitespace();
+    while (source[index] !== "}") {
+      const key =
+        source[index] === '"' || source[index] === "'" ? parseString() : parseIdentifier();
+      skipWhitespace();
+      if (source[index++] !== ":") throw new Error("expected colon");
+      object[key] = parseValue();
+      skipWhitespace();
+      if (source[index] === ",") {
+        index++;
+        skipWhitespace();
+        if (source[index] === "}") break;
+        continue;
+      }
+      if (source[index] !== "}") throw new Error("expected object separator");
+    }
+    if (source[index++] !== "}") throw new Error("unterminated object");
+    return object;
+  }
+
+  function parseArray() {
+    const array = [];
+    index++;
+    skipWhitespace();
+    while (source[index] !== "]") {
+      array.push(parseValue());
+      skipWhitespace();
+      if (source[index] === ",") {
+        index++;
+        skipWhitespace();
+        if (source[index] === "]") break;
+        continue;
+      }
+      if (source[index] !== "]") throw new Error("expected array separator");
+    }
+    if (source[index++] !== "]") throw new Error("unterminated array");
+    return array;
+  }
+
+  const value = parseValue();
+  return { value, endIndex: index };
+}
+
+function wrappedUpdatePlan(value) {
+  if (typeof value !== "string") return null;
+  for (const argumentIndex of updatePlanArgumentIndexes(value)) {
+    try {
+      const parsed = parseDataLiteral(value, argumentIndex).value;
+      if (parsed && typeof parsed === "object" && Array.isArray(parsed.plan)) return parsed;
+    } catch {
+      /* keep searching for another well-formed call */
+    }
+  }
+  return null;
 }
 
 function itemText(item) {
@@ -163,6 +288,16 @@ function makeObservation({
 
 function toolObservation(name, inputValue, outputValue, context) {
   const tool = String(name || "");
+  const wrappedPlan = tool === "exec" ? wrappedUpdatePlan(inputValue) : null;
+  if (wrappedPlan) {
+    return makeObservation({
+      ...context,
+      kind: "replace",
+      tool: "update_plan",
+      items: wrappedPlan.plan,
+      explanation: wrappedPlan.explanation,
+    });
+  }
   const input = parseToolInput(inputValue);
   const output = objectValue(outputValue);
   if (tool === "TodoWrite") {
@@ -170,13 +305,13 @@ function toolObservation(name, inputValue, outputValue, context) {
     if (!items) return null;
     return makeObservation({ ...context, kind: "replace", tool, items });
   }
-  if (tool === "update_plan") {
+  if (tool === "update_plan" || tool === "tools.update_plan") {
     const items = listFromObject(input);
     if (!items) return null;
     return makeObservation({
       ...context,
       kind: "replace",
-      tool,
+      tool: "update_plan",
       items,
       explanation: input.explanation,
     });

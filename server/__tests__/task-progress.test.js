@@ -106,6 +106,62 @@ describe("task progress extraction", () => {
     assert.equal(result.summary.previewItems[0].status, "in_progress");
   });
 
+  it("extracts update_plan from the Codex exec wrapper used by unified tools", () => {
+    const root = tempRoot();
+    const transcript = path.join(root, "wrapped-plan.jsonl");
+    writeJsonl(transcript, [
+      {
+        type: "response_item",
+        timestamp: "2026-08-08T00:06:07.958Z",
+        payload: {
+          type: "custom_tool_call",
+          name: "exec",
+          input:
+            'const r = await tools.update_plan({plan:[{step:"Create a sample task",status:"completed"},{step:"Create a lightweight todo list",status:"completed"},{step:"Confirm the setup is ready for local testing",status:"in_progress"}]}); text(r);',
+        },
+      },
+    ]);
+
+    const result = extractSessionTaskProgress({
+      session: { id: "codex-wrapped-plan", provider: "codex" },
+      mainTranscriptPath: transcript,
+      agents: [{ id: "codex-wrapped-plan-main", type: "main" }],
+    });
+
+    assert.equal(result.snapshot.sourceTool, "update_plan");
+    assert.equal(result.snapshot.total, 3);
+    assert.equal(result.snapshot.completed, 2);
+    assert.equal(result.snapshot.inProgress, 1);
+    assert.equal(result.snapshot.percentComplete, 67);
+    assert.equal(result.snapshot.activeText, "Confirm the setup is ready for local testing");
+  });
+
+  it("ignores update_plan text inside Codex exec strings and comments", () => {
+    const root = tempRoot();
+    const transcript = path.join(root, "mentioned-plan.jsonl");
+    writeJsonl(transcript, [
+      {
+        type: "response_item",
+        timestamp: "2026-08-08T00:07:00.000Z",
+        payload: {
+          type: "custom_tool_call",
+          name: "exec",
+          input:
+            'const example = "tools.update_plan({plan:[{step:\\"Fake\\",status:\\"completed\\"}]})"; // tools.update_plan({plan:[{step:"Also fake",status:"pending"}]})',
+        },
+      },
+    ]);
+
+    const result = extractSessionTaskProgress({
+      session: { id: "codex-mentioned-plan", provider: "codex" },
+      mainTranscriptPath: transcript,
+      agents: [{ id: "codex-mentioned-plan-main", type: "main" }],
+    });
+
+    assert.equal(result.snapshot, null);
+    assert.equal(result.summary, null);
+  });
+
   it("parses the latest legacy Claude TodoWrite snapshot", () => {
     const root = tempRoot();
     const transcript = path.join(root, "claude-legacy.jsonl");

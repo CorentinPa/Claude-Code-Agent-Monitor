@@ -658,7 +658,10 @@ interface SessionCardProps {
 
 #### AgentCard
 
-Shows agent type, status, tool usage, and cost breakdown.
+Shows agent type, status, tool usage, and cost breakdown. When the attached
+session has a `todo_summary`, the card renders the same accessible task-progress
+donut and portal tooltip used by the Sessions table immediately before the
+status badge. Session Detail renders the full task list with 10 rows per page.
 
 **Props:**
 ```typescript

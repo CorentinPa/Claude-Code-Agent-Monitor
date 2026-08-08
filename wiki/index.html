@@ -952,11 +952,13 @@
                   <p>
                     Two tabs: <strong>Monitor</strong> shows overview stats, active agent cards with
                     collapsible subagent hierarchy, and a recent activity feed whose item count fills
-                    available viewport height. <strong>Health</strong> renders a composite system
-                    health score ring, storage engine donut chart, cache/error/success gauges, tool
-                    invocation bars, subagent effectiveness ratios, model token distribution, and
-                    compaction stats. Both tabs auto-refresh every 5 seconds via WebSocket push so
-                    the view is always current without manual reload.
+                    available viewport height. When an active session exposes task state, its card
+                    shows the same completion donut as the Sessions table immediately before the
+                    status badge; hover or focus opens the detailed task preview. <strong>Health</strong>
+                    renders a composite system health score ring, storage engine donut chart,
+                    cache/error/success gauges, tool invocation bars, subagent effectiveness ratios,
+                    model token distribution, and compaction stats. Both tabs auto-refresh every 5
+                    seconds via WebSocket push so the view is always current without manual reload.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1004,11 +1006,14 @@
                     subagent type breakdown give quick distribution reads. When observable task
                     state exists, an owner-aware progress panel appears directly below the
                     overview with a segmented donut, active task, completion bar, owner
-                    breakdown, and dense task rows. The conversation
+                    breakdown, and dense task rows paginated at 10 tasks per page. The conversation
                     viewer renders markdown with syntax highlighting, per-tool styled blocks,
                     slash-command pills with their captured TUI output, and inline session-rename
-                    markers. Messages typed mid-turn (queued while Claude was still working) appear where Claude actually received them, and harness notifications are attributed to System. Export the entire session as JSON or share the permalink for async
-                    review. When the session is waiting on you, a yellow banner under the header names the reason and how long it has been waiting.
+                    markers. Messages typed mid-turn (queued while Claude was still working) appear
+                    where Claude actually received them, and harness notifications are attributed to
+                    System. Export the entire session as JSON or share the permalink for async review.
+                    When the session is waiting on you, a yellow banner under the header names the
+                    reason and how long it has been waiting.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1523,7 +1528,7 @@
           <div class="screenshot-gallery">
             <div class="screenshot-card" id="ss-dashboard">
               <img src="../images/dashboard.png" alt="Dashboard Overview" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">📡</span> <span><strong>Dashboard · Monitor</strong> — live overview of active sessions and agents. Stats tiles, collapsible subagent hierarchy cards, and a recent activity feed. Auto-refreshes every 5 s via WebSocket</span></div>
+              <div class="screenshot-caption"><span class="caption-icon">📡</span> <span><strong>Dashboard · Monitor</strong> — live overview of active sessions and agents. Cards with task state show a progress donut beside status with the same detailed preview as Sessions. Stats tiles, collapsible subagent hierarchy cards, and a recent activity feed auto-refresh via WebSocket</span></div>
             </div>
             <div class="screenshot-card">
               <img src="../images/dashboard-health.png" alt="Dashboard — System Health tab" width="100%" loading="lazy" decoding="async" />
@@ -1543,7 +1548,7 @@
             </div>
             <div class="screenshot-card" id="ss-session-detail">
               <img src="../images/session-agents.png" alt="Session Detail — Agents tab" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">🤖</span> <span><strong>Session Detail · Agents</strong> — overview tiles, an owner-aware task-progress panel when available, top-tool usage, subagent breakdown, and a collapsible parent–child agent hierarchy tree</span></div>
+              <div class="screenshot-caption"><span class="caption-icon">🤖</span> <span><strong>Session Detail · Agents</strong> — overview tiles, an owner-aware task-progress panel with 10 tasks per page when available, top-tool usage, subagent breakdown, and a collapsible parent–child agent hierarchy tree</span></div>
             </div>
             <div class="screenshot-card">
               <img src="../images/session-conversation.png" alt="Session Detail — Conversation tab" width="100%" loading="lazy" decoding="async" />
@@ -6971,8 +6976,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=70" defer></script>
-    <script src="script.js?v=51" defer></script>
+    <script src="i18n-content.js?v=71" defer></script>
+    <script src="script.js?v=52" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

@@ -11,7 +11,7 @@ import type { ReactElement } from "react";
 // render is used inside renderCard helper
 import { MemoryRouter, useLocation } from "react-router";
 import { AgentCard } from "../AgentCard";
-import type { Agent, Session } from "../../lib/types";
+import type { Agent, Session, SessionTodoSummary } from "../../lib/types";
 import { formatModelName, fmtCost } from "../../lib/format";
 
 function renderCard(element: ReactElement) {
@@ -41,6 +41,22 @@ function makeAgent(overrides: Partial<Agent> = {}): Agent {
   };
 }
 
+const taskSummary: SessionTodoSummary = {
+  total: 3,
+  completed: 2,
+  inProgress: 1,
+  pending: 0,
+  cancelled: 0,
+  unknown: 0,
+  percentComplete: 67,
+  activeText: "Confirm the setup is ready for local testing",
+  sourceTool: "update_plan",
+  updatedAt: "2026-08-08T00:06:07.958Z",
+  previewItems: [],
+  overflowCount: 0,
+  ownerBreakdown: [],
+};
+
 describe("AgentCard", () => {
   it("should render agent name", () => {
     renderCard(<AgentCard agent={makeAgent({ name: "Test Agent" })} />);
@@ -50,6 +66,50 @@ describe("AgentCard", () => {
   it("should render status badge", () => {
     renderCard(<AgentCard agent={makeAgent({ status: "working" })} />);
     expect(screen.getByText("Working")).toBeInTheDocument();
+  });
+
+  it("renders session task progress immediately before the status badge", () => {
+    renderCard(
+      <AgentCard
+        agent={makeAgent({ status: "waiting" })}
+        session={
+          {
+            id: "sess-1",
+            name: "Codex session",
+            provider: "codex",
+            status: "active",
+            todo_summary: taskSummary,
+          } as Session
+        }
+      />
+    );
+
+    const progress = screen.getByRole("button", { name: "Task progress: 2 of 3 complete" });
+    const status = screen.getByText("Waiting");
+    expect(
+      progress.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("keeps task-progress interaction from triggering the card click", () => {
+    const onClick = vi.fn();
+    renderCard(
+      <AgentCard
+        agent={makeAgent()}
+        session={
+          {
+            id: "sess-1",
+            name: "Task session",
+            status: "active",
+            todo_summary: taskSummary,
+          } as Session
+        }
+        onClick={onClick}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Task progress: 2 of 3 complete" }));
+    expect(onClick).not.toHaveBeenCalled();
   });
 
   it("should render subagent_type when present", () => {

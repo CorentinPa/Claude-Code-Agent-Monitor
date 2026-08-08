@@ -17,6 +17,7 @@ const {
   getCodexSessionTitles,
 } = require("./codex-home");
 const { getDataDir } = require("./claude-home");
+const { updatePlanArgumentIndexes } = require("./codex-plan-call");
 
 const MAX_EVENT_SUMMARY = 500;
 const CONTEXT_SHORT_LIMIT = 272000;
@@ -190,6 +191,14 @@ function codexToolCategory(name) {
   return raw || "Other";
 }
 
+function isWrappedUpdatePlan(item) {
+  return (
+    item?.type === "custom_tool_call" &&
+    item.name === "exec" &&
+    updatePlanArgumentIndexes(item.input).length > 0
+  );
+}
+
 function responseToolDetails(record) {
   const item = record.payload || {};
   if (
@@ -208,10 +217,11 @@ function responseToolDetails(record) {
         ? "tool_search"
         : null);
   if (!rawName) return null;
+  const displayName = isWrappedUpdatePlan(item) ? "update_plan" : String(rawName);
   return {
     rawName: String(rawName),
-    tool: codexToolCategory(rawName),
-    summary: truncate(`Called ${rawName}`),
+    tool: codexToolCategory(displayName),
+    summary: truncate(`Called ${displayName}`),
     callId: item.call_id || null,
     itemType: item.type,
   };

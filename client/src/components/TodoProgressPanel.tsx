@@ -1,6 +1,7 @@
 /**
  * @file Full owner-aware task-progress panel for Session Detail, combining a
- * segmented donut, completion bar, owner breakdown, and dense task rows.
+ * segmented donut, completion bar, owner breakdown, and task rows paginated
+ * ten at a time.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -9,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import type { SessionTodoItem, SessionTodoSnapshot, SessionTodoStatus } from "../lib/types";
 import { timeAgo } from "../lib/format";
 import { TODO_STATUS_META, taskProgressSegments, taskSourceLabel } from "./todoProgress";
+import { PaginatedLegend } from "./PaginatedLegend";
 
 const STATUS_ICONS = {
   completed: Check,
@@ -159,14 +161,13 @@ export function TodoProgressPanel({ snapshot }: { snapshot: SessionTodoSnapshot 
       </div>
 
       <div className="border-t border-border">
-        {snapshot.items.slice(0, 50).map((item) => (
-          <TaskRow key={`${item.agentId}-${item.id}`} item={item} />
-        ))}
-        {snapshot.items.length > 50 && (
-          <p className="px-5 py-3 text-[11px] text-gray-500">
-            {t("taskProgress.hiddenTasks", { count: snapshot.items.length - 50 })}
-          </p>
-        )}
+        <PaginatedLegend
+          items={snapshot.items}
+          pageSize={10}
+          getKey={(item) => `${item.agentId}-${item.id}`}
+          renderItem={(item) => <TaskRow item={item} />}
+          controlsClassName="px-5 pb-3"
+        />
       </div>
     </section>
   );
@@ -177,7 +178,7 @@ function TaskRow({ item }: { item: SessionTodoItem }) {
   const Icon = STATUS_ICONS[item.status];
   const meta = TODO_STATUS_META[item.status];
   return (
-    <div className="grid min-h-11 grid-cols-[20px_minmax(0,1fr)_auto] items-center gap-2 border-b border-border/70 px-5 py-2.5 last:border-b-0">
+    <div className="grid min-h-11 grid-cols-[20px_minmax(0,1fr)_auto] items-center gap-2 border-b border-border/70 px-5 py-2.5">
       <Icon
         className={`h-3.5 w-3.5 ${meta.textClass} ${
           item.status === "in_progress" ? "animate-spin" : ""

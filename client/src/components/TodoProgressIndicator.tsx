@@ -22,9 +22,13 @@ const STATUS_ICONS = {
 
 interface TodoProgressIndicatorProps {
   progress: SessionTodoSummary;
+  stopClickPropagation?: boolean;
 }
 
-export function TodoProgressIndicator({ progress }: TodoProgressIndicatorProps) {
+export function TodoProgressIndicator({
+  progress,
+  stopClickPropagation = false,
+}: TodoProgressIndicatorProps) {
   const { t } = useTranslation("sessions");
   const tooltipId = useId();
   const anchorRef = useRef<HTMLButtonElement>(null);
@@ -68,6 +72,7 @@ export function TodoProgressIndicator({ progress }: TodoProgressIndicatorProps) 
         onMouseLeave={() => setOpen(false)}
         onFocus={show}
         onBlur={() => setOpen(false)}
+        onClick={stopClickPropagation ? (event) => event.stopPropagation() : undefined}
       >
         <ProgressDonut progress={progress} size={20} strokeWidth={3} />
         {progress.inProgress > 0 && (

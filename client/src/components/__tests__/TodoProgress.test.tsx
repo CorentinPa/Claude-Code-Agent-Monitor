@@ -5,6 +5,7 @@
  */
 
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import type { SessionTodoSnapshot, SessionTodoSummary } from "../../lib/types";
 import { TodoProgressIndicator } from "../TodoProgressIndicator";
@@ -177,5 +178,47 @@ describe("TodoProgressPanel", () => {
     expect(screen.getByText("Review the final diff")).toBeInTheDocument();
     expect(screen.getAllByText("reviewer").length).toBeGreaterThan(0);
     expect(screen.getByText("4 / 7 complete")).toBeInTheDocument();
+  });
+
+  it("pages long task lists ten rows at a time", async () => {
+    const user = userEvent.setup();
+    const paginatedItems = Array.from({ length: 12 }, (_, index) => ({
+      id: `page-task-${index + 1}`,
+      text: `Page task ${index + 1}`,
+      status: "pending" as const,
+      sourceStatus: "pending",
+      order: index,
+      agentId: "main-1",
+      agentType: "main",
+      description: null,
+    }));
+
+    render(
+      <TodoProgressPanel
+        snapshot={{
+          ...snapshot,
+          total: 12,
+          completed: 0,
+          inProgress: 0,
+          pending: 12,
+          percentComplete: 0,
+          activeText: null,
+          items: paginatedItems,
+          ownerBreakdown: [{ agentId: "main-1", agentType: "main", completed: 0, total: 12 }],
+        }}
+      />
+    );
+
+    expect(screen.getByText("Page task 1")).toBeVisible();
+    expect(screen.getByText("Page task 10")).toBeVisible();
+    expect(screen.queryByText("Page task 11")).not.toBeInTheDocument();
+    expect(screen.getByText("Showing 1-10 of 12")).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+
+    expect(screen.queryByText("Page task 1")).not.toBeInTheDocument();
+    expect(screen.getByText("Page task 11")).toBeVisible();
+    expect(screen.getByText("Page task 12")).toBeVisible();
+    expect(screen.getByText("Showing 11-12 of 12")).toBeVisible();
   });
 });

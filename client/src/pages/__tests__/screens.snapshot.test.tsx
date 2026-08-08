@@ -496,6 +496,21 @@ describe("screen snapshots", () => {
   it("Dashboard", async () => {
     await snapshot(<Dashboard />, "/");
   });
+  it("Dashboard requests task progress for active agent cards", async () => {
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <Dashboard />
+      </MemoryRouter>
+    );
+    await settle();
+
+    expect(vi.mocked(api.sessions.list)).toHaveBeenCalledWith({
+      status: "active",
+      limit: 100,
+      include_transient: true,
+      include_task_progress: true,
+    });
+  });
   it("Kanban board", async () => {
     await snapshot(<KanbanBoard />, "/kanban");
   });
