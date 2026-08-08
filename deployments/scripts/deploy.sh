@@ -85,7 +85,7 @@ ${BOLD}Options:${NC}
 
 ${BOLD}Examples:${NC}
   $(basename "$0") --env dev --method helm
-  $(basename "$0") --env production --method helm --tag v2.0.4
+  $(basename "$0") --env production --method helm --tag 2.0.4
   $(basename "$0") --env staging --method kustomize --dry-run
 
 EOF
