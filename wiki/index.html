@@ -952,11 +952,13 @@
                   <p>
                     Two tabs: <strong>Monitor</strong> shows overview stats, active agent cards with
                     collapsible subagent hierarchy, and a recent activity feed whose item count fills
-                    available viewport height. <strong>Health</strong> renders a composite system
-                    health score ring, storage engine donut chart, cache/error/success gauges, tool
-                    invocation bars, subagent effectiveness ratios, model token distribution, and
-                    compaction stats. Both tabs auto-refresh every 5 seconds via WebSocket push so
-                    the view is always current without manual reload.
+                    available viewport height. When an active session exposes task state, its card
+                    shows the same completion donut as the Sessions table immediately before the
+                    status badge; hover or focus opens the detailed task preview. <strong>Health</strong>
+                    renders a composite system health score ring, storage engine donut chart,
+                    cache/error/success gauges, tool invocation bars, subagent effectiveness ratios,
+                    model token distribution, and compaction stats. Both tabs auto-refresh every 5
+                    seconds via WebSocket push so the view is always current without manual reload.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -979,14 +981,20 @@
                   <p>
                     <strong>Server-paginated</strong> table of every recorded session — each page
                     fetches only its slice so cost computation stays bounded no matter how many
-                    sessions exist. Case-insensitive search across <code>id</code>,
+                    sessions exist. The first page also shows the same local, in-memory Codex
+                    startup row used by Dashboard and Kanban. It appears immediately but stays
+                    non-navigable until a durable session ID replaces it, without changing durable
+                    totals or pagination. Case-insensitive search across <code>id</code>,
                     <code>name</code>, and <code>cwd</code> runs server-side with a 300 ms
                     debounce; the status filter composes with search for precise narrowing.
                     Each row shows the session's real name (synced live from the transcript — a
                     <code>/rename</code> or <code>claude -n</code> title, else the auto title,
                     else the first user prompt, with a short-ID fallback), status badge, agent
-                    count, duration, model, and estimated
-                    cost. Click any row to drill into the full session detail view with conversation
+                    count, duration, model, estimated cost, and — when the provider exposed task
+                    state — a compact completion donut beside the status badge. Hovering or
+                    focusing the donut opens a viewport-clamped preview with current work,
+                    owner labels, source, and up to five tasks. Click any row to drill into the
+                    full session detail view with conversation
                     transcript and agent hierarchy.
                   </p>
                 </div>
@@ -998,11 +1006,17 @@
                     chronological event timeline showing every tool call name and summary. An
                     overview panel at the top surfaces tile counters for events, tool calls,
                     subagents, compactions, errors, and duration. Top-tool usage bars and a
-                    subagent type breakdown give quick distribution reads. The conversation
+                    subagent type breakdown give quick distribution reads. When observable task
+                    state exists, an owner-aware progress panel appears directly below the
+                    overview with a segmented donut, active task, completion bar, owner
+                    breakdown, and dense task rows paginated at 10 tasks per page. The conversation
                     viewer renders markdown with syntax highlighting, per-tool styled blocks,
                     slash-command pills with their captured TUI output, and inline session-rename
-                    markers. Messages typed mid-turn (queued while Claude was still working) appear where Claude actually received them, and harness notifications are attributed to System. Export the entire session as JSON or share the permalink for async
-                    review. When the session is waiting on you, a yellow banner under the header names the reason and how long it has been waiting.
+                    markers. Messages typed mid-turn (queued while Claude was still working) appear
+                    where Claude actually received them, and harness notifications are attributed to
+                    System. Export the entire session as JSON or share the permalink for async review.
+                    When the session is waiting on you, a yellow banner under the header names the
+                    reason and how long it has been waiting.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1351,7 +1365,7 @@
                     One shared marketplace ships 14 plugins for Claude Code and Codex, with 66
                     packaged skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, and
                     2 MCP-enabled plugins. Every skill includes canonical frontmatter and OpenAI
-                    metadata. The skills.sh CLI discovers 74 repository skills from the same
+                    metadata. The skills.sh CLI discovers 75 repository skills from the same
                     public source. Install with <code>claude plugin marketplace add</code>,
                     <code>codex plugin marketplace add</code>, or <code>npx skills add</code>.
                   </p>
@@ -1517,7 +1531,7 @@
           <div class="screenshot-gallery">
             <div class="screenshot-card" id="ss-dashboard">
               <img src="../images/dashboard.png" alt="Dashboard Overview" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">📡</span> <span><strong>Dashboard · Monitor</strong> — live overview of active sessions and agents. Stats tiles, collapsible subagent hierarchy cards, and a recent activity feed. Auto-refreshes every 5 s via WebSocket</span></div>
+              <div class="screenshot-caption"><span class="caption-icon">📡</span> <span><strong>Dashboard · Monitor</strong> — live overview of active sessions and agents. Cards with task state show a progress donut beside status with the same detailed preview as Sessions. Stats tiles, collapsible subagent hierarchy cards, and a recent activity feed auto-refresh via WebSocket</span></div>
             </div>
             <div class="screenshot-card">
               <img src="../images/dashboard-health.png" alt="Dashboard — System Health tab" width="100%" loading="lazy" decoding="async" />
@@ -1533,11 +1547,15 @@
             </div>
             <div class="screenshot-card" id="ss-sessions">
               <img src="../images/sessions.png" alt="Sessions Overview" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">📂</span> <span><strong>Sessions</strong> — searchable, filterable, server-paginated table. Each row shows status badge, agent count, duration, model, and cost. Click any row to drill into session detail</span></div>
+              <div class="screenshot-caption"><span class="caption-icon">📂</span> <span><strong>Sessions</strong> — searchable, filterable, server-paginated table. Rows with task state add a progress donut beside status; hover or focus opens a detailed task preview. Click any row to drill into session detail</span></div>
             </div>
             <div class="screenshot-card" id="ss-session-detail">
               <img src="../images/session-agents.png" alt="Session Detail — Agents tab" width="100%" loading="lazy" decoding="async" />
-              <div class="screenshot-caption"><span class="caption-icon">🤖</span> <span><strong>Session Detail · Agents</strong> — overview tiles (events, tool calls, subagents, errors, duration), top-tool usage bars, subagent type breakdown, and a collapsible parent–child agent hierarchy tree</span></div>
+              <div class="screenshot-caption"><span class="caption-icon">🤖</span> <span><strong>Session Detail · Agents</strong> — overview tiles, an owner-aware task-progress panel with 10 tasks per page when available, top-tool usage, subagent breakdown, and a collapsible parent–child agent hierarchy tree</span></div>
+            </div>
+            <div class="screenshot-card">
+              <img src="../images/tasks-details.png" alt="Task Progress panel on Session Detail" width="100%" loading="lazy" decoding="async" />
+              <div class="screenshot-caption"><span class="caption-icon">✅</span> <span><strong>Task Progress · Session Detail</strong> — the full owner-aware tracker combines a segmented completion donut, active task, completion bar, owner breakdown, and a task list paginated at 10 rows per page</span></div>
             </div>
             <div class="screenshot-card">
               <img src="../images/session-conversation.png" alt="Session Detail — Conversation tab" width="100%" loading="lazy" decoding="async" />
@@ -3713,6 +3731,9 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <code>include_transient=true</code>, and removed on process exit. A
             <code>SessionStart</code> hook, native live-thread row, or rollout then creates the
             durable session and main-agent rows without copying the temporary card into history.
+            If the user selects an existing thread in Codex's Resume picker, that exact Codex PID
+            opens the resumed rollout or writer lock immediately. CCAM uses that signal to switch
+            from the temporary card to the durable resumed session before the first new message.
           </p>
           <p>
             Codex <code>response_item</code> tool calls are indexed exactly once through a separate
@@ -4393,7 +4414,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
           <p>
             The Agent Monitor ships one shared marketplace containing 14 plugins for Claude Code and
             Codex, 66 packaged plugin skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers,
-            3 hook configurations, and 2 MCP-enabled plugins. The skills.sh CLI discovers 74 total
+            3 hook configurations, and 2 MCP-enabled plugins. The skills.sh CLI discovers 75 total
             repository skills. Product-specific manifests stay separate while skill instructions and
             validation remain shared.
           </p>
@@ -6965,8 +6986,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=68" defer></script>
-    <script src="script.js?v=49" defer></script>
+    <script src="i18n-content.js?v=74" defer></script>
+    <script src="script.js?v=55" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");

@@ -1,6 +1,7 @@
 /**
  * @file Dashboard.tsx
- * @description Main dashboard page showing real-time stats, active agents, and recent activity feed for Claude Code sessions.
+ * @description Main dashboard page showing real-time stats, active agents with
+ * session task-progress indicators, and recent activity for Claude and Codex.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -1020,7 +1021,12 @@ export function Dashboard() {
           api.agents.list({ status: "waiting", limit: 20, include_transient: true }),
           api.events.list({ limit: 30 }),
           api.pricing.totalCost(),
-          api.sessions.list({ status: "active", limit: 100, include_transient: true }),
+          api.sessions.list({
+            status: "active",
+            limit: 100,
+            include_transient: true,
+            include_task_progress: true,
+          }),
         ]
       );
       setStats(statsRes);
@@ -1094,8 +1100,12 @@ export function Dashboard() {
         debounceRef.timer = setTimeout(load, 300);
       }
       if (msg.type === "new_event") {
+        const newEvent = msg.data as DashboardEvent;
+        if (newEvent.tool_name === "update_plan") {
+          if (debounceRef.timer) clearTimeout(debounceRef.timer);
+          debounceRef.timer = setTimeout(load, 300);
+        }
         setRecentEvents((prev) => {
-          const newEvent = msg.data as DashboardEvent;
           // Deduplicate by event ID to prevent WS + polling race condition
           if (newEvent.id && prev.some((e) => e.id === newEvent.id)) return prev;
           return [newEvent, ...prev.slice(0, 14)];

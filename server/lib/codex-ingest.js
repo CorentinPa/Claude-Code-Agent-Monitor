@@ -2,8 +2,9 @@
  * @file Incrementally ingests Codex rollout JSONL transcripts into dashboard
  * sessions, events, response-item tool calls, costs, native `/rename` titles,
  * latest human-prompt card context, startup placeholders from hooks or Codex's
- * live-thread state, and dashboard card lifecycle. Independent byte cursors
- * make watcher/hook notifications idempotent and real-time safe.
+ * live-thread state, resume-picker reactivation, and dashboard card lifecycle.
+ * Independent byte cursors make watcher/hook notifications idempotent and
+ * real-time safe.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -17,6 +18,7 @@ const {
   getCodexSessionTitles,
 } = require("./codex-home");
 const { getDataDir } = require("./claude-home");
+const { updatePlanArgumentIndexes } = require("./codex-plan-call");
 
 const MAX_EVENT_SUMMARY = 500;
 const CONTEXT_SHORT_LIMIT = 272000;
@@ -190,6 +192,14 @@ function codexToolCategory(name) {
   return raw || "Other";
 }
 
+function isWrappedUpdatePlan(item) {
+  return (
+    item?.type === "custom_tool_call" &&
+    item.name === "exec" &&
+    updatePlanArgumentIndexes(item.input).length > 0
+  );
+}
+
 function responseToolDetails(record) {
   const item = record.payload || {};
   if (
@@ -208,10 +218,11 @@ function responseToolDetails(record) {
         ? "tool_search"
         : null);
   if (!rawName) return null;
+  const displayName = isWrappedUpdatePlan(item) ? "update_plan" : String(rawName);
   return {
     rawName: String(rawName),
-    tool: codexToolCategory(rawName),
-    summary: truncate(`Called ${rawName}`),
+    tool: codexToolCategory(displayName),
+    summary: truncate(`Called ${displayName}`),
     callId: item.call_id || null,
     itemType: item.type,
   };
@@ -499,6 +510,23 @@ function setCodexWaiting(sessionId, reason = "stop") {
     changed = stmts.setAgentAwaitingInput.run(now, reason, agentId).changes > 0 || changed;
   }
   return changed;
+}
+
+function resumeCodexSessionAtPrompt(sessionId) {
+  const session = stmts.getSession.get(sessionId);
+  if (
+    !session ||
+    session.provider !== "codex" ||
+    (session.source !== null && session.source !== "local")
+  ) {
+    return null;
+  }
+  const changed = setCodexWaiting(sessionId, "session_start");
+  return {
+    changed,
+    session: stmts.getSession.get(sessionId),
+    agent: stmts.getAgent.get(`codex:${sessionId}`),
+  };
 }
 
 function applyCodexTranscriptLifecycle(sessionId, record) {
@@ -941,6 +969,7 @@ module.exports = {
   applyCodexHookLifecycle,
   applyCodexTranscriptLifecycle,
   reconcileCodexSessionLiveness,
+  resumeCodexSessionAtPrompt,
   refreshCodexSessionTitles,
   syncCodexStateSessions,
   isCodexTranscript,

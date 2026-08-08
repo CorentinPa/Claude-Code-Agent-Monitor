@@ -2785,8 +2785,9 @@
             <p>
               Auto-installs into Claude Code and Codex hook settings. Claude Code creates a session
               at <code>SessionStart</code>; Codex shows an in-memory card as soon as its interactive
-              TUI process starts, then hands off to its hook, live-thread row, or rollout without
-              persisting the temporary card. SessionStart, PreToolUse,
+              TUI process starts, then hands off to its hook, live-thread row, rollout, or selected
+              Resume thread without persisting the temporary card or waiting for a new message.
+              SessionStart, PreToolUse,
               PostToolUse, Stop, SubagentStop, Notification - every event lands in SQLite within
               milliseconds.
             </p>
@@ -2804,7 +2805,7 @@
             <h3>Extensible by default</h3>
             <p>
               The marketplace includes 66 packaged skills, 18 Claude subagents, 34 Claude commands,
-              and two MCP-enabled plugins. The skills.sh CLI discovers 74 repository skills.
+              and two MCP-enabled plugins. The skills.sh CLI discovers 75 repository skills.
             </p>
           </div>
           <div class="feature-card">
@@ -3015,7 +3016,7 @@
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
                 <h4>Sessions</h4>
-                <p>Searchable, filterable, server-paginated sessions with a multi-project picker and custom sort controls</p>
+                <p>Searchable, server-paginated sessions with the live Codex startup row, task-progress donuts, project filters, and custom sorting</p>
               </div>
             </div>
           </div>
@@ -3025,7 +3026,17 @@
               <span class="showcase-expand-icon">⤢</span>
               <div class="showcase-overlay">
                 <h4>Session Detail</h4>
-                <p>Full session overview with metadata, cost, model, and tool breakdown</p>
+                <p>Full session overview with owner-aware task progress paginated at 10 tasks per page, metadata, cost, model, agents, and tool breakdown</p>
+              </div>
+            </div>
+          </div>
+          <div class="showcase-card" data-cat="sessions" data-title="Task Progress · Session Detail">
+            <div class="showcase-img">
+              <img src="images/tasks-details.png" alt="Owner-aware task progress panel on Session Detail" loading="lazy" />
+              <span class="showcase-expand-icon">⤢</span>
+              <div class="showcase-overlay">
+                <h4>Task Progress · Session Detail</h4>
+                <p>Full progress visualization, active task, owner breakdown, and 10 tasks per page</p>
               </div>
             </div>
           </div>

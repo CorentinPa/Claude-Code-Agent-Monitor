@@ -196,13 +196,16 @@ client/
 │   │   ├── SplashScreen.tsx   # First-run provider choice and live-hook setup gate
 │   │   ├── PaginatedLegend.tsx # Bounded responsive legends for Analytics and Workflows
 │   │   ├── RemoteSources.tsx  # Remote Data Sources settings panel (SSH multi-machine collection)
+│   │   ├── TodoProgressIndicator.tsx # Micro donut + portal tooltip beside Sessions status
+│   │   ├── TodoProgressPanel.tsx # Full owner-aware tracker on Session Detail
+│   │   ├── todoProgress.ts       # Shared task status colors/formatters
 │   │   └── workflows/      # D3.js workflow visualization components (12 files)
 │   │
 │   ├── pages/              # Route pages
 │   │   ├── Dashboard.tsx
 │   │   ├── KanbanBoard.tsx
-│   │   ├── Sessions.tsx       # Server-paginated table with searchable multi-project filtering and custom sort menus; shows each session's real name (synced live from the transcript), falls back to the short ID
-│   │   ├── SessionDetail.tsx  # Agent tree + event timeline + cursor-paginated Conversation tab (slash-command pills/output, rename markers, Codex exec calls)
+│   │   ├── Sessions.tsx       # Server-paginated table with task-progress donut, page-zero transient Codex startup row, searchable multi-project filtering, and custom sort menus
+│   │   ├── SessionDetail.tsx  # Overview + full task tracker + agent tree + event timeline + cursor-paginated Conversation tab
 │   │   ├── ActivityFeed.tsx  # Real-time event log; row click expands payload; Session btn navigates
 │   │   ├── Analytics.tsx
 │   │   ├── Workflows.tsx
@@ -655,7 +658,15 @@ interface SessionCardProps {
 
 #### AgentCard
 
-Shows agent type, status, tool usage, and cost breakdown.
+Shows agent type, status, tool usage, and cost breakdown. When the attached
+session has a `todo_summary`, the card renders the same accessible task-progress
+donut and portal tooltip used by the Sessions table immediately before the
+status badge. Session Detail renders the full task list with 10 rows per page.
+
+The Sessions table opts into `include_transient=true` only on page zero, so the
+local in-memory Codex startup row appears immediately just as it does on
+Dashboard and Kanban. That row remains non-navigable until the durable session
+ID replaces it; durable totals and later pages stay unchanged.
 
 **Props:**
 ```typescript

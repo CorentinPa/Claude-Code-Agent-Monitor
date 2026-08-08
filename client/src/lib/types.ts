@@ -705,6 +705,61 @@ export interface Session {
   /** Product that created this session. Historical records default to Claude;
    *  Codex rollouts are marked `codex` and use the GPT price card. */
   provider?: "claude" | "codex";
+  /** Compact latest task progress attached to Sessions-list rows. Null when the
+   * provider never emitted task/checklist/plan state. */
+  todo_summary?: SessionTodoSummary | null;
+  /** Full latest owner-attributed task state attached to Session Detail. Null
+   * when no observable task/checklist/plan state exists. */
+  todo_snapshot?: SessionTodoSnapshot | null;
+}
+
+export type SessionTodoStatus = "pending" | "in_progress" | "completed" | "cancelled" | "unknown";
+
+export interface SessionTodoItem {
+  id: string;
+  text: string;
+  status: SessionTodoStatus;
+  sourceStatus: string | null;
+  order: number;
+  agentId: string;
+  agentType: string;
+  description: string | null;
+}
+
+export interface SessionTodoOwnerSummary {
+  agentId: string;
+  agentType: string;
+  completed: number;
+  total: number;
+}
+
+export interface SessionTodoSummary {
+  total: number;
+  completed: number;
+  inProgress: number;
+  pending: number;
+  cancelled: number;
+  unknown: number;
+  percentComplete: number | null;
+  activeText: string | null;
+  sourceTool: string | null;
+  updatedAt: string | null;
+  previewItems: SessionTodoItem[];
+  overflowCount: number;
+  ownerBreakdown: SessionTodoOwnerSummary[];
+}
+
+export interface SessionTodoSnapshot extends Omit<
+  SessionTodoSummary,
+  "previewItems" | "overflowCount"
+> {
+  provider: "claude" | "codex";
+  source: "transcript" | "mixed";
+  sourceLine: number | null;
+  explanation: string | null;
+  confidence: "full" | "partial";
+  items: SessionTodoItem[];
+  includesSubagents: boolean;
 }
 
 /**

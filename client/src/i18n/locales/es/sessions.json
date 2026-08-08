@@ -20,6 +20,33 @@
   "tableCost": "Costo",
   "tableDirectory": "Directorio",
   "defaultName": "Sesión ",
+  "taskProgress": {
+    "title": "Progreso de Tareas",
+    "aria": "Progreso de tareas: {{completed}} de {{total}} completadas",
+    "complete": "completado",
+    "completeCount": "{{completed}} / {{total}} completadas · {{percent}}%",
+    "completeCountShort": "{{completed}} / {{total}} completadas",
+    "current": "Actual: {{task}}",
+    "more_one": "+{{count}} tarea más en el detalle de la sesión",
+    "more_other": "+{{count}} tareas más en el detalle de la sesión",
+    "includesSubagents": "Incluye subagentes",
+    "partialSource": "Derivado de eventos del ciclo de tareas",
+    "owners": "Responsables",
+    "mainAgent": "Agente principal",
+    "doneCount_one": "{{count}} completada",
+    "doneCount_other": "{{count}} completadas",
+    "remainingCount_one": "{{count}} pendiente",
+    "remainingCount_other": "{{count}} pendientes",
+    "hiddenTasks_one": "No se muestra {{count}} tarea adicional.",
+    "hiddenTasks_other": "No se muestran {{count}} tareas adicionales.",
+    "status": {
+      "completed": "Completadas",
+      "inProgress": "En progreso",
+      "pending": "Pendientes",
+      "cancelled": "Canceladas",
+      "unknown": "Desconocidas"
+    }
+  },
   "detail": {
     "waitingBanner": {
       "title": "Esperando tu entrada",

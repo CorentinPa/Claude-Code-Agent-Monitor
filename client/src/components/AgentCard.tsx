@@ -2,7 +2,8 @@
  * @file AgentCard.tsx
  * @description Defines the AgentCard component that displays a summary of an
  * agent's name, status, task, current tool, timestamps, and native Codex
- * title plus a latest-two-human-turn context. Durable cards navigate to session
+ * title plus a latest-two-human-turn context. Cards reuse session task-progress
+ * donuts beside status when available. Durable cards navigate to session
  * details while the brief pre-identity Codex process card stays non-navigable.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
@@ -61,6 +62,7 @@ import { useTranslation } from "react-i18next";
 import { Bot, GitBranch, Clock, Wrench, Cpu, Coins } from "lucide-react";
 import { useNavigate } from "react-router";
 import { AgentStatusBadge } from "./StatusBadge";
+import { TodoProgressIndicator } from "./TodoProgressIndicator";
 import { effectiveAgentStatus, isAgentAwaitingInput, agentAwaitingReason } from "../lib/types";
 import type { Agent, Session } from "../lib/types";
 import { formatDuration, timeAgo, formatModelName, pathBasename, fmtCost } from "../lib/format";
@@ -256,12 +258,17 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
         </div>
         {/* compact: cards are narrow — inline reason chip would squeeze the
             title, so the reason stays hover-tooltip-only here. */}
-        <AgentStatusBadge
-          status={status}
-          reason={agentAwaitingReason(agent)}
-          provider={session?.provider}
-          compact
-        />
+        <div className="flex flex-shrink-0 items-center gap-1.5">
+          {session?.todo_summary && (
+            <TodoProgressIndicator progress={session.todo_summary} stopClickPropagation />
+          )}
+          <AgentStatusBadge
+            status={status}
+            reason={agentAwaitingReason(agent)}
+            provider={session?.provider}
+            compact
+          />
+        </div>
       </div>
 
       {taskPreviewLines.length > 0 && (

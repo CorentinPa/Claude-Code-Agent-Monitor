@@ -119,6 +119,15 @@ describe("Codex rollout ingestor", () => {
       })
     );
     append(
+      record("response_item", {
+        type: "custom_tool_call",
+        name: "exec",
+        call_id: "plan-1",
+        input:
+          'const r = await tools.update_plan({plan:[{step:"Inspect",status:"completed"},{step:"Verify",status:"in_progress"}]}); text(r);',
+      })
+    );
+    append(
       record("event_msg", {
         type: "token_count",
         info: {
@@ -160,9 +169,12 @@ describe("Codex rollout ingestor", () => {
       .filter((event) => event.event_type === "codex_tool_call");
     assert.deepEqual(
       toolEvents.map((event) => event.tool_name).sort(),
-      ["Bash", "Edit"],
+      ["Bash", "Edit", "update_plan"],
       "response-item calls are retained for provider-aware tool analytics"
     );
+    const planEvent = toolEvents.find((event) => event.tool_name === "update_plan");
+    assert.equal(JSON.parse(planEvent.data).raw_tool_name, "exec");
+    assert.equal(planEvent.summary, "Called update_plan");
     assert.equal(
       hooksRouter.codexTranscriptPath({ thread_id: SESSION_ID }),
       ROLLOUT,
@@ -182,7 +194,7 @@ describe("Codex rollout ingestor", () => {
       stmts.listEventsBySession
         .all(SESSION_ID)
         .filter((event) => event.event_type === "codex_tool_call").length,
-      2,
+      3,
       "a repeated watcher/hook notification never double-counts response-item tools"
     );
 
