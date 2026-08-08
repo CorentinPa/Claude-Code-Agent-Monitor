@@ -2034,17 +2034,22 @@ async function cmdStop() {
     console.log(`${c.dim("○")} Dashboard is not running — nothing to stop.`);
     return;
   }
-  // Read PID from discovery file
-  const serverInfoPath = path.join(
-    process.env.CLAUDE_HOME || path.join(require("node:os").homedir(), ".claude"),
-    ".agent-dashboard.json"
+  // Resolve the discovery file and target port the same way baseUrl() does,
+  // so `stop` kills the exact server this CLI talks to rather than an
+  // arbitrary entry when multiple dashboards run side by side (e.g. the
+  // desktop app next to `npm run dev`).
+  const { getServerInfoPath, resolveDashboardPort } = require(
+    path.join(REPO_ROOT, "server", "lib", "server-info.js")
   );
+  const serverInfoPath = getServerInfoPath();
+  const targetPort = resolveDashboardPort();
   let pid;
   try {
     const raw = fs.readFileSync(serverInfoPath, "utf8");
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed.servers) && parsed.servers.length > 0) {
-      pid = parsed.servers[0].pid;
+      const match = parsed.servers.find((s) => s.port === targetPort);
+      pid = match ? match.pid : parsed.servers[0].pid;
     } else if (parsed.pid) {
       pid = parsed.pid;
     }
@@ -2052,9 +2057,7 @@ async function cmdStop() {
     // fall through
   }
   if (!pid) {
-    console.error(
-      c.red("✖ Could not determine server PID from ") + c.dim(serverInfoPath)
-    );
+    console.error(c.red("✖ Could not determine server PID from ") + c.dim(serverInfoPath));
     console.error(c.dim("  Kill it manually: find the node process on port 4820"));
     process.exit(1);
   }
