@@ -57,7 +57,7 @@ function writeDiscovery(port, pid) {
   const entry = { port, pid, startedAt: new Date().toISOString(), dataDir: TMP };
   fs.writeFileSync(
     infoPath,
-    JSON.stringify({ port, pid, startedAt: entry.startedAt, servers: [entry] }, null, 2),
+    JSON.stringify({ port, pid, startedAt: entry.startedAt, servers: [entry] }, null, 2)
   );
 }
 
@@ -167,7 +167,7 @@ describe("ccam stop — graceful shutdown", () => {
           const req = http.get(`http://127.0.0.1:${target.port}/api/health`, resolve);
           req.on("error", reject);
         }),
-      { code: "ECONNREFUSED" },
+      { code: "ECONNREFUSED" }
     );
   });
 });
@@ -204,12 +204,16 @@ describe("ccam stop — SIGKILL escalation", () => {
     assert.equal(isAlive(target.child.pid), false, "target should be dead after forced stop");
   });
 
-  it("stops the process even on platforms where SIGTERM cannot be ignored", { skip: !isWindows }, async () => {
-    const { code, out } = await ccamStop({ DASHBOARD_PORT: String(target.port) });
-    assert.equal(code, 0);
-    assert.match(out, /stopped/i);
-    assert.equal(isAlive(target.child.pid), false, "target should be dead after stop");
-  });
+  it(
+    "stops the process even on platforms where SIGTERM cannot be ignored",
+    { skip: !isWindows },
+    async () => {
+      const { code, out } = await ccamStop({ DASHBOARD_PORT: String(target.port) });
+      assert.equal(code, 0);
+      assert.match(out, /stopped/i);
+      assert.equal(isAlive(target.child.pid), false, "target should be dead after stop");
+    }
+  );
 });
 
 describe("ccam stop — stale PID", () => {
