@@ -2,8 +2,8 @@
  * @file Sessions.tsx
  * @description Displays all recorded sessions with searchable multi-project,
  * status, text, and custom sort filters plus server-side pagination. Rows can
- * show an accessible task-progress donut beside status, updated from event bus
- * activity.
+ * show an accessible task-progress donut beside status and the local transient
+ * Codex startup row before its durable session id exists.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 /* =============================================================================
@@ -97,6 +97,15 @@ import type { Session, DashboardEvent } from "../lib/types";
 const PAGE_SIZE = 10;
 type SessionSort = "time" | "duration" | "price";
 
+function isTransientProcessSession(session: Session): boolean {
+  if (!session.metadata) return false;
+  try {
+    return JSON.parse(session.metadata)?.pre_identity_process === true;
+  } catch {
+    return false;
+  }
+}
+
 export function Sessions() {
   const navigate = useNavigate();
   const { t } = useTranslation("sessions");
@@ -180,6 +189,7 @@ export function Sessions() {
           cwd: cwds.length > 0 ? cwds : undefined,
           sort_by: sortBy,
           sort_desc: sortDesc,
+          include_transient: page === 0,
           include_task_progress: true,
           limit: 10000,
           offset: 0,
@@ -195,6 +205,7 @@ export function Sessions() {
         cwd?: string[];
         sort_by?: SessionSort;
         sort_desc?: boolean;
+        include_transient?: boolean;
         include_task_progress?: boolean;
         limit: number;
         offset: number;
@@ -203,6 +214,7 @@ export function Sessions() {
         offset: page * PAGE_SIZE,
         sort_by: sortBy,
         sort_desc: sortDesc,
+        include_transient: page === 0,
         include_task_progress: true,
       };
       if (filter) params.status = filter;
@@ -287,6 +299,8 @@ export function Sessions() {
   // The server already paginates, so the rendered page IS the loaded list.
   const paged = sessions;
   const filtered = sessions; // kept for empty-state checks below
+  const displayedTotal =
+    total + (filter === "waiting" ? 0 : sessions.filter(isTransientProcessSession).length);
 
   const wsConnected = useSyncExternalStore(eventBus.onConnection, () => eventBus.connected);
   const SORT_OPTIONS: Array<{ label: string; value: SessionSort }> = [
@@ -318,7 +332,7 @@ export function Sessions() {
               )}
             </div>
             <p className="text-xs text-gray-500" aria-live="polite" aria-atomic="true">
-              {t("sessionCount", { count: total })}
+              {t("sessionCount", { count: displayedTotal })}
               {filter ? ` ${filter}` : ""}
             </p>
           </div>
@@ -447,8 +461,14 @@ export function Sessions() {
                 {paged.map((session) => (
                   <tr
                     key={session.id}
-                    onClick={() => navigate(`/sessions/${session.id}`)}
-                    className="hover:bg-surface-4 transition-colors cursor-pointer group"
+                    onClick={
+                      isTransientProcessSession(session)
+                        ? undefined
+                        : () => navigate(`/sessions/${session.id}`)
+                    }
+                    className={`hover:bg-surface-4 transition-colors group ${
+                      isTransientProcessSession(session) ? "cursor-default" : "cursor-pointer"
+                    }`}
                   >
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
@@ -517,7 +537,9 @@ export function Sessions() {
                       {session.cwd ? truncate(session.cwd, 30) : "-"}
                     </td>
                     <td className="px-3 py-4">
-                      <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
+                      {!isTransientProcessSession(session) && (
+                        <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
+                      )}
                     </td>
                   </tr>
                 ))}

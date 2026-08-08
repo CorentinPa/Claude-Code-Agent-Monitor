@@ -204,7 +204,7 @@ client/
 │   ├── pages/              # Route pages
 │   │   ├── Dashboard.tsx
 │   │   ├── KanbanBoard.tsx
-│   │   ├── Sessions.tsx       # Server-paginated table with task-progress donut beside status, searchable multi-project filtering, and custom sort menus
+│   │   ├── Sessions.tsx       # Server-paginated table with task-progress donut, page-zero transient Codex startup row, searchable multi-project filtering, and custom sort menus
 │   │   ├── SessionDetail.tsx  # Overview + full task tracker + agent tree + event timeline + cursor-paginated Conversation tab
 │   │   ├── ActivityFeed.tsx  # Real-time event log; row click expands payload; Session btn navigates
 │   │   ├── Analytics.tsx
@@ -662,6 +662,11 @@ Shows agent type, status, tool usage, and cost breakdown. When the attached
 session has a `todo_summary`, the card renders the same accessible task-progress
 donut and portal tooltip used by the Sessions table immediately before the
 status badge. Session Detail renders the full task list with 10 rows per page.
+
+The Sessions table opts into `include_transient=true` only on page zero, so the
+local in-memory Codex startup row appears immediately just as it does on
+Dashboard and Kanban. That row remains non-navigable until the durable session
+ID replaces it; durable totals and later pages stay unchanged.
 
 **Props:**
 ```typescript
