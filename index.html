@@ -2785,8 +2785,9 @@
             <p>
               Auto-installs into Claude Code and Codex hook settings. Claude Code creates a session
               at <code>SessionStart</code>; Codex shows an in-memory card as soon as its interactive
-              TUI process starts, then hands off to its hook, live-thread row, or rollout without
-              persisting the temporary card. SessionStart, PreToolUse,
+              TUI process starts, then hands off to its hook, live-thread row, rollout, or selected
+              Resume thread without persisting the temporary card or waiting for a new message.
+              SessionStart, PreToolUse,
               PostToolUse, Stop, SubagentStop, Notification - every event lands in SQLite within
               milliseconds.
             </p>

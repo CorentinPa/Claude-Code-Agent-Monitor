@@ -1,8 +1,8 @@
 /**
  * @file Tracks interactive Codex TUI processes before Codex creates a durable
  * session identity. The resulting session and agent cards live only in memory,
- * never enter SQLite, and disappear when the process exits or a durable Codex
- * session in the same working directory takes their place.
+ * never enter SQLite, and hand off immediately when the process opens a durable
+ * thread writer lock, including before a resumed thread receives a new message.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -11,6 +11,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { execFile } = require("node:child_process");
 const { isInsideContainer } = require("../../scripts/install-hooks");
+const { getCodexHome, getCodexSessionsDir } = require("./codex-home");
 
 const NON_INTERACTIVE_COMMANDS = new Set([
   "e",
@@ -62,6 +63,7 @@ const VALUE_FLAGS = new Set([
 ]);
 
 let sessionsById = new Map();
+let matchedSessionIds = new Set();
 let monitorStarted = false;
 
 function commandTokens(args) {
@@ -135,6 +137,94 @@ function run(command, args, options) {
   });
 }
 
+function writerLockSessionId(
+  filename,
+  lockRoot = path.join(getCodexHome(), "thread-writer-locks")
+) {
+  if (typeof filename !== "string" || !filename) return null;
+  const resolved = path.resolve(filename);
+  const root = path.resolve(lockRoot);
+  if (path.dirname(resolved) !== root || path.extname(resolved) !== ".lock") return null;
+  const sessionId = path.basename(resolved, ".lock");
+  return /^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(sessionId) ? sessionId : null;
+}
+
+function rolloutSessionId(filename, sessionsRoot = getCodexSessionsDir()) {
+  if (typeof filename !== "string" || !filename) return null;
+  const resolved = path.resolve(filename);
+  const root = path.resolve(sessionsRoot);
+  if (!resolved.startsWith(`${root}${path.sep}`)) return null;
+  return path.basename(resolved).match(/([0-9a-f]{8}-[0-9a-f-]{27,})\.jsonl$/i)?.[1] || null;
+}
+
+function newestWriterLock(paths, options = {}) {
+  const statFile = options.statFile || fs.statSync;
+  const locks = [];
+  for (const filename of paths) {
+    const sessionId = writerLockSessionId(filename, options.lockRoot);
+    if (!sessionId) continue;
+    let openedAtMs = 0;
+    try {
+      const stat = statFile(filename);
+      openedAtMs = stat.birthtimeMs || stat.mtimeMs || 0;
+    } catch {
+      // Open descriptors remain useful even when the path disappears mid-probe.
+    }
+    locks.push({ sessionId, openedAtMs });
+  }
+  return locks.sort(
+    (left, right) =>
+      right.openedAtMs - left.openedAtMs || right.sessionId.localeCompare(left.sessionId)
+  )[0];
+}
+
+function processInfosFromLsof(argsByPid, output, options = {}) {
+  const byPid = new Map();
+  let currentPid = null;
+  let currentField = null;
+  for (const line of String(output || "").split("\n")) {
+    if (line.startsWith("p")) {
+      const pid = Number(line.slice(1));
+      currentPid = argsByPid.has(pid) ? pid : null;
+      currentField = null;
+      if (currentPid && !byPid.has(currentPid)) {
+        byPid.set(currentPid, { pid: currentPid, cwd: null, openPaths: [] });
+      }
+      continue;
+    }
+    if (!currentPid) continue;
+    if (line.startsWith("f")) {
+      currentField = line.slice(1);
+      continue;
+    }
+    if (!line.startsWith("n")) continue;
+    const filename = line.slice(1);
+    const processInfo = byPid.get(currentPid);
+    if (currentField === "cwd") processInfo.cwd = path.resolve(filename);
+    else processInfo.openPaths.push(filename);
+  }
+
+  const processes = [];
+  for (const processInfo of byPid.values()) {
+    if (!processInfo.cwd) continue;
+    const rolloutIds = [
+      ...new Set(
+        processInfo.openPaths
+          .map((filename) => rolloutSessionId(filename, options.sessionsRoot))
+          .filter(Boolean)
+      ),
+    ];
+    const newest = newestWriterLock(processInfo.openPaths, options);
+    const sessionId = rolloutIds.length === 1 ? rolloutIds[0] : newest?.sessionId;
+    processes.push({
+      pid: processInfo.pid,
+      cwd: processInfo.cwd,
+      ...(sessionId ? { sessionId } : {}),
+    });
+  }
+  return processes;
+}
+
 async function probeInteractiveCodexProcesses() {
   if (probeDisabled()) return { available: false, processes: [] };
 
@@ -161,7 +251,20 @@ async function probeInteractiveCodexProcesses() {
   if (process.platform === "linux") {
     for (const pid of argsByPid.keys()) {
       try {
-        processes.push({ pid, cwd: path.resolve(fs.readlinkSync(`/proc/${pid}/cwd`)) });
+        const cwd = path.resolve(fs.readlinkSync(`/proc/${pid}/cwd`));
+        const openPaths = fs.readdirSync(`/proc/${pid}/fd`).flatMap((descriptor) => {
+          try {
+            return [fs.readlinkSync(`/proc/${pid}/fd/${descriptor}`)];
+          } catch {
+            return [];
+          }
+        });
+        const rolloutIds = [
+          ...new Set(openPaths.map((filename) => rolloutSessionId(filename)).filter(Boolean)),
+        ];
+        const newest = newestWriterLock(openPaths);
+        const sessionId = rolloutIds.length === 1 ? rolloutIds[0] : newest?.sessionId;
+        processes.push({ pid, cwd, ...(sessionId ? { sessionId } : {}) });
       } catch {
         // The process exited between ps and readlink.
       }
@@ -171,31 +274,17 @@ async function probeInteractiveCodexProcesses() {
 
   let lsofOutput;
   try {
-    lsofOutput = await run(
-      "lsof",
-      ["-a", "-p", [...argsByPid.keys()].join(","), "-d", "cwd", "-Fn"],
-      {
-        encoding: "utf8",
-        timeout: 10_000,
-        maxBuffer: 16 * 1024 * 1024,
-      }
-    );
+    lsofOutput = await run("lsof", ["-a", "-p", [...argsByPid.keys()].join(","), "-Fn"], {
+      encoding: "utf8",
+      timeout: 10_000,
+      maxBuffer: 16 * 1024 * 1024,
+    });
   } catch (error) {
     lsofOutput = error && typeof error.stdout === "string" && error.stdout ? error.stdout : null;
     if (lsofOutput === null) return { available: false, processes: [] };
   }
 
-  let currentPid = null;
-  for (const line of lsofOutput.split("\n")) {
-    if (line.startsWith("p")) {
-      const pid = Number(line.slice(1));
-      currentPid = argsByPid.has(pid) ? pid : null;
-    } else if (line.startsWith("n") && currentPid) {
-      processes.push({ pid: currentPid, cwd: path.resolve(line.slice(1)) });
-      currentPid = null;
-    }
-  }
-  return { available: true, processes };
+  return { available: true, processes: processInfosFromLsof(argsByPid, lsofOutput) };
 }
 
 function overlaySessionId(processInfo) {
@@ -230,6 +319,12 @@ function buildSession(processInfo, startedAt) {
 }
 
 function reconcileCodexProcessOverlay(processes, durableSessions, now = new Date().toISOString()) {
+  const durableIds = new Set((durableSessions || []).map((session) => session?.id).filter(Boolean));
+  const matchedDurableIds = new Set(
+    (processes || [])
+      .map((processInfo) => processInfo?.sessionId)
+      .filter((sessionId) => durableIds.has(sessionId))
+  );
   const liveByCwd = new Map();
   for (const processInfo of processes || []) {
     if (
@@ -239,6 +334,7 @@ function reconcileCodexProcessOverlay(processes, durableSessions, now = new Date
     ) {
       continue;
     }
+    if (processInfo.sessionId && durableIds.has(processInfo.sessionId)) continue;
     const cwd = path.resolve(processInfo.cwd);
     const entries = liveByCwd.get(cwd) || [];
     if (!entries.some((entry) => entry.pid === processInfo.pid)) {
@@ -249,6 +345,8 @@ function reconcileCodexProcessOverlay(processes, durableSessions, now = new Date
 
   const durableCountByCwd = new Map();
   for (const session of durableSessions || []) {
+    if (session?.status && session.status !== "active") continue;
+    if (matchedDurableIds.has(session.id)) continue;
     if (!path.isAbsolute(session?.cwd || "")) continue;
     const cwd = path.resolve(session.cwd);
     durableCountByCwd.set(cwd, (durableCountByCwd.get(cwd) || 0) + 1);
@@ -275,6 +373,7 @@ function reconcileCodexProcessOverlay(processes, durableSessions, now = new Date
       awaiting_reason: null,
     }));
   sessionsById = desired;
+  matchedSessionIds = matchedDurableIds;
   return { added, removed };
 }
 
@@ -286,23 +385,48 @@ async function refreshCodexProcessOverlay(options = {}) {
   if (!durableSessions) {
     try {
       const { db } = require("../db");
+      const selectedIds = [
+        ...new Set(
+          probe.processes
+            .map((processInfo) => processInfo?.sessionId)
+            .filter((sessionId) => typeof sessionId === "string" && sessionId)
+        ),
+      ];
+      const selectedClause = selectedIds.length
+        ? ` OR id IN (${selectedIds.map(() => "?").join(", ")})`
+        : "";
       durableSessions = db
         .prepare(
-          `SELECT id, cwd FROM sessions
-           WHERE provider = 'codex' AND status = 'active'
-             AND (source = 'local' OR source IS NULL)`
+          `SELECT id, cwd, status FROM sessions
+           WHERE provider = 'codex' AND (source = 'local' OR source IS NULL)
+             AND (status = 'active'${selectedClause})`
         )
-        .all();
+        .all(...selectedIds);
     } catch {
       return { added: [], removed: [] };
     }
   }
-  return reconcileCodexProcessOverlay(probe.processes, durableSessions, options.now);
+  const durableIds = new Set((durableSessions || []).map((session) => session.id));
+  const resumed = [];
+  for (const processInfo of probe.processes) {
+    if (!processInfo?.sessionId || !durableIds.has(processInfo.sessionId)) continue;
+    try {
+      const { resumeCodexSessionAtPrompt } = require("./codex-ingest");
+      const result = resumeCodexSessionAtPrompt(processInfo.sessionId);
+      if (result?.changed) resumed.push(result);
+    } catch {
+      // Lock hints are optional; rollout and hook ingestion remain authoritative.
+    }
+  }
+  const changes = reconcileCodexProcessOverlay(probe.processes, durableSessions, options.now);
+  return { ...changes, resumed };
 }
 
 function visibleCodexProcessSessions(durableSessions = []) {
   const durableCountByCwd = new Map();
   for (const session of durableSessions) {
+    if (session?.status && session.status !== "active") continue;
+    if (matchedSessionIds.has(session.id)) continue;
     if (!path.isAbsolute(session?.cwd || "")) continue;
     const cwd = path.resolve(session.cwd);
     durableCountByCwd.set(cwd, (durableCountByCwd.get(cwd) || 0) + 1);
@@ -364,6 +488,10 @@ function startCodexProcessOverlay({ broadcast, intervalMs = 1_000 } = {}) {
       for (const session of [...changes.added, ...changes.removed]) {
         broadcast("session_updated", session);
       }
+      for (const result of changes.resumed || []) {
+        if (result.session) broadcast("session_updated", result.session);
+        if (result.agent) broadcast("agent_updated", result.agent);
+      }
     } catch {
       // This optional pre-identity signal must never affect durable ingestion.
     } finally {
@@ -379,15 +507,18 @@ function startCodexProcessOverlay({ broadcast, intervalMs = 1_000 } = {}) {
 
 function resetCodexProcessOverlayForTests() {
   sessionsById = new Map();
+  matchedSessionIds = new Set();
 }
 
 module.exports = {
   getCodexProcessAgents,
   getCodexProcessSessions,
   isInteractiveCodexCommand,
+  processInfosFromLsof,
   probeInteractiveCodexProcesses,
   reconcileCodexProcessOverlay,
   refreshCodexProcessOverlay,
+  rolloutSessionId,
   resetCodexProcessOverlayForTests,
   startCodexProcessOverlay,
 };

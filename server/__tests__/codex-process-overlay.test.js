@@ -1,7 +1,8 @@
 /**
  * @file Regression tests for the in-memory Codex pre-identity process overlay.
  * Proves immediate startup visibility, strict command filtering, zero SQLite
- * persistence, durable-session handoff, same-cwd concurrency, and exit cleanup.
+ * persistence, resume-picker handoff before the first message, same-cwd
+ * concurrency, durable-session takeover, and exit cleanup.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -23,7 +24,9 @@ const {
   getCodexProcessAgents,
   getCodexProcessSessions,
   isInteractiveCodexCommand,
+  processInfosFromLsof,
   reconcileCodexProcessOverlay,
+  refreshCodexProcessOverlay,
   resetCodexProcessOverlayForTests,
 } = require("../lib/codex-process-overlay");
 
@@ -95,6 +98,73 @@ describe("interactive Codex command classification", () => {
     ]) {
       assert.equal(isInteractiveCodexCommand(command), false, command);
     }
+  });
+
+  it("prefers the open resumed rollout over the newer startup writer lock", () => {
+    const lockRoot = "/tmp/codex-home/thread-writer-locks";
+    const startupId = "019fdf72-0107-7e90-9cc2-7741580c4ce5";
+    const resumedId = "019fdab4-3502-7792-9d95-cd5ef25b0e1d";
+    const processes = processInfosFromLsof(
+      new Map([[60182, "codex --yolo"]]),
+      [
+        "p60182",
+        "fcwd",
+        "n/workspace/launch",
+        "f43",
+        `n/tmp/codex-home/sessions/2026/08/06/rollout-2026-08-06T22-31-11-${resumedId}.jsonl`,
+        "f44",
+        `n${lockRoot}/${resumedId}.lock`,
+        "f46",
+        `n${lockRoot}/${startupId}.lock`,
+      ].join("\n"),
+      {
+        lockRoot,
+        sessionsRoot: "/tmp/codex-home/sessions",
+        statFile(filename) {
+          return {
+            birthtimeMs: filename.includes(startupId) ? 2_000 : 1_000,
+            mtimeMs: filename.includes(startupId) ? 2_000 : 1_000,
+          };
+        },
+      }
+    );
+
+    assert.deepEqual(processes, [
+      {
+        pid: 60182,
+        cwd: "/workspace/launch",
+        sessionId: resumedId,
+      },
+    ]);
+  });
+
+  it("falls back to the newest writer lock before a rollout is open", () => {
+    const lockRoot = "/tmp/codex-home/thread-writer-locks";
+    const startupId = "019fdf72-0107-7e90-9cc2-7741580c4ce5";
+    const resumedId = "019fdab4-3502-7792-9d95-cd5ef25b0e1d";
+    const processes = processInfosFromLsof(
+      new Map([[60182, "codex --yolo"]]),
+      [
+        "p60182",
+        "fcwd",
+        "n/workspace/launch",
+        "f44",
+        `n${lockRoot}/${resumedId}.lock`,
+        "f46",
+        `n${lockRoot}/${startupId}.lock`,
+      ].join("\n"),
+      {
+        lockRoot,
+        statFile(filename) {
+          return {
+            birthtimeMs: filename.includes(resumedId) ? 2_000 : 1_000,
+            mtimeMs: filename.includes(resumedId) ? 2_000 : 1_000,
+          };
+        },
+      }
+    );
+
+    assert.equal(processes[0].sessionId, resumedId);
   });
 });
 
@@ -254,6 +324,64 @@ describe("Codex process overlay lifecycle", () => {
     db.prepare("DELETE FROM sessions WHERE id = ?").run(durableId);
   });
 
+  it("switches from the startup card to a selected resumed thread before its first message", async () => {
+    const launchCwd = "/workspace/codex-launch";
+    const originalCwd = "/workspace/resumed-thread";
+    const sessionId = "019fdeac-fede-7250-b7d2-a4bdf6772d3f";
+    const agentId = `codex:${sessionId}`;
+    const processInfo = { pid: 4571, cwd: launchCwd };
+    const started = reconcileCodexProcessOverlay([processInfo], []);
+    assert.equal(started.added.length, 1);
+
+    const timestamp = "2026-08-07T21:16:03.000Z";
+    const metadata = JSON.stringify({ provider: "codex", transcript_path: null });
+    stmts.insertCodexSession.run(
+      sessionId,
+      "Resumed Codex session",
+      "completed",
+      originalCwd,
+      "gpt-5.6-luna",
+      "local",
+      timestamp,
+      timestamp,
+      metadata
+    );
+    stmts.insertAgent.run(
+      agentId,
+      sessionId,
+      "Codex",
+      "main",
+      null,
+      "completed",
+      null,
+      null,
+      metadata
+    );
+
+    const change = await refreshCodexProcessOverlay({
+      probe: {
+        available: true,
+        processes: [{ ...processInfo, sessionId }],
+      },
+      now: "2026-08-07T21:16:04.000Z",
+    });
+
+    assert.equal(change.resumed.length, 1);
+    assert.equal(change.resumed[0].session.id, sessionId);
+    assert.equal(change.removed.length, 1);
+    assert.equal(change.removed[0].id, started.added[0].id);
+    assert.equal(getCodexProcessSessions().length, 0);
+
+    const resumedSession = stmts.getSession.get(sessionId);
+    const resumedAgent = stmts.getAgent.get(agentId);
+    assert.equal(resumedSession.status, "active");
+    assert.equal(resumedSession.awaiting_reason, "session_start");
+    assert.equal(resumedAgent.status, "waiting");
+    assert.equal(resumedAgent.awaiting_reason, "session_start");
+
+    db.prepare("DELETE FROM sessions WHERE id = ?").run(sessionId);
+  });
+
   it("keeps exactly one placeholder for a second process sharing a durable cwd", () => {
     const cwd = "/workspace/parallel-codex";
     const change = reconcileCodexProcessOverlay(
@@ -262,6 +390,33 @@ describe("Codex process overlay lifecycle", () => {
         { pid: 4602, cwd },
       ],
       [{ id: "durable-in-same-cwd", cwd }]
+    );
+
+    assert.equal(change.added.length, 1);
+    assert.equal(getCodexProcessSessions().length, 1);
+  });
+
+  it("keeps a fresh placeholder beside an exactly matched resumed process in the same cwd", () => {
+    const cwd = "/workspace/mixed-resume";
+    const resumedId = "durable-resumed-in-same-cwd";
+    const change = reconcileCodexProcessOverlay(
+      [
+        { pid: 4603, cwd, sessionId: resumedId },
+        { pid: 4604, cwd },
+      ],
+      [{ id: resumedId, cwd, status: "active" }]
+    );
+
+    assert.equal(change.added.length, 1);
+    assert.match(change.added[0].id, /^codex-process:4604:/);
+    assert.equal(getCodexProcessSessions([{ id: resumedId, cwd, status: "active" }]).length, 1);
+  });
+
+  it("does not let completed history hide an unrelated new process in the same cwd", () => {
+    const cwd = "/workspace/reused-cwd";
+    const change = reconcileCodexProcessOverlay(
+      [{ pid: 4603, cwd }],
+      [{ id: "completed-history", cwd, status: "completed" }]
     );
 
     assert.equal(change.added.length, 1);

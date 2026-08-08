@@ -2,8 +2,9 @@
  * @file Incrementally ingests Codex rollout JSONL transcripts into dashboard
  * sessions, events, response-item tool calls, costs, native `/rename` titles,
  * latest human-prompt card context, startup placeholders from hooks or Codex's
- * live-thread state, and dashboard card lifecycle. Independent byte cursors
- * make watcher/hook notifications idempotent and real-time safe.
+ * live-thread state, resume-picker reactivation, and dashboard card lifecycle.
+ * Independent byte cursors make watcher/hook notifications idempotent and
+ * real-time safe.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -511,6 +512,23 @@ function setCodexWaiting(sessionId, reason = "stop") {
   return changed;
 }
 
+function resumeCodexSessionAtPrompt(sessionId) {
+  const session = stmts.getSession.get(sessionId);
+  if (
+    !session ||
+    session.provider !== "codex" ||
+    (session.source !== null && session.source !== "local")
+  ) {
+    return null;
+  }
+  const changed = setCodexWaiting(sessionId, "session_start");
+  return {
+    changed,
+    session: stmts.getSession.get(sessionId),
+    agent: stmts.getAgent.get(`codex:${sessionId}`),
+  };
+}
+
 function applyCodexTranscriptLifecycle(sessionId, record) {
   const type = record?.type === "event_msg" ? record.payload?.type : null;
   if (!LIFECYCLE_EVENT_TYPES.has(type)) return false;
@@ -951,6 +969,7 @@ module.exports = {
   applyCodexHookLifecycle,
   applyCodexTranscriptLifecycle,
   reconcileCodexSessionLiveness,
+  resumeCodexSessionAtPrompt,
   refreshCodexSessionTitles,
   syncCodexStateSessions,
   isCodexTranscript,

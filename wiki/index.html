@@ -3732,6 +3732,9 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
             <code>include_transient=true</code>, and removed on process exit. A
             <code>SessionStart</code> hook, native live-thread row, or rollout then creates the
             durable session and main-agent rows without copying the temporary card into history.
+            If the user selects an existing thread in Codex's Resume picker, that exact Codex PID
+            opens the resumed rollout or writer lock immediately. CCAM uses that signal to switch
+            from the temporary card to the durable resumed session before the first new message.
           </p>
           <p>
             Codex <code>response_item</code> tool calls are indexed exactly once through a separate
@@ -6984,8 +6987,8 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=72" defer></script>
-    <script src="script.js?v=53" defer></script>
+    <script src="i18n-content.js?v=73" defer></script>
+    <script src="script.js?v=54" defer></script>
     <script>
       (function () {
         var carousel = document.getElementById("feature-carousel");
