@@ -2091,10 +2091,16 @@ async function cmdStop() {
   // Escalate to SIGKILL
   try {
     process.kill(pid, "SIGKILL");
-  } catch {
-    // already gone
+    console.log(`${c.green("●")} Dashboard stopped (forced).`);
+  } catch (err) {
+    if (err.code === "ESRCH") {
+      // Process exited between the last check and SIGKILL — success
+      console.log(`${c.green("●")} Dashboard stopped.`);
+    } else {
+      console.error(c.red(`✖ Failed to stop dashboard (pid ${pid}): ${err.message}`));
+      process.exit(1);
+    }
   }
-  console.log(`${c.green("●")} Dashboard stopped (forced).`);
 }
 
 /** Up/down indicator without exiting non-zero noise — the at-a-glance check. */
