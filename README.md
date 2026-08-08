@@ -151,6 +151,12 @@ Comes with a sleek dark theme, responsive design, and intuitive navigation to ex
 </p>
 
 <p align="center">
+  <img src="images/tasks-overview.png" alt="Task Progress Overview on Dashboard agent cards" width="100%">
+  <br>
+  <em>📋 <strong>Task Progress · Overview</strong> — Dashboard agent cards and Sessions rows reuse the same compact completion donut beside status; hover or focus opens an owner-aware preview of current work and task states</em>
+</p>
+
+<p align="center">
   <img src="images/dashboard-health.png" alt="Dashboard — System Health tab" width="100%">
   <br>
   <em>🩺 <strong>Dashboard · Health</strong> — composite health score ring, storage engine donut chart, cache hit / error / success gauges, tool invocation bars, subagent effectiveness, model token distribution, and compaction stats — all auto-refreshing every 5 s</em>
@@ -178,6 +184,12 @@ Comes with a sleek dark theme, responsive design, and intuitive navigation to ex
   <img src="images/session-agents.png" alt="Session Detail — Agents tab" width="100%">
   <br>
   <em>🤖 <strong>Session Detail · Agents</strong> — real-time overview tiles (events, tool calls, subagents, compactions, errors, duration), top-tool usage bars, subagent type breakdown, token flow, and the agent hierarchy tree</em>
+</p>
+
+<p align="center">
+  <img src="images/tasks-details.png" alt="Task Progress panel on Session Detail" width="100%">
+  <br>
+  <em>✅ <strong>Task Progress · Session Detail</strong> — the full owner-aware tracker combines a segmented completion donut, active task, completion bar, owner breakdown, and a task list paginated at 10 rows per page</em>
 </p>
 
 <p align="center">

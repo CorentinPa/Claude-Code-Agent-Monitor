@@ -150,6 +150,12 @@ flowchart LR
 </p>
 
 <p align="center">
+  <img src="images/tasks-overview.png" alt="Tổng quan tiến độ công việc trên thẻ Agent của Dashboard" width="100%">
+  <br>
+  <em>📋 <strong>Tiến độ công việc · Tổng quan</strong> — thẻ Agent trên Dashboard và hàng trong Sessions dùng cùng donut hoàn thành nhỏ gọn cạnh trạng thái; hover hoặc focus mở bản xem trước theo chủ sở hữu về công việc hiện tại và trạng thái tác vụ</em>
+</p>
+
+<p align="center">
   <img src="images/dashboard-health.png" alt="Dashboard — tab Sức khỏe hệ thống" width="100%">
   <br>
   <em>🩺 <strong>Dashboard · Health</strong> — vòng điểm sức khỏe tổng hợp, biểu đồ donut lưu trữ, thước đo cache / lỗi / thành công, thanh công cụ sử dụng, hiệu quả subagent, phân bổ token mô hình, thống kê nén — tự làm mới mỗi 5 giây</em>
@@ -177,6 +183,12 @@ flowchart LR
   <img src="images/session-agents.png" alt="Chi tiết phiên — tab Agent" width="100%">
   <br>
   <em>🤖 <strong>Chi tiết phiên · Agent</strong> — bảng tổng quan thời gian thực (sự kiện, lượt gọi công cụ, subagent, lần nén, lỗi, thời lượng), thanh sử dụng top công cụ, phân tích theo loại subagent, dòng chảy token và cây phân cấp Agent</em>
+</p>
+
+<p align="center">
+  <img src="images/tasks-details.png" alt="Bảng tiến độ công việc trong Chi tiết phiên" width="100%">
+  <br>
+  <em>✅ <strong>Tiến độ công việc · Chi tiết phiên</strong> — trình theo dõi đầy đủ theo chủ sở hữu kết hợp donut hoàn thành phân đoạn, tác vụ đang chạy, thanh hoàn thành, phân tích chủ sở hữu và danh sách phân trang 10 hàng mỗi trang</em>
 </p>
 
 <p align="center">

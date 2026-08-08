@@ -150,6 +150,12 @@ Vino con un elegante tema oscuro, diseño responsive y navegación intuitiva par
 </p>
 
 <p align="center">
+<img src="images/tasks-overview.png" alt="Resumen del progreso de tareas en las tarjetas de Agent del Dashboard" width="100%">
+<br>
+<em>📋 <strong>Progreso de tareas · Resumen</strong> — las tarjetas de Agent del Dashboard y las filas de Sessions reutilizan el mismo donut compacto de finalización junto al estado; al pasar el cursor o enfocar se abre una vista previa por propietario del trabajo actual y los estados de las tareas</em>
+</p>
+
+<p align="center">
 <img src="images/dashboard-health.png" alt="Panel de control — Pestaña Estado del sistema" width="100%">
 <br>
 <em>🩺 <strong>Panel de control · Salud</strong> — anillo de puntuación de salud compuesto, gráfico de donas del motor de almacenamiento, indicadores de éxito / error / éxito de la caché, barras de invocación de herramientas, eficacia del subagente, distribución de tokens del modelo y estadísticas de compactación — todo se actualiza automáticamente cada 5 s</em>
@@ -177,6 +183,12 @@ Vino con un elegante tema oscuro, diseño responsive y navegación intuitiva par
 <img src="images/session-agents.png" alt="Detalles de la sesión — Pestaña Agentes" width="100%">
 <br>
 <em>🤖 <strong>Detalles de la sesión · Agentes</strong> — baldosas de visión general en tiempo real (eventos, llamadas de herramientas, subagentes, compactaciones, errores, duración), barras de uso de herramientas principales, desglose del tipo de subagente, flujo de tokens y el árbol jerárquico del agente</em>
+</p>
+
+<p align="center">
+<img src="images/tasks-details.png" alt="Panel de progreso de tareas en Detalles de la sesión" width="100%">
+<br>
+<em>✅ <strong>Progreso de tareas · Detalles de la sesión</strong> — el rastreador completo por propietario combina un donut segmentado de finalización, la tarea activa, una barra de finalización, el desglose por propietario y una lista paginada de 10 filas por página</em>
 </p>
 
 <p align="center">

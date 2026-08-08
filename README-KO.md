@@ -150,6 +150,12 @@ flowchart LR
 </p>
 
 <p align="center">
+  <img src="images/tasks-overview.png" alt="Dashboard Agent 카드의 작업 진행률 개요" width="100%">
+  <br>
+  <em>📋 <strong>작업 진행률 · 개요</strong> — Dashboard Agent 카드와 Sessions 행은 상태 옆에 동일한 컴팩트 완료 도넛을 사용하며, 마우스를 올리거나 포커스하면 현재 작업과 작업 상태를 소유자별로 보여주는 미리보기가 열립니다</em>
+</p>
+
+<p align="center">
   <img src="images/dashboard-health.png" alt="Dashboard — System Health tab" width="100%">
   <br>
   <em>🩺 <strong>대시보드 · 상태</strong> — 종합 상태 점수 링, 스토리지 엔진 도넛 차트, 캐시 적중 / 오류 / 성공 게이지, 도구 호출 막대, 서브에이전트 효과성, 모델 토큰 분포, 컴팩션 통계 — 모두 5초마다 자동 새로고침됩니다</em>
@@ -177,6 +183,12 @@ flowchart LR
   <img src="images/session-agents.png" alt="Session Detail — Agents tab" width="100%">
   <br>
   <em>🤖 <strong>세션 상세 · 에이전트</strong> — 실시간 개요 타일(이벤트, 도구 호출, 서브에이전트, 컴팩션, 오류, 소요 시간), 상위 도구 사용 막대, 서브에이전트 유형 분석, 토큰 흐름, 에이전트 계층 트리</em>
+</p>
+
+<p align="center">
+  <img src="images/tasks-details.png" alt="세션 상세의 작업 진행률 패널" width="100%">
+  <br>
+  <em>✅ <strong>작업 진행률 · 세션 상세</strong> — 전체 소유자 인식 추적기는 분할 완료 도넛, 활성 작업, 완료 막대, 소유자 분석, 페이지당 10개 행으로 나뉜 작업 목록을 제공합니다</em>
 </p>
 
 <p align="center">

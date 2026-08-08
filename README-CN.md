@@ -152,6 +152,12 @@ flowchart LR
 </p>
 
 <p align="center">
+  <img src="images/tasks-overview.png" alt="Dashboard Agent 卡片上的任务进度概览" width="100%">
+  <br>
+  <em>📋 <strong>任务进度 · 概览</strong> — Dashboard Agent 卡片与 Sessions 行在状态旁复用同一个紧凑完成度环形图；悬停或聚焦可打开带归属信息的当前工作与任务状态预览</em>
+</p>
+
+<p align="center">
   <img src="images/dashboard-health.png" alt="Dashboard — 系统健康标签页" width="100%">
   <br>
   <em>🩺 <strong>Dashboard · Health</strong> — 综合健康评分环、存储引擎甜甜圈图、缓存/错误/成功率仪表、工具调用条形图、子Agent效能、模型Token分布、压缩统计 — 每 5 秒自动刷新</em>
@@ -179,6 +185,12 @@ flowchart LR
   <img src="images/session-agents.png" alt="会话详情 — Agent 标签页" width="100%">
   <br>
   <em>🤖 <strong>会话详情 · Agent</strong> — 实时概览卡片（事件、工具调用、子 Agent、压缩、错误、时长）、Top 工具用量条形图、子 Agent 类型分布、Token 流和 Agent 层级树</em>
+</p>
+
+<p align="center">
+  <img src="images/tasks-details.png" alt="会话详情中的任务进度面板" width="100%">
+  <br>
+  <em>✅ <strong>任务进度 · 会话详情</strong> — 完整的带归属信息任务跟踪器包含分段完成度环形图、当前任务、完成进度条、归属统计，以及每页 10 行的任务列表</em>
 </p>
 
 <p align="center">
