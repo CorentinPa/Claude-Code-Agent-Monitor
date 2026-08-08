@@ -2056,7 +2056,7 @@ async function cmdStop() {
   } catch {
     // fall through
   }
-  if (!pid) {
+  if (!Number.isSafeInteger(pid) || pid <= 0) {
     console.error(c.red("✖ Could not determine server PID from ") + c.dim(serverInfoPath));
     console.error(c.dim("  Kill it manually: find the node process on port 4820"));
     process.exit(1);
