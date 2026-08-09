@@ -1,6 +1,7 @@
 /**
  * @file Guards release metadata that must carry the root package version.
- * The checks make version bumps fail fast when packaged artifacts drift.
+ * The checks make version bumps fail fast when packaged artifacts or published
+ * API specifications drift.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -8,6 +9,8 @@ const { describe, it } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const yaml = require("js-yaml");
+const { createOpenApiSpec } = require("../openapi");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 
@@ -28,5 +31,18 @@ describe("release version consistency", () => {
     assert.equal(desktopPackage.version, packageVersion);
     assert.equal(desktopLockfile.version, packageVersion);
     assert.equal(desktopLockfile.packages[""].version, packageVersion);
+  });
+
+  it("keeps live and generated OpenAPI versions aligned", () => {
+    const liveSpec = createOpenApiSpec();
+    const generatedSpec = yaml.load(fs.readFileSync(path.join(ROOT, "openapi.yaml"), "utf8"));
+
+    for (const spec of [liveSpec, generatedSpec]) {
+      assert.equal(spec.info.version, packageVersion);
+      assert.equal(
+        spec.components.schemas.HealthResponse.properties.version.example,
+        packageVersion
+      );
+    }
   });
 });
