@@ -8,6 +8,17 @@ CCAM ships one source tree that supports three distribution paths:
 
 The verified bundle contains **14 plugins, 66 bundled plugin skills, 18 Claude subagents, 34 Claude commands, 3 CLI helpers, 3 hook configurations, and 2 MCP-enabled plugins**. The skills.sh CLI discovers **75 total repository skills** because it also includes the repository-maintenance skills under `.agents/skills/` and `.claude/skills/`.
 
+## Choose an Installation Path
+
+| Need | Recommended path | Why |
+| --- | --- | --- |
+| A curated capability pack for Claude Code | Claude Code plugin marketplace | Installs the plugin's skills, commands, agents, and metadata together. |
+| The same pack for Codex | Codex plugin marketplace | Uses the Codex manifest while sharing the canonical plugin source tree. |
+| One reusable workflow without the rest of a plugin | `npx skills add` | Keeps the install focused on the selected skill and supports project or global scope. |
+| Modify or contribute an extension | Clone this repository | Lets you run the sync and validation commands before using local manifests. |
+
+Do not install the same capability through multiple paths unless you intentionally want duplicates. Start with one path, verify it with the listed CLI command, and switch only after removing the previous installation.
+
 ## Install for Claude Code
 
 ```bash
