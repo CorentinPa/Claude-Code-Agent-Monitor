@@ -39,6 +39,12 @@ npm run mcp:start:repl
 | Streamable HTTP + SSE | `ccam mcp http` | `/mcp`, `/sse`, `/messages`, `/health` on port `8819` by default |
 | REPL | `ccam mcp repl` | Direct validated tool invocation with domain filtering |
 
+### Choosing a transport
+
+- Use **stdio** for Claude Code, Codex, and IDE integrations on the same machine. It keeps the protocol on the host process's stdin/stdout and needs no HTTP listener.
+- Use **Streamable HTTP + SSE** only when a separate local process must share the MCP server. Keep the listener on loopback unless you intentionally operate a protected reverse-proxy deployment, and set `MCP_HTTP_AUTH_TOKEN` for non-probe endpoints.
+- Use the **REPL** for an operator's one-off inspection or an explicitly reviewed mutation. It invokes the same schema and safety gates as the protocol transports, so it is a good way to validate an operation before wiring it into automation.
+
 ## Tool Catalog
 
 ### Observability
