@@ -88,6 +88,13 @@ sequenceDiagram
     API-->>Client: 200 OK + Data
 ```
 
+### Client integration checklist
+
+- Prefer the `Authorization: Bearer <token>` header for regular integrations. The query parameter is supported for constrained clients, but URLs are more likely to end up in shell history, browser history, and access logs.
+- Keep `DASHBOARD_TOKEN` in a secret store or environment variable; do not place it in a checked-in client bundle or example URL.
+- Treat `/api/health` as a liveness probe only. It is intentionally exempt from token checks and cannot verify that a client is authorized for protected API routes.
+- When exposing the dashboard beyond loopback, terminate TLS before the API, configure `DASHBOARD_ALLOWED_HOSTS` with the hostname clients use, and test both an authenticated REST request and WebSocket connection from the intended origin.
+
 ---
 
 ## Base URL
