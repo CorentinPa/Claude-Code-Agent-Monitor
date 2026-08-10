@@ -116,6 +116,31 @@ function isAlive(pid) {
   }
 }
 
+/**
+ * Wait until the test-owned target has been reaped after it receives a signal.
+ * `process.kill(pid, "SIGKILL")` confirms signal delivery, but the parent's
+ * immediate PID probe can run before Node has emitted the child's exit event.
+ *
+ * @param {import("node:child_process").ChildProcess} child
+ * @param {number} [timeoutMs=1500]
+ * @returns {Promise<void>}
+ */
+function waitForChildExit(child, timeoutMs = 1500) {
+  if (child.exitCode !== null || child.signalCode !== null) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    const onExit = () => {
+      clearTimeout(timeout);
+      resolve();
+    };
+    const timeout = setTimeout(() => {
+      child.off("exit", onExit);
+      reject(new Error(`target process ${child.pid} did not exit within ${timeoutMs} ms`));
+    }, timeoutMs);
+    child.once("exit", onExit);
+  });
+}
+
 describe("ccam stop — server not running", () => {
   beforeEach(() => {
     fs.rmSync(TMP, { recursive: true, force: true });
@@ -201,6 +226,7 @@ describe("ccam stop — SIGKILL escalation", () => {
     const { code, out } = await ccamStop({ DASHBOARD_PORT: String(target.port) });
     assert.equal(code, 0);
     assert.match(out, /stopped.*forced/i);
+    await waitForChildExit(target.child);
     assert.equal(isAlive(target.child.pid), false, "target should be dead after forced stop");
   });
 
