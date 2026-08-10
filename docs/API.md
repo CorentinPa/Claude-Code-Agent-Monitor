@@ -1032,10 +1032,9 @@ POST /api/remote-sources
 | `identity_file` | string | No | Private-key path passed to ssh (`-i`) |
 | `remote_home` | string | No | Remote Claude home (defaults to remote `~/.claude`) |
 | `remote_codex_home` | string | No | Remote Codex home (defaults to remote `~/.codex`) |
+| `enabled` | boolean | No | Whether the source is eligible for syncs (default `true`) |
 
 > **Cursor (informational):** Sessions imported from `~/.claude` include **Cursor** agent usage on that machine too — Cursor happens to use the same paths as Claude Code. CCAM does not tag which app created a session.
-
-| `enabled` | boolean | No | Whether the source is eligible for syncs (default `true`) |
 
 Returns `{ "source": RemoteSource }` with HTTP **201**.
 
