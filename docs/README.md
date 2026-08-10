@@ -14,6 +14,20 @@ Comprehensive documentation for the Agent Dashboard project.
 
 ---
 
+## Choose a Reading Path
+
+Start with the smallest set of documents for the job at hand, then use the catalog below as a reference:
+
+| Goal | Start here | Continue with |
+| --- | --- | --- |
+| Run CCAM locally | [INSTALL.md](../INSTALL.md) | [SETUP.md](../SETUP.md), then the dashboard |
+| Integrate with the API or WebSocket | [API.md](./API.md) | [MCP.md](./MCP.md) for an MCP-based integration |
+| Understand captured activity | [HOOKS.md](./HOOKS.md) | [DATABASE.md](./DATABASE.md) and [ARCHITECTURE.md](../ARCHITECTURE.md) |
+| Operate CCAM in production | [DEPLOYMENT.md](./DEPLOYMENT.md) | [server/README.md](../server/README.md) and [monitoring/README.md](../monitoring/README.md) |
+| Extend the UI or localization | [client/README.md](../client/README.md) | [I18N.md](./I18N.md) |
+
+---
+
 ## Documentation Sections
 
 ### 📘 Core Documentation
