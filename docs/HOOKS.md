@@ -253,6 +253,16 @@ ls -la .githooks/
 # session-end.py
 ```
 
+### Installation readiness checklist
+
+Before relying on hooks for production monitoring:
+
+- Confirm the target dashboard answers `curl http://127.0.0.1:4820/api/health` from the machine that runs Claude Code or Codex.
+- Run `npm run install-hooks` on that host, then review the provider's hook configuration to confirm the dashboard entries point at a real host-side `hook-handler.js` path.
+- Start one short test session and verify that it creates activity in the dashboard before assuming historical import or remote sync is covering live events.
+- For a remote dashboard, configure `CCAM_DASHBOARD_URL` and a file-backed `CCAM_HOOK_TOKEN_FILE`; do not put the hook token directly in a shared shell history or checked-in configuration.
+- Keep hook failures non-blocking. If delivery cannot be established, fix the dashboard connection rather than replacing the fail-safe hook behavior.
+
 ---
 
 > **Codex startup:** A fresh interactive Codex process first appears as an in-memory **Waiting** card, including while Codex is still at its trust screen or first prompt and has no stable session/thread ID. The card is local-only, non-navigable, excluded from durable APIs unless `include_transient=true`, and removed on process exit. A `SessionStart` hook, native live-thread row, or rollout then creates the durable session and main-agent rows without copying the temporary card into history.

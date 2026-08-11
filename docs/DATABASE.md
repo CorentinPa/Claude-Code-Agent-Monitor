@@ -861,6 +861,20 @@ function validateSession(session) {
 VACUUM INTO '/backups/dashboard_20240318.db';
 ```
 
+### Backup Verification
+
+A backup is useful only when it can be opened independently of the live database. Verify each new snapshot before relying on it:
+
+```bash
+# Expect exactly: ok
+sqlite3 /backups/dashboard_20240318.db 'PRAGMA integrity_check;'
+
+# Confirm the snapshot contains expected dashboard data
+sqlite3 /backups/dashboard_20240318.db 'SELECT count(*) FROM sessions;'
+```
+
+Keep the verified snapshot outside the live data directory, and periodically perform a restore drill against a **copy** of the backup. Point that isolated dashboard at the copy with `DASHBOARD_DB_PATH` (or an isolated `DASHBOARD_DATA_DIR`) and a different port; never use a restore drill to overwrite the running database.
+
 ### Offline Backup
 
 ```bash
