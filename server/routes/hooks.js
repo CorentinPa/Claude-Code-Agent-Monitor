@@ -965,26 +965,42 @@ const processEvent = db.transaction((hookType, data) => {
       }
 
       // Register turn duration events from transcript
+      let insertedTurns = 0;
+      let insertedTurnMs = 0;
       if (result.turnDurations) {
         for (const td of result.turnDurations) {
           const tdTs = td.timestamp || new Date().toISOString();
-          // Deduplicate by checking if we already have this turn duration event
+          // Deduplicate by checking if we already have this turn duration event.
+          //
+          // The whole transcript is re-read on every hook fire, so each turn is offered
+          // again and again — this guard is the only thing keeping the table finite. It
+          // compared created_at against tdTs while insertEvent wrote the column's own
+          // "now" default, so it could never match: measured 2026-08-11 on a live DB,
+          // 16 625 rows for 116 distinct turns (~143x), with TurnDuration reaching 84%
+          // of a 1 GB events table.
+          //
+          // insertEventAt stores tdTs so the comparison has something to hit; matching
+          // durationMs as well still dedupes when td.timestamp is absent and the
+          // fallback "now" differs on every replay.
           const existing = db
             .prepare(
-              "SELECT 1 FROM events WHERE session_id = ? AND event_type = 'TurnDuration' AND created_at = ? LIMIT 1"
+              "SELECT 1 FROM events WHERE session_id = ? AND event_type = 'TurnDuration' AND created_at = ? AND json_extract(data, '$.durationMs') = ? LIMIT 1"
             )
-            .get(sessionId, tdTs);
+            .get(sessionId, tdTs, td.durationMs);
           if (existing) continue;
 
           const tdSummary = `Turn completed in ${(td.durationMs / 1000).toFixed(1)}s`;
-          stmts.insertEvent.run(
+          stmts.insertEventAt.run(
             sessionId,
             mainAgentId,
             "TurnDuration",
             null,
             tdSummary,
-            JSON.stringify({ durationMs: td.durationMs })
+            JSON.stringify({ durationMs: td.durationMs }),
+            tdTs
           );
+          insertedTurns += 1;
+          insertedTurnMs += td.durationMs;
           broadcast("new_event", {
             session_id: sessionId,
             agent_id: mainAgentId,
@@ -1007,10 +1023,13 @@ const processEvent = db.transaction((hookType, data) => {
           if (result.thinkingBlockCount > 0) {
             meta.thinking_blocks = (meta.thinking_blocks || 0) + result.thinkingBlockCount;
           }
-          if (result.turnDurations) {
-            meta.turn_count = (meta.turn_count || 0) + result.turnDurations.length;
-            const totalMs = result.turnDurations.reduce((s, t) => s + t.durationMs, 0);
-            meta.total_turn_duration_ms = (meta.total_turn_duration_ms || 0) + totalMs;
+          // Count only the turns this fire actually inserted. Adding
+          // result.turnDurations.length re-counted the session's whole turn history on
+          // every hook fire, inflating turn_count and total_turn_duration_ms in step
+          // with the duplicate rows above.
+          if (insertedTurns > 0) {
+            meta.turn_count = (meta.turn_count || 0) + insertedTurns;
+            meta.total_turn_duration_ms = (meta.total_turn_duration_ms || 0) + insertedTurnMs;
           }
           stmts.updateSession.run(null, null, null, JSON.stringify(meta), sessionId);
         }
