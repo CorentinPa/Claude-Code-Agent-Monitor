@@ -1,7 +1,8 @@
 /**
  * @file Derives owner-attributed task progress from Claude and Codex JSONL
- * transcripts plus Claude task lifecycle events, with bounded stat-based
- * caching and fail-soft parsing for session API surfaces.
+ * transcripts plus persisted task and session lifecycle events. Top-level
+ * work boundaries expire older tracker state, turn-end markers discard
+ * unfinished state, and bounded stat-based caching keeps session APIs safe.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -16,6 +17,8 @@ const MAX_LINE_BYTES = 16 * 1024 * 1024;
 const MAX_SCAN_BYTES = 32 * 1024 * 1024;
 const READ_CHUNK_BYTES = 1024 * 1024;
 const cache = new Map();
+const RESET_ALL_EVENT_TYPES = new Set(["UserPromptSubmit"]);
+const FINALIZE_ALL_EVENT_TYPES = new Set(["Stop", "SessionEnd", "Interrupted"]);
 
 function cleanText(value) {
   if (typeof value !== "string") return null;
@@ -286,6 +289,41 @@ function makeObservation({
   };
 }
 
+function claudeTurnBoundary(entry, context) {
+  if (entry?.isMeta === true || entry?.isCompactSummary === true) return null;
+  let text = null;
+  if (entry?.type === "attachment") {
+    const attachment = entry.attachment;
+    if (attachment?.type !== "queued_command") return null;
+    text = typeof attachment.prompt === "string" ? attachment.prompt : null;
+    const kind =
+      attachment.origin && typeof attachment.origin.kind === "string"
+        ? attachment.origin.kind
+        : null;
+    if (kind !== null && kind !== "human") return null;
+  } else if (entry?.type === "user") {
+    const content = entry?.message?.content;
+    text =
+      typeof content === "string"
+        ? content
+        : Array.isArray(content)
+          ? content.find((block) => block?.type === "text")?.text
+          : null;
+  } else {
+    return null;
+  }
+  const lead = String(text || "").trimStart();
+  if (!lead) return null;
+  if (lead.startsWith("<task-notification") || lead.startsWith("[SYSTEM NOTIFICATION")) {
+    return null;
+  }
+  return makeObservation({
+    ...context,
+    kind: context.ownerType === "main" ? "reset_all" : "reset_owner",
+    tool: null,
+  });
+}
+
 function toolObservation(name, inputValue, outputValue, context) {
   const tool = String(name || "");
   const wrappedPlan = tool === "exec" ? wrappedUpdatePlan(inputValue) : null;
@@ -362,6 +400,31 @@ function observationsFromEntry(entry, line, owner) {
     }
     return observations;
   }
+
+  if (entry?.type === "event_msg" && entry?.payload?.type === "task_started") {
+    observations.push(makeObservation({ ...context, kind: "reset_all", tool: null }));
+    return observations;
+  }
+  if (
+    entry?.type === "event_msg" &&
+    ["task_complete", "turn_aborted"].includes(entry?.payload?.type)
+  ) {
+    observations.push(makeObservation({ ...context, kind: "finalize_all", tool: null }));
+    return observations;
+  }
+  if (entry?.type === "system" && ["stop_hook_summary", "turn_duration"].includes(entry?.subtype)) {
+    observations.push(
+      makeObservation({
+        ...context,
+        kind: context.ownerType === "main" ? "finalize_all" : "finalize_owner",
+        tool: null,
+      })
+    );
+    return observations;
+  }
+
+  const turnBoundary = claudeTurnBoundary(entry, context);
+  if (turnBoundary) observations.push(turnBoundary);
 
   const content = entry?.message?.content;
   if (!Array.isArray(content)) return observations;
@@ -524,9 +587,28 @@ function parseTranscript(filePath, owner) {
 }
 
 function observationFromEvent(event, agentsById) {
-  if (!event || !["TaskCreated", "TaskCompleted"].includes(event.event_type)) return null;
+  if (!event) return null;
   const data = objectValue(event.data) || {};
   const agent = agentsById.get(event.agent_id);
+  const context = {
+    tool: null,
+    timestamp: event.created_at,
+    ownerId: event.agent_id || "main",
+    ownerType:
+      agent?.type === "main"
+        ? "main"
+        : agent?.subagent_type || data.agent_type || data.teammate_name || "subagent",
+  };
+  if (RESET_ALL_EVENT_TYPES.has(event.event_type)) {
+    return makeObservation({ ...context, kind: "reset_all" });
+  }
+  if (FINALIZE_ALL_EVENT_TYPES.has(event.event_type)) {
+    return makeObservation({ ...context, kind: "finalize_all" });
+  }
+  if (event.event_type === "SubagentStop") {
+    return makeObservation({ ...context, kind: "finalize_owner" });
+  }
+  if (!["TaskCreated", "TaskCompleted"].includes(event.event_type)) return null;
   const rawStatus = event.event_type === "TaskCompleted" ? "completed" : data.status || "pending";
   const task = {
     id: data.task_id,
@@ -540,10 +622,7 @@ function observationFromEvent(event, agentsById) {
     tool: event.event_type,
     timestamp: event.created_at,
     ownerId: event.agent_id || "main",
-    ownerType:
-      agent?.type === "main"
-        ? "main"
-        : agent?.subagent_type || data.agent_type || data.teammate_name || "subagent",
+    ownerType: context.ownerType,
     task,
     confidence: "partial",
   });
@@ -645,8 +724,34 @@ function observationTime(observation, index) {
   return Number.isFinite(parsed) ? parsed : index;
 }
 
+function ownerStateIsFinished(state) {
+  return (
+    state.items.size > 0 &&
+    [...state.items.values()].every((item) => ["completed", "cancelled"].includes(item.status))
+  );
+}
+
 function applyObservation(ownerStates, observation) {
   const ownerKey = observation.ownerId || "main";
+  if (observation.kind === "reset_all") {
+    ownerStates.clear();
+    return;
+  }
+  if (observation.kind === "reset_owner") {
+    ownerStates.delete(ownerKey);
+    return;
+  }
+  if (observation.kind === "finalize_all") {
+    for (const [key, state] of ownerStates) {
+      if (!ownerStateIsFinished(state)) ownerStates.delete(key);
+    }
+    return;
+  }
+  if (observation.kind === "finalize_owner") {
+    const state = ownerStates.get(ownerKey);
+    if (state && !ownerStateIsFinished(state)) ownerStates.delete(ownerKey);
+    return;
+  }
   let state = ownerStates.get(ownerKey);
   if (!state) {
     state = {
@@ -774,7 +879,11 @@ function buildSnapshot(provider, observations) {
     .sort((left, right) => stateTime(right) - stateTime(left))[0];
   return {
     provider: provider === "codex" ? "codex" : "claude",
-    source: observations.some((observation) => observation.line == null) ? "mixed" : "transcript",
+    source: observations.some(
+      (observation) => observation.line == null && ["replace", "upsert"].includes(observation.kind)
+    )
+      ? "mixed"
+      : "transcript",
     sourceTool: latest?.sourceTool || null,
     sourceLine: latest?.sourceLine || null,
     updatedAt: latest?.updatedAt || null,

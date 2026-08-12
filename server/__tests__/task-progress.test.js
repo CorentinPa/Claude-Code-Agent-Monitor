@@ -56,6 +56,274 @@ afterEach(() => {
 });
 
 describe("task progress extraction", () => {
+  it("drops an older Codex plan when the latest task starts without task progress", () => {
+    const root = tempRoot();
+    const transcript = path.join(root, "codex-latest-task-without-plan.jsonl");
+    writeJsonl(transcript, [
+      {
+        type: "event_msg",
+        timestamp: "2026-08-07T10:00:00.000Z",
+        payload: { type: "task_started" },
+      },
+      {
+        type: "response_item",
+        timestamp: "2026-08-07T10:01:00.000Z",
+        payload: {
+          type: "function_call",
+          name: "update_plan",
+          arguments: JSON.stringify({
+            plan: [{ step: "Old work", status: "in_progress" }],
+          }),
+        },
+      },
+      {
+        type: "event_msg",
+        timestamp: "2026-08-07T11:00:00.000Z",
+        payload: { type: "task_started" },
+      },
+      {
+        type: "response_item",
+        timestamp: "2026-08-07T11:01:00.000Z",
+        payload: { type: "message", role: "assistant", content: "Handled without a plan" },
+      },
+    ]);
+
+    const result = extractSessionTaskProgress({
+      session: { id: "codex-latest-task-without-plan", provider: "codex" },
+      mainTranscriptPath: transcript,
+      agents: [{ id: "codex-latest-task-without-plan-main", type: "main" }],
+    });
+
+    assert.equal(result.snapshot, null);
+    assert.equal(result.summary, null);
+  });
+
+  it("drops unfinished Codex progress when the task ends without a final plan update", () => {
+    const root = tempRoot();
+    const transcript = path.join(root, "codex-unfinished-task-complete.jsonl");
+    writeJsonl(transcript, [
+      {
+        type: "event_msg",
+        timestamp: "2026-08-07T10:00:00.000Z",
+        payload: { type: "task_started" },
+      },
+      {
+        type: "response_item",
+        timestamp: "2026-08-07T10:01:00.000Z",
+        payload: {
+          type: "function_call",
+          name: "update_plan",
+          arguments: JSON.stringify({
+            plan: [{ step: "Forgotten work", status: "in_progress" }],
+          }),
+        },
+      },
+      {
+        type: "event_msg",
+        timestamp: "2026-08-07T10:02:00.000Z",
+        payload: { type: "task_complete" },
+      },
+    ]);
+
+    const result = extractSessionTaskProgress({
+      session: { id: "codex-unfinished-task-complete", provider: "codex" },
+      mainTranscriptPath: transcript,
+    });
+
+    assert.equal(result.snapshot, null);
+    assert.equal(result.summary, null);
+  });
+
+  it("drops unfinished Claude progress when the turn ends without another TodoWrite", () => {
+    const root = tempRoot();
+    const transcript = path.join(root, "claude-unfinished-turn.jsonl");
+    writeJsonl(transcript, [
+      {
+        type: "user",
+        timestamp: "2026-08-07T10:00:00.000Z",
+        message: { role: "user", content: [{ type: "text", text: "Do the work" }] },
+      },
+      claudeToolUse("2026-08-07T10:01:00.000Z", "todo-1", "TodoWrite", {
+        todos: [{ content: "Forgotten work", status: "in_progress" }],
+      }),
+      {
+        type: "system",
+        subtype: "turn_duration",
+        timestamp: "2026-08-07T10:02:00.000Z",
+        durationMs: 120000,
+      },
+    ]);
+
+    const result = extractSessionTaskProgress({
+      session: { id: "claude-unfinished-turn", provider: "claude" },
+      mainTranscriptPath: transcript,
+    });
+
+    assert.equal(result.snapshot, null);
+    assert.equal(result.summary, null);
+  });
+
+  it("keeps fully completed task progress after a turn ends", () => {
+    const root = tempRoot();
+    const transcript = path.join(root, "claude-completed-turn.jsonl");
+    writeJsonl(transcript, [
+      claudeToolUse("2026-08-07T10:01:00.000Z", "todo-1", "TodoWrite", {
+        todos: [{ content: "Finished work", status: "completed" }],
+      }),
+      {
+        type: "system",
+        subtype: "turn_duration",
+        timestamp: "2026-08-07T10:02:00.000Z",
+        durationMs: 120000,
+      },
+    ]);
+
+    const result = extractSessionTaskProgress({
+      session: { id: "claude-completed-turn", provider: "claude" },
+      mainTranscriptPath: transcript,
+    });
+
+    assert.equal(result.snapshot.total, 1);
+    assert.equal(result.snapshot.completed, 1);
+    assert.equal(result.snapshot.items[0].text, "Finished work");
+  });
+
+  it("drops every prior Claude owner tracker when the latest human turn has no task state", () => {
+    const root = tempRoot();
+    const sessionId = "claude-latest-turn-without-tasks";
+    const transcript = path.join(root, `${sessionId}.jsonl`);
+    const subagentTranscript = path.join(root, sessionId, "subagents", "agent-reviewer-1.jsonl");
+    writeJsonl(transcript, [
+      {
+        type: "user",
+        timestamp: "2026-08-07T10:00:00.000Z",
+        message: { role: "user", content: [{ type: "text", text: "Do the old work" }] },
+      },
+      claudeToolUse("2026-08-07T10:01:00.000Z", "old-todo", "TodoWrite", {
+        todos: [{ content: "Old main work", status: "in_progress" }],
+      }),
+      {
+        type: "user",
+        timestamp: "2026-08-07T11:00:00.000Z",
+        message: { role: "user", content: [{ type: "text", text: "Answer a quick question" }] },
+      },
+      {
+        type: "assistant",
+        timestamp: "2026-08-07T11:01:00.000Z",
+        message: { role: "assistant", content: [{ type: "text", text: "Answered" }] },
+      },
+    ]);
+    writeJsonl(subagentTranscript, [
+      {
+        type: "user",
+        timestamp: "2026-08-07T10:01:30.000Z",
+        isSidechain: true,
+        message: { role: "user", content: [{ type: "text", text: "Review the old work" }] },
+      },
+      claudeToolUse("2026-08-07T10:02:00.000Z", "sub-todo", "TodoWrite", {
+        todos: [{ content: "Old review work", status: "in_progress" }],
+      }),
+    ]);
+    fs.writeFileSync(
+      subagentTranscript.replace(".jsonl", ".meta.json"),
+      JSON.stringify({ agentType: "reviewer" })
+    );
+
+    const result = extractSessionTaskProgress({
+      session: { id: sessionId, provider: "claude" },
+      mainTranscriptPath: transcript,
+      agents: [
+        { id: `${sessionId}-main`, type: "main" },
+        { id: "reviewer-db-id", type: "subagent", subagent_type: "reviewer" },
+      ],
+    });
+
+    assert.equal(result.snapshot, null);
+    assert.equal(result.summary, null);
+  });
+
+  it("does not treat Claude harness task notifications as a new human turn", () => {
+    const root = tempRoot();
+    const transcript = path.join(root, "claude-task-notification.jsonl");
+    writeJsonl(transcript, [
+      claudeToolUse("2026-08-07T10:00:00.000Z", "todo-1", "TodoWrite", {
+        todos: [{ content: "Current work", status: "in_progress" }],
+      }),
+      {
+        type: "user",
+        timestamp: "2026-08-07T10:01:00.000Z",
+        message: {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "<task-notification>Background helper completed</task-notification>",
+            },
+          ],
+        },
+      },
+    ]);
+
+    const result = extractSessionTaskProgress({
+      session: { id: "claude-task-notification", provider: "claude" },
+      mainTranscriptPath: transcript,
+    });
+
+    assert.equal(result.snapshot.activeText, "Current work");
+  });
+
+  it("drops older Claude progress for a transcript-only queued human message", () => {
+    const root = tempRoot();
+    const transcript = path.join(root, "claude-queued-human-message.jsonl");
+    writeJsonl(transcript, [
+      claudeToolUse("2026-08-07T10:00:00.000Z", "todo-1", "TodoWrite", {
+        todos: [{ content: "Old tracked work", status: "in_progress" }],
+      }),
+      {
+        type: "attachment",
+        timestamp: "2026-08-07T10:01:00.000Z",
+        attachment: {
+          type: "queued_command",
+          prompt: "Handle this follow-up without a tracker",
+          origin: { kind: "human" },
+        },
+      },
+    ]);
+
+    const result = extractSessionTaskProgress({
+      session: { id: "claude-queued-human-message", provider: "claude" },
+      mainTranscriptPath: transcript,
+    });
+
+    assert.equal(result.snapshot, null);
+    assert.equal(result.summary, null);
+  });
+
+  it("does not reset Claude progress for a queued harness notification", () => {
+    const root = tempRoot();
+    const transcript = path.join(root, "claude-queued-harness-message.jsonl");
+    writeJsonl(transcript, [
+      claudeToolUse("2026-08-07T10:00:00.000Z", "todo-1", "TodoWrite", {
+        todos: [{ content: "Current work", status: "in_progress" }],
+      }),
+      {
+        type: "attachment",
+        timestamp: "2026-08-07T10:01:00.000Z",
+        attachment: {
+          type: "queued_command",
+          prompt: "<task-notification>Background helper completed</task-notification>",
+        },
+      },
+    ]);
+
+    const result = extractSessionTaskProgress({
+      session: { id: "claude-queued-harness-message", provider: "claude" },
+      mainTranscriptPath: transcript,
+    });
+
+    assert.equal(result.snapshot.activeText, "Current work");
+  });
+
   it("uses the latest Codex update_plan call as the current full snapshot", () => {
     const root = tempRoot();
     const transcript = path.join(root, "rollout.jsonl");

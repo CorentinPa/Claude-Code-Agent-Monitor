@@ -395,7 +395,7 @@ function createOpenApiSpec() {
               allOf: [{ $ref: "#/components/schemas/SessionTodoSummary" }],
               nullable: true,
               description:
-                "Compact latest observable task/checklist/plan state for Sessions-list rows. Null when the provider emitted no task state.",
+                "Compact task/checklist/plan state for the latest top-level work item on Sessions-list rows. Null when that work item emitted no task state or ended with unfinished tracker state; fully completed history remains available.",
             },
             todo_snapshot: {
               allOf: [{ $ref: "#/components/schemas/SessionTodoSnapshot" }],
@@ -478,7 +478,7 @@ function createOpenApiSpec() {
             version: {
               type: "string",
               description: "Dashboard release version from package.json",
-              example: "2.0.4",
+              example: "2.0.6",
             },
             timestamp: { type: "string", format: "date-time" },
           },

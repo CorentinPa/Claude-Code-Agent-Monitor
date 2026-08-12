@@ -950,109 +950,74 @@
                   <div class="feature-icon ic-indigo">📡</div>
                   <h3 id="feat-dashboard">Live Dashboard</h3>
                   <p>
-                    Two tabs: <strong>Monitor</strong> shows overview stats, active agent cards with
-                    collapsible subagent hierarchy, and a recent activity feed whose item count fills
-                    available viewport height. When an active session exposes task state, its card
-                    shows the same completion donut as the Sessions table immediately before the
-                    status badge; hover or focus opens the detailed task preview. <strong>Health</strong>
-                    renders a composite system health score ring, storage engine donut chart,
-                    cache/error/success gauges, tool invocation bars, subagent effectiveness ratios,
-                    model token distribution, and compaction stats. Both tabs auto-refresh every 5
-                    seconds via WebSocket push so the view is always current without manual reload.
+                    <strong>Monitor</strong> combines overview stats, active agent cards, collapsible
+                    subagent trees, recent activity, and the same task-progress previews used by
+                    Sessions. <strong>Health</strong> summarizes system score, storage, cache, errors,
+                    tool use, subagent effectiveness, model tokens, and compactions. Both tabs refresh
+                    every 5 seconds through WebSocket push, while the activity feed adapts its item
+                    count to the available viewport height.
                   </p>
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-emerald">📋</div>
                   <h3 id="feat-kanban">Kanban Board</h3>
                   <p>
-                    Toggle between <strong>Agents</strong> (Working / Waiting / Completed /
-                    Error) and <strong>Sessions</strong> (Active / Waiting / Completed / Error /
-                    Abandoned) swim lanes. A yellow <strong>Waiting</strong> column flags items
-                    sitting on the user — fresh prompt, between turns, or permission gate. Hover
-                    any column header for lifecycle tooltips explaining each state transition.
-                    Cards surface model name, cumulative cost, and the current tool being called.
-                    Counts update in real time via WebSocket so the board is always in sync with
-                    the live event store. Hover a Waiting badge to see why — needs input, turn done, at prompt, or interrupted.
+                    Switch between <strong>Agent</strong> and <strong>Session</strong> swim lanes for
+                    working, waiting, completed, error, and abandoned states. Yellow Waiting cards
+                    identify work paused for user input, a permission gate, or the next prompt;
+                    hover badges and column headers for the exact reason and lifecycle rules. Cards
+                    show model, cumulative cost, and current tool, while WebSocket updates keep lane
+                    counts synchronized with the live event store.
                   </p>
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-amber">📂</div>
                   <h3 id="feat-sessions">Sessions Table</h3>
                   <p>
-                    <strong>Server-paginated</strong> table of every recorded session — each page
-                    fetches only its slice so cost computation stays bounded no matter how many
-                    sessions exist. The first page also shows the same local, in-memory Codex
-                    startup row used by Dashboard and Kanban. It appears immediately but stays
-                    non-navigable until a durable session ID replaces it, without changing durable
-                    totals or pagination. Case-insensitive search across <code>id</code>,
-                    <code>name</code>, and <code>cwd</code> runs server-side with a 300 ms
-                    debounce; the status filter composes with search for precise narrowing.
-                    Each row shows the session's real name (synced live from the transcript — a
-                    <code>/rename</code> or <code>claude -n</code> title, else the auto title,
-                    else the first user prompt, with a short-ID fallback), status badge, agent
-                    count, duration, model, estimated cost, and — when the provider exposed task
-                    state — a compact completion donut beside the status badge. Hovering or
-                    focusing the donut opens a viewport-clamped preview with current work,
-                    owner labels, source, and up to five tasks. Click any row to drill into the
-                    full session detail view with conversation
-                    transcript and agent hierarchy.
+                    Browse every recorded session in a <strong>server-paginated</strong> table with
+                    fast search, project and status filters, sorting, cost, model, duration, and
+                    agent counts. The first page can show a temporary local Codex startup row until
+                    its durable session arrives. Rows with task state add a compact progress donut
+                    and owner-aware preview; stale trackers disappear when newer work no longer uses
+                    them or a turn ends unfinished, while completed progress remains available. Open
+                    any durable row for its conversation, events, and agent hierarchy.
                   </p>
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-violet">🔬</div>
                   <h3 id="feat-session-detail">Session Detail</h3>
                   <p>
-                    Per-session deep dive with a collapsible agent hierarchy tree and a full
-                    chronological event timeline showing every tool call name and summary. An
-                    overview panel at the top surfaces tile counters for events, tool calls,
-                    subagents, compactions, errors, and duration. Top-tool usage bars and a
-                    subagent type breakdown give quick distribution reads. When observable task
-                    state exists, an owner-aware progress panel appears directly below the
-                    overview with a segmented donut, active task, completion bar, owner
-                    breakdown, and dense task rows paginated at 10 tasks per page. The conversation
-                    viewer renders markdown with syntax highlighting, per-tool styled blocks,
-                    slash-command pills with their captured TUI output, and inline session-rename
-                    markers. Messages typed mid-turn (queued while Claude was still working) appear
-                    where Claude actually received them, and harness notifications are attributed to
-                    System. Export the entire session as JSON or share the permalink for async review.
-                    When the session is waiting on you, a yellow banner under the header names the
-                    reason and how long it has been waiting.
+                    Open any session for overview counters, top-tool and subagent breakdowns, a
+                    collapsible agent tree, and a chronological event timeline. When task state
+                    exists, an owner-aware panel adds a segmented donut, active task, completion
+                    bar, and paginated rows. The conversation view renders Markdown, highlighted
+                    code, tool blocks, slash-command output, renames, and correctly attributed
+                    queued messages. Waiting sessions explain why and for how long; export the
+                    record as JSON or share its permalink.
                   </p>
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-amber">🔔</div>
                   <h3 id="feat-alerts">Alerts &amp; Webhooks</h3>
                   <p>
-                    A rules-based alerting engine evaluates the live event stream server-side:
-                    <strong>event pattern</strong> (match event type / tool / summary text,
-                    optionally N matches within a time window), <strong>inactivity</strong>,
-                    <strong>stuck agent</strong>, and <strong>token threshold</strong> — each with
-                    per-(rule, session, agent) cooldown dedup. Fired alerts surface in a live feed
-                    and fan out to <strong>14 first-class webhook providers</strong> — Slack,
-                    Discord, Teams, Google Chat, Mattermost, Rocket.Chat, Telegram, PagerDuty,
-                    Opsgenie, Splunk On-Call, Zapier, Make, n8n, Pipedream — plus any generic JSON
-                    endpoint (with optional HMAC-SHA256 signing and custom headers). Delivery is
-                    detached and fail-safe with a request timeout, bounded retry/backoff, secret
-                    redaction, a one-click test probe, and a per-target delivery log. Rules and
-                    channels are managed together in <strong>Settings → Alerts</strong>.
+                    Server-side rules detect event patterns, inactivity, stuck agents, and token
+                    thresholds with per-session cooldown dedup. Fired alerts appear in a live feed
+                    and can reach 14 built-in providers or a generic JSON endpoint with optional
+                    HMAC-SHA256 signing and custom headers. Delivery stays fail-safe through bounded
+                    timeouts, retries, secret redaction, test probes, and per-target logs. Configure
+                    rules and channels together in <strong>Settings → Alerts</strong>.
                   </p>
                 </div>
                 <div class="feature-card">
                   <div class="feature-icon ic-cyan">🍎🪟</div>
                   <h3 id="feat-desktop-app">Desktop App (macOS &amp; Windows)</h3>
                   <p>
-                    A native desktop app — a macOS <code>.app</code> (shipped as a
-                    <code>.dmg</code>) and a Windows <code>.exe</code> (NSIS installer plus a
-                    no-install portable build) — built with Electron 35. It
-                    <strong>embeds the Express server in-process</strong> —
-                    <code>require()</code>-ing <code>server/index.js</code> directly, with no
-                    child process and no IPC — and renders the built React client in a
-                    <code>BrowserWindow</code>. Adds a menu-bar / notification-area (tray) icon, a
-                    native application menu, auto-start at login (macOS Login Items via
-                    <code>SMAppService</code>; Windows per-user <code>HKCU\…\Run</code>), and a
-                    single-instance lock. Closing the window hides it while the server keeps
-                    running, and the app auto-installs Claude Code hooks on first boot so an
-                    install-only user gets events flowing without a checkout.
+                    Electron packages CCAM as a macOS <code>.dmg</code> and Windows installer or
+                    portable <code>.exe</code>. The app embeds the Express server in-process and
+                    renders the React client in a native window, with tray controls, application
+                    menus, login startup, and a single-instance lock. Closing the window leaves the
+                    local server running, and first boot installs Claude Code hooks automatically so
+                    events flow without a repository checkout.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1072,17 +1037,11 @@
                   <div class="feature-icon ic-cyan">📊</div>
                   <h3 id="feat-analytics">Analytics</h3>
                   <p>
-                    Token usage breakdown by model with stacked bar charts, tool frequency
-                    rankings, agent type distribution donuts, and session outcome pie charts.
-                    A 52-week activity heatmap aligned by day-of-week shows density with hover
-                    tooltips. 30-day sparkline trends track cost and session volume at a glance.
-                    The cost summary panel totals input, output, and cache spend across all
-                    models. A live/offline indicator and auto-refresh via WebSocket keep
-                    everything current. All charts are responsive and adapt to mobile viewports.
-                  </p>
-                  <p>
-                    Long Analytics legends use compact pages with localized controls. Legends
-                    that fit on one page stay unchanged.
+                    Compare model tokens, tool frequency, agent types, session outcomes, and total
+                    input, output, and cache spend. A 52-week activity heatmap and 30-day cost and
+                    session sparklines reveal longer trends, while WebSocket refresh and a live
+                    indicator keep current values clear. Responsive charts adapt to mobile screens;
+                    long legends paginate with localized controls without changing compact legends.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1129,21 +1088,13 @@
                   <div class="feature-icon ic-emerald">🛰️</div>
                   <h3>Continuous Project Sync</h3>
                   <p>
-                    The startup auto-import of <code>~/.claude/projects</code> is one-time and
-                    marker-gated, so a project folder created after first launch — whose sessions
-                    never flow through hooks (for example with host-only hooks disabled) — would
-                    stay invisible until a manual rescan. A background sync closes that gap with
-                    three triggers sharing one mtime cache and a single coalesced sweep: an
-                    immediate sweep at startup, a debounced <code>fs.watch</code> (recursive on
-                    macOS and Windows; root plus immediate child folders on Linux to avoid the
-                    userland recursive-watcher hazard) that fires the moment a new session file or
-                    project folder appears, and a periodic safety-net poll tunable via
-                    <code>DASHBOARD_SESSION_SYNC_MS</code> (default <code>30000</code> ms;
-                    <code>0</code> disables the poll while leaving the watcher running). Each sweep
-                    re-parses only files whose mtime advanced and broadcasts
-                    <code>session_created</code> / <code>session_updated</code> (plus the main
-                    agent) so the UI refreshes live, while an already-imported unchanged session is
-                    skipped without re-parsing.
+                    Background sync keeps new Claude project folders and session files visible
+                    after the one-time startup import. An immediate sweep, debounced filesystem
+                    watcher, and optional 30-second safety poll share one mtime cache and coalesce
+                    overlapping work; set <code>DASHBOARD_SESSION_SYNC_MS</code> to tune or disable
+                    only the poll. Each sweep parses only changed transcripts, skips unchanged
+                    imports, and broadcasts session and main-agent updates so the UI refreshes live
+                    across macOS, Windows, and Linux.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1160,36 +1111,13 @@
                   <div class="feature-icon ic-cyan">💾</div>
                   <h3>Transcript Cache</h3>
                   <p>
-                    Incremental JSONL reader shared across the hook handler, compaction scanner,
-                    conversation viewer, and import pipeline. Byte-offset tracking skips
-                    already-parsed content; cache hits short-circuit disk I/O so even sessions
-                    with tens of thousands of turns stay fast. It also extracts the live session
-                    title (<code>custom-title</code> / <code>ai-title</code>) so renames surface in
-                    real time, plus the first user prompt as a fallback descriptor for
-                    placeholder-named sessions and agents.
-                  </p>
-                  <p>
-                    Codex also reads its native session index, so <code>/rename</code> titles reach
-                    session and agent cards in real time. Its conversation reader includes human
-                    turns plus <code>exec</code> custom-tool calls and outputs, and loads older pages
-                    when you reach the top of the transcript.
-                  </p>
-                  <p>
-                    Stable transcript identities keep Claude <code>TurnDuration</code> events
-                    replay-safe and repair legacy duplicate totals. On supported local hosts,
-                    exact open-rollout probing also prevents historical Codex sessions that share
-                    a project directory from appearing as active agents. Node launcher/native-child
-                    pairs are collapsed first, so each interactive TUI produces one card.
-                  </p>
-                  <p>
-                    Claude Code and Codex cards show a compact two-row history of their latest distinct
-                    human prompts beneath the provider-native title, so a short friendly name or terse
-                    follow-up never hides the active task. Claude refreshes this context from its local
-                    transcript cache during live hooks, imports, and watchdog sweeps; Codex refreshes it
-                    from rollout records and falls back to persisted <code>user_message</code> events for
-                    older imports. The transcript renders persisted PNG/JPEG/GIF/WebP attachments for
-                    Claude Code and Codex when available, while duplicate Codex response/event copies
-                    collapse into one human turn.
+                    Reads Claude and Codex transcripts incrementally, keeping long-running sessions
+                    fast while powering conversation history, live titles, prompt previews,
+                    attachments, and turn statistics. Renames and recent human prompts flow to
+                    session and agent cards in real time, older conversation pages load on demand,
+                    and duplicate Codex records collapse into one readable turn. Stable transcript
+                    identities also prevent replayed events from inflating totals, while
+                    provider-aware process matching keeps historical sessions from appearing active.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1229,22 +1157,13 @@
                   <div class="feature-icon ic-amber">💰</div>
                   <h3>Cost Tracking</h3>
                   <p>
-                    Per-model cost estimation with configurable pricing rules — set input, output,
-                    and cache-read rates per model variant through the Settings UI. View total and
-                    per-session breakdowns on Sessions, Session Detail, and Analytics. Compaction-
-                    aware token accounting preserves baselines across context compressions so no
-                    usage is silently dropped. Cost chips appear on Kanban cards, session rows,
-                    and the sidebar summary. Subagent cards show each subagent's own cost, computed
-                    from that subagent's transcript token usage priced at current rates, so a
-                    subagent card no longer misleadingly reads as if it cost the whole session;
-                    main-agent cards still show the session total. Pricing changes retroactively
-                    recalculate all stored sessions, and imports apply the same rate table.
-                  </p>
-                  <p>
-                    Codex rollouts are accounted separately with fresh, cached, cache-write,
-                    output, and reasoning-output deltas. The GPT rate card distinguishes standard
-                    short context (≤272K input tokens), long context, and Fast mode; unavailable
-                    published tiers remain explicitly unpriced until you set a rate.
+                    Configure per-model input, output, cache, and Codex reasoning rates in Settings,
+                    then see consistent totals across Sessions, Session Detail, Analytics, Kanban,
+                    and agent cards. Compaction-aware accounting preserves usage across context
+                    compression, imports reuse the same pricing table, and rate edits recalculate
+                    stored sessions. Subagent cards show only their own transcript cost while main
+                    agents retain session totals. GPT pricing distinguishes standard, long-context,
+                    and Fast modes, leaving unpublished tiers explicitly unpriced.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1302,17 +1221,12 @@
                   <div class="feature-icon ic-indigo">📊</div>
                   <h3>Workflow Analytics</h3>
                   <p>
-                    Subagent effectiveness scorecards with success-rate rings and day-of-week
-                    sparklines. Auto-detected workflow patterns expand on click into a detail
-                    panel with the full step chain, stats grid, and a narrative with loop
-                    detection. Model delegation flow, error propagation bars with API error
-                    cards, concurrency swim-lanes, and complexity bubble charts round out the
-                    view. Six headline stat cards each include an info popover explaining
-                    the metric and its current value. Status filter applies globally.
-                  </p>
-                  <p>
-                    Data-driven Workflows legends also paginate when labels would make a chart
-                    card too tall, while keeping every label reachable.
+                    Measure subagent effectiveness, workflow patterns, model delegation, error
+                    propagation, concurrency, and complexity in one view. Expand detected patterns
+                    for their full step chain, statistics, and loop-aware narrative; info popovers
+                    explain each headline metric, and the status filter applies across the page.
+                    Data-driven legends paginate when needed so every label remains reachable
+                    without making chart cards excessively tall.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1381,20 +1295,12 @@
                   <div class="feature-icon ic-emerald">▶️</div>
                   <h3 id="feat-run-claude">Run Agent</h3>
                   <p>
-                    Spawn <code>claude</code> subprocesses straight from the dashboard with
-                    a chat-style streaming UI — multi-turn <b>Conversation</b> or single-shot
-                    <b>Headless</b> mode. One-click <b>Resume</b> on any past conversation
-                    spawns <code>claude --resume</code> seeded with the prior transcript. Re-
-                    attach reconciles in-memory logs with the on-disk JSONL so navigating away
-                    never loses history. Slash-command autocomplete, file references, live
-                    token/context-window meter, and a thinking-effort dial bring TUI parity
-                    to the browser. Same-origin guard blocks drive-by spawns.
-                  </p>
-                  <p>
-                    <strong>Run Agent</strong> now begins by choosing Claude Code or Codex. Codex
-                    starts a native interactive <code>app-server</code> thread, offers provider-native
-                    approval and sandbox controls, and discovers models directly from the signed-in
-                    CLI so new releases appear without a dashboard update.
+                    Start Claude Code or Codex from a streaming browser chat, using multi-turn,
+                    headless, or resumable sessions. Re-attachment reconciles memory with the saved
+                    transcript, while slash-command completion, file references, token context, and
+                    effort controls bring core TUI workflows to the dashboard. Codex uses a native
+                    interactive <code>app-server</code> thread with provider approval, sandbox, and
+                    signed-in model discovery; same-origin checks protect every spawn.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -1416,26 +1322,13 @@
                   <div class="feature-icon ic-amber">🧰</div>
                   <h3 id="feat-config-explorer">Agent Config</h3>
                   <p>
-                    A 12-tab inspector at <code>/cc-config</code> for everything Claude Code
-                    knows about: skills, subagents, slash commands, output styles, plugins,
-                    marketplaces, MCP servers, hooks, settings, memory, keybindings, and
-                    statusline scripts. The Settings tab leads with a Current configuration summary
-                    of the options <code>/config</code> controls — model, verbose, theme, output
-                    style, auto-compact, notifications — resolved across scopes. The Memory tab
-                    surfaces both the user and project <code>CLAUDE.md</code> files and the
-                    per-project file-based memory store — every auto-memory <code>*.md</code>
-                    under <code>~/.claude/projects/&lt;slug&gt;/memory/</code> (a
-                    <code>MEMORY.md</code> index plus one file per remembered fact, often 100+),
-                    grouped by project, searchable, and editable — the <code>MEMORY.md</code>
-                    index links are clickable and jump to (scroll to + highlight) the matching
-                    fact file.                     Create, edit, and
-                    delete the low-risk surfaces — text-file artifacts, per-project auto-memory
-                    files, and <code>keybindings.json</code> (structured inline editor) —
-                    with mandatory timestamped backups before every write. Plugins, MCP, hooks,
-                    and live settings stay read-only with explainer banners and copy-able CLI
-                    commands. See the dedicated
-                    <a href="#config-explorer">Config Explorer</a> section for the full tour.
-                    Per-plugin contribution breakdowns show author and license.
+                    Explore Claude Code configuration in 12 tabs covering skills, subagents,
+                    commands, styles, plugins, MCP, hooks, settings, memory, keybindings, and
+                    statusline scripts. The page resolves <code>/config</code> values across scopes,
+                    searches project memory, links <code>MEMORY.md</code> entries to their source
+                    facts, and shows plugin authorship. Low-risk text, memory, and keybinding files
+                    support create, edit, and delete with timestamped backups; plugins, MCP, hooks,
+                    and live settings remain read-only with copyable CLI guidance.
                   </p>
                 </div>
                 <div class="feature-card">
@@ -6993,7 +6886,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=75" defer></script>
+    <script src="i18n-content.js?v=78" defer></script>
     <script src="script.js?v=55" defer></script>
     <script>
       (function () {
