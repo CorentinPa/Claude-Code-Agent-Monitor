@@ -662,6 +662,11 @@ Shows agent type, status, tool usage, and cost breakdown. When the attached
 session has a `todo_summary`, the card renders the same accessible task-progress
 donut and portal tooltip used by the Sessions table immediately before the
 status badge. Session Detail renders the full task list with 10 rows per page.
+The server scopes these nullable values to the latest top-level work item, so a
+new Claude human turn or Codex task that emits no tracker removes the donut and
+detail panel instead of leaving an older in-progress list visible. A turn/task
+that ends without a final tracker update also drops unfinished state; fully
+completed progress remains available as history.
 
 The Sessions table opts into `include_transient=true` only on page zero, so the
 local in-memory Codex startup row appears immediately just as it does on

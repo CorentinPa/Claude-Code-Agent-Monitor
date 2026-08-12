@@ -114,6 +114,70 @@ before(async () => {
 
   insertSession("task-progress-empty", "claude", null);
 
+  const staleId = "task-progress-stopped-without-final-update";
+  const staleTranscript = path.join(ROOT, `${staleId}.jsonl`);
+  writeJsonl(staleTranscript, [
+    {
+      type: "assistant",
+      timestamp: "2026-08-07T12:00:00.000Z",
+      message: {
+        role: "assistant",
+        content: [
+          {
+            type: "tool_use",
+            id: "stale-todo",
+            name: "TodoWrite",
+            input: {
+              todos: [{ content: "Forgotten API work", status: "in_progress" }],
+            },
+          },
+        ],
+      },
+    },
+  ]);
+  insertSession(staleId, "claude", staleTranscript);
+  stmts.insertEventAt.run(
+    staleId,
+    `${staleId}-main`,
+    "Stop",
+    null,
+    "Turn completed",
+    JSON.stringify({ session_id: staleId }),
+    "2026-08-07T12:01:00.000Z"
+  );
+
+  const newPromptId = "task-progress-new-prompt-without-tracker";
+  const newPromptTranscript = path.join(ROOT, `${newPromptId}.jsonl`);
+  writeJsonl(newPromptTranscript, [
+    {
+      type: "assistant",
+      timestamp: "2026-08-07T13:00:00.000Z",
+      message: {
+        role: "assistant",
+        content: [
+          {
+            type: "tool_use",
+            id: "completed-todo",
+            name: "TodoWrite",
+            input: {
+              todos: [{ content: "Finished previous work", status: "completed" }],
+            },
+          },
+        ],
+      },
+    },
+  ]);
+  insertSession(newPromptId, "claude", newPromptTranscript);
+  stmts.insertEventAt.run(
+    newPromptId,
+    `${newPromptId}-main`,
+    "UserPromptSubmit",
+    null,
+    "User prompt submitted",
+    JSON.stringify({ session_id: newPromptId }),
+    "2026-08-07T13:01:00.000Z"
+  );
+
   const app = createApp();
   server = await startServer(app, 0);
   baseUrl = `http://127.0.0.1:${server.address().port}`;
@@ -169,6 +233,36 @@ describe("session task progress API", () => {
 
     assert.equal(response.status, 200);
     assert.equal(response.body.session.todo_snapshot, null);
+  });
+
+  it("removes unfinished progress on the persisted Stop event before transcript markers flush", async () => {
+    const listResponse = await requestJson("/api/sessions?limit=20&include_task_progress=true");
+    const stale = listResponse.body.sessions.find(
+      (session) => session.id === "task-progress-stopped-without-final-update"
+    );
+    const detailResponse = await requestJson(
+      "/api/sessions/task-progress-stopped-without-final-update"
+    );
+
+    assert.equal(listResponse.status, 200);
+    assert.equal(stale.todo_summary, null);
+    assert.equal(detailResponse.status, 200);
+    assert.equal(detailResponse.body.session.todo_snapshot, null);
+  });
+
+  it("removes completed history as soon as a new prompt starts without a tracker", async () => {
+    const listResponse = await requestJson("/api/sessions?limit=20&include_task_progress=true");
+    const latest = listResponse.body.sessions.find(
+      (session) => session.id === "task-progress-new-prompt-without-tracker"
+    );
+    const detailResponse = await requestJson(
+      "/api/sessions/task-progress-new-prompt-without-tracker"
+    );
+
+    assert.equal(listResponse.status, 200);
+    assert.equal(latest.todo_summary, null);
+    assert.equal(detailResponse.status, 200);
+    assert.equal(detailResponse.body.session.todo_snapshot, null);
   });
 
   it("caps task-progress enrichment on large list requests", async () => {
