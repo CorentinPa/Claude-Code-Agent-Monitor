@@ -38,6 +38,7 @@ const liveness = require("../lib/session-liveness");
 const hooksRouter = require("../routes/hooks");
 
 const realProbe = liveness.probeLiveCwds;
+const realRolloutProbe = liveness.probeLiveCodexRollouts;
 
 const enc = (cwd) => cwd.replace(/[^a-zA-Z0-9]/g, "-");
 const PROJECTS = path.join(CLAUDE_HOME, "projects");
@@ -150,6 +151,7 @@ before(async () => {
 
 after(() => {
   liveness.probeLiveCwds = realProbe;
+  liveness.probeLiveCodexRollouts = realRolloutProbe;
   if (server) server.close();
   if (db) db.close();
   try {
@@ -161,6 +163,7 @@ after(() => {
 
 beforeEach(() => {
   liveness.probeLiveCwds = realProbe;
+  liveness.probeLiveCodexRollouts = realRolloutProbe;
 });
 
 describe("isClaudeCommand — claude CLI process matcher", () => {
@@ -325,6 +328,24 @@ describe("watchdog liveness reap", () => {
     hooksRouter.livenessReap();
 
     assert.equal(stmts.getSession.get(sid).status, "completed");
+  });
+
+  it("distinguishes old and live Codex rollouts that share the same cwd", () => {
+    const cwd = "/tmp/liveness-shared-codex";
+    const liveId = "cliv0000-0000-0000-0000-000000000011";
+    const deadId = "cded0000-0000-0000-0000-000000000012";
+    const livePath = seedCodexSession(liveId, cwd);
+    seedCodexSession(deadId, cwd);
+
+    liveness.probeLiveCwds = () => ({ available: true, cwds: new Set([path.resolve(cwd)]) });
+    liveness.probeLiveCodexRollouts = () => ({
+      available: true,
+      paths: new Set([path.resolve(livePath)]),
+    });
+    hooksRouter.livenessReap({ provider: "codex" });
+
+    assert.equal(stmts.getSession.get(liveId).status, "active");
+    assert.equal(stmts.getSession.get(deadId).status, "completed");
   });
 
   it("does nothing when the probe is unavailable", async () => {

@@ -21,6 +21,7 @@ process.env.DASHBOARD_LIVENESS_PROBE = "0";
 const { createApp, startServer } = require("../index");
 const { db, stmts } = require("../db");
 const {
+  collapseCodexProcessTree,
   getCodexProcessAgents,
   getCodexProcessSessions,
   isInteractiveCodexCommand,
@@ -165,6 +166,36 @@ describe("interactive Codex command classification", () => {
     );
 
     assert.equal(processes[0].sessionId, resumedId);
+  });
+
+  it("counts a Node launcher and its native child as one logical session", () => {
+    const processes = collapseCodexProcessTree(
+      [
+        { pid: 61001, cwd: "/workspace/project" },
+        {
+          pid: 61002,
+          cwd: "/workspace/project",
+          sessionId: "019ff6e2-cedb-7f50-b298-c025267b7268",
+        },
+        { pid: 62001, cwd: "/workspace/other" },
+        { pid: 62002, cwd: "/workspace/other" },
+      ],
+      new Map([
+        [61001, 50000],
+        [61002, 61001],
+        [62001, 50000],
+        [62002, 62001],
+      ])
+    );
+
+    assert.deepEqual(processes, [
+      {
+        pid: 61002,
+        cwd: "/workspace/project",
+        sessionId: "019ff6e2-cedb-7f50-b298-c025267b7268",
+      },
+      { pid: 62002, cwd: "/workspace/other" },
+    ]);
   });
 });
 

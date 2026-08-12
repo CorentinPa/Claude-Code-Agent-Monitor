@@ -404,6 +404,34 @@ describe("Codex rollout ingestor", () => {
     assert.equal(stmts.getAgent.get(`codex:${SESSION_ID}`).status, "working");
   });
 
+  it("imports an inactive historical rollout as completed without replaying task_started", () => {
+    const sessionId = "019fd086-d75c-7a91-9743-2788d849c224";
+    const rollout = path.join(
+      process.env.DASHBOARD_CODEX_HOME,
+      "sessions",
+      "2026",
+      "08",
+      "05",
+      `rollout-2026-08-05T12-00-00-${sessionId}.jsonl`
+    );
+    fs.mkdirSync(path.dirname(rollout), { recursive: true });
+    fs.writeFileSync(
+      rollout,
+      [
+        record("session_meta", { id: sessionId, cwd: "/workspace/shared-cwd" }),
+        record("event_msg", { type: "task_started" }),
+      ]
+        .map((entry) => JSON.stringify(entry))
+        .join("\n") + "\n"
+    );
+
+    const result = ingestCodexTranscript(rollout, { liveTranscripts: new Set() });
+
+    assert.equal(result.created, true);
+    assert.equal(stmts.getSession.get(sessionId).status, "completed");
+    assert.equal(stmts.getAgent.get(`codex:${sessionId}`).status, "completed");
+  });
+
   it("uses and live-syncs Codex's native /rename title from session_index.jsonl", () => {
     const indexPath = path.join(process.env.DASHBOARD_CODEX_HOME, "session_index.jsonl");
     fs.writeFileSync(
