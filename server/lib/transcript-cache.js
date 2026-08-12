@@ -185,6 +185,8 @@ class TranscriptCache {
             compaction: merged.compaction,
             errors: merged.errors,
             turnDurations: hasTurnDurations ? merged.turnDurations : null,
+            turnDurationsComplete: merged.turnDurationsComplete,
+            turnDurationCount: merged.turnDurationCount,
             thinkingBlockCount: merged.thinkingBlockCount || 0,
             usageExtras: hasUsageExtras ? merged.usageExtras : null,
             latestModel: merged.latestModel || null,
@@ -286,6 +288,7 @@ class TranscriptCache {
     const buf = Buffer.allocUnsafe(CHUNK);
     let pending = null; // bytes of partial trailing line not yet terminated by \n
     let pendingLen = 0;
+    let pendingStart = null;
     let pos = startOffset;
     let fd;
     try {
@@ -296,6 +299,7 @@ class TranscriptCache {
       }
 
       while (pos < endOffset) {
+        const chunkStart = pos;
         const want = Math.min(CHUNK, endOffset - pos);
         let got;
         try {
@@ -325,7 +329,9 @@ class TranscriptCache {
           if (line.length && line.charCodeAt(line.length - 1) === 13) {
             line = line.slice(0, -1); // strip CR
           }
-          if (line) this._consumeLine(line, state);
+          const sourceOffset = pendingStart ?? chunkStart + lineStart;
+          if (line) this._consumeLine(line, state, sourceOffset);
+          pendingStart = null;
           lineStart = i + 1;
         }
 
@@ -338,7 +344,9 @@ class TranscriptCache {
             // to one malformed line.
             pending = null;
             pendingLen = 0;
+            pendingStart = null;
           } else {
+            if (pendingLen === 0) pendingStart = chunkStart + lineStart;
             if (!pending) {
               pending = Buffer.allocUnsafe(Math.max(newLen, 8192));
             } else if (pending.length < newLen) {
@@ -357,7 +365,7 @@ class TranscriptCache {
         if (line.length && line.charCodeAt(line.length - 1) === 13) {
           line = line.slice(0, -1);
         }
-        if (line) this._consumeLine(line, state);
+        if (line) this._consumeLine(line, state, pendingStart);
       }
     } finally {
       if (fd !== undefined) {
@@ -378,6 +386,7 @@ class TranscriptCache {
       compaction: null,
       errors: [],
       turnDurations: [],
+      turnDurationCount: 0,
       thinkingBlockCount: 0,
       usageExtras: {
         service_tiers: new Set(),
@@ -419,7 +428,7 @@ class TranscriptCache {
     };
   }
 
-  _consumeLine(line, state) {
+  _consumeLine(line, state, sourceOffset = null) {
     if (!line) return;
     let entry;
     try {
@@ -487,12 +496,22 @@ class TranscriptCache {
     }
 
     if (entry.type === "system" && entry.subtype === "turn_duration" && entry.durationMs) {
+      state.turnDurationCount++;
       const turnTs = entry.timestamp
         ? typeof entry.timestamp === "number"
           ? new Date(entry.timestamp).toISOString()
           : entry.timestamp
         : null;
-      state.turnDurations.push({ durationMs: entry.durationMs, timestamp: turnTs });
+      state.turnDurations.push({
+        durationMs: entry.durationMs,
+        timestamp: turnTs,
+        turnId:
+          typeof entry.uuid === "string" && entry.uuid
+            ? `uuid:${entry.uuid}`
+            : sourceOffset !== null
+              ? `offset:${sourceOffset}`
+              : `ordinal:${state.turnDurationCount}`,
+      });
       if (state.turnDurations.length >= PARSE_TRIM_WATERMARK) {
         this._trimArray(state.turnDurations);
       }
@@ -599,6 +618,8 @@ class TranscriptCache {
       compaction: state.compaction,
       errors: hasErrors ? state.errors : null,
       turnDurations: hasTurnDurations ? state.turnDurations : null,
+      turnDurationsComplete: state.turnDurationCount <= MAX_ARRAY_LEN,
+      turnDurationCount: state.turnDurationCount,
       thinkingBlockCount: state.thinkingBlockCount,
       usageExtras: serializedExtras,
       latestModel: state.latestModel,
@@ -624,13 +645,13 @@ class TranscriptCache {
       if (content.charCodeAt(i) !== 10) continue;
       let line = content.slice(start, i);
       if (line.length && line.charCodeAt(line.length - 1) === 13) line = line.slice(0, -1);
-      if (line) this._consumeLine(line, state);
+      if (line) this._consumeLine(line, state, start);
       start = i + 1;
     }
     if (start < content.length) {
       let line = content.slice(start);
       if (line.length && line.charCodeAt(line.length - 1) === 13) line = line.slice(0, -1);
-      if (line) this._consumeLine(line, state);
+      if (line) this._consumeLine(line, state, start);
     }
     return this._finalizeState(state);
   }
@@ -671,6 +692,14 @@ class TranscriptCache {
       turnDurations.push(...incremental.turnDurations);
       this._trimArray(turnDurations);
     }
+    const turnDurationCount =
+      (cached.result?.turnDurationCount || cached.result?.turnDurations?.length || 0) +
+      (incremental?.turnDurationCount || incremental?.turnDurations?.length || 0);
+    const turnDurationsComplete = Boolean(
+      cached.result?.turnDurationsComplete !== false &&
+      (!incremental || incremental.turnDurationsComplete !== false) &&
+      turnDurationCount <= MAX_ARRAY_LEN
+    );
 
     const thinkingBlockCount =
       (cached.result?.thinkingBlockCount || 0) + (incremental?.thinkingBlockCount || 0);
@@ -742,6 +771,8 @@ class TranscriptCache {
       compaction,
       errors,
       turnDurations,
+      turnDurationsComplete,
+      turnDurationCount,
       thinkingBlockCount,
       usageExtras,
       latestModel,

@@ -3394,7 +3394,9 @@
             <p>
               Single SQLite transaction per event. Auto-creates sessions and agents. Extracts
               token usage, tool calls, compactions, API errors, and turn durations from JSONL
-              transcripts via a stat-cached reader.
+              transcripts via a stat-cached reader. Stable turn identities prevent replayed
+              duration rows, while exact Codex rollout liveness keeps historical sessions off the
+              Active Agents board, and launcher/native PID pairs collapse into one TUI card.
             </p>
           </div>
           <div class="how-step">

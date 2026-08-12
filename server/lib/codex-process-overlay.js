@@ -225,12 +225,38 @@ function processInfosFromLsof(argsByPid, output, options = {}) {
   return processes;
 }
 
+/**
+ * Collapse the Node launcher and its direct native Codex child into one logical
+ * interactive process. npm's `codex` shim stays alive as the parent, so counting
+ * both PIDs creates two transient cards for every real terminal session.
+ */
+function collapseCodexProcessTree(processes, parentByPid) {
+  const byPid = new Map((processes || []).map((processInfo) => [processInfo.pid, processInfo]));
+  const launcherPids = new Set();
+  const inheritedSessionIds = new Map();
+  for (const child of processes || []) {
+    const parent = byPid.get(parentByPid.get(child.pid));
+    if (!parent || parent.cwd !== child.cwd) continue;
+    if (!child.sessionId && parent.sessionId) {
+      inheritedSessionIds.set(child.pid, parent.sessionId);
+    }
+    launcherPids.add(parent.pid);
+  }
+  return (processes || [])
+    .filter((processInfo) => !launcherPids.has(processInfo.pid))
+    .map((processInfo) =>
+      inheritedSessionIds.has(processInfo.pid)
+        ? { ...processInfo, sessionId: inheritedSessionIds.get(processInfo.pid) }
+        : processInfo
+    );
+}
+
 async function probeInteractiveCodexProcesses() {
   if (probeDisabled()) return { available: false, processes: [] };
 
   let psOutput;
   try {
-    psOutput = await run("ps", ["-Ao", "pid=,args="], {
+    psOutput = await run("ps", ["-Ao", "pid=,ppid=,args="], {
       encoding: "utf8",
       timeout: 5_000,
       maxBuffer: 16 * 1024 * 1024,
@@ -240,10 +266,13 @@ async function probeInteractiveCodexProcesses() {
   }
 
   const argsByPid = new Map();
+  const parentByPid = new Map();
   for (const line of psOutput.split("\n")) {
-    const match = line.match(/^\s*(\d+)\s+(.*)$/);
-    if (!match || !isInteractiveCodexCommand(match[2])) continue;
-    argsByPid.set(Number(match[1]), match[2]);
+    const match = line.match(/^\s*(\d+)\s+(\d+)\s+(.*)$/);
+    if (!match || !isInteractiveCodexCommand(match[3])) continue;
+    const pid = Number(match[1]);
+    argsByPid.set(pid, match[3]);
+    parentByPid.set(pid, Number(match[2]));
   }
   if (argsByPid.size === 0) return { available: true, processes: [] };
 
@@ -269,7 +298,7 @@ async function probeInteractiveCodexProcesses() {
         // The process exited between ps and readlink.
       }
     }
-    return { available: true, processes };
+    return { available: true, processes: collapseCodexProcessTree(processes, parentByPid) };
   }
 
   let lsofOutput;
@@ -284,7 +313,10 @@ async function probeInteractiveCodexProcesses() {
     if (lsofOutput === null) return { available: false, processes: [] };
   }
 
-  return { available: true, processes: processInfosFromLsof(argsByPid, lsofOutput) };
+  return {
+    available: true,
+    processes: collapseCodexProcessTree(processInfosFromLsof(argsByPid, lsofOutput), parentByPid),
+  };
 }
 
 function overlaySessionId(processInfo) {
@@ -511,6 +543,7 @@ function resetCodexProcessOverlayForTests() {
 }
 
 module.exports = {
+  collapseCodexProcessTree,
   getCodexProcessAgents,
   getCodexProcessSessions,
   isInteractiveCodexCommand,

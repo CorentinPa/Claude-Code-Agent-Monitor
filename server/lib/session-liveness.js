@@ -117,4 +117,82 @@ function probeLiveCwds(binary = "claude") {
   return { available: true, cwds };
 }
 
-module.exports = { probeLiveCwds, isAgentCommand, isClaudeCommand, isCodexCommand };
+/**
+ * Enumerate the exact rollout JSONL files held open by live Codex processes.
+ * This is stronger than cwd matching: multiple historical and live Codex
+ * sessions commonly share one repository, while each live native process keeps
+ * only its own rollout open. Unavailable means callers must fall back to the
+ * conservative cwd probe and must not infer that any session is dead.
+ */
+function probeLiveCodexRollouts() {
+  if (probeDisabledByEnv() || process.platform === "win32" || isInsideContainer()) {
+    return { available: false, paths: new Set() };
+  }
+
+  let psOut;
+  try {
+    psOut = execFileSync("ps", ["-Ao", "pid=,args="], {
+      encoding: "utf8",
+      timeout: 5_000,
+      maxBuffer: 16 * 1024 * 1024,
+    });
+  } catch {
+    return { available: false, paths: new Set() };
+  }
+  const pids = [];
+  for (const line of psOut.split("\n")) {
+    const match = line.match(/^\s*(\d+)\s+(.*)$/);
+    if (match && isCodexCommand(match[2])) pids.push(match[1]);
+  }
+  const paths = new Set();
+  if (pids.length === 0) return { available: true, paths };
+
+  const remember = (candidate) => {
+    if (typeof candidate !== "string") return;
+    if (!candidate.endsWith(".jsonl") || !path.basename(candidate).startsWith("rollout-")) return;
+    paths.add(path.resolve(candidate));
+  };
+
+  if (process.platform === "linux") {
+    for (const pid of pids) {
+      let descriptors;
+      try {
+        descriptors = fs.readdirSync(`/proc/${pid}/fd`);
+      } catch {
+        continue;
+      }
+      for (const descriptor of descriptors) {
+        try {
+          remember(fs.readlinkSync(`/proc/${pid}/fd/${descriptor}`));
+        } catch {
+          /* descriptor closed between listing and read */
+        }
+      }
+    }
+    return { available: true, paths };
+  }
+
+  let lsofOut;
+  try {
+    lsofOut = execFileSync("lsof", ["-a", "-p", pids.join(","), "-Fn"], {
+      encoding: "utf8",
+      timeout: 10_000,
+      maxBuffer: 32 * 1024 * 1024,
+    });
+  } catch (err) {
+    lsofOut = err && typeof err.stdout === "string" && err.stdout ? err.stdout : null;
+    if (lsofOut === null) return { available: false, paths: new Set() };
+  }
+  for (const line of lsofOut.split("\n")) {
+    if (line.startsWith("n")) remember(line.slice(1));
+  }
+  return { available: true, paths };
+}
+
+module.exports = {
+  probeLiveCwds,
+  probeLiveCodexRollouts,
+  isAgentCommand,
+  isClaudeCommand,
+  isCodexCommand,
+};

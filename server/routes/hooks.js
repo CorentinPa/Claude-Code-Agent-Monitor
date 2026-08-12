@@ -965,39 +965,108 @@ const processEvent = db.transaction((hookType, data) => {
       }
 
       // Register turn duration events from transcript
+      let insertedTurns = 0;
+      let insertedTurnMs = 0;
+      let reconciledTurnTotals = null;
       if (result.turnDurations) {
-        for (const td of result.turnDurations) {
-          const tdTs = td.timestamp || new Date().toISOString();
-          // Deduplicate by checking if we already have this turn duration event
-          const existing = db
-            .prepare(
-              "SELECT 1 FROM events WHERE session_id = ? AND event_type = 'TurnDuration' AND created_at = ? LIMIT 1"
-            )
-            .get(sessionId, tdTs);
-          if (existing) continue;
+        const sessionForTurns = stmts.getSession.get(sessionId);
+        const fallbackStart = Date.parse(sessionForTurns?.started_at || "") || Date.now();
+        const turns = result.turnDurations.map((td, index) => ({
+          durationMs: td.durationMs,
+          turnId: td.turnId || null,
+          // Some Claude versions omit the timestamp. A session-relative fallback is
+          // deterministic across hook replays; turnId remains the primary identity.
+          timestamp: td.timestamp || new Date(fallbackStart + index).toISOString(),
+        }));
 
-          const tdSummary = `Turn completed in ${(td.durationMs / 1000).toFixed(1)}s`;
-          stmts.insertEvent.run(
+        const insertTurn = (turn) => {
+          const summary = `Turn completed in ${(turn.durationMs / 1000).toFixed(1)}s`;
+          stmts.insertEventAt.run(
             sessionId,
             mainAgentId,
             "TurnDuration",
             null,
-            tdSummary,
-            JSON.stringify({ durationMs: td.durationMs })
+            summary,
+            JSON.stringify({ durationMs: turn.durationMs, turnId: turn.turnId }),
+            turn.timestamp
           );
-          broadcast("new_event", {
-            session_id: sessionId,
-            agent_id: mainAgentId,
-            event_type: "TurnDuration",
-            tool_name: null,
-            summary: tdSummary,
-            created_at: tdTs,
-          });
+          return summary;
+        };
+
+        if (result.turnDurationsComplete) {
+          // A complete parse is authoritative. Rebuilding a non-canonical set repairs
+          // rows and counters inflated by older versions while preserving each real
+          // turn, including distinct timestamp-less turns with equal durations.
+          const existingTurns = db
+            .prepare(
+              `SELECT id, created_at, json_extract(data, '$.durationMs') AS duration_ms,
+                      json_extract(data, '$.turnId') AS turn_id
+               FROM events WHERE session_id = ? AND event_type = 'TurnDuration'
+               ORDER BY id ASC`
+            )
+            .all(sessionId);
+          const canonical =
+            existingTurns.length === turns.length &&
+            turns.every((turn, index) => {
+              const row = existingTurns[index];
+              return (
+                row.turn_id === turn.turnId &&
+                Number(row.duration_ms) === Number(turn.durationMs) &&
+                row.created_at === turn.timestamp
+              );
+            });
+
+          if (!canonical) {
+            // processEvent already runs in one transaction, so deletion and rebuild
+            // commit atomically with the hook event and repaired metadata below.
+            db.prepare(
+              "DELETE FROM events WHERE session_id = ? AND event_type = 'TurnDuration'"
+            ).run(sessionId);
+            for (const turn of turns) insertTurn(turn);
+          }
+          reconciledTurnTotals = {
+            count: turns.length,
+            durationMs: turns.reduce((total, turn) => total + turn.durationMs, 0),
+          };
+        } else {
+          // A capped parse only contains the newest turns, so it must never delete
+          // older persisted rows. Stable turn IDs make this append path replay-safe.
+          for (const turn of turns) {
+            const existing = turn.turnId
+              ? db
+                  .prepare(
+                    "SELECT 1 FROM events WHERE session_id = ? AND event_type = 'TurnDuration' AND json_extract(data, '$.turnId') = ? LIMIT 1"
+                  )
+                  .get(sessionId, turn.turnId)
+              : db
+                  .prepare(
+                    "SELECT 1 FROM events WHERE session_id = ? AND event_type = 'TurnDuration' AND created_at = ? AND json_extract(data, '$.durationMs') = ? LIMIT 1"
+                  )
+                  .get(sessionId, turn.timestamp, turn.durationMs);
+            if (existing) continue;
+
+            const summary = insertTurn(turn);
+            insertedTurns += 1;
+            insertedTurnMs += turn.durationMs;
+            broadcast("new_event", {
+              session_id: sessionId,
+              agent_id: mainAgentId,
+              event_type: "TurnDuration",
+              tool_name: null,
+              summary,
+              created_at: turn.timestamp,
+            });
+          }
         }
       }
 
       // Update session metadata with enriched data (thinking blocks, usage extras)
-      if (result.usageExtras || result.thinkingBlockCount > 0) {
+      if (
+        result.usageExtras ||
+        result.thinkingBlockCount > 0 ||
+        reconciledTurnTotals ||
+        insertedTurns > 0
+      ) {
         const session = stmts.getSession.get(sessionId);
         if (session) {
           const meta = session.metadata ? JSON.parse(session.metadata) : {};
@@ -1005,12 +1074,19 @@ const processEvent = db.transaction((hookType, data) => {
             meta.usage_extras = result.usageExtras;
           }
           if (result.thinkingBlockCount > 0) {
-            meta.thinking_blocks = (meta.thinking_blocks || 0) + result.thinkingBlockCount;
+            // The cache reports the transcript-wide total, not a per-hook delta.
+            meta.thinking_blocks = result.thinkingBlockCount;
           }
-          if (result.turnDurations) {
-            meta.turn_count = (meta.turn_count || 0) + result.turnDurations.length;
-            const totalMs = result.turnDurations.reduce((s, t) => s + t.durationMs, 0);
-            meta.total_turn_duration_ms = (meta.total_turn_duration_ms || 0) + totalMs;
+          // Count only the turns this fire actually inserted. Adding
+          // result.turnDurations.length re-counted the session's whole turn history on
+          // every hook fire, inflating turn_count and total_turn_duration_ms in step
+          // with the duplicate rows above.
+          if (reconciledTurnTotals) {
+            meta.turn_count = reconciledTurnTotals.count;
+            meta.total_turn_duration_ms = reconciledTurnTotals.durationMs;
+          } else if (insertedTurns > 0) {
+            meta.turn_count = (meta.turn_count || 0) + insertedTurns;
+            meta.total_turn_duration_ms = (meta.total_turn_duration_ms || 0) + insertedTurnMs;
           }
           stmts.updateSession.run(null, null, null, JSON.stringify(meta), sessionId);
         }
@@ -1527,43 +1603,50 @@ function livenessReap({ ignoreIdleGate = false, provider = "claude" } = {}) {
   const activeSessions = db
     .prepare(
       `SELECT id, name, cwd, transcript_path, updated_at FROM sessions
-       WHERE status = 'active' AND cwd IS NOT NULL AND cwd <> ''
+       WHERE status = 'active'
          AND (source = 'local' OR source IS NULL)
-         AND COALESCE(provider, 'claude') = ?`
+         AND COALESCE(provider, 'claude') = ?
+         AND ((cwd IS NOT NULL AND cwd <> '') OR (? = 'codex' AND transcript_path IS NOT NULL))`
     )
-    .all(provider);
+    .all(provider, provider);
   if (activeSessions.length === 0) return; // nothing to check — skip the ps/lsof cost
 
   const probe = liveness.probeLiveCwds(cli);
-  if (!probe.available) return;
+  const rolloutProbe = provider === "codex" ? liveness.probeLiveCodexRollouts() : null;
+  if (!probe.available && !rolloutProbe?.available) return;
   const now = Date.now();
   for (const sess of activeSessions) {
-    // Household-hook-forwarded sessions report cwd in the ORIGIN machine's own
-    // path syntax (e.g. Windows `D:\Git\ai-deck`). This probe only ever
-    // discovers *local* claude processes' cwds via /proc or lsof on THIS host,
-    // so a non-POSIX-absolute cwd can never appear in probe.cwds — treating
-    // that mismatch as "process is dead" is a false positive for every remote
-    // session, not a real crash signal. This guard protects the common mixed
-    // deployment (this host has BOTH local sessions the probe should keep
-    // reaping, AND remote household-hook sessions it must leave alone)
-    // without sacrificing local crash detection via DASHBOARD_LIVENESS_PROBE=0.
-    // The probe only ever reports POSIX cwds (/proc + lsof, and it bails out
-    // entirely on win32), so "could this cwd be local?" is precisely "is it
-    // POSIX-absolute?" — a leading-"/" check. Use path.posix.isAbsolute()
-    // explicitly rather than the platform-sensitive path.isAbsolute(): in
-    // production this only runs on POSIX hosts so the two are identical, but
-    // the unit tests mock probeLiveCwds() to exercise this reaper on a Windows
-    // host too, where bare path.isAbsolute("D:\\Git\\ai-deck") would be true
-    // and wrongly reap a forwarded remote session. posix keeps it host-agnostic.
-    if (!path.posix.isAbsolute(sess.cwd)) continue;
+    if (rolloutProbe?.available && sess.transcript_path) {
+      if (rolloutProbe.paths.has(path.resolve(sess.transcript_path))) continue;
+    } else {
+      if (!probe.available || !sess.cwd) continue;
+      // Household-hook-forwarded sessions report cwd in the ORIGIN machine's own
+      // path syntax (e.g. Windows `D:\Git\ai-deck`). This probe only ever
+      // discovers *local* claude processes' cwds via /proc or lsof on THIS host,
+      // so a non-POSIX-absolute cwd can never appear in probe.cwds — treating
+      // that mismatch as "process is dead" is a false positive for every remote
+      // session, not a real crash signal. This guard protects the common mixed
+      // deployment (this host has BOTH local sessions the probe should keep
+      // reaping, AND remote household-hook sessions it must leave alone)
+      // without sacrificing local crash detection via DASHBOARD_LIVENESS_PROBE=0.
+      // The probe only ever reports POSIX cwds (/proc + lsof, and it bails out
+      // entirely on win32), so "could this cwd be local?" is precisely "is it
+      // POSIX-absolute?" — a leading-"/" check. Use path.posix.isAbsolute()
+      // explicitly rather than the platform-sensitive path.isAbsolute(): in
+      // production this only runs on POSIX hosts so the two are identical, but
+      // the unit tests mock probeLiveCwds() to exercise this reaper on a Windows
+      // host too, where bare path.isAbsolute("D:\\Git\\ai-deck") would be true
+      // and wrongly reap a forwarded remote session. posix keeps it host-agnostic.
+      if (!path.posix.isAbsolute(sess.cwd)) continue;
 
-    let resolvedCwd;
-    try {
-      resolvedCwd = path.resolve(sess.cwd);
-    } catch {
-      continue;
+      let resolvedCwd;
+      try {
+        resolvedCwd = path.resolve(sess.cwd);
+      } catch {
+        continue;
+      }
+      if (probe.cwds.has(resolvedCwd)) continue;
     }
-    if (probe.cwds.has(resolvedCwd)) continue;
 
     // Idle gate (watchdog ticks only — boot passes skip it, see above): the
     // transcript mtime is the ground truth for "when did this session last

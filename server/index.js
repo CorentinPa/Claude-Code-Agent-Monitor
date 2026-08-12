@@ -581,6 +581,7 @@ function startCodexSessionSync(broadcast) {
     refreshCodexSessionTitles,
     syncCodexStateSessions,
   } = require("./lib/codex-ingest");
+  const liveness = require("./lib/session-liveness");
   const fingerprints = new Map();
   let running = false;
   let queued = false;
@@ -609,6 +610,8 @@ function startCodexSessionSync(broadcast) {
       // as soon as Codex creates the directory instead of polling forever.
       watchSessionsDir();
       watchCodexHome();
+      const rolloutProbe = liveness.probeLiveCodexRollouts();
+      const liveTranscripts = rolloutProbe.available ? rolloutProbe.paths : null;
       // Hooks are the lowest-latency signal, but Codex may delay a new hook
       // until the user approves it. Its local thread row is written at CLI
       // launch, so use it to create the same Waiting card immediately.
@@ -632,7 +635,7 @@ function startCodexSessionSync(broadcast) {
             // Only retain a successful fingerprint. A temporarily unreadable or
             // malformed rollout must retry on the next sweep rather than being
             // silently skipped until another byte happens to arrive.
-            publish(ingestCodexTranscript(transcriptPath));
+            publish(ingestCodexTranscript(transcriptPath, { liveTranscripts }));
             fingerprints.set(transcriptPath, fingerprint);
           } catch (err) {
             console.warn(

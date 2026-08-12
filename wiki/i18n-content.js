@@ -6,6 +6,8 @@
  */
 window.__WIKI_CONTENT_I18N = {
   zh: {
+    "Stable transcript identities keep Claude <code>TurnDuration</code> events replay-safe and repair legacy duplicate totals. On supported local hosts, exact open-rollout probing also prevents historical Codex sessions that share a project directory from appearing as active agents. Node launcher/native-child pairs are collapsed first, so each interactive TUI produces one card.":
+      "稳定的 Transcript 标识使 Claude <code>TurnDuration</code> 事件可安全重放，并修复旧版本的重复总计。在受支持的本地主机上，精确的开放 rollout 探测还会防止共享项目目录的历史 Codex 会话显示为 active Agent。Node 启动器与原生子进程会先合并，因此每个交互式 TUI 只生成一张卡片。",
     '<span class="caption-icon">📋</span> <span><strong>Task Progress · Overview</strong> — Dashboard agent cards and Sessions rows reuse the same compact completion donut beside status; hover or focus opens an owner-aware preview of current work and task states</span>':
       '<span class="caption-icon">📋</span> <span><strong>任务进度 · 概览</strong> — Dashboard Agent 卡片与 Sessions 行在状态旁复用同一个紧凑完成度环形图；悬停或聚焦可打开带归属信息的当前工作与任务状态预览</span>',
     '<span class="caption-icon">✅</span> <span><strong>Task Progress · Session Detail</strong> — the full owner-aware tracker combines a segmented completion donut, active task, completion bar, owner breakdown, and a task list paginated at 10 rows per page</span>':
@@ -1462,6 +1464,8 @@ window.__WIKI_CONTENT_I18N = {
       "<strong>服务端分页</strong>的表格，列出每一个已记录的会话。每一页只获取对应的数据片段，因此无论会话数量多少，成本计算都保持有界。针对 <code>id</code>、<code>name</code> 和 <code>cwd</code> 的不区分大小写搜索在服务端运行，并带有 300 ms 防抖；状态过滤器可与搜索组合以精确缩小范围。可搜索的复选框项目选择器支持选择多个目录；完整长路径仍可查看，紧凑的触发器文字让筛选栏保持易读。排序使用相同的自定义下拉模式。每一行显示会话的真实名称（从 transcript 实时同步：<code>/rename</code> 或 <code>claude -n</code> 标题，否则使用自动标题，再否则使用首条用户 prompt，并回退到短 ID）、状态徽章、agent 数量、时长、模型和预估成本。点击任意行即可深入查看完整的会话详情视图，包含对话记录和 agent 层级。",
   },
   vi: {
+    "Stable transcript identities keep Claude <code>TurnDuration</code> events replay-safe and repair legacy duplicate totals. On supported local hosts, exact open-rollout probing also prevents historical Codex sessions that share a project directory from appearing as active agents. Node launcher/native-child pairs are collapsed first, so each interactive TUI produces one card.":
+      "Định danh transcript ổn định giúp sự kiện Claude <code>TurnDuration</code> an toàn khi phát lại và sửa các tổng trùng lặp từ phiên bản cũ. Trên máy cục bộ được hỗ trợ, việc dò đúng rollout đang mở cũng ngăn phiên Codex lịch sử dùng chung thư mục dự án xuất hiện như agent active. Cặp tiến trình khởi chạy Node và tiến trình con native được gộp trước, nên mỗi TUI tương tác chỉ tạo một thẻ.",
     '<span class="caption-icon">📋</span> <span><strong>Task Progress · Overview</strong> — Dashboard agent cards and Sessions rows reuse the same compact completion donut beside status; hover or focus opens an owner-aware preview of current work and task states</span>':
       '<span class="caption-icon">📋</span> <span><strong>Tiến độ công việc · Tổng quan</strong> — thẻ Agent trên Dashboard và hàng trong Sessions dùng cùng donut hoàn thành nhỏ gọn cạnh trạng thái; hover hoặc focus mở bản xem trước theo chủ sở hữu về công việc hiện tại và trạng thái tác vụ</span>',
     '<span class="caption-icon">✅</span> <span><strong>Task Progress · Session Detail</strong> — the full owner-aware tracker combines a segmented completion donut, active task, completion bar, owner breakdown, and a task list paginated at 10 rows per page</span>':

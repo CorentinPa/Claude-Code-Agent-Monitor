@@ -317,7 +317,7 @@ function refreshCodexSessionTitles() {
   return changed;
 }
 
-function createCodexSession(meta, transcriptPath) {
+function createCodexSession(meta, transcriptPath, options = {}) {
   const sessionId = meta?.id || sessionIdFromPath(transcriptPath);
   if (!sessionId) return null;
   let session = stmts.getSession.get(sessionId);
@@ -332,10 +332,11 @@ function createCodexSession(meta, transcriptPath) {
     model_provider: meta?.model_provider || "openai",
     git: meta?.git || null,
   });
+  const confirmedHistorical = options.confirmedLive === false;
   stmts.insertCodexSession.run(
     sessionId,
     getCodexSessionTitle(sessionId) || "Codex session",
-    "active",
+    confirmedHistorical ? "completed" : "active",
     cwd,
     meta?.model || meta?.model_name || "unknown",
     "local",
@@ -350,7 +351,22 @@ function createCodexSession(meta, transcriptPath) {
     stmts.setSessionTranscriptPath.run(transcriptPath, sessionId);
   }
   const agentId = `codex:${sessionId}`;
-  stmts.insertAgent.run(agentId, sessionId, "Codex", "main", null, "working", null, null, metadata);
+  stmts.insertAgent.run(
+    agentId,
+    sessionId,
+    "Codex",
+    "main",
+    null,
+    confirmedHistorical ? "completed" : "working",
+    null,
+    null,
+    metadata
+  );
+  if (confirmedHistorical) {
+    const endedAt = options.endedAt || startedAt;
+    db.prepare("UPDATE sessions SET ended_at = ? WHERE id = ?").run(endedAt, sessionId);
+    db.prepare("UPDATE agents SET ended_at = ? WHERE id = ?").run(endedAt, agentId);
+  }
   session = stmts.getSession.get(sessionId);
   return session;
 }
@@ -735,15 +751,29 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
     stmts.replaceSessionTranscriptPath.run(transcriptPath, knownSession.id);
     return ingestCodexTranscript(transcriptPath, options);
   }
+  const liveTranscripts = options.liveTranscripts instanceof Set ? options.liveTranscripts : null;
+  const confirmedLive = liveTranscripts ? liveTranscripts.has(path.resolve(transcriptPath)) : null;
   const created = !knownSession;
-  let session = knownSession || createCodexSession(meta, transcriptPath);
-  if (!session && meta?.id) session = createCodexSession(meta, transcriptPath);
+  const createOptions = {
+    confirmedLive,
+    endedAt: new Date(stat.mtimeMs).toISOString(),
+  };
+  let session = knownSession || createCodexSession(meta, transcriptPath, createOptions);
+  if (!session && meta?.id) session = createCodexSession(meta, transcriptPath, createOptions);
   if (!session) return { changed: false, events: [] };
   // Backfill sessions created by an older dashboard build that stored the path
   // only in metadata. The prepared statement is intentionally one-shot.
   stmts.setSessionTranscriptPath.run(transcriptPath, session.id);
 
   const agentId = `codex:${session.id}`;
+  if (confirmedLive === false && session.status === "active") {
+    const endedAt = new Date(stat.mtimeMs).toISOString();
+    stmts.clearSessionAwaitingInput.run(session.id);
+    stmts.clearAgentAwaitingInput.run(agentId);
+    stmts.updateSession.run(null, "completed", endedAt, null, session.id);
+    stmts.updateAgent.run(null, "completed", null, null, endedAt, null, agentId);
+    session = stmts.getSession.get(session.id);
+  }
   let model = session.model || "unknown";
   let speed = "standard";
   let counters = {
@@ -815,7 +845,10 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
   // Process only the final lifecycle record in this byte batch. A cold import
   // can contain hundreds of historic turns; replaying every intermediate
   // Working/Waiting mutation is wasteful and can briefly broadcast stale state.
-  applyCodexTranscriptLifecycle(session.id, latestLifecycleRecord);
+  // Exact process identity wins over a historical rollout's final lifecycle
+  // marker. Replaying an old task_started record must never reactivate and
+  // broadcast a dead session merely because it shares a cwd with a live one.
+  if (confirmedLive !== false) applyCodexTranscriptLifecycle(session.id, latestLifecycleRecord);
   // Tool invocations are stored through an independent cursor so initial
   // rollout imports and all subsequent real-time appends preserve their exact
   // order without double-counting lifecycle/token records.
