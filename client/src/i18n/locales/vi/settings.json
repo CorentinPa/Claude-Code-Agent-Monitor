@@ -42,8 +42,8 @@
     },
     "cacheWrite5m": "Ghi bộ nhớ đệm (5m)",
     "cacheWrite1h": "Ghi bộ nhớ đệm (1h)",
-    "fastInput": "Fast Input",
-    "fastOutput": "Fast Output",
+    "fastInput": "Đầu vào Fast",
+    "fastOutput": "Đầu ra Fast",
     "gpt": {
       "title": "Định giá mô hình GPT của OpenAI",
       "description": "Đơn giá API OpenAI công bố cho mức dùng Codex. Yêu cầu chuẩn dùng mức Short với đầu vào không quá 272K token và Long khi vượt 272K; Fast mode dùng bảng giá riêng. USD trên 1M token.",
@@ -289,7 +289,7 @@
     "uptime": "Thời gian chạy",
     "nodejs": "Node.js",
     "platform": "Nền tảng",
-    "wsClients": "WS Clients",
+    "wsClients": "Máy khách WS",
     "loadingInfo": "Đang tải thông tin máy chủ..."
   },
   "tables": {
