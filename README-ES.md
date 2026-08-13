@@ -72,6 +72,9 @@ Un panel profesional para rastrear y visualizar sus sesiones de agente Claude Co
 > [!TIP]
 > Consulta también [README.md](./README.md) (English), [README-CN.md](./README-CN.md) (中文), [README-VN.md](./README-VN.md) (Tiếng Việt) y [README-KO.md](./README-KO.md) (한국어). Este es el README en español.
 
+> [!NOTE]
+> ¿Necesitas ayuda orientada a tareas? La [Wiki de GitHub](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/wiki) es el manual práctico para el uso diario, las operaciones de equipo, la solución de problemas, la automatización con CLI/MCP y las recetas de despliegue. La [Wiki estática localizada](https://hoangsonww.github.io/Claude-Code-Agent-Monitor/wiki/) sigue siendo el recorrido del producto y la arquitectura en inglés, vietnamita, chino, coreano y español; los contratos técnicos exactos permanecen en [`docs/`](./docs/README.md).
+
 ---
 
 ## Índice de contenidos
