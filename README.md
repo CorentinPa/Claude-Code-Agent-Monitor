@@ -73,6 +73,9 @@ A professional dashboard to track and visualize your Claude Code and Codex agent
 > [!TIP]
 > See also: [README-CN.md](./README-CN.md) (中文版本), [README-VN.md](./README-VN.md) (Phiên bản tiếng Việt), [README-KO.md](./README-KO.md) (한국어 버전), and [README-ES.md](./README-ES.md) (versión en español) for localized documentation with region-specific tips and best practices.
 
+> [!NOTE]
+> Need task-first help? The [GitHub Wiki](https://github.com/hoangsonww/Claude-Code-Agent-Monitor/wiki) is the practical handbook for everyday use, team operations, troubleshooting, CLI/MCP automation, and deployment recipes. The [localized static Wiki](https://hoangsonww.github.io/Claude-Code-Agent-Monitor/wiki/) remains the English, Vietnamese, Chinese, Korean, and Spanish product and architecture tour; exact technical contracts stay in [`docs/`](./docs/README.md).
+
 ---
 
 ## Table of Contents
