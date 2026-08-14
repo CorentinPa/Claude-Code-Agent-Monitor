@@ -42,8 +42,8 @@
     },
     "cacheWrite5m": "캐시 쓰기(5분)",
     "cacheWrite1h": "캐시 쓰기(1시간)",
-    "fastInput": "Fast Input",
-    "fastOutput": "Fast Output",
+    "fastInput": "Fast 입력",
+    "fastOutput": "Fast 출력",
     "gpt": {
       "title": "OpenAI GPT 모델 가격 정책",
       "description": "Codex 사용을 위한 공개 OpenAI API 요금입니다. 표준 요청은 입력 토큰이 272K 이하일 때 Short, 초과일 때 Long 요율을 사용하며 Fast 모드는 별도 요금표를 사용합니다. 토큰 100만 개당 USD입니다.",

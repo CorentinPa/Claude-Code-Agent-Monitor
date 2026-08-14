@@ -104,12 +104,30 @@
   },
   "hooks": {
     "title": "Configuración de ganchos",
-    "description": "Los ganchos de Claude Code reenvían eventos al panel en tiempo real.",
+    "description": "Los ganchos de Claude Code y Codex reenvían eventos al panel en tiempo real.",
     "allInstalled": "Todos los ganchos instalados",
+    "someInstalled": "Ganchos configurados",
     "incomplete": "Ganchos incompletos",
     "reinstall": "Reinstalar ganchos",
+    "configure": "Configurar ganchos",
     "success": "Ganchos instalados correctamente",
-    "failed": "Error al instalar los ganchos"
+    "failed": "Error al instalar los ganchos",
+    "display": {
+      "title": "Datos del panel",
+      "description": "Filtra inmediatamente todas las vistas del panel por producto. El filtrado de fuentes de datos de máquinas permanece independiente.",
+      "both": "Ambos"
+    },
+    "modal": {
+      "title": "Instalar ganchos del panel",
+      "description": "Selecciona uno o ambos productos. Las entradas de ganchos existentes del panel se actualizan; los comandos de ganchos no relacionados permanecen intactos.",
+      "claude": "Ganchos de ciclo de vida desde ~/.claude/settings.json.",
+      "codex": "Ganchos de ciclo de vida desde ~/.codex/hooks.json, con JSONL de despliegue como respaldo en tiempo real.",
+      "installed": "Ya instalado",
+      "overrideWarning": "Se encontró una configuración de ganchos existente para uno o más productos seleccionados. Al continuar se reemplazan solo las entradas coincidentes de este panel y se conservan los ganchos no relacionados.",
+      "preserveNote": "Debe seleccionarse al menos un producto.",
+      "install": "Instalar los ganchos seleccionados",
+      "failed": "No se pudieron instalar los ganchos seleccionados."
+    }
   },
   "notifications": {
     "title": "Notificaciones",
