@@ -2105,7 +2105,7 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                 <tr>
                   <td><code>repair-tokens</code></td>
                   <td><code>npm run repair-tokens</code></td>
-                  <td>Re-derive token totals for every session whose transcript is still on disk and zero the compaction baselines. One-time repair for databases inflated by the old per-record usage sum; stop the dashboard before running it</td>
+                  <td>Re-derive non-workflow token totals for Claude sessions whose transcripts are still on disk and reset the compaction baselines, preserving workflow and Codex rows. One-time repair for databases inflated by the old per-record usage sum; stop the dashboard before running it</td>
                 </tr>
                 <tr>
                   <td><code>clear-data</code></td>
@@ -6896,7 +6896,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=80" defer></script>
+    <script src="i18n-content.js?v=81" defer></script>
     <script src="script.js?v=56" defer></script>
     <script>
       (function () {

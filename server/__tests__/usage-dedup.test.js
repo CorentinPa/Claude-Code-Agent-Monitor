@@ -18,6 +18,16 @@ const path = require("path");
 const os = require("os");
 
 const TranscriptCache = require("../lib/transcript-cache");
+const { USAGE_RECONCILE_WINDOW } = require("../lib/token-usage");
+
+// The live cache sizes its reconciliation window from
+// TRANSCRIPT_CACHE_MAX_ARRAY_LEN (same default as the shared constant), so the
+// window tests below derive their fixture sizes from the effective value
+// instead of hard-coding one.
+const WINDOW = (() => {
+  const raw = parseInt(process.env.TRANSCRIPT_CACHE_MAX_ARRAY_LEN, 10);
+  return Number.isFinite(raw) && raw > 0 ? raw : USAGE_RECONCILE_WINDOW;
+})();
 
 let tmpDir;
 before(() => {
@@ -293,18 +303,44 @@ describe("usage reconciliation across incremental reads", () => {
       cache_creation_input_tokens: 0,
     };
     const far = { ...tiny, output_tokens: 7 };
+    // Derive the filler count from the EFFECTIVE window rather than hard-coding
+    // it, so the expectation follows TRANSCRIPT_CACHE_MAX_ARRAY_LEN if the env
+    // var is set or the default changes.
+    const filler = WINDOW + 100;
     const lines = [assistantRecord("msg_far", far)];
-    for (let i = 0; i < 1100; i++) lines.push(assistantRecord(`filler_${i}`, tiny));
+    for (let i = 0; i < filler; i++) lines.push(assistantRecord(`filler_${i}`, tiny));
     lines.push(assistantRecord("msg_far", far));
     fs.writeFileSync(p, lines.join("\n") + "\n");
 
     const result = new TranscriptCache().extract(p);
-    const correct = 7 + 1100;
+    const correct = far.output_tokens + filler;
     assert.equal(
       sumField(result, "output"),
-      correct + 7,
+      correct + far.output_tokens,
       "exactly one record is double-counted past the window"
     );
+    assert.deepEqual(negativeBuckets(result), []);
+  });
+
+  it("reconciles a message whose records stay inside the window", () => {
+    // The complement of the test above: just inside the window, the earlier
+    // record is still retractable and the message counts exactly once.
+    const p = path.join(tmpDir, "window-inside.jsonl");
+    const tiny = {
+      input_tokens: 0,
+      output_tokens: 1,
+      cache_read_input_tokens: 0,
+      cache_creation_input_tokens: 0,
+    };
+    const near = { ...tiny, output_tokens: 7 };
+    const filler = Math.max(1, Math.floor(WINDOW / 2));
+    const lines = [assistantRecord("msg_near", near)];
+    for (let i = 0; i < filler; i++) lines.push(assistantRecord(`inside_${i}`, tiny));
+    lines.push(assistantRecord("msg_near", near));
+    fs.writeFileSync(p, lines.join("\n") + "\n");
+
+    const result = new TranscriptCache().extract(p);
+    assert.equal(sumField(result, "output"), near.output_tokens + filler);
     assert.deepEqual(negativeBuckets(result), []);
   });
 });

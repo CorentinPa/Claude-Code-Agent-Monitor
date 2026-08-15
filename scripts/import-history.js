@@ -2033,10 +2033,21 @@ async function syncDefaultProjects(dbModule, options = {}) {
 }
 
 /**
- * Re-walk every JSONL file under ~/.claude/projects/ for sessions that already
- * exist in the DB, sum parent + subagent tokens, and refresh token_usage via
- * replaceTokenUsage. Safe to run repeatedly: never reduces totals because of
- * replaceTokenUsage's baseline-shift behavior.
+ * Re-derive token totals for CLAUDE sessions that already exist in the DB from
+ * their transcripts (parent + subagents) and refresh token_usage.
+ *
+ * A session's transcript is located by scanning ~/.claude/projects/ for the
+ * default `<proj>/<sid>.jsonl` layout, falling back to the `transcript_path`
+ * persisted on the session row; sessions with neither are counted in
+ * `missingFiles` and left untouched. Codex sessions are excluded outright —
+ * their usage comes from rollout journals, not Claude transcripts.
+ *
+ * Default mode writes through replaceTokenUsage, so it is safe to run
+ * repeatedly and never reduces a total (the baseline high-water mark).
+ * `options.resetBaselines` instead clears each session's non-workflow rows and
+ * writes the re-derivation as the whole truth with zeroed baselines — the
+ * repair for databases inflated before usage was reconciled per message.id.
+ * `options.all` widens the sweep beyond `imported`-marked sessions.
  *
  * Returns { reconciled, sessionsTouched, modelsWritten, missingFiles }.
  */
@@ -2067,13 +2078,27 @@ async function reconcileTokens(dbModule, options = {}) {
     }
   }
 
-  // options.all widens the sweep from imported sessions to every session
-  // whose transcript is still on disk — needed to repair rows written by the
-  // live ingestion path (they don't carry the imported marker).
+  // options.all widens the sweep from imported sessions to every CLAUDE
+  // session whose transcript is still on disk — needed to repair rows written
+  // by the live ingestion path (they don't carry the imported marker).
+  //
+  // The `provider = 'claude'` filter is a SAFETY GUARD, not an optimization.
+  // Codex sessions' token_usage is derived from rollout journals via
+  // upsertCodexTokenDelta, never from a Claude JSONL transcript. Feeding a
+  // Codex transcript to parseSessionFile would produce a bogus derivation, and
+  // in reset mode the sweep clears a session's rows before writing — so
+  // including them would DELETE real Codex usage and replace it with garbage.
+  // They were previously excluded only by accident (their transcripts live
+  // outside PROJECTS_DIR, so the directory scan never matched them); resolving
+  // `transcript_path` below removes that accident, hence the explicit filter.
   const known = options.all
-    ? dbModule.db.prepare("SELECT id FROM sessions").all()
+    ? dbModule.db
+        .prepare("SELECT id, transcript_path FROM sessions WHERE provider = 'claude'")
+        .all()
     : dbModule.db
-        .prepare("SELECT id FROM sessions WHERE metadata LIKE '%\"imported\":true%'")
+        .prepare(
+          "SELECT id, transcript_path FROM sessions WHERE provider = 'claude' AND metadata LIKE '%\"imported\":true%'"
+        )
         .all();
 
   const total = known.length;
@@ -2106,9 +2131,22 @@ async function reconcileTokens(dbModule, options = {}) {
   let batch = [];
   const FLUSH = 50;
 
-  for (const { id: sessionId } of known) {
+  for (const { id: sessionId, transcript_path: storedPath } of known) {
     processed++;
-    const jsonlPath = sessionPaths.get(sessionId);
+    // Prefer the PROJECTS_DIR scan (the default `<proj>/<sid>.jsonl` layout),
+    // then fall back to the transcript path persisted on the session row. The
+    // scan alone misses every Claude session whose transcript lives outside
+    // the default tree — e.g. one imported from a custom directory via
+    // `ccam import path`, or a non-default CLAUDE_HOME — which would silently
+    // leave those sessions un-repaired despite having a transcript on disk.
+    let jsonlPath = sessionPaths.get(sessionId);
+    if (!jsonlPath && storedPath && storedPath.endsWith(".jsonl")) {
+      try {
+        if (fs.statSync(storedPath).isFile()) jsonlPath = storedPath;
+      } catch {
+        /* stale path — treated as missing below */
+      }
+    }
     if (!jsonlPath) {
       counters.missingFiles++;
       if (processed % 25 === 0) onProgress({ processed, total, counters });
@@ -2205,19 +2243,33 @@ if (require.main === module) {
       if (resetBaselines) {
         const { resolveAllDashboardPorts } = require("../server/lib/server-info");
         for (const port of resolveAllDashboardPorts()) {
+          let reason = null;
           try {
             const res = await fetch(`http://127.0.0.1:${port}/api/health`, {
-              signal: AbortSignal.timeout(1000),
+              signal: AbortSignal.timeout(2000),
             });
-            if (res.ok) {
-              console.error(
-                `A dashboard server is running on port ${port} — stop it before running` +
-                  ` --reconcile-tokens --reset-baselines (live hook ingestion races the repair).`
-              );
-              process.exit(1);
+            // Any response at all means something is listening. A non-2xx
+            // dashboard is still a running writer, so it must block the repair
+            // just as a healthy one does.
+            reason = res.ok ? "is running" : `answered with HTTP ${res.status}`;
+          } catch (err) {
+            // ONLY a refused connection proves nothing is listening. A timeout
+            // or any other transport error is ambiguous — a busy dashboard
+            // that failed to answer within the deadline is still writing — so
+            // fail closed rather than assuming the port is free.
+            const code = err?.cause?.code || err?.code || err?.name;
+            if (code !== "ECONNREFUSED") {
+              reason = `could not be probed (${code || "unknown error"})`;
             }
-          } catch {
-            /* no server answering on this port — safe */
+          }
+          if (reason) {
+            console.error(
+              `A dashboard server on port ${port} ${reason} — stop it before running` +
+                ` --reconcile-tokens --reset-baselines (live hook ingestion races the repair).` +
+                ` The repair parses transcripts outside its write transaction, so a` +
+                ` concurrent writer can be clobbered with stale totals.`
+            );
+            process.exit(1);
           }
         }
       }

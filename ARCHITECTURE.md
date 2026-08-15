@@ -1368,8 +1368,22 @@ npm run repair-tokens
 # = node scripts/import-history.js --reconcile-tokens --all --reset-baselines
 ```
 
-- `--all` widens the sweep from `imported`-marked sessions to every session
-  whose transcript is still on disk (live-ingested rows carry no marker).
+- `--all` widens the sweep from `imported`-marked sessions to every **Claude**
+  session with a transcript on disk (live-ingested rows carry no marker).
+- A session's transcript is located by scanning `~/.claude/projects/` for the
+  default `<proj>/<sid>.jsonl` layout, falling back to the `transcript_path`
+  persisted on the session row. The fallback matters: without it, every Claude
+  session whose transcript lives outside the default tree — imported from a
+  custom directory via `ccam import path`, or under a non-default
+  `CLAUDE_HOME` — would be silently skipped despite having a transcript.
+- **Codex sessions are excluded outright.** Their `token_usage` is derived from
+  rollout journals via `upsertCodexTokenDelta`, never from a Claude JSONL
+  transcript, so feeding one to `parseSessionFile` would yield a bogus
+  derivation — and because the reset mode clears a session's rows before
+  writing, including them would *delete* real Codex usage. They were previously
+  excluded only by accident (their transcripts sit outside `~/.claude/projects/`,
+  so the directory scan never matched them); resolving `transcript_path` removes
+  that accident, hence the explicit `provider = 'claude'` filter.
 - `--reset-baselines` clears each session's non-workflow `token_usage` rows
   before writing, so stale buckets whose (model, speed, geo, tier) key no
   longer occurs in the corrected derivation cannot survive — an empty
@@ -1381,8 +1395,9 @@ npm run repair-tokens
   ingestion would race the repair and clobber it with a stale reading. It
   also rejects `--dry-run` rather than silently ignoring it.
 
-Two limitations are deliberate. Sessions whose transcript has been deleted
-are skipped — their totals cannot be re-derived, and dropping them would
+Two limitations are deliberate. Sessions whose transcript has been deleted (or
+whose stored `transcript_path` is stale) are skipped and counted in
+`missingFiles` — their totals cannot be re-derived, and dropping them would
 destroy real usage. And if a message's partial and final records ever land in
 *different* pricing buckets, the live writer's high-water fold preserves the
 partial (bounded by one record per drifted message); re-running the repair

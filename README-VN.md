@@ -719,7 +719,7 @@ Các lệnh dựa trên API cần server đang chạy — khi chưa chạy, **c�
 | `npm run seed`          | Điền vào cơ sở dữ liệu với dữ liệu mẫu                         |
 | `npm run import-history`| Nhập các phiên kế thừa từ `~/.claude/` (cũng chạy khi khởi động) |
 | `npm run reconcile-tokens`| Làm mới tổng token cho các phiên đã nhập (không bao giờ hạ thấp một tổng đã có) |
-| `npm run repair-tokens` | Tính lại tổng token cho **mọi** phiên vẫn còn transcript trên đĩa và đưa các baseline nén ngữ cảnh về 0 — bản sửa một lần cho cơ sở dữ liệu bị thổi phồng do cách cộng usage theo từng bản ghi trước v2.0.9. Hãy dừng dashboard trước |
+| `npm run repair-tokens` | Tính lại tổng token **không thuộc workflow** cho mọi phiên **Claude** còn transcript trên đĩa (tìm trong `~/.claude/projects/` hoặc theo `transcript_path` đã lưu của phiên) và đưa các baseline nén ngữ cảnh về 0; các hàng workflow và Codex được giữ nguyên. Bản sửa một lần cho cơ sở dữ liệu bị thổi phồng do cách cộng usage theo từng bản ghi trước v2.0.9. Hãy dừng dashboard trước |
 | `npm run clear-data`    | Xóa tất cả các phiên, tác nhân, sự kiện và việc sử dụng mã thông báo            |
 | `npm run mcp:install`   | Cài đặt các phần phụ thuộc cho gói MCP cục bộ (`mcp/`)       |
 | `npm run mcp:build`     | Xây dựng TypeScript của máy chủ MCP thành `mcp/build/`             |

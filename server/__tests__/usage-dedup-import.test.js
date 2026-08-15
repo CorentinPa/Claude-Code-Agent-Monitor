@@ -483,3 +483,83 @@ describe("combineSessionTokens", () => {
     assert.equal(combined.cacheRead, EXPECTED.cacheRead);
   });
 });
+
+describe("repair sweep — transcript resolution and provider safety", () => {
+  const OUTSIDE = "repair-outside-projects";
+  const CODEX = "repair-codex-session";
+
+  before(() => {
+    // A Claude session whose transcript is NOT under the scanned projects tree
+    // (imported from a custom directory), reachable only via the persisted
+    // transcript_path. The directory scan alone would skip it.
+    insertSession(OUTSIDE);
+    const outsidePath = path.join(TMP_ROOT, "outside", `${OUTSIDE}.jsonl`);
+    fs.mkdirSync(path.dirname(outsidePath), { recursive: true });
+    writeJsonl(outsidePath, fixtureLines());
+    db.prepare("UPDATE sessions SET transcript_path = ? WHERE id = ?").run(outsidePath, OUTSIDE);
+    writeLive(OUTSIDE, MODEL, {
+      input: EXPECTED.input * 3,
+      output: EXPECTED.output * 3,
+      cacheRead: EXPECTED.cacheRead * 3,
+      cacheWrite: EXPECTED.cacheWrite * 3,
+    });
+
+    // A Codex session. Its token_usage comes from rollout journals, never from
+    // a Claude transcript — but it DOES carry a transcript_path, so resolving
+    // stored paths must not pull it into the Claude re-derivation.
+    stmts.insertCodexSession.run(
+      CODEX,
+      "codex",
+      "active",
+      "/tmp/proj",
+      "gpt-5",
+      "local",
+      "2026-08-15T10:00:00.000Z",
+      "2026-08-15T10:00:00.000Z",
+      null
+    );
+    const codexPath = path.join(TMP_ROOT, "outside", `${CODEX}.jsonl`);
+    writeJsonl(codexPath, fixtureLines());
+    db.prepare("UPDATE sessions SET transcript_path = ? WHERE id = ?").run(codexPath, CODEX);
+    writeLive(CODEX, "gpt-5", { input: 111, output: 222, cacheRead: 333, cacheWrite: 0 });
+  });
+
+  it("repairs a session reachable only through its persisted transcript_path", async () => {
+    await reconcileTokens(dbModule, { all: true, resetBaselines: true });
+    const row = rawRow(OUTSIDE, MODEL);
+    assert.ok(row, "the session must have been re-derived, not skipped");
+    assert.equal(row.output_tokens, EXPECTED.output);
+    assert.equal(row.cache_read_tokens, EXPECTED.cacheRead);
+    assert.equal(row.baseline_output, 0);
+  });
+
+  it("never rebuilds or deletes a Codex session's token rows", async () => {
+    // The sweep clears a session's non-workflow rows before writing. Codex
+    // usage cannot be re-derived from a Claude transcript, so including Codex
+    // sessions would destroy real data — the provider filter must exclude them.
+    await reconcileTokens(dbModule, { all: true, resetBaselines: true });
+    const row = rawRow(CODEX, "gpt-5");
+    assert.ok(row, "Codex token rows must survive the repair");
+    assert.equal(row.input_tokens, 111);
+    assert.equal(row.output_tokens, 222);
+    assert.equal(row.cache_read_tokens, 333);
+    // And no Claude-model bucket may be invented for it from its transcript.
+    assert.equal(rawRow(CODEX, MODEL), undefined);
+  });
+
+  it("ignores a stale transcript_path that no longer exists", async () => {
+    const STALE = "repair-stale-path";
+    insertSession(STALE);
+    db.prepare("UPDATE sessions SET transcript_path = ? WHERE id = ?").run(
+      path.join(TMP_ROOT, "gone", "nope.jsonl"),
+      STALE
+    );
+    writeLive(STALE, MODEL, { output: 4242, cacheRead: 2121 });
+
+    const counters = await reconcileTokens(dbModule, { all: true, resetBaselines: true });
+    assert.ok(counters.missingFiles >= 1);
+    // Unreadable path == no transcript: leave the row alone rather than
+    // clearing usage that cannot be re-derived.
+    assert.equal(rawRow(STALE, MODEL).output_tokens, 4242);
+  });
+});
