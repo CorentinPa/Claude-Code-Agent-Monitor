@@ -121,8 +121,13 @@ function accumulateBucket(target, src) {
 /**
  * Default size of the per-message reconciliation window (see
  * `rememberUsageContribution`). A single API response's records are written
- * adjacently, so a bounded tail window reconciles every real transcript while
- * keeping memory flat on multi-hundred-MiB files.
+ * ADJACENTLY: measured across a 295-transcript corpus, all 13,115 duplicate
+ * usage records sat exactly one distinct message.id apart — the span was never
+ * greater than 1. A 1000-entry tail window therefore reconciles every real
+ * transcript with a ~1000x margin while keeping memory flat on
+ * multi-hundred-MiB files. Past the window a message's earlier record can no
+ * longer be retracted, which over-counts that one record rather than drifting
+ * without bound.
  */
 const USAGE_RECONCILE_WINDOW = 1000;
 

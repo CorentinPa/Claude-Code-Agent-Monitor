@@ -157,3 +157,154 @@ describe("usage dedup by message.id", () => {
     assert.equal(t.output, USAGE_A.output_tokens * 2);
   });
 });
+
+/**
+ * Append `lines` one at a time, re-extracting after each — the pattern live
+ * hook ingestion actually produces, where every record can land in its own
+ * incremental read. Bumps mtime monotonically so the stat-based cache takes
+ * the incremental path each time.
+ */
+function growLineByLine(cache, filePath, lines) {
+  let clock = Date.now();
+  let result = null;
+  fs.writeFileSync(filePath, "");
+  for (const line of lines) {
+    fs.appendFileSync(filePath, line + "\n");
+    clock += 1000;
+    const stamp = new Date(clock);
+    fs.utimesSync(filePath, stamp, stamp);
+    result = cache.extract(filePath);
+  }
+  return result;
+}
+
+function bucketsOf(result) {
+  return Object.values((result && result.tokensByModel) || {});
+}
+
+function sumField(result, field) {
+  return bucketsOf(result).reduce((acc, b) => acc + (b[field] || 0), 0);
+}
+
+function negativeBuckets(result) {
+  const bad = [];
+  for (const b of bucketsOf(result)) {
+    for (const field of ["input", "output", "cacheRead", "cacheWrite"]) {
+      if ((b[field] || 0) < 0) bad.push(`${b.model}/${b.speed}/${b.geo}/${b.tier}.${field}`);
+    }
+  }
+  return bad;
+}
+
+describe("usage reconciliation across incremental reads", () => {
+  it("reconciles when every record lands in its own incremental read", () => {
+    // The live hook pattern: a record is appended and the file re-read before
+    // the next record exists, so a message's partial usage is already cached
+    // when its final record arrives.
+    const p = path.join(tmpDir, "grow.jsonl");
+    const partial = { ...USAGE_A, output_tokens: 5, cache_read_input_tokens: 0 };
+    const result = growLineByLine(new TranscriptCache(), p, [
+      assistantRecord("msg_a", partial, "thinking"),
+      assistantRecord("msg_a", partial),
+      assistantRecord("msg_a", USAGE_A),
+      assistantRecord("msg_b", USAGE_B),
+    ]);
+
+    assert.equal(sumField(result, "output"), USAGE_A.output_tokens + USAGE_B.output_tokens);
+    assert.equal(
+      sumField(result, "cacheRead"),
+      USAGE_A.cache_read_input_tokens + USAGE_B.cache_read_input_tokens
+    );
+    assert.equal(sumField(result, "input"), USAGE_A.input_tokens + USAGE_B.input_tokens);
+    assert.deepEqual(negativeBuckets(result), [], "no bucket may be written negative");
+
+    // A full re-read of the same bytes must agree with the incremental result.
+    const full = new TranscriptCache().extract(p);
+    assert.equal(sumField(full, "output"), sumField(result, "output"));
+  });
+
+  it("nets a drifting pricing bucket to zero instead of going negative", () => {
+    // A message whose partial record is priced in one bucket and whose final
+    // record lands in another (service_tier drift). The retraction targets a
+    // bucket that only exists in the CACHED result, so the incremental chunk
+    // holds a transient negative that `_merge` must net out — nothing
+    // negative may reach the DB writer.
+    const p = path.join(tmpDir, "bucket-drift.jsonl");
+    const partial = { ...USAGE_A, output_tokens: 5, service_tier: "standard" };
+    const final = { ...USAGE_A, service_tier: "batch" };
+    const result = growLineByLine(new TranscriptCache(), p, [
+      assistantRecord("msg_a", partial),
+      assistantRecord("msg_a", final),
+    ]);
+
+    assert.deepEqual(negativeBuckets(result), [], "a drifted bucket must not go negative");
+    assert.equal(sumField(result, "output"), USAGE_A.output_tokens);
+    assert.equal(sumField(result, "cacheRead"), USAGE_A.cache_read_input_tokens);
+
+    const batch = bucketsOf(result).find((b) => b.tier === "batch");
+    const standard = bucketsOf(result).find((b) => b.tier === "standard");
+    assert.equal(batch.output, USAGE_A.output_tokens, "final usage belongs to the batch bucket");
+    assert.equal(standard ? standard.output : 0, 0, "the abandoned bucket nets to zero");
+  });
+
+  it("starts from a clean reconciliation state when a transcript is rewritten", () => {
+    // Compaction rewrites the file smaller; the cache falls back to a full
+    // re-read, and no message id or bucket from the old content may survive.
+    const p = path.join(tmpDir, "rewritten.jsonl");
+    const cache = new TranscriptCache();
+    let clock = Date.now();
+    fs.writeFileSync(
+      p,
+      [
+        assistantRecord("old_a", USAGE_A),
+        assistantRecord("old_a", USAGE_A),
+        assistantRecord("old_b", USAGE_B),
+      ].join("\n") + "\n"
+    );
+    fs.utimesSync(p, new Date(clock), new Date(clock));
+    assert.equal(
+      sumField(cache.extract(p), "output"),
+      USAGE_A.output_tokens + USAGE_B.output_tokens
+    );
+
+    fs.writeFileSync(
+      p,
+      [assistantRecord("new_c", USAGE_B), assistantRecord("new_c", USAGE_B)].join("\n") + "\n"
+    );
+    clock += 5000;
+    fs.utimesSync(p, new Date(clock), new Date(clock));
+
+    const after = cache.extract(p);
+    assert.equal(sumField(after, "output"), USAGE_B.output_tokens, "only the new content counts");
+    assert.deepEqual(negativeBuckets(after), []);
+  });
+
+  it("bounds the over-count when a message's records fall outside the window", () => {
+    // The reconciliation window is a bounded tail (TRANSCRIPT_CACHE_MAX_ARRAY_LEN,
+    // default 1000). Across every real transcript on record a message's records
+    // are strictly ADJACENT, so the window never bites; this pins the failure
+    // mode when it theoretically does — one un-retracted record, never
+    // unbounded drift and never a negative bucket.
+    const p = path.join(tmpDir, "window-evict.jsonl");
+    const tiny = {
+      input_tokens: 0,
+      output_tokens: 1,
+      cache_read_input_tokens: 0,
+      cache_creation_input_tokens: 0,
+    };
+    const far = { ...tiny, output_tokens: 7 };
+    const lines = [assistantRecord("msg_far", far)];
+    for (let i = 0; i < 1100; i++) lines.push(assistantRecord(`filler_${i}`, tiny));
+    lines.push(assistantRecord("msg_far", far));
+    fs.writeFileSync(p, lines.join("\n") + "\n");
+
+    const result = new TranscriptCache().extract(p);
+    const correct = 7 + 1100;
+    assert.equal(
+      sumField(result, "output"),
+      correct + 7,
+      "exactly one record is double-counted past the window"
+    );
+    assert.deepEqual(negativeBuckets(result), []);
+  });
+});
