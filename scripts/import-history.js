@@ -2054,12 +2054,20 @@ async function syncDefaultProjects(dbModule, options = {}) {
 async function reconcileTokens(dbModule, options = {}) {
   const onProgress = typeof options.onProgress === "function" ? options.onProgress : () => {};
   const counters = { reconciled: 0, sessionsTouched: 0, modelsWritten: 0, missingFiles: 0 };
-  if (!fs.existsSync(PROJECTS_DIR)) return counters;
 
-  const projectDirs = fs
-    .readdirSync(PROJECTS_DIR, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => d.name);
+  // A missing scan root is an EMPTY directory listing, not a reason to bail:
+  // sessions can carry a `transcript_path` pointing outside this tree (a custom
+  // import directory, a non-default CLAUDE_HOME), and returning early here
+  // would leave those repairable sessions with stale token rows.
+  let projectDirs = [];
+  try {
+    projectDirs = fs
+      .readdirSync(PROJECTS_DIR, { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .map((d) => d.name);
+  } catch {
+    /* no projects tree — fall through to the persisted-path sweep below */
+  }
 
   // Build a map of session_id -> JSONL path so we only parse files for sessions
   // already present in the DB.

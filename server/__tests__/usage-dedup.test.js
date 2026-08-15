@@ -333,7 +333,11 @@ describe("usage reconciliation across incremental reads", () => {
       cache_creation_input_tokens: 0,
     };
     const near = { ...tiny, output_tokens: 7 };
-    const filler = Math.max(1, Math.floor(WINDOW / 2));
+    // WINDOW - 1 fillers is the LARGEST separation that stays retractable: the
+    // map then holds exactly WINDOW entries (msg_near plus the fillers) and
+    // evicts nothing. Anything derived from a fraction of WINDOW would stop
+    // testing the boundary — and would break outright at WINDOW = 1.
+    const filler = Math.max(0, WINDOW - 1);
     const lines = [assistantRecord("msg_near", near)];
     for (let i = 0; i < filler; i++) lines.push(assistantRecord(`inside_${i}`, tiny));
     lines.push(assistantRecord("msg_near", near));

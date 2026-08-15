@@ -563,3 +563,42 @@ describe("repair sweep — transcript resolution and provider safety", () => {
     assert.equal(rawRow(STALE, MODEL).output_tokens, 4242);
   });
 });
+
+describe("repair sweep — missing projects directory", () => {
+  it("still repairs persisted-path sessions when the scan root is absent", async () => {
+    // A missing ~/.claude/projects (fresh machine, non-default CLAUDE_HOME, a
+    // container holding only the DB plus externally-mounted transcripts) must
+    // not abort the sweep: sessions whose transcript_path points outside that
+    // tree are still repairable, and bailing early would leave them stale.
+    const SID = "repair-no-scan-root";
+    insertSession(SID);
+    const outsidePath = path.join(TMP_ROOT, "outside", `${SID}.jsonl`);
+    fs.mkdirSync(path.dirname(outsidePath), { recursive: true });
+    writeJsonl(outsidePath, fixtureLines());
+    db.prepare("UPDATE sessions SET transcript_path = ? WHERE id = ?").run(outsidePath, SID);
+    writeLive(SID, MODEL, {
+      input: EXPECTED.input * 3,
+      output: EXPECTED.output * 3,
+      cacheRead: EXPECTED.cacheRead * 3,
+      cacheWrite: EXPECTED.cacheWrite * 3,
+    });
+
+    // Move the whole projects tree aside for the duration of this sweep.
+    const projectsRoot = path.join(CLAUDE_HOME, "projects");
+    const stashed = path.join(TMP_ROOT, "projects-stashed");
+    fs.renameSync(projectsRoot, stashed);
+    assert.equal(fs.existsSync(projectsRoot), false, "scan root must be absent for this test");
+
+    try {
+      await reconcileTokens(dbModule, { all: true, resetBaselines: true });
+    } finally {
+      fs.renameSync(stashed, projectsRoot);
+    }
+
+    const row = rawRow(SID, MODEL);
+    assert.ok(row, "the persisted-path session must still be re-derived");
+    assert.equal(row.output_tokens, EXPECTED.output);
+    assert.equal(row.cache_read_tokens, EXPECTED.cacheRead);
+    assert.equal(row.baseline_output, 0);
+  });
+});
