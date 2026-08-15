@@ -1991,6 +1991,11 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                   <td>Safety-net interval (ms) for incremental Codex rollout scanning. Default <code>4000</code>; <code>0</code> disables polling but keeps the watcher.</td>
                 </tr>
                 <tr>
+                  <td><code>DASHBOARD_TASK_SUMMARY_TTL_MS</code></td>
+                  <td><code>2000</code></td>
+                  <td>Serve-stale window (ms) for per-transcript task-progress summaries behind <code>include_task_progress</code> list requests and the session-detail <code>todo_snapshot</code>. A transcript being actively appended to rarely hits the size+mtime cache key, so without this floor every list reload fully re-parses each multi-MB live transcript. <code>0</code> restores immediate re-parse on every change.</td>
+                </tr>
+                <tr>
                   <td><code>NODE_ENV</code></td>
                   <td><code>development</code></td>
                   <td>
@@ -6886,7 +6891,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=79" defer></script>
+    <script src="i18n-content.js?v=80" defer></script>
     <script src="script.js?v=56" defer></script>
     <script>
       (function () {

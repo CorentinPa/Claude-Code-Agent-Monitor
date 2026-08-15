@@ -570,6 +570,29 @@ function startWorkflowPoll(broadcast) {
  * Fresh files are prioritized and the sweep reads Codex's native live-thread
  * index first, so a large historical rollout tree cannot delay a new card.
  */
+/**
+ * Should a change under the Codex home schedule a discovery sweep?
+ *
+ * Matches the session index and the Codex state database, but DELIBERATELY NOT
+ * its `-shm` sidecar: SQLite touches the wal-index on every WAL-mode reader
+ * open — including the sweep's own read-only open of that same database — so
+ * treating `-shm` as a trigger makes each sweep schedule the next one. That is
+ * a self-sustaining full-scan loop (directory walk + state-DB read + a
+ * synchronous `ps` probe) which runs forever with no Codex process and no user
+ * activity; it measured ~40% of all CPU profile samples (issue #295). Durable
+ * changes always land in the main database file or its `-wal`, both of which
+ * still match.
+ *
+ * A null/absent filename (some platforms and filesystems omit it) still
+ * triggers, so the watcher never goes blind — the debounce, not this filter,
+ * is the platform-independent frequency cap.
+ */
+function codexHomeChangeTriggersSweep(filename) {
+  const name = filename && path.basename(String(filename));
+  if (!name) return true;
+  return name === "session_index.jsonl" || /^state_\d+\.sqlite(?:-wal)?$/.test(name);
+}
+
 function startCodexSessionSync(broadcast) {
   const fs = require("fs");
   const { getCodexHome, getCodexSessionsDir, onCodexHomeChanged } = require("./lib/codex-home");
@@ -583,6 +606,16 @@ function startCodexSessionSync(broadcast) {
   } = require("./lib/codex-ingest");
   const liveness = require("./lib/session-liveness");
   const fingerprints = new Map();
+  // The response-item tool-call backfill (ingestCodexToolEvents) keeps its own
+  // byte cursor, so semantically it is safe to call every sweep — but its
+  // "no-op" early exit still costs a statSync plus two DB lookups per file.
+  // Across thousands of historical rollouts every 4s that is a constant CPU
+  // tax. Run it for every file once per process (backfill), then only for
+  // files whose fingerprint changed — plus any file whose last tool-event
+  // ingest threw, so a transient failure retries instead of being skipped
+  // until the file happens to grow.
+  let toolBackfillDone = false;
+  const toolIngestFailed = new Set();
   let running = false;
   let queued = false;
   let watcher = null;
@@ -630,7 +663,8 @@ function startCodexSessionSync(broadcast) {
           continue;
         }
         const fingerprint = `${stat.size}:${stat.mtimeMs}`;
-        if (fingerprints.get(transcriptPath) !== fingerprint) {
+        const changed = fingerprints.get(transcriptPath) !== fingerprint;
+        if (changed) {
           try {
             // Only retain a successful fingerprint. A temporarily unreadable or
             // malformed rollout must retry on the next sweep rather than being
@@ -644,17 +678,25 @@ function startCodexSessionSync(broadcast) {
             );
           }
         }
-        try {
-          // This independent cursor backfills response-item tool calls from
-          // rollouts imported before Workflows understood Codex. It is a
-          // no-op after the first pass, and also catches records that arrive
-          // without one of Codex's lower-volume lifecycle event messages.
-          publish(ingestCodexToolEvents(transcriptPath));
-        } catch (err) {
-          console.warn(
-            `[CODEX SYNC] Failed to index tools for ${path.basename(transcriptPath)}:`,
-            err.message
-          );
+        if (changed || !toolBackfillDone || toolIngestFailed.has(transcriptPath)) {
+          try {
+            // This independent cursor backfills response-item tool calls from
+            // rollouts imported before Workflows understood Codex. It is a
+            // no-op after the first pass, and also catches records that arrive
+            // without one of Codex's lower-volume lifecycle event messages —
+            // hence the full pass once per process, then changed-files-only.
+            // A thrown failure (e.g. transient SQLITE_BUSY) re-queues the file
+            // so it retries every sweep until it succeeds — the same retry
+            // property the main-ingest fingerprint above deliberately keeps.
+            publish(ingestCodexToolEvents(transcriptPath));
+            toolIngestFailed.delete(transcriptPath);
+          } catch (err) {
+            toolIngestFailed.add(transcriptPath);
+            console.warn(
+              `[CODEX SYNC] Failed to index tools for ${path.basename(transcriptPath)}:`,
+              err.message
+            );
+          }
         }
         // Cold history can contain hundreds of large JSONL files. Yielding in
         // modest batches lets fs.watch/hook callbacks and WebSocket delivery
@@ -663,6 +705,9 @@ function startCodexSessionSync(broadcast) {
           await new Promise((resolve) => setImmediate(resolve));
         }
       }
+      // Only after one complete pass over every discovered transcript has the
+      // backfill actually covered the full corpus.
+      toolBackfillDone = true;
       for (const result of reconcileCodexSessionLiveness()) publish(result);
     } catch {
       // Codex is optional; an unreadable/missing home must not affect startup.
@@ -689,10 +734,14 @@ function startCodexSessionSync(broadcast) {
   let debounce;
   const schedule = () => {
     if (debounce) return;
+    // A live Codex process appends to its WAL near-continuously; each sweep is
+    // a full discovery pass (directory walk + state-DB read + `ps` probe), so
+    // coalesce watcher bursts to at most ~1 sweep/second rather than one per
+    // 150ms. Sub-second card latency isn't worth a background full scan loop.
     debounce = setTimeout(() => {
       debounce = null;
       void runSweep();
-    }, 150);
+    }, 1_000);
     if (debounce.unref) debounce.unref();
   };
   function watchSessionsDir() {
@@ -743,14 +792,7 @@ function startCodexSessionSync(broadcast) {
     if (homeWatcher || !fs.existsSync(codexHome)) return;
     try {
       const nextWatcher = fs.watch(codexHome, { recursive: false }, (_event, filename) => {
-        const name = filename && path.basename(String(filename));
-        if (
-          !name ||
-          name === "session_index.jsonl" ||
-          /^state_\d+\.sqlite(?:-(wal|shm))?$/.test(name)
-        ) {
-          schedule();
-        }
+        if (codexHomeChangeTriggersSweep(filename)) schedule();
       });
       homeWatcher = nextWatcher;
       nextWatcher.on("error", () => {
@@ -775,6 +817,8 @@ function startCodexSessionSync(broadcast) {
   // response has been sent so a large history never delays the UI action.
   onCodexHomeChanged(() => {
     fingerprints.clear();
+    toolBackfillDone = false; // new home → new corpus needs one full backfill pass
+    toolIngestFailed.clear();
     watchSessionsDir();
     watchCodexHome();
     setImmediate(() => void runSweep());
@@ -1258,4 +1302,9 @@ if (require.main === module) {
   // just this standalone path. See autoImportLegacySessions().
 }
 
-module.exports = { createApp, startServer, startBackgroundServices };
+module.exports = {
+  createApp,
+  startServer,
+  startBackgroundServices,
+  codexHomeChangeTriggersSweep,
+};
