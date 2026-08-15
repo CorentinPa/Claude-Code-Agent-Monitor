@@ -43,10 +43,12 @@ process.env.DASHBOARD_DB_PATH = TEST_DB;
 const dbModule = require("../db");
 const { db, stmts } = dbModule;
 const { rememberUsageContribution, USAGE_RECONCILE_WINDOW } = require("../lib/token-usage");
+const { calculateCost } = require("../routes/pricing");
 const {
   parseSessionFile,
   parseSubagentFile,
   reconcileTokens,
+  combineSessionTokens,
 } = require("../../scripts/import-history");
 
 after(() => {
@@ -379,5 +381,105 @@ describe("reconcileTokens — historical repair sweep", () => {
     // Deleting these would destroy real usage we cannot re-derive, so the
     // sweep deliberately leaves them untouched (documented limitation).
     assert.equal(rawRow(GONE, MODEL).output_tokens, 4242);
+  });
+});
+
+describe("reconciliation is visible in reported cost", () => {
+  const SESSION = "cost-1";
+
+  before(() => {
+    insertSession(SESSION);
+    writeJsonl(path.join(PROJECT_DIR, `${SESSION}.jsonl`), fixtureLines());
+  });
+
+  /** Price a session exactly the way the dashboard does. */
+  function costOf(sessionId) {
+    return calculateCost(stmts.getTokensBySession.all(sessionId), stmts.listPricing.all())
+      .total_cost;
+  }
+
+  it("prices the corrected totals below the naive per-record sum", async () => {
+    // Write what the OLD per-record accumulator would have produced, price it,
+    // then repair and price again. The corrected cost must be strictly lower —
+    // this is the user-visible symptom reported in the issue.
+    const naive = {
+      input: FINAL.input_tokens * 3 + SECOND.input_tokens,
+      output: PARTIAL.output_tokens * 2 + FINAL.output_tokens + SECOND.output_tokens,
+      cacheRead: FINAL.cache_read_input_tokens * 3 + SECOND.cache_read_input_tokens,
+      cacheWrite: FINAL.cache_creation_input_tokens * 3 + SECOND.cache_creation_input_tokens,
+    };
+    writeLive(SESSION, MODEL, naive);
+    const inflated = costOf(SESSION);
+    assert.ok(inflated > 0, "the naive reading must have a non-zero cost");
+
+    await reconcileTokens(dbModule, { all: true, resetBaselines: true });
+    const corrected = costOf(SESSION);
+
+    assert.ok(corrected < inflated, `corrected ${corrected} must be below inflated ${inflated}`);
+    const row = rawRow(SESSION, MODEL);
+    assert.equal(row.cache_read_tokens, EXPECTED.cacheRead);
+    assert.equal(row.output_tokens, EXPECTED.output);
+  });
+
+  it("matches a cost computed directly from the parsed transcript", async () => {
+    // Independent path: parse the transcript and price those buckets straight,
+    // with no database round-trip. The stored session must agree exactly.
+    const parsed = await parseSessionFile(path.join(PROJECT_DIR, `${SESSION}.jsonl`));
+    const direct = calculateCost(
+      Object.values(parsed.tokensByModel).map((b) => ({
+        model: b.model,
+        speed: b.speed,
+        inference_geo: b.geo,
+        service_tier: b.tier,
+        input_tokens: b.input,
+        output_tokens: b.output,
+        cache_read_tokens: b.cacheRead,
+        cache_write_tokens: b.cacheWrite,
+        cache_write_1h_tokens: b.cacheWrite1h,
+        web_search_requests: b.webSearch,
+        web_fetch_requests: b.webFetch,
+        code_execution_requests: b.codeExec,
+      })),
+      stmts.listPricing.all()
+    ).total_cost;
+
+    assert.equal(costOf(SESSION), direct);
+  });
+
+  it("keeps the grand total equal to the sum of its per-bucket costs", () => {
+    const rules = stmts.listPricing.all();
+    const rows = stmts.getTokensBySession.all(SESSION);
+    const result = calculateCost(rows, rules);
+    const perBucket = result.breakdown.reduce((acc, b) => acc + b.cost, 0);
+    // total_cost also carries the server-tool surcharges, which this fixture
+    // has none of, so the breakdown must account for the whole total.
+    assert.equal(result.total_cost, Math.round(perBucket * 10000) / 10000);
+  });
+});
+
+describe("combineSessionTokens", () => {
+  it("sums reconciled parent and subagent buckets without re-counting", async () => {
+    const main = path.join(TMP_ROOT, "combine-main.jsonl");
+    const sub = path.join(TMP_ROOT, "agent-combine-sub.jsonl");
+    writeJsonl(main, fixtureLines());
+    writeJsonl(sub, fixtureLines());
+
+    const session = await parseSessionFile(main);
+    session.parsedSubagents = [await parseSubagentFile(sub)];
+    const combined = onlyBucket(combineSessionTokens(session));
+
+    // Each file independently reconciles to EXPECTED; combining adds them once.
+    assert.equal(combined.output, EXPECTED.output * 2);
+    assert.equal(combined.cacheRead, EXPECTED.cacheRead * 2);
+    assert.equal(combined.input, EXPECTED.input * 2);
+  });
+
+  it("returns the parent's buckets unchanged when there are no subagents", async () => {
+    const main = path.join(TMP_ROOT, "combine-solo.jsonl");
+    writeJsonl(main, fixtureLines());
+    const session = await parseSessionFile(main);
+    const combined = onlyBucket(combineSessionTokens(session));
+    assert.equal(combined.output, EXPECTED.output);
+    assert.equal(combined.cacheRead, EXPECTED.cacheRead);
   });
 });
