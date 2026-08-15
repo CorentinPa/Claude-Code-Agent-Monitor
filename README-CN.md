@@ -720,6 +720,8 @@ ccam version                      # 打印 CLI 版本（也可用 --version / -v
 | `npm run install-hooks` | 在 `~/.claude/settings.json` 中配置 Claude Code Hook |
 | `npm run seed` | 用示例数据填充数据库 |
 | `npm run import-history` | 从 `~/.claude/` 导入历史会话（启动时也会运行） |
+| `npm run reconcile-tokens` | 刷新已导入会话的 Token 总计（不会降低已有的总计） |
+| `npm run repair-tokens` | 为 **每个** Transcript 仍在磁盘上的会话重新推导 Token 总计，并将上下文压缩基线清零 —— 针对因 v2.0.9 之前按记录累加用量而虚高的数据库的一次性修复。请先停止 Dashboard |
 | `npm run clear-data` | 删除所有会话、Agent、事件和 Token 用量 |
 | `npm run mcp:install` | 安装本地 MCP 包（`mcp/`）的依赖 |
 | `npm run mcp:build` | 构建 MCP 服务器 TypeScript 到 `mcp/build/` |

@@ -409,7 +409,26 @@ node scripts/import-history.js --dry-run
 
 # Scope to a single project dir
 node scripts/import-history.js --project my-project
+
+# Refresh token totals for imported sessions (high-water mark: never lowers a total)
+npm run reconcile-tokens
+
+# One-time repair for token totals inflated by the pre-v2.0.9 per-record usage sum.
+# Re-derives every session that still has a transcript on disk and zeroes the
+# compaction baselines, so corrected (lower) totals actually stick.
+# Stop the dashboard first — live hook ingestion races the repair, and the
+# command refuses to run while a dashboard answers on a known port.
+npm run repair-tokens
 ```
+
+`--reconcile-tokens` accepts two flags: `--all` widens the sweep from
+already-imported sessions to every session whose transcript is still on disk
+(live-ingested sessions carry no `imported` marker), and `--reset-baselines`
+writes the re-derived totals as the whole truth instead of folding a decrease
+into the `baseline_*` high-water columns. `npm run repair-tokens` is the two
+together. `--dry-run` is rejected rather than ignored, since the sweep writes
+inside a transaction. Sessions whose transcript has been deleted are skipped —
+their totals cannot be re-derived, so they keep whatever was recorded.
 
 ---
 
@@ -425,6 +444,8 @@ node scripts/import-history.js --project my-project
 | `clear-data` | `npm run clear-data` | Delete all data from the database |
 | `seed` | `npm run seed` | Insert demo sessions/agents/events |
 | `import-history` | `npm run import-history` | Import legacy sessions from `~/.claude/` (also runs on startup) |
+| `reconcile-tokens` | `npm run reconcile-tokens` | Refresh token totals for imported sessions (never lowers a total) |
+| `repair-tokens` | `npm run repair-tokens` | Re-derive token totals for every session with a transcript on disk and zero the compaction baselines (one-time fix for pre-v2.0.9 inflation; stop the dashboard first) |
 | `mcp:install` | `npm run mcp:install` | Install MCP package dependencies |
 | `mcp:build` | `npm run mcp:build` | Build MCP server into `mcp/build/` |
 | `mcp:start` | `npm run mcp:start` | Start MCP server (stdio, for MCP hosts) |

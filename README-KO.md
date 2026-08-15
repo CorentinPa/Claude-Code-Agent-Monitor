@@ -731,6 +731,8 @@ API 기반 명령어는 서버가 실행 중이어야 합니다 — 서버가 �
 | `npm run install-hooks` | `~/.claude/settings.json`에 Claude Code Hook을 구성합니다   |
 | `npm run seed`          | 샘플 데이터로 데이터베이스를 채웁니다                           |
 | `npm run import-history`| `~/.claude/`에서 레거시 세션을 가져옵니다 (시작 시에도 실행됨) |
+| `npm run reconcile-tokens`| 가져온 세션의 토큰 합계를 새로 계산합니다 (기존 합계를 낮추지는 않습니다) |
+| `npm run repair-tokens` | 트랜스크립트가 아직 디스크에 남아 있는 **모든** 세션의 토큰 합계를 다시 도출하고 컨텍스트 압축 baseline을 0으로 만듭니다 — v2.0.9 이전의 레코드 단위 usage 합산으로 부풀려진 데이터베이스를 위한 일회성 복구입니다. 먼저 대시보드를 중지하세요 |
 | `npm run clear-data`    | 모든 세션, 에이전트, 이벤트, 토큰 사용량을 삭제합니다            |
 | `npm run mcp:install`   | 로컬 MCP 패키지(`mcp/`)의 의존성을 설치합니다       |
 | `npm run mcp:build`     | MCP 서버 TypeScript를 `mcp/build/`로 빌드합니다             |

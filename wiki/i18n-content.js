@@ -506,6 +506,10 @@ window.__WIKI_CONTENT_I18N = {
       "手动将 Claude Code hooks 写入 <code>~/.claude/settings.json</code>",
     "Insert demo sessions, agents, and events (8 sessions / 23 agents / 106 events)":
       "插入演示用的会话、agent 和事件（8 个会话 / 23 个 agent / 106 个事件）",
+    "Refresh token totals for imported sessions from their transcripts. Never lowers an existing total":
+      "从 Transcript 刷新已导入会话的 Token 总计。不会降低已有的总计",
+    "Re-derive token totals for every session whose transcript is still on disk and zero the compaction baselines. One-time repair for databases inflated by the old per-record usage sum; stop the dashboard before running it":
+      "为每个 Transcript 仍在磁盘上的会话重新推导 Token 总计，并将上下文压缩基线清零。这是针对因旧版按记录累加用量而虚高的数据库的一次性修复；运行前请先停止 Dashboard",
     "Import historical Claude Code sessions from <code>~/.claude</code> with deep JSONL extraction (API errors, turn durations, thinking blocks, subagent data)":
       "从 <code>~/.claude</code> 导入历史 Claude Code 会话，并进行深度 JSONL 提取（API 错误、回合时长、思考块、subagent 数据）",
     "Delete all data from the database (keeps schema)": "删除数据库中的所有数据（保留表结构）",
@@ -1983,6 +1987,10 @@ window.__WIKI_CONTENT_I18N = {
       "Ghi thủ công các hook của Claude Code vào <code>~/.claude/settings.json</code>",
     "Insert demo sessions, agents, and events (8 sessions / 23 agents / 106 events)":
       "Chèn các phiên, agent và sự kiện mẫu (8 phiên / 23 agent / 106 sự kiện)",
+    "Refresh token totals for imported sessions from their transcripts. Never lowers an existing total":
+      "Làm mới tổng Token cho các phiên đã nhập từ transcript của chúng. Không bao giờ hạ thấp tổng hiện có",
+    "Re-derive token totals for every session whose transcript is still on disk and zero the compaction baselines. One-time repair for databases inflated by the old per-record usage sum; stop the dashboard before running it":
+      "Tính lại tổng Token cho mọi phiên vẫn còn transcript trên đĩa và đưa các baseline nén ngữ cảnh về 0. Đây là bản sửa một lần cho cơ sở dữ liệu bị thổi phồng do cách cộng usage theo từng bản ghi trước đây; hãy dừng Dashboard trước khi chạy",
     "Import historical Claude Code sessions from <code>~/.claude</code> with deep JSONL extraction (API errors, turn durations, thinking blocks, subagent data)":
       "Nhập các phiên Claude Code trong lịch sử từ <code>~/.claude</code> với trích xuất JSONL sâu (lỗi API, thời lượng lượt, khối suy nghĩ, dữ liệu subagent)",
     "Delete all data from the database (keeps schema)":
@@ -3453,6 +3461,10 @@ window.__WIKI_CONTENT_I18N = {
       "Claude Code hook을 <code>~/.claude/settings.json</code>에 수동으로 기록합니다",
     "Insert demo sessions, agents, and events (8 sessions / 23 agents / 106 events)":
       "데모 세션, 에이전트, 이벤트를 삽입합니다 (세션 8개 / 에이전트 23개 / 이벤트 106개)",
+    "Refresh token totals for imported sessions from their transcripts. Never lowers an existing total":
+      "가져온 세션의 토큰 합계를 트랜스크립트에서 다시 계산합니다. 기존 합계를 낮추지는 않습니다",
+    "Re-derive token totals for every session whose transcript is still on disk and zero the compaction baselines. One-time repair for databases inflated by the old per-record usage sum; stop the dashboard before running it":
+      "트랜스크립트가 아직 디스크에 남아 있는 모든 세션의 토큰 합계를 다시 도출하고 컨텍스트 압축 baseline을 0으로 만듭니다. 예전의 레코드 단위 usage 합산으로 부풀려진 데이터베이스를 위한 일회성 복구이며, 실행 전에 Dashboard를 중지하세요",
     "Import historical Claude Code sessions from <code>~/.claude</code> with deep JSONL extraction (API errors, turn durations, thinking blocks, subagent data)":
       "<code>~/.claude</code>에서 과거 Claude Code 세션을 가져오며, JSONL을 심층 추출합니다 (API 오류, 턴 소요 시간, 생각 블록, Subagent 데이터)",
     "Delete all data from the database (keeps schema)":
@@ -4922,6 +4934,10 @@ window.__WIKI_CONTENT_I18N = {
       "Escriba manualmente los ganchos del código Claude para <code>~/.claude/settings.json</code>",
     "Insert demo sessions, agents, and events (8 sessions / 23 agents / 106 events)":
       "Insertar sesiones de demostración, agentes y eventos (8 sesiones / 23 agentes / 106 eventos)",
+    "Refresh token totals for imported sessions from their transcripts. Never lowers an existing total":
+      "Actualiza los totales de Token de las sesiones importadas a partir de sus transcripciones. Nunca reduce un total existente",
+    "Re-derive token totals for every session whose transcript is still on disk and zero the compaction baselines. One-time repair for databases inflated by the old per-record usage sum; stop the dashboard before running it":
+      "Vuelve a derivar los totales de Token de cada sesión cuya transcripción siga en disco y pone a cero las líneas base de compactación. Es una reparación única para bases de datos infladas por la antigua suma de usage por registro; detén el Dashboard antes de ejecutarlo",
     "Import historical Claude Code sessions from <code>~/.claude</code> with deep JSONL extraction (API errors, turn durations, thinking blocks, subagent data)":
       "Importar sesiones históricas del Código Claude desde <code>~/.claude</code> Con extracción profunda de JSONL (errores de API, duraciones de turno, bloqueos de pensamiento, datos de subagentes)",
     "Delete all data from the database (keeps schema)":

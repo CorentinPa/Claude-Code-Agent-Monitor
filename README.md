@@ -730,6 +730,8 @@ API-backed commands need the server running — when it isn't, **read-only comma
 | `npm run install-hooks` | Configure Claude Code hooks in `~/.claude/settings.json`   |
 | `npm run seed`          | Populate database with sample data                         |
 | `npm run import-history`| Import legacy sessions from `~/.claude/` (also runs on startup) |
+| `npm run reconcile-tokens`| Refresh token totals for imported sessions (never lowers a total) |
+| `npm run repair-tokens` | Re-derive token totals for **every** session with a transcript on disk and zero the compaction baselines — the one-time repair for databases inflated by the pre-v2.0.9 per-record usage sum. Stop the dashboard first |
 | `npm run clear-data`    | Delete all sessions, agents, events, and token usage            |
 | `npm run mcp:install`   | Install dependencies for local MCP package (`mcp/`)       |
 | `npm run mcp:build`     | Build MCP server TypeScript into `mcp/build/`             |

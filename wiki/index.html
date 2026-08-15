@@ -2098,6 +2098,16 @@ npm run mcp:start:repl         # interactive CLI with tab completion</code></pre
                   <td>Import historical Claude Code sessions from <code>~/.claude</code> with deep JSONL extraction (API errors, turn durations, thinking blocks, subagent data)</td>
                 </tr>
                 <tr>
+                  <td><code>reconcile-tokens</code></td>
+                  <td><code>npm run reconcile-tokens</code></td>
+                  <td>Refresh token totals for imported sessions from their transcripts. Never lowers an existing total</td>
+                </tr>
+                <tr>
+                  <td><code>repair-tokens</code></td>
+                  <td><code>npm run repair-tokens</code></td>
+                  <td>Re-derive token totals for every session whose transcript is still on disk and zero the compaction baselines. One-time repair for databases inflated by the old per-record usage sum; stop the dashboard before running it</td>
+                </tr>
+                <tr>
                   <td><code>clear-data</code></td>
                   <td><code>npm run clear-data</code></td>
                   <td>Delete all data from the database (keeps schema)</td>
@@ -6886,7 +6896,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=79" defer></script>
+    <script src="i18n-content.js?v=80" defer></script>
     <script src="script.js?v=56" defer></script>
     <script>
       (function () {

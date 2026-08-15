@@ -118,8 +118,58 @@ function accumulateBucket(target, src) {
   return target;
 }
 
+/**
+ * Default size of the per-message reconciliation window (see
+ * `rememberUsageContribution`). A single API response's records are written
+ * adjacently, so a bounded tail window reconciles every real transcript while
+ * keeping memory flat on multi-hundred-MiB files.
+ */
+const USAGE_RECONCILE_WINDOW = 1000;
+
+/**
+ * Inverse of accumulateBucket. Used to retract a message's earlier usage
+ * contribution when a later record for the same message.id carries the
+ * final (larger) usage — streaming writes partial usage first. A bucket may
+ * go transiently negative when the retracted contribution was counted in a
+ * previous incremental parse; the merge step nets it out.
+ */
+function subtractBucket(target, src) {
+  target.input -= src.input || 0;
+  target.output -= src.output || 0;
+  target.cacheRead -= src.cacheRead || 0;
+  target.cacheWrite -= src.cacheWrite || 0;
+  target.cacheWrite1h -= src.cacheWrite1h || 0;
+  target.webSearch -= src.webSearch || 0;
+  target.webFetch -= src.webFetch || 0;
+  target.codeExec -= src.codeExec || 0;
+  return target;
+}
+
+/**
+ * Record `contribution` as the usage currently counted for `messageId`, so a
+ * later record for the same id can retract it via subtractBucket. Re-inserts
+ * on update (Map iterates in insertion order) and evicts the oldest entries
+ * past `maxEntries`, keeping the window a bounded tail. Both ingestion paths
+ * call this so their reconciliation windows behave identically.
+ */
+function rememberUsageContribution(
+  map,
+  messageId,
+  contribution,
+  maxEntries = USAGE_RECONCILE_WINDOW
+) {
+  map.delete(messageId);
+  map.set(messageId, contribution);
+  while (map.size > maxEntries) {
+    const oldest = map.keys().next().value;
+    map.delete(oldest);
+  }
+  return map;
+}
+
 module.exports = {
   BUCKET_SEP,
+  USAGE_RECONCILE_WINDOW,
   normalizeSpeed,
   normalizeGeo,
   normalizeTier,
@@ -127,4 +177,6 @@ module.exports = {
   emptyBucket,
   extractUsageFields,
   accumulateBucket,
+  subtractBucket,
+  rememberUsageContribution,
 };

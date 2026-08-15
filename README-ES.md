@@ -723,6 +723,8 @@ Los comandos respaldados por API necesitan que el servidor esté en ejecución, 
 | `npm run install-hooks` | Configurar los ganchos de código Claude en `~/.claude/settings.json` |
 | `npm run seed`          | Rellenar la base de datos con datos de muestra                         |
 | `npm run import-history`| Importar sesiones heredadas desde `~/.claude/` (también se ejecuta al iniciar la sesión) |
+| `npm run reconcile-tokens`| Actualizar los totales de tokens de las sesiones importadas (nunca reduce un total existente) |
+| `npm run repair-tokens` | Volver a derivar los totales de tokens de **todas** las sesiones cuya transcripción siga en disco y poner a cero las líneas base de compactación: la reparación única para bases de datos infladas por la suma de usage por registro anterior a v2.0.9. Detén el dashboard primero |
 | `npm run clear-data` | Eliminar todas las sesiones, agentes, eventos y uso de tokens |
 | `npm run mcp:install` | Instalar dependencias para el paquete MCP local (`mcp/`) |
 | `npm run mcp:build` | Construir el servidor MCP TypeScript en `mcp/build/` |
