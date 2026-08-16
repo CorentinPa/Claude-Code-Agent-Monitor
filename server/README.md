@@ -691,6 +691,7 @@ rewrites `parent_agent_id`) and runs in `importSession` and the live
 | ------------------------------ | ------------------------------------------------------------------------------------------------------ |
 | `server/routes/import.js`      | Express router, request validation, temp-dir lifecycle, progress broadcasts                            |
 | `server/lib/codex-import.js`   | Historical Codex rollout importer; snapshots external files and delegates parsing/accounting to `codex-ingest.js` |
+| `server/lib/codex-ingest.js`   | Incremental Codex rollout ingestor. Discovery stats each rollout **once** rather than inside the sort comparator, which made newest-first ordering cost O(N log N) stat syscalls. Both read paths close their descriptor in a `finally`, and an I/O failure is reported as `failed` (distinct from a completed no-op) so the sweep keeps that file queued instead of recording its fingerprint and skipping it |
 | `server/lib/archive.js`        | Safe archive extractors (`.zip` / `.tar(.gz)` / `.gz`) with path-traversal and size-cap enforcement    |
 | `scripts/import-history.js`    | Generalized directory walker (`importFromDirectory`) + shared `parseSessionFile` / `importSession`. Re-import is fully incremental: per-event-type high-water mark (`MAX(created_at) GROUP BY event_type` per session) drives `ts > cutoff[type]` dedup for Stop / PostToolUse / TurnDuration / ToolError, and `sessions.ended_at` is rolled forward when the JSONL has progressed past the stored value. After each batch imports, it calls `ingestWorkflowsForSession` (`server/lib/workflow-ingest.js`) per session — outside the SQLite transaction — so an offline/headless/CI/cluster **Workflow-tool** run (whose journal never reached a live server) has its inner agents linked to their `run_id` on a plain rescan / path import, not left orphaned (`workflow_run_id = NULL`) |
 | `server/lib/transcript-cache.js` | Chunked 4 MiB sync byte-stream reader for JSONL transcripts — never materializes the whole file as a JS string, so files larger than V8's max string length (~512 MiB on 64-bit Node 20) parse without aborting Node with `FATAL ERROR: v8::ToLocalChecked Empty MaybeLocal` |
@@ -1189,6 +1190,22 @@ The startup auto-import of `~/.claude/projects` is **one-time** (marker-gated vi
 3. **Periodic poll** — a safety-net sweep on `DASHBOARD_SESSION_SYNC_MS` (default `30000` ms; `0` disables the poll but leaves the watcher running), covering events a watcher can miss (e.g. on network filesystems).
 
 Each sweep parses **only** files whose mtime is new or has advanced. A cold-cache fast path (e.g. the immediate sweep on every restart, when `mtimeCache` is empty) additionally skips an already-imported session whose file mtime hasn't advanced past its DB row's `updated_at`, so restart cost stays O(new/changed files) instead of re-parsing every transcript on disk. For each touched session it then broadcasts `session_created` / `session_updated` plus the session's main agent (`agent_created` / `agent_updated`) — the same frames hooks emit, so the UI refreshes live. All timers and watchers are `unref`'d and best-effort; nothing here can block shutdown or take down the server.
+
+### Codex Sweep Triggers
+
+The codex-home watcher deliberately does **not** treat the SQLite `-shm` sidecar as a reason to sweep.
+SQLite touches the wal-index on every WAL-mode reader open — including the sweep's own read-only open of
+that same state database — so matching `-shm` made each sweep schedule the next one: a self-sustaining
+full-scan loop (directory walk + state-DB read + a synchronous `ps` probe) that ran with no Codex process
+running and no user activity. Durable changes always land in the main database or its `-wal`, both of
+which still match; the predicate is exported as `codexHomeChangeTriggersSweep` so the exclusion is
+directly testable. A null filename still triggers, so the watcher never goes blind on platforms that omit
+it — there the 1 s debounce, not the filename filter, is the frequency cap.
+
+The response-item tool-call backfill runs for every discovered file once per process, then only for
+fingerprint-changed files (its "no-op" early exit still costs a `statSync` plus two DB lookups per file);
+a file whose ingest fails is re-queued so a transient error retries instead of waiting for the file to
+grow.
 
 ### Remote Data Source Sync
 
