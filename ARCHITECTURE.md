@@ -1360,8 +1360,29 @@ a *distinct* block even when the usage copy is repeated.
 
 The parser fix alone cannot heal historical rows: `replaceTokenUsage` is a
 high-water mark, so a corrected (lower) re-read just migrates the over-count
-into `baseline_*`. The repair sweep re-derives totals and zeroes the
-baselines via the `resetTokenUsage` statement:
+into `baseline_*`. Every session that predates the upgrade would keep its
+inflated cost forever while new sessions price correctly — so the dashboard
+runs the repair **for the user**, once per database, rather than leaving it to
+a CLI flag nobody will find.
+
+`repairInflatedTokenTotals()` (in `server/index.js`, started from
+`startBackgroundServices`) is gated by a `.token-repair-v1.done` marker written
+next to the database only after a completed pass, so a crash mid-repair retries
+instead of being skipped. It is deferred off the boot path so a large corpus
+never delays the UI, skipped (without consuming the marker) while
+`peersSharingDataDir()` reports another dashboard on the same database, and
+disabled entirely by `DASHBOARD_TOKEN_REPAIR=0`. Because the sweep clears and
+rewrites rows, it first copies the table to `token_usage_pre_repair` — one
+snapshot kept so the pre-repair numbers stay recoverable with plain SQL; it is
+safe to drop.
+
+A hook landing mid-repair can lose a single write, since the sweep parses
+outside its transaction. That self-heals: with baselines zeroed, the next event
+for that session re-parses the whole transcript and `replaceTokenUsage` writes
+the true total.
+
+The same sweep is available manually — for a re-run, or after restoring a
+backup:
 
 ```bash
 npm run repair-tokens
