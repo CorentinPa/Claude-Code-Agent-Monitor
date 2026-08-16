@@ -702,7 +702,8 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
   try {
     stat = fs.statSync(transcriptPath);
   } catch {
-    return { changed: false, events: [] };
+    // Same reasoning as the read failure below — keep it retryable.
+    return { changed: false, events: [], failed: true };
   }
   const state = stmts.getCodexIngestState.get(transcriptPath);
   const offset = !state || stat.size < state.byte_offset ? 0 : state.byte_offset;
@@ -712,7 +713,12 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
     if (length <= 0) return { changed: false, events: [] };
     body = readRangeUtf8(transcriptPath, offset, length);
   } catch {
-    return { changed: false, events: [] };
+    // An I/O failure is NOT a completed no-op. The sweep records this file's
+    // size+mtime fingerprint after any non-throwing return, so reporting a read
+    // error as an ordinary no-op would make the next sweep skip the transcript
+    // entirely — leaving its lifecycle and token events unprocessed until some
+    // later write happens to move the fingerprint.
+    return { changed: false, events: [], failed: true };
   }
 
   const lastNewline = body.lastIndexOf("\n");

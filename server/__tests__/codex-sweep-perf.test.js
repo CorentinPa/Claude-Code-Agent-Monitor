@@ -272,3 +272,111 @@ describe("ingestCodexToolEvents read-path failure", () => {
     }
   });
 });
+
+describe("ingestCodexTranscript failure signalling", () => {
+  const { ingestCodexTranscript } = require("../lib/codex-ingest");
+  const { stmts } = require("../db");
+  const root = path.join(TMP_ROOT, "codex", "sessions");
+  const SESSION_ID = "11111111-2222-3333-4444-555555555555";
+  let rollout;
+
+  before(() => {
+    rollout = path.join(root, `rollout-2026-08-15T01-00-00-${SESSION_ID}.jsonl`);
+    fs.writeFileSync(
+      rollout,
+      `${JSON.stringify({ type: "session_meta", payload: { id: SESSION_ID } })}\n`
+    );
+    try {
+      stmts.insertCodexSession.run(
+        SESSION_ID,
+        "codex",
+        "active",
+        "/tmp/proj",
+        "gpt-5",
+        "local",
+        "2026-08-15T10:00:00.000Z",
+        "2026-08-15T10:00:00.000Z",
+        null
+      );
+    } catch {
+      /* already present */
+    }
+  });
+
+  it("reports a read failure as failed rather than a no-op", () => {
+    // The sweep records this file's fingerprint after any non-throwing return.
+    // Reporting an I/O error as an ordinary no-op would let the next sweep skip
+    // the transcript entirely, leaving its lifecycle and token events
+    // unprocessed until some later write moved the fingerprint.
+    const realRead = fs.readSync;
+    fs.readSync = function () {
+      throw new Error("EIO");
+    };
+    let result;
+    try {
+      result = ingestCodexTranscript(rollout, { root });
+    } finally {
+      fs.readSync = realRead;
+    }
+    assert.equal(result.changed, false);
+    assert.equal(result.failed, true, "a read error must be reported as failed");
+  });
+
+  it("reports an unstattable transcript as failed", () => {
+    const missing = path.join(root, `rollout-2026-08-15T01-00-00-gone.jsonl`);
+    const result = ingestCodexTranscript(missing, { root });
+    assert.equal(result.changed, false);
+    assert.equal(result.failed, true);
+  });
+
+  it("does not flag a genuine no-op as failed", () => {
+    // Unchanged bytes: nothing to do, nothing to retry. Marking this failed
+    // would make the sweep re-ingest the same file forever.
+    ingestCodexTranscript(rollout, { root });
+    const second = ingestCodexTranscript(rollout, { root });
+    assert.equal(second.changed, false);
+    assert.ok(!second.failed, "an up-to-date transcript must not be marked failed");
+  });
+
+  it("closes the descriptor when the main read throws", () => {
+    // Append unread bytes first: the previous test advanced the byte cursor to
+    // EOF, and with nothing left to read the function returns before opening
+    // anything.
+    fs.appendFileSync(
+      rollout,
+      `${JSON.stringify({ type: "event_msg", payload: { type: "user_message" } })}\n`
+    );
+    const realOpen = fs.openSync;
+    const realClose = fs.closeSync;
+    const realRead = fs.readSync;
+    const opened = [];
+    const closed = [];
+    fs.openSync = function (...args) {
+      const fd = realOpen.apply(this, args);
+      opened.push(fd);
+      return fd;
+    };
+    fs.closeSync = function (fd) {
+      closed.push(fd);
+      return realClose.call(this, fd);
+    };
+    fs.readSync = function () {
+      throw new Error("EIO");
+    };
+    try {
+      for (let i = 0; i < 3; i++) ingestCodexTranscript(rollout, { root });
+    } finally {
+      fs.openSync = realOpen;
+      fs.closeSync = realClose;
+      fs.readSync = realRead;
+    }
+
+    // Assert the precondition: with the byte cursor already at EOF there is no
+    // unread range, the read is never attempted, and this test would pass
+    // without exercising anything at all.
+    assert.ok(opened.length >= 3, `expected a read attempt per call, got ${opened.length}`);
+    for (const fd of opened) {
+      assert.ok(closed.includes(fd), `descriptor ${fd} was opened but never closed`);
+    }
+  });
+});

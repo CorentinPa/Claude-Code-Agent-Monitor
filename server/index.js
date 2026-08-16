@@ -668,9 +668,14 @@ function startCodexSessionSync(broadcast) {
           try {
             // Only retain a successful fingerprint. A temporarily unreadable or
             // malformed rollout must retry on the next sweep rather than being
-            // silently skipped until another byte happens to arrive.
-            publish(ingestCodexTranscript(transcriptPath, { liveTranscripts }));
-            fingerprints.set(transcriptPath, fingerprint);
+            // silently skipped until another byte happens to arrive. Two
+            // failure shapes exist and BOTH must skip the fingerprint: a thrown
+            // error, and an I/O error the ingestor swallows and reports as
+            // `failed` (it returns `{changed:false}` for legitimate no-ops too,
+            // so the flag is the only way to tell them apart).
+            const ingestResult = ingestCodexTranscript(transcriptPath, { liveTranscripts });
+            publish(ingestResult);
+            if (!ingestResult?.failed) fingerprints.set(transcriptPath, fingerprint);
           } catch (err) {
             console.warn(
               `[CODEX SYNC] Failed to ingest ${path.basename(transcriptPath)}:`,
