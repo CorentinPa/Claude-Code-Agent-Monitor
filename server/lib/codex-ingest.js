@@ -63,6 +63,30 @@ function rememberTranscriptPath(transcriptPath) {
   return sessionId;
 }
 
+/**
+ * Read `[offset, offset + length)` from a file as UTF-8, closing the descriptor
+ * on EVERY exit path.
+ *
+ * `Buffer.alloc` and `fs.readSync` can both throw after the open, and callers
+ * retry a failed rollout on every subsequent sweep — so an fd leaked here does
+ * not leak once, it leaks once per sweep and will eventually exhaust the
+ * process descriptor limit on a file with a persistent read error.
+ */
+function readRangeUtf8(filePath, offset, length) {
+  const fd = fs.openSync(filePath, "r");
+  try {
+    const buffer = Buffer.alloc(length);
+    fs.readSync(fd, buffer, 0, length, offset);
+    return buffer.toString("utf8");
+  } finally {
+    try {
+      fs.closeSync(fd);
+    } catch {
+      // Already closed or otherwise invalid — there is nothing left to release.
+    }
+  }
+}
+
 function isCodexTranscript(transcriptPath, options = {}) {
   if (typeof transcriptPath !== "string" || !transcriptPath.endsWith(".jsonl")) return false;
   const root = path.resolve(options.root || getCodexSessionsDir());
@@ -624,11 +648,7 @@ function ingestCodexToolEvents(transcriptPath, options = {}) {
 
   let body;
   try {
-    const fd = fs.openSync(transcriptPath, "r");
-    const buffer = Buffer.alloc(length);
-    fs.readSync(fd, buffer, 0, length, offset);
-    fs.closeSync(fd);
-    body = buffer.toString("utf8");
+    body = readRangeUtf8(transcriptPath, offset, length);
   } catch {
     // Same as the stat failure above — a read error must stay retryable.
     return { changed: false, events: [], failed: true };
@@ -690,11 +710,7 @@ function ingestCodexTranscript(transcriptPath, options = {}) {
   try {
     const length = stat.size - offset;
     if (length <= 0) return { changed: false, events: [] };
-    const fd = fs.openSync(transcriptPath, "r");
-    const buffer = Buffer.alloc(length);
-    fs.readSync(fd, buffer, 0, length, offset);
-    fs.closeSync(fd);
-    body = buffer.toString("utf8");
+    body = readRangeUtf8(transcriptPath, offset, length);
   } catch {
     return { changed: false, events: [] };
   }

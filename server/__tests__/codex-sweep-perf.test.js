@@ -187,3 +187,88 @@ describe("ingestCodexToolEvents failure signalling", () => {
     assert.ok(!result.failed, "a completed no-op must not be marked failed");
   });
 });
+
+describe("ingestCodexToolEvents read-path failure", () => {
+  const { ingestCodexToolEvents } = require("../lib/codex-ingest");
+  const { stmts } = require("../db");
+  const root = path.join(TMP_ROOT, "codex", "sessions");
+  // The basename must carry a UUID for sessionIdFromPath to resolve a session,
+  // otherwise the function exits before it ever reaches the read.
+  const SESSION_ID = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+  let rollout;
+
+  before(() => {
+    rollout = path.join(root, `rollout-2026-08-15T00-00-00-${SESSION_ID}.jsonl`);
+    fs.writeFileSync(rollout, `${JSON.stringify({ type: "response_item" })}\n`);
+    try {
+      stmts.insertCodexSession.run(
+        SESSION_ID,
+        "codex",
+        "active",
+        "/tmp/proj",
+        "gpt-5",
+        "local",
+        "2026-08-15T10:00:00.000Z",
+        "2026-08-15T10:00:00.000Z",
+        null
+      );
+    } catch {
+      /* already present */
+    }
+  });
+
+  it("reports a post-stat read error as failed, not as a no-op", () => {
+    // The missing-file test covers the statSync catch. This covers the OTHER
+    // failure path — the file stats fine and has unread bytes, but the read
+    // itself throws — which previously also had to be distinguishable from a
+    // completed no-op for the sweep's retry marker to be correct.
+    const realRead = fs.readSync;
+    fs.readSync = function () {
+      throw new Error("EIO");
+    };
+    let result;
+    try {
+      result = ingestCodexToolEvents(rollout, { root });
+    } finally {
+      fs.readSync = realRead;
+    }
+    assert.equal(result.changed, false);
+    assert.equal(result.failed, true, "a read error must be reported as failed");
+  });
+
+  it("closes the descriptor even when the read throws", () => {
+    // Failed rollouts are retried on every later sweep, so a descriptor leaked
+    // on this path leaks once per sweep and would eventually exhaust the
+    // process limit. Drive the failing path repeatedly and assert every opened
+    // descriptor was closed.
+    const realOpen = fs.openSync;
+    const realRead = fs.readSync;
+    const opened = [];
+    const closed = [];
+    const realClose = fs.closeSync;
+    fs.openSync = function (...args) {
+      const fd = realOpen.apply(this, args);
+      opened.push(fd);
+      return fd;
+    };
+    fs.closeSync = function (fd) {
+      closed.push(fd);
+      return realClose.call(this, fd);
+    };
+    fs.readSync = function () {
+      throw new Error("EIO");
+    };
+    try {
+      for (let i = 0; i < 5; i++) ingestCodexToolEvents(rollout, { root });
+    } finally {
+      fs.openSync = realOpen;
+      fs.readSync = realRead;
+      fs.closeSync = realClose;
+    }
+
+    assert.ok(opened.length >= 5, `expected repeated opens, got ${opened.length}`);
+    for (const fd of opened) {
+      assert.ok(closed.includes(fd), `descriptor ${fd} was opened but never closed`);
+    }
+  });
+});

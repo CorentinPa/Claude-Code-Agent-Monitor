@@ -897,6 +897,12 @@ describe("task-progress caches validate file identity", () => {
    * precisely what a size+mtime (or TTL) cache key cannot see.
    */
   function replaceInPlace(filePath, entries) {
+    // Pin the ORIGINAL to a whole-millisecond mtime first. utimesSync only
+    // round-trips millisecond precision, so without this the original's
+    // sub-millisecond mtimeMs could never be reproduced on the replacement and
+    // the "same size + same mtime" collision this test needs would not happen.
+    const pinned = new Date(Math.floor(fs.statSync(filePath).mtimeMs));
+    fs.utimesSync(filePath, pinned, pinned);
     const before = fs.statSync(filePath);
     const sibling = `${filePath}.replacement`;
     writeJsonl(sibling, entries);
@@ -909,7 +915,7 @@ describe("task-progress caches validate file identity", () => {
     fs.writeFileSync(sibling, body);
     fs.renameSync(sibling, filePath);
     fs.utimesSync(filePath, before.atime, before.mtime);
-    return fs.statSync(filePath);
+    return { before, after: fs.statSync(filePath) };
   }
 
   it("does not serve a replaced file from the previous file's parse", () => {
@@ -928,12 +934,18 @@ describe("task-progress caches validate file identity", () => {
     });
     assert.equal(first.snapshot.completed, 0);
 
-    const after = replaceInPlace(transcript, [
+    const { before, after } = replaceInPlace(transcript, [
       claudeToolUse("2026-08-07T10:00:00.000Z", "todo-1", "TodoWrite", {
         todos: [{ content: "Inspect", status: "completed" }],
       }),
     ]);
-    assert.ok(after.size > 0);
+    // Assert the PRECONDITION, not just the outcome: without proving that size
+    // and mtime actually collided, a filesystem that fails to preserve mtimeMs
+    // would make this test pass through mtime detection and quietly stop
+    // testing inode detection at all.
+    assert.equal(after.size, before.size, "replacement must match the original size");
+    assert.equal(after.mtimeMs, before.mtimeMs, "replacement must match the original mtime");
+    assert.notEqual(after.ino, before.ino, "replacement must be a different inode");
 
     const second = extractSessionTaskProgress({
       session: { id: "replaced", provider: "claude" },
