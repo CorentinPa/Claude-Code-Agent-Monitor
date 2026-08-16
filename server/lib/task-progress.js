@@ -27,8 +27,11 @@ const READ_CHUNK_BYTES = 1024 * 1024;
 const FRESH_PARSE_TTL_MS = 2_000;
 function freshParseTtlMs() {
   const raw = process.env.DASHBOARD_TASK_SUMMARY_TTL_MS;
-  if (raw === undefined || raw === "") return FRESH_PARSE_TTL_MS;
-  const value = Number(raw);
+  // Trim first: Number(" ") is 0, which would silently DISABLE stale reuse
+  // for a whitespace-only value instead of applying the documented default.
+  const trimmed = typeof raw === "string" ? raw.trim() : raw;
+  if (trimmed === undefined || trimmed === "") return FRESH_PARSE_TTL_MS;
+  const value = Number(trimmed);
   return Number.isFinite(value) && value >= 0 ? value : FRESH_PARSE_TTL_MS;
 }
 const cache = new Map();
@@ -544,10 +547,19 @@ function parseTranscript(filePath, owner) {
   }
   const key = `${filePath}:${owner.id}:${owner.type}`;
   const cached = cache.get(key);
+  // `dev`+`ino` identify the actual inode, so a DIFFERENT file rotated in at
+  // the same path can never be served from the previous file's parse — neither
+  // through the TTL window nor through a size+mtime collision. The serve-stale
+  // branch additionally refuses a shrunken file: transcripts are append-only,
+  // so a smaller size means truncation or replacement and the cached
+  // observations no longer describe it.
+  const sameFile =
+    cached && (cached.dev === undefined || (cached.dev === stat.dev && cached.ino === stat.ino));
   if (
     cached &&
+    sameFile &&
     ((cached.size === stat.size && cached.mtimeMs === stat.mtimeMs) ||
-      Date.now() - cached.parsedAt < freshParseTtlMs())
+      (stat.size >= cached.size && Date.now() - cached.parsedAt < freshParseTtlMs()))
   ) {
     cache.delete(key);
     cache.set(key, cached);
@@ -601,7 +613,14 @@ function parseTranscript(filePath, owner) {
   } catch {
     return [];
   }
-  cacheSet(key, { size: stat.size, mtimeMs: stat.mtimeMs, parsedAt: Date.now(), observations });
+  cacheSet(key, {
+    size: stat.size,
+    mtimeMs: stat.mtimeMs,
+    dev: stat.dev,
+    ino: stat.ino,
+    parsedAt: Date.now(),
+    observations,
+  });
   return observations;
 }
 
@@ -657,16 +676,22 @@ const timestampCache = new Map();
 const MAX_TIMESTAMP_CACHE_ENTRIES = 2_000;
 
 function transcriptTimestamp(filePath) {
-  let size = null;
+  let stat = null;
   try {
-    size = fs.statSync(filePath).size;
+    stat = fs.statSync(filePath);
   } catch {
     timestampCache.delete(filePath);
     return null;
   }
+  const size = stat.size;
   const cached = timestampCache.get(filePath);
   if (cached) {
-    if (size >= cached.size) return cached.timestamp;
+    // Growth alone is not proof of identity: a replacement file at the same
+    // path can be the same size or larger, and its first line may differ. Pin
+    // the entry to the inode (dev+ino) as well, so only a genuine append to
+    // the SAME file keeps the cached first-line timestamp.
+    const sameFile = cached.dev === stat.dev && cached.ino === stat.ino;
+    if (sameFile && size >= cached.size) return cached.timestamp;
     timestampCache.delete(filePath);
   }
   let timestamp = null;
@@ -685,7 +710,7 @@ function transcriptTimestamp(filePath) {
   }
   // Only a found timestamp is immutable; a file with none yet may gain one.
   if (timestamp) {
-    timestampCache.set(filePath, { timestamp, size });
+    timestampCache.set(filePath, { timestamp, size, dev: stat.dev, ino: stat.ino });
     while (timestampCache.size > MAX_TIMESTAMP_CACHE_ENTRIES) {
       timestampCache.delete(timestampCache.keys().next().value);
     }

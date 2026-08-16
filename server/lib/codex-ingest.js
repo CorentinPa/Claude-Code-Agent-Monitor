@@ -609,7 +609,10 @@ function ingestCodexToolEvents(transcriptPath, options = {}) {
   try {
     stat = fs.statSync(transcriptPath);
   } catch {
-    return { changed: false, events: [] };
+    // An I/O failure is NOT a completed no-op: the caller's retry bookkeeping
+    // has to keep this file queued, otherwise a transient error leaves its
+    // response-item tool calls unindexed until the file happens to grow.
+    return { changed: false, events: [], failed: true };
   }
   const state = stmts.getCodexToolIngestState.get(transcriptPath);
   const offset = !state || stat.size < state.byte_offset ? 0 : state.byte_offset;
@@ -627,7 +630,8 @@ function ingestCodexToolEvents(transcriptPath, options = {}) {
     fs.closeSync(fd);
     body = buffer.toString("utf8");
   } catch {
-    return { changed: false, events: [] };
+    // Same as the stat failure above — a read error must stay retryable.
+    return { changed: false, events: [], failed: true };
   }
   const lastNewline = body.lastIndexOf("\n");
   if (lastNewline < 0) return { changed: false, events: [] };

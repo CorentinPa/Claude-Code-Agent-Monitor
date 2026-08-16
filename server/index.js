@@ -685,11 +685,22 @@ function startCodexSessionSync(broadcast) {
             // no-op after the first pass, and also catches records that arrive
             // without one of Codex's lower-volume lifecycle event messages —
             // hence the full pass once per process, then changed-files-only.
-            // A thrown failure (e.g. transient SQLITE_BUSY) re-queues the file
-            // so it retries every sweep until it succeeds — the same retry
-            // property the main-ingest fingerprint above deliberately keeps.
-            publish(ingestCodexToolEvents(transcriptPath));
-            toolIngestFailed.delete(transcriptPath);
+            // A failure re-queues the file so it retries every sweep until it
+            // succeeds — the same retry property the main-ingest fingerprint
+            // above deliberately keeps. Two shapes of failure exist and BOTH
+            // must re-queue: a thrown error (e.g. transient SQLITE_BUSY), and
+            // an I/O error the ingestor swallows internally and reports as
+            // `failed` (it returns `{changed:false}` for legitimate no-ops
+            // too, so the flag is the only way to tell them apart — without it
+            // a transient read error would clear the marker and the file's
+            // tool calls would stay unindexed until it next grew).
+            const toolResult = ingestCodexToolEvents(transcriptPath);
+            publish(toolResult);
+            if (toolResult?.failed) {
+              toolIngestFailed.add(transcriptPath);
+            } else {
+              toolIngestFailed.delete(transcriptPath);
+            }
           } catch (err) {
             toolIngestFailed.add(transcriptPath);
             console.warn(

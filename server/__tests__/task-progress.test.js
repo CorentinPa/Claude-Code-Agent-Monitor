@@ -758,6 +758,9 @@ describe("task progress extraction", () => {
   it("invalidates the stat cache when a transcript grows (TTL disabled)", () => {
     // TTL 0 restores immediate re-parse on growth; the default TTL's
     // serve-stale window is covered by the next test.
+    // Save and restore rather than delete: the variable may be supplied by the
+    // test command, and clobbering it would leak into later tests.
+    const priorTtl = process.env.DASHBOARD_TASK_SUMMARY_TTL_MS;
     process.env.DASHBOARD_TASK_SUMMARY_TTL_MS = "0";
     try {
       const root = tempRoot();
@@ -788,7 +791,8 @@ describe("task progress extraction", () => {
       });
       assert.equal(second.snapshot.completed, 1);
     } finally {
-      delete process.env.DASHBOARD_TASK_SUMMARY_TTL_MS;
+      if (priorTtl === undefined) delete process.env.DASHBOARD_TASK_SUMMARY_TTL_MS;
+      else process.env.DASHBOARD_TASK_SUMMARY_TTL_MS = priorTtl;
     }
   });
 
@@ -796,6 +800,19 @@ describe("task progress extraction", () => {
     // Default TTL: a burst of requests against an actively-appended transcript
     // must not re-parse per request — the second read inside the window sees
     // the cached (stale) snapshot, and clearing the cache forces a fresh one.
+    // Clear the override explicitly so this asserts the DEFAULT, not whatever
+    // the test command happened to export.
+    const priorTtl = process.env.DASHBOARD_TASK_SUMMARY_TTL_MS;
+    delete process.env.DASHBOARD_TASK_SUMMARY_TTL_MS;
+    try {
+      runDefaultTtlAssertions();
+    } finally {
+      if (priorTtl === undefined) delete process.env.DASHBOARD_TASK_SUMMARY_TTL_MS;
+      else process.env.DASHBOARD_TASK_SUMMARY_TTL_MS = priorTtl;
+    }
+  });
+
+  function runDefaultTtlAssertions() {
     const root = tempRoot();
     const transcript = path.join(root, "growing-ttl.jsonl");
     writeJsonl(transcript, [
@@ -830,11 +847,12 @@ describe("task progress extraction", () => {
       mainTranscriptPath: transcript,
     });
     assert.equal(fresh.snapshot.completed, 1);
-  });
+  }
 
   it("re-parses a grown transcript automatically once the TTL expires", async () => {
     // Guards against an accidentally-infinite TTL: with a 1ms window, a read
     // after the window must pick up appended data without any manual clear.
+    const priorTtl = process.env.DASHBOARD_TASK_SUMMARY_TTL_MS;
     process.env.DASHBOARD_TASK_SUMMARY_TTL_MS = "1";
     try {
       const root = tempRoot();
@@ -866,7 +884,98 @@ describe("task progress extraction", () => {
       });
       assert.equal(fresh.snapshot.completed, 1);
     } finally {
-      delete process.env.DASHBOARD_TASK_SUMMARY_TTL_MS;
+      if (priorTtl === undefined) delete process.env.DASHBOARD_TASK_SUMMARY_TTL_MS;
+      else process.env.DASHBOARD_TASK_SUMMARY_TTL_MS = priorTtl;
     }
+  });
+});
+
+describe("task-progress caches validate file identity", () => {
+  /**
+   * Replace a transcript with a DIFFERENT file at the same path, matching the
+   * original's size and mtime exactly. Only the inode differs — which is
+   * precisely what a size+mtime (or TTL) cache key cannot see.
+   */
+  function replaceInPlace(filePath, entries) {
+    const before = fs.statSync(filePath);
+    const sibling = `${filePath}.replacement`;
+    writeJsonl(sibling, entries);
+    // Pad or truncate so the replacement is byte-identical in length.
+    const target = before.size;
+    let body = fs.readFileSync(sibling);
+    if (body.length < target)
+      body = Buffer.concat([body, Buffer.alloc(target - body.length, 0x20)]);
+    else body = body.subarray(0, target);
+    fs.writeFileSync(sibling, body);
+    fs.renameSync(sibling, filePath);
+    fs.utimesSync(filePath, before.atime, before.mtime);
+    return fs.statSync(filePath);
+  }
+
+  it("does not serve a replaced file from the previous file's parse", () => {
+    // Within the TTL — and even on an exact size+mtime match — a different
+    // inode at the same path must force a fresh parse.
+    const root = tempRoot();
+    const transcript = path.join(root, "replaced.jsonl");
+    writeJsonl(transcript, [
+      claudeToolUse("2026-08-07T10:00:00.000Z", "todo-1", "TodoWrite", {
+        todos: [{ content: "Inspect", status: "in_progress" }],
+      }),
+    ]);
+    const first = extractSessionTaskProgress({
+      session: { id: "replaced", provider: "claude" },
+      mainTranscriptPath: transcript,
+    });
+    assert.equal(first.snapshot.completed, 0);
+
+    const after = replaceInPlace(transcript, [
+      claudeToolUse("2026-08-07T10:00:00.000Z", "todo-1", "TodoWrite", {
+        todos: [{ content: "Inspect", status: "completed" }],
+      }),
+    ]);
+    assert.ok(after.size > 0);
+
+    const second = extractSessionTaskProgress({
+      session: { id: "replaced", provider: "claude" },
+      mainTranscriptPath: transcript,
+    });
+    assert.equal(
+      second.snapshot.completed,
+      1,
+      "a different inode at the same path must not reuse the cached parse"
+    );
+  });
+
+  it("re-parses a truncated transcript instead of serving stale observations", () => {
+    // Transcripts are append-only, so a SMALLER file means truncation or
+    // replacement — the cached observations no longer describe it, even inside
+    // the TTL window.
+    const root = tempRoot();
+    const transcript = path.join(root, "truncated.jsonl");
+    writeJsonl(transcript, [
+      claudeToolUse("2026-08-07T10:00:00.000Z", "todo-1", "TodoWrite", {
+        todos: [
+          { content: "One", status: "completed" },
+          { content: "Two", status: "completed" },
+        ],
+      }),
+    ]);
+    const first = extractSessionTaskProgress({
+      session: { id: "truncated", provider: "claude" },
+      mainTranscriptPath: transcript,
+    });
+    assert.equal(first.snapshot.completed, 2);
+
+    writeJsonl(transcript, [
+      claudeToolUse("2026-08-07T10:00:00.000Z", "todo-1", "TodoWrite", {
+        todos: [{ content: "One", status: "in_progress" }],
+      }),
+    ]);
+
+    const second = extractSessionTaskProgress({
+      session: { id: "truncated", provider: "claude" },
+      mainTranscriptPath: transcript,
+    });
+    assert.equal(second.snapshot.completed, 0, "a shrunken file must be re-parsed");
   });
 });

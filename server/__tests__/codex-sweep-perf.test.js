@@ -157,3 +157,33 @@ describe("findCodexTranscripts stat cost", () => {
     assert.equal(files[files.length - 1], doomed, "and sorts last");
   });
 });
+
+describe("ingestCodexToolEvents failure signalling", () => {
+  const { ingestCodexToolEvents } = require("../lib/codex-ingest");
+  // `root` scopes the "is this a Codex transcript?" check to the fixture tree;
+  // without it the function short-circuits on the path test and never reaches
+  // the I/O these tests are about.
+  const root = path.join(TMP_ROOT, "codex", "sessions");
+
+  it("flags an unreadable transcript as failed, not as a completed no-op", () => {
+    // The sweep clears a file's retry marker after a completed ingest. Because
+    // this function swallows I/O errors and returns { changed: false } — the
+    // same shape a legitimate no-op returns — it must say so explicitly, or a
+    // transient read error would clear the marker and leave the file's
+    // response-item tool calls unindexed until it next grew.
+    const missing = path.join(TMP_ROOT, "codex", "sessions", "rollout-does-not-exist.jsonl");
+    const result = ingestCodexToolEvents(missing, { root });
+    assert.equal(result.changed, false);
+    assert.equal(result.failed, true, "an unreadable file must report failed");
+  });
+
+  it("does not flag a genuine no-op as failed", () => {
+    // A readable rollout with no session row is a completed no-op: nothing to
+    // do, nothing to retry. Marking it failed would re-queue it every sweep.
+    const file = path.join(TMP_ROOT, "codex", "sessions", "2026", "08", "15", "rollout-noop.jsonl");
+    fs.writeFileSync(file, `${JSON.stringify({ type: "response_item" })}\n`);
+    const result = ingestCodexToolEvents(file, { root });
+    assert.equal(result.changed, false);
+    assert.ok(!result.failed, "a completed no-op must not be marked failed");
+  });
+});
