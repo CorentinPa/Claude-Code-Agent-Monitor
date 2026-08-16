@@ -740,6 +740,7 @@ matches one probed from either layout candidate.
 | Variable                          | Default     | Purpose                                                           |
 | --------------------------------- | ----------- | ----------------------------------------------------------------- |
 | `CCAM_IMPORT_MAX_BYTES`           | `1073741824` | Maximum size per uploaded file                                   |
+| `DASHBOARD_TOKEN_REPAIR`          | `1`         | One-time automatic repair of token totals inflated before usage was reconciled per `message.id`; `0` skips it (repair manually with `npm run repair-tokens`) |
 | `CCAM_IMPORT_MAX_FILES`           | `2000`      | Maximum files per upload request                                 |
 | `CCAM_IMPORT_MAX_EXTRACT_BYTES`   | `4294967296` | Total uncompressed bytes allowed per archive (zip-bomb guard)   |
 
@@ -1474,6 +1475,7 @@ DASHBOARD_DB_PATH=./data/dashboard.db  # SQLite database path
 DASHBOARD_SESSION_SYNC_MS=30000    # Continuous project-sync poll interval (ms); 0 disables the poll (watcher stays)
 DASHBOARD_CODEX_HOME=              # Optional Codex home; Settings saves this dashboard-only override and immediately re-arms live watching
 DASHBOARD_CODEX_SYNC_MS=4000       # Codex rollout safety-net poll (ms); 0 disables poll (watcher stays)
+DASHBOARD_TOKEN_REPAIR=1           # One-time startup repair of pre-reconciliation token totals; 0 skips it
 DASHBOARD_LIVENESS_PROBE=1         # 0 disables the local Claude Code/Codex dead-session liveness reap (use when hooks arrive from another machine)
 DASHBOARD_LIVENESS_IDLE_SECONDS=60 # Idle gate before the liveness reap may complete a process-less session
 
