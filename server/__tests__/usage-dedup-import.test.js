@@ -583,16 +583,20 @@ describe("repair sweep — missing projects directory", () => {
       cacheWrite: EXPECTED.cacheWrite * 3,
     });
 
-    // Move the whole projects tree aside for the duration of this sweep.
+    // Move the whole projects tree aside for the duration of this sweep. The
+    // try starts BEFORE the rename and tracks whether it happened, so a failed
+    // assertion between the two can never leave the tree stashed and
+    // contaminate every later test in this file.
     const projectsRoot = path.join(CLAUDE_HOME, "projects");
     const stashed = path.join(TMP_ROOT, "projects-stashed");
-    fs.renameSync(projectsRoot, stashed);
-    assert.equal(fs.existsSync(projectsRoot), false, "scan root must be absent for this test");
-
+    let moved = false;
     try {
+      fs.renameSync(projectsRoot, stashed);
+      moved = true;
+      assert.equal(fs.existsSync(projectsRoot), false, "scan root must be absent for this test");
       await reconcileTokens(dbModule, { all: true, resetBaselines: true });
     } finally {
-      fs.renameSync(stashed, projectsRoot);
+      if (moved) fs.renameSync(stashed, projectsRoot);
     }
 
     const row = rawRow(SID, MODEL);
