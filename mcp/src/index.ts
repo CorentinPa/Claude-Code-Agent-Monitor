@@ -88,7 +88,9 @@ function resolveTransport(env: TransportMode): TransportMode {
  * For stdio/http, installs `SIGINT`/`SIGTERM` handlers invoking the
  * transport's `shutdownFn`, plus `unhandledRejection`/`uncaughtException`
  * handlers logging via {@link Logger} — the latter sets `process.exitCode = 1`
- * without exiting immediately, letting in-flight work finish.
+ * without exiting immediately, letting in-flight work finish. Stdio mode also
+ * self-terminates on stdin close or a detected ppid-1 orphan, since a dead
+ * host process never sends a signal in that case.
  */
 async function main() {
   const config = loadConfig();
@@ -118,6 +120,34 @@ async function main() {
       await stdioTransport.close?.();
       await server.close();
     };
+
+    // The SDK's StdioServerTransport only listens for stdin "data"/"error"
+    // events, so it never notices when the host (Claude Code) dies without
+    // sending SIGTERM/SIGINT first: stdin just closes silently and this
+    // process lingers as an orphan (ppid 1) — observed spinning at high CPU
+    // indefinitely with nothing left to talk to. Detect that two ways —
+    // stdin closing and a periodic ppid check, since either can fire first
+    // depending on how the host exited — and self-terminate immediately.
+    let orphanHandled = false;
+    const exitIfOrphaned = (reason: string) => {
+      if (orphanHandled) return;
+      orphanHandled = true;
+      clearInterval(orphanCheckInterval);
+      logger.info("Host process gone; shutting down orphaned stdio server", { reason });
+      shutdownFn?.()
+        .catch((error) => {
+          logger.error("Error during orphan shutdown", {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        })
+        .finally(() => process.exit(0));
+    };
+    process.stdin.on("end", () => exitIfOrphaned("stdin_end"));
+    process.stdin.on("close", () => exitIfOrphaned("stdin_close"));
+    const orphanCheckInterval = setInterval(() => {
+      if (process.ppid === 1) exitIfOrphaned("ppid_orphaned");
+    }, 5000);
+    orphanCheckInterval.unref();
   }
 
   // ── HTTP mode (SSE + Streamable HTTP) ───────────────────────
