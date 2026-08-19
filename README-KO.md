@@ -1863,7 +1863,7 @@ npx skills update --global --yes
 npx skills remove --global mcp-server --yes
 ```
 
-프로젝트 설치는 `.agents/skills/`와 Agent별 링크를 사용합니다. 전역 Claude Code 스킬은 기본적으로 `~/.claude/skills/`에 설치되며, `CLAUDE_CONFIG_DIR`이 설정된 경우 해당 디렉터리의 `skills/` 아래에 설치됩니다. 전역 Codex 스킬은 기본적으로 `~/.codex/skills/`에 설치되며, `CODEX_HOME`이 설정된 경우 해당 디렉터리의 `skills/` 아래에 설치됩니다. 여러 Agent에 설치할 때는 공유 저장소에서 파일을 중복 제거한 뒤 해당 대상 디렉터리로 링크할 수 있습니다. skills.sh CLI는 66개 플러그인 스킬과 저장소 유지보수 스킬을 포함해 총 75개 저장소 스킬을 찾습니다.
+프로젝트 설치는 `.agents/skills/`와 Agent별 링크를 사용합니다. 전역 Claude Code 스킬은 기본적으로 `~/.claude/skills/`에 설치되며, `CLAUDE_CONFIG_DIR`이 설정된 경우 해당 디렉터리의 `skills/` 아래에 설치됩니다. 전역 Codex 스킬은 기본적으로 `~/.codex/skills/`에 설치되며, `CODEX_HOME`이 설정된 경우 해당 디렉터리의 `skills/` 아래에 설치됩니다. 여러 Agent에 설치할 때는 공유 저장소에서 파일을 중복 제거한 뒤 해당 대상 디렉터리로 링크할 수 있습니다. skills.sh CLI는 66개 플러그인 스킬과 저장소 유지보수 스킬을 포함해 총 76개 저장소 스킬을 찾습니다.
 
 ### 사용 가능한 플러그인
 
