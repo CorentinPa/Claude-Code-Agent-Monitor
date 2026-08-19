@@ -108,8 +108,6 @@ Services:
 
 Nginx proxies the UI, authenticated REST API, and WebSocket. It returns `404` for `/api/hooks`, `/api/metrics`, `/mcp`, `/sse`, and `/messages` by default. Prometheus scrapes `/api/metrics` on the private network with `dashboard-token`.
 
-The MCP HTTP service keeps one MCP server per client session. Sessions end on `DELETE /mcp` or SSE disconnect, and anything left behind by a client that vanished without terminating is swept once idle past `MCP_HTTP_SESSION_TIMEOUT_MS` (default 30 minutes; `0` disables the sweep). Watch `activeSessions` on `GET /health` — a count that climbs and never falls is the signal that clients are dropping without terminating.
-
 To expose authenticated remote hooks behind TLS:
 
 ```bash
@@ -195,7 +193,7 @@ Render and replace the local image name with an immutable registry reference:
 REGISTRY="ghcr.io/$(gh repo view --json owner -q .owner.login)"
 IMAGE_TAG="$(git rev-parse --short HEAD)"
 kubectl kustomize deployments/kubernetes/overlays/production \
-  | sed "s|ccam-dashboard:2.0.9|${REGISTRY}/claude-code-agent-monitor:${IMAGE_TAG}|g" \
+  | sed "s|ccam-dashboard:2.0.10|${REGISTRY}/claude-code-agent-monitor:${IMAGE_TAG}|g" \
   | kubectl apply --server-side --field-manager=ccam-deployer -f -
 ```
 
