@@ -45,6 +45,22 @@ npm run mcp:start:repl
 - Use **Streamable HTTP + SSE** only when a separate local process must share the MCP server. Keep the listener on loopback unless you intentionally operate a protected reverse-proxy deployment, and set `MCP_HTTP_AUTH_TOKEN` for non-probe endpoints.
 - Use the **REPL** for an operator's one-off inspection or an explicitly reviewed mutation. It invokes the same schema and safety gates as the protocol transports, so it is a good way to validate an operation before wiring it into automation.
 
+### Stdio lifecycle and orphan shutdown
+
+A stdio server is owned by the host that launched it, and the MCP SDK's stdio transport only reacts to stdin `data`/`error` events. When a host exits without sending `SIGTERM`/`SIGINT` first, stdin simply goes quiet and the server would otherwise linger forever with nothing to talk to. CCAM therefore watches two independent conditions — stdin closing, and the process being re-parented — and shuts the server down the moment either fires:
+
+| Signal | Logged reason | Fires when |
+| --- | --- | --- |
+| stdin reaches end of stream | `stdin_end` | The host closed its end of the pipe, including a normal protocol-level shutdown |
+| stdin is destroyed | `stdin_close` | The host process died and took the pipe with it |
+| The process is re-parented | `reparented` | The launching parent exited while stdin stayed open — checked every 5s |
+
+Re-parenting is detected by comparing the current parent pid against the one captured at startup, **not** by testing for pid 1. That distinction matters in both directions: a server legitimately launched with an init-like parent (a container running `tini` as PID 1, or an `exec`-style launcher) keeps pid 1 as its parent while perfectly healthy, and a Linux orphan under a `systemd --user` session or another subreaper is re-parented to that supervisor rather than to pid 1.
+
+Shutdown closes the transport and the server, then exits `0`. A 2-second deadline forces the exit even when teardown hangs, since an unresponsive shutdown is exactly how an orphaned process ends up running indefinitely. Each shutdown is logged to stderr with its reason, so `reason` in the log tells you which signal ended a session.
+
+Only the stdio transport does this. HTTP servers outlive any single client by design and stop on `SIGINT`/`SIGTERM` only; the REPL owns its own lifecycle.
+
 ## Tool Catalog
 
 ### Observability

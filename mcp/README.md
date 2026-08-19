@@ -39,6 +39,8 @@ npm run mcp:start:repl
 | Streamable HTTP + SSE | `ccam mcp http` | `/mcp`, `/sse`, `/messages`, `/health` on port `8819` by default |
 | REPL | `ccam mcp repl` | Direct validated tool invocation with domain filtering |
 
+A stdio server self-terminates when its host process goes away — stdin reaching end/close, or the process being re-parented away from the parent it started under (polled every 5s). This prevents the orphaned, unreachable servers that a host crashing without `SIGTERM`/`SIGINT` would otherwise leave behind. Re-parenting is measured against the startup parent rather than pid 1, so a server launched under an init-like parent (a container running `tini` as PID 1) is not killed off as a false positive. See `docs/MCP.md` for the full lifecycle.
+
 ## Tool Catalog
 
 ### Observability
@@ -251,4 +253,5 @@ npm run extensions:validate
 - Mutation denied: set `MCP_DASHBOARD_ALLOW_MUTATIONS=true` for that MCP process.
 - Plugin MCP launch fails: run `npm run setup`, then verify `ccam mcp repl`.
 - HTTP clients cannot connect: verify `/health`, bind host, firewall, and the exact `/mcp` endpoint.
+- stdio server exited on its own: check stderr for `shutting down orphaned stdio server` and its `reason` (`stdin_end`, `stdin_close`, or `reparented`) — the host process ended or the server was re-parented.
 - Never write protocol logs to stdout in stdio mode. MCP logs use stderr.

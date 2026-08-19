@@ -30,6 +30,7 @@
  * - `./clients/dashboard-api-client.js`
  * - `./config/app-config.js`
  * - `./core/logger.js`
+ * - `./core/orphan-watch.js`
  * - `./server.js`
  * - `./transports/http-server.js`
  * - `./transports/repl.js`
@@ -51,6 +52,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { DashboardApiClient } from "./clients/dashboard-api-client.js";
 import { loadConfig, type TransportMode } from "./config/app-config.js";
 import { Logger } from "./core/logger.js";
+import { watchForOrphanedHost, type OrphanWatch } from "./core/orphan-watch.js";
 import { buildServer } from "./server.js";
 import { startHttpServer } from "./transports/http-server.js";
 import { startRepl, toolDomain } from "./transports/repl.js";
@@ -89,8 +91,9 @@ function resolveTransport(env: TransportMode): TransportMode {
  * transport's `shutdownFn`, plus `unhandledRejection`/`uncaughtException`
  * handlers logging via {@link Logger} — the latter sets `process.exitCode = 1`
  * without exiting immediately, letting in-flight work finish. Stdio mode also
- * self-terminates on stdin close or a detected ppid-1 orphan, since a dead
- * host process never sends a signal in that case.
+ * self-terminates when its host process vanishes — stdin reaching end/close,
+ * or the process being re-parented away from its startup parent — since a
+ * dead host never sends a signal in that case (see `core/orphan-watch.ts`).
  */
 async function main() {
   const config = loadConfig();
@@ -99,6 +102,7 @@ async function main() {
   const api = new DashboardApiClient(config, logger);
 
   let shutdownFn: (() => Promise<void>) | undefined;
+  let orphanWatch: OrphanWatch | undefined;
 
   // ── stdio mode (default, backward compatible) ───────────────
   if (transport === "stdio") {
@@ -124,30 +128,20 @@ async function main() {
     // The SDK's StdioServerTransport only listens for stdin "data"/"error"
     // events, so it never notices when the host (Claude Code) dies without
     // sending SIGTERM/SIGINT first: stdin just closes silently and this
-    // process lingers as an orphan (ppid 1) — observed spinning at high CPU
-    // indefinitely with nothing left to talk to. Detect that two ways —
-    // stdin closing and a periodic ppid check, since either can fire first
-    // depending on how the host exited — and self-terminate immediately.
-    let orphanHandled = false;
-    const exitIfOrphaned = (reason: string) => {
-      if (orphanHandled) return;
-      orphanHandled = true;
-      clearInterval(orphanCheckInterval);
-      logger.info("Host process gone; shutting down orphaned stdio server", { reason });
-      shutdownFn?.()
-        .catch((error) => {
-          logger.error("Error during orphan shutdown", {
-            error: error instanceof Error ? error.message : String(error),
-          });
-        })
-        .finally(() => process.exit(0));
-    };
-    process.stdin.on("end", () => exitIfOrphaned("stdin_end"));
-    process.stdin.on("close", () => exitIfOrphaned("stdin_close"));
-    const orphanCheckInterval = setInterval(() => {
-      if (process.ppid === 1) exitIfOrphaned("ppid_orphaned");
-    }, 5000);
-    orphanCheckInterval.unref();
+    // process lingers as an orphan — observed spinning at high CPU
+    // indefinitely with nothing left to talk to. See core/orphan-watch.ts for
+    // the two signals watched and why re-parenting is compared against the
+    // startup ppid rather than tested against PID 1.
+    const stdioShutdown = shutdownFn;
+    orphanWatch = watchForOrphanedHost({
+      shutdown: stdioShutdown,
+      onDetect: (reason) =>
+        logger.info("Host process gone; shutting down orphaned stdio server", { reason }),
+      onShutdownError: (error) =>
+        logger.error("Error during orphan shutdown", {
+          error: error instanceof Error ? error.message : String(error),
+        }),
+    });
   }
 
   // ── HTTP mode (SSE + Streamable HTTP) ───────────────────────
@@ -178,6 +172,10 @@ async function main() {
 
   // ── Graceful shutdown ───────────────────────────────────────
   const onSignal = async (signal: string) => {
+    // Orphan shutdown already owns the teardown (and its own exit deadline);
+    // running shutdownFn a second time here would race it.
+    if (orphanWatch?.hasTriggered()) return;
+    orphanWatch?.stop();
     logger.info(`Received ${signal}, shutting down`);
     if (transport !== "stdio") printShutdown();
     await shutdownFn?.();
