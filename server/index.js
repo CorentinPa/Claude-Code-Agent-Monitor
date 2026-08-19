@@ -313,6 +313,85 @@ function autoImportLegacySessions() {
 }
 
 /**
+ * One-time repair of token totals inflated before usage was reconciled per
+ * `message.id` (issue #293).
+ *
+ * Why this cannot be left to the parser fix alone: `replaceTokenUsage` is a
+ * monotonic high-water mark, so when the corrected parser re-reads a transcript
+ * and produces a LOWER total, the difference is folded into `baseline_*` and the
+ * effective number never drops. Every session that existed before the upgrade
+ * would keep its inflated cost forever while new sessions priced correctly.
+ *
+ * Guards, in order:
+ *   - a `.token-repair-v1.done` marker next to the database, written only after
+ *     a completed pass, so a crash mid-repair retries instead of being skipped;
+ *   - `DASHBOARD_TOKEN_REPAIR=0` opts out entirely;
+ *   - skipped (without writing the marker) while another dashboard shares this
+ *     data directory, since two concurrent repairs would race each other;
+ *   - deferred off the boot path so a large corpus never delays the UI.
+ *
+ * The sweep clears and rewrites non-workflow `token_usage` rows, so it first
+ * copies the table to `token_usage_pre_repair` — one snapshot, kept so the
+ * pre-repair numbers stay recoverable with plain SQL. It is safe to drop.
+ *
+ * A hook that lands mid-repair can lose one write (the sweep parses outside its
+ * transaction), but that self-heals: with baselines zeroed, the very next event
+ * for that session re-parses the whole transcript and `replaceTokenUsage`
+ * writes the true total.
+ */
+function repairInflatedTokenTotals() {
+  try {
+    const fs = require("fs");
+    if (process.env.DASHBOARD_TOKEN_REPAIR === "0") return;
+
+    const dbModule = require("./db");
+    const markerPath = path.join(path.dirname(dbModule.DB_PATH), ".token-repair-v1.done");
+    if (fs.existsSync(markerPath)) return;
+
+    // Another dashboard on the same database would race this sweep. Skip
+    // WITHOUT the marker so the instance that ends up alone still repairs.
+    let peers = [];
+    try {
+      peers = peersSharingDataDir() || [];
+    } catch {
+      /* discovery is best-effort; treat an unreadable peer list as "alone" */
+    }
+    if (peers.length > 0) {
+      console.log("Token repair deferred: another dashboard shares this database.");
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      (async () => {
+        try {
+          dbModule.db.exec(
+            "CREATE TABLE IF NOT EXISTS token_usage_pre_repair AS SELECT * FROM token_usage"
+          );
+          const { reconcileTokens } = require("../scripts/import-history");
+          const result = await reconcileTokens(dbModule, { all: true, resetBaselines: true });
+          if (result.sessionsTouched > 0) {
+            console.log(
+              `Repaired token totals for ${result.sessionsTouched} session(s) ` +
+                `(issue #293). Pre-repair values kept in token_usage_pre_repair.`
+            );
+          }
+          try {
+            fs.writeFileSync(markerPath, `${new Date().toISOString()}\n`);
+          } catch {
+            /* non-fatal — the (idempotent) repair simply re-runs next start */
+          }
+        } catch (err) {
+          console.warn("token total repair failed:", err.message);
+        }
+      })();
+    }, 8_000);
+    if (timer.unref) timer.unref();
+  } catch (err) {
+    console.warn("token total repair could not start:", err.message);
+  }
+}
+
+/**
  * Start the background services the dashboard relies on once the HTTP server
  * is listening: a one-time legacy-session import, the upstream update
  * scheduler, the Claude Code config watcher, and a one-time reconciliation of
@@ -326,6 +405,11 @@ function autoImportLegacySessions() {
 function startBackgroundServices() {
   // One-time legacy-session backfill (a no-op once its marker file exists).
   autoImportLegacySessions();
+
+  // One-time repair of token totals inflated by the pre-reconciliation parser
+  // (issue #293). Marker-gated and deferred; see the function for why the
+  // parser fix alone cannot heal historical rows.
+  repairInflatedTokenTotals();
 
   // Boot liveness reap. When the user quit Claude Code while the dashboard
   // was DOWN, the SessionEnd hook was lost and only the process probe can
@@ -1258,4 +1342,9 @@ if (require.main === module) {
   // just this standalone path. See autoImportLegacySessions().
 }
 
-module.exports = { createApp, startServer, startBackgroundServices };
+module.exports = {
+  createApp,
+  startServer,
+  startBackgroundServices,
+  repairInflatedTokenTotals,
+};

@@ -28,6 +28,7 @@
 - Client tests: `npm run test:client`
 - MCP install/build/start: `npm run mcp:install`, `npm run mcp:build`, `npm run mcp:start`
 - MCP typecheck: `npm run mcp:typecheck`
+- Token repair: `npm run repair-tokens` — one-time re-derivation of token totals inflated before usage was reconciled per `message.id` (the dashboard also runs this automatically once per database; `DASHBOARD_TOKEN_REPAIR=0` opts out)
 - CLI (after setup): `ccam <command>` — terminal access to the full dashboard surface (`bin/ccam.js`; `ccam help` lists commands)
 
 ## Testing and verification policy

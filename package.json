@@ -1,6 +1,6 @@
 {
   "name": "agent-dashboard",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "bin": {
     "ccam": "bin/ccam.js"
   },
@@ -89,6 +89,7 @@
     "seed": "node scripts/seed.js",
     "import-history": "node scripts/import-history.js",
     "reconcile-tokens": "node scripts/import-history.js --reconcile-tokens",
+    "repair-tokens": "node scripts/import-history.js --reconcile-tokens --all --reset-baselines",
     "clear-data": "node scripts/clear-data.js",
     "test": "node --test server/__tests__/*.test.js && cd client && npm test",
     "test:server": "node --test server/__tests__/*.test.js",
