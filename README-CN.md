@@ -335,7 +335,7 @@ Dashboard 提供全面的功能来监控和分析你的 Claude Code 会话和 Ag
 | **种子数据** | 内置种子脚本，用于演示和开发 |
 | **状态栏** | 彩色编码的 CLI 状态栏，显示模型、上下文使用率、Git 分支、Token 数 |
 | **模型名称格式化** | 整个 UI 中使用人性化的模型名称：原始标识符如 `claude-opus-4-7-20260101` 或 `claude-opus-4-7[1m]` 显示为"Claude Opus 4.7"或"Claude Opus 4.7 (1M)"。支持 Claude、GPT 和 Gemini 家族的自动版本号点连接、日期/latest 后缀剥离、提供商前缀移除和上下文窗口标签格式化。设置页保留原始名称以配置定价规则 |
-| **Claude + Codex 插件市场** | 同一套 14 个插件同时提供 Claude Code 与 Codex Manifest、两个 Marketplace Catalog、66 个插件技能、18 个 Claude 子 Agent、34 个 Claude 命令和 OpenAI 技能元数据。skills.sh CLI 可通过 `npx skills add hoangsonww/Claude-Code-Agent-Monitor --list` 发现仓库中的 75 个技能。支持 `claude plugin marketplace add`、`codex plugin marketplace add` 和 `npx skills add` |
+| **Claude + Codex 插件市场** | 同一套 14 个插件同时提供 Claude Code 与 Codex Manifest、两个 Marketplace Catalog、66 个插件技能、18 个 Claude 子 Agent、34 个 Claude 命令和 OpenAI 技能元数据。skills.sh CLI 可通过 `npx skills add hoangsonww/Claude-Code-Agent-Monitor --list` 发现仓库中的 76 个技能。支持 `claude plugin marketplace add`、`codex plugin marketplace add` 和 `npx skills add` |
 | **运行 Claude** | 直接从仪表盘启动 `claude` 子进程,带聊天式流式 UI。两种模式:**对话**(多轮 — stdin 持续打开,后续轮次以 stream-json 信封通过 stdin 传送)与 **单次**(headless,一个 prompt → 一个响应)。对话模式还支持通过 `claude --resume <id>` **恢复任何已有会话** — 使用可搜索选择器从你的完整会话历史中挑选。标题栏的进行中运行切换器允许你将运行留在后台、启动另一个、稍后重新附加。重新附加是持久的:客户端会把派生进程的内存信封日志(`?envelopes=1`)与会话磁盘上的 JSONL 转录文件协调,优先选择 user/assistant 消息更多的那一份,因此从已恢复的运行离开再回来会保留全部历史(派生进程只看到 spawn 之后的轮次;转录文件包含先前 + 当前)。模型下拉(Opus 4.7 / 1M / Sonnet 4.6 / Haiku 4.5 / 自定义)、permission-mode 选择器(对 `bypassPermissions` 显式警告)、**思考强度**字段(low / medium / high — 映射到 `--effort`)、cwd 自动补全(预填用户的**主目录** — 一个中性的启动位置,不会继承仪表盘仓库自身的 `.claude` 项目上下文(agents、skills、rules、`CLAUDE.md`、`.mcp.json`);若没有 home 建议则回退到仪表盘 cwd,建议分组以 home 优先(home → dashboard → 最近))。通过 `--include-partial-messages` 实现真正的逐字符流式渲染,加上客户端 **打字机平滑层** 通过 `requestAnimationFrame` 让每个 `text_delta` / `thinking_delta` 逐字浮现 — 即便是短回复(claude 把整个回答打成一两块 chunk 的情况)也呈现为打字效果。合并代码在 claude 中途送达 canonical `assistant` 信封时保留 `_streaming` 标志和增量累积的 `content` 数组,所以 thinking 块不会在完成时丢失。WebSocket 分发为每个信封包裹 `flushSync`,避免 React 自动批处理把多个 deltas 合并成一次渲染。**TUI 对齐(Tier 1)**:**限制说明横幅** 可最小化为细条(永不消失)解释 stream-json 模式相对终端 TUI 能做和不能做什么;**带斜杠命令自动补全的提示编辑器** 使用分级评分(精确名称 → 前缀匹配 → 词边界 → 包含 → 子序列 → 描述匹配)列出用户 / 项目 / 插件命令(发送前在客户端按模板展开执行),并以"仅 CLI — 此处不会执行"标记呈现 `/clear`、`/model`、`/config` 等内置 CLI 命令;**`@` 文件引用** 通过对该 run 的 cwd 进行去抖模糊搜索(跳过 `node_modules`、`.git`、`dist`、`build` 等);**实时上下文窗口 / token 计** 显示输入 + 输出 + 缓存命中 token 与运行成本 — 实时流式时从 `stream_event` / `result.usage` 计算,从转录恢复 / 查看 / 重新附加时也从已完结的 assistant `usage` 块(input / output / cache-read / cache-creation)读取,因此不会卡在 0/200k;**状态头** 显示当前 model、effort、permission mode、cwd、session ID、信封计数与已运行时间。自动补全下拉框向上展开,避免与下方 cwd 选择器冲突。标题旁有 Live / Offline 指示器。路由上的同源守卫防止浏览器 drive-by spawn。并发实际上不设上限(默认安全上限 10000,与终端 TUI 一致 — 仅作为防止有缺陷客户端 fork-bomb 的兜底;通过 `RUN_MAX_CONCURRENT` 设置真正的上限)。统一的活动运行 / 历史模态框还提供两个一键跳转按钮:对话型历史行的 **Resume** 按钮立即派生 `claude --resume <id>` 并把过去的对话记录预填入聊天视图(无需重新输入 prompt — 派生的进程会在 stdin 上空转直到你发送跟进消息);单次型历史行的 **View** 按钮把已捕获的转录内联加载到 run 查看器中作只读展示(不派生进程 — 同一面板,无 Stop / 跟进控件)。生成的会话触发与任何 `claude` 进程相同的 hooks,因此自动出现在 Sessions / Analytics / Kanban / Workflows — 而 Sessions / SessionDetail 会为当前正由 Run 页驱动的会话显示绿色 **▶ Run** 徽标 / 横幅,可点击跳回 Run 页 |
 | **Tabby** | 固定在每个页面右下角的可爱 SVG 小猫伴侣,会订阅实时会话 WebSocket 流并据此做出反应。**会做出反应的吉祥物**:基于实时会话流呈现 8 种情绪——空闲、观察、开心、担忧、卡住、思考、睡觉、断开连接;眼睛会追踪光标,每种情绪都有专属动画。**气泡台词**在值得关注的事件发生时弹出(会话开始/结束、出现错误、运行完成),带节流且可静音。点击小猫或按 **⌘B / Ctrl+B** 打开**面板**(Esc 关闭):实时状态行(N 个进行中 · M 个出错 · 连接状态)、快捷操作(跳转到 Run Claude / 活动 / 会话 / 出错的会话,静音,清除提醒)以及一个 **Ask** 提问框。Ask 提问框在本地回答简单的状态类问题;其他问题则交给现有的 **Run Claude** 页面(`/run?prompt=...`)以启动一个真正的 Claude Code 会话——**无需新增后端、无需 API 密钥**。完全构建在现有的 WebSocket 流之上,支持无障碍(键盘、`aria-live`、尊重 `prefers-reduced-motion`),可在「设置」中开关。代码位于 `client/src/components/Tabby/` |
 | **告警与 Webhook** | 基于规则的告警引擎在服务端评估实时事件流,支持四种条件类型:**事件模式**(匹配事件类型 / 工具名 / 摘要子串,可选要求在时间窗口内出现 N 次匹配——例如「2 分钟内超过 5 个错误」)、**闲置**(活跃会话 N 分钟无事件)、**卡住的代理**(代理在 `working`/`waiting` 状态下 N 分钟无活动)和**令牌阈值**(会话总令牌超过上限)。每条规则都按 (规则、会话、代理) 维度做冷却去重。触发的告警显示在实时列表中(支持确认 / 全部确认),并扇出到 **14 个一等公民 Webhook 提供方**——**Slack**、**Discord**、**Microsoft Teams**(通过 Power Automate Workflows 的 Adaptive Card)、**Google Chat**、**Mattermost**、**Rocket.Chat**、**Telegram**(Bot API)、**PagerDuty**(Events API v2)、**Opsgenie**(Alert API)、**Splunk On-Call**(VictorOps)、**Zapier**、**Make**、**n8n**、**Pipedream**——以及任意通用 JSON 端点(可选 **HMAC-SHA256** 签名 + 自定义请求头)。每个提供方都有各自的原生负载格式,可按规则限定范围。投递与告警流程分离且完全失败安全:请求超时、有界重试/退避、响应体校验(Splunk On-Call 返回 200 但 `result:"failure"`)、同步的**「发送测试」**按钮以及每个目标的投递日志。URL、密钥和凭据均存储在服务端,**绝不**通过 API 返回(在所有响应中被掩码/脱敏)。规则与渠道在 **设置 → 告警** 中统一管理,每个字段都有解释性提示,并提供按提供方的设置指南(附说明:这些步骤可能已过时——请查阅官方文档) |
@@ -721,6 +721,9 @@ ccam version                      # 打印 CLI 版本（也可用 --version / -v
 | `npm run install-hooks` | 在 `~/.claude/settings.json` 中配置 Claude Code Hook |
 | `npm run seed` | 用示例数据填充数据库 |
 | `npm run import-history` | 从 `~/.claude/` 导入历史会话（启动时也会运行） |
+| `npm run reconcile-tokens` | 刷新已导入会话的 Token 总计（不会降低已有的总计） |
+| `npm run repair-tokens` | 为每个 Transcript 仍在磁盘上的 **Claude** 会话（在 `~/.claude/projects/` 中查找，或按会话已保存的 `transcript_path`）重新推导**非 workflow** 的 Token 总计，并将上下文压缩基线清零；workflow 与 Codex 行保持不变。这是针对因 v2.0.9 之前按记录累加用量而虚高的数据库的一次性修复。请先停止 Dashboard |
+| `DASHBOARD_TOKEN_REPAIR` | `1`（启用） | 一次性自动修复在用量按 `message.id` 对账之前被虚高的 Token 总计。`replaceTokenUsage` 是高水位标记，因此仅靠解析器修复永远无法下调历史总计 —— 若无此步骤，升级前的所有会话都会永久保留错误成本。每个数据库只运行一次（有标记文件、延后于启动路径、当另一个 Dashboard 共用数据目录时跳过），并会先将旧行快照到 `token_usage_pre_repair`。设为 `0` 可跳过，改用 `npm run repair-tokens` 手动修复 |
 | `npm run clear-data` | 删除所有会话、Agent、事件和 Token 用量 |
 | `npm run mcp:install` | 安装本地 MCP 包（`mcp/`）的依赖 |
 | `npm run mcp:build` | 构建 MCP 服务器 TypeScript 到 `mcp/build/` |
@@ -1783,7 +1786,7 @@ erDiagram
 
 ## 插件市场
 
-CCAM 为 Claude Code 和 Codex 提供 14 个共享插件、66 个插件技能、18 个 Claude 子 Agent、34 个 Claude 命令、3 个 CLI 工具、3 个 Hook 配置和 2 个支持 MCP 的插件。skills.sh CLI 可发现 75 个仓库技能。
+CCAM 为 Claude Code 和 Codex 提供 14 个共享插件、66 个插件技能、18 个 Claude 子 Agent、34 个 Claude 命令、3 个 CLI 工具、3 个 Hook 配置和 2 个支持 MCP 的插件。skills.sh CLI 可发现 76 个仓库技能。
 
 ### 添加市场
 
@@ -1795,7 +1798,7 @@ codex plugin marketplace add hoangsonww/Claude-Code-Agent-Monitor
 ### 使用 skills.sh 安装技能
 
 ```bash
-# 查看全部 75 个技能，不执行安装
+# 查看全部 76 个技能，不执行安装
 npx skills add hoangsonww/Claude-Code-Agent-Monitor --list
 
 # 在当前项目中为 Claude Code 和 Codex 安装一个技能
@@ -1822,7 +1825,7 @@ npx skills update --global --yes
 npx skills remove --global mcp-server --yes
 ```
 
-项目级安装使用 `.agents/skills/` 及各 Agent 的链接。Claude Code 全局技能默认位于 `~/.claude/skills/`，设置 `CLAUDE_CONFIG_DIR` 后位于其 `skills/` 子目录。Codex 全局技能默认位于 `~/.codex/skills/`，设置 `CODEX_HOME` 后位于其 `skills/` 子目录。多 Agent 安装可能通过共享存储去重，并链接到这些目标目录。skills.sh CLI 可发现 75 个仓库技能，其中包括 66 个插件技能和仓库维护技能。
+项目级安装使用 `.agents/skills/` 及各 Agent 的链接。Claude Code 全局技能默认位于 `~/.claude/skills/`，设置 `CLAUDE_CONFIG_DIR` 后位于其 `skills/` 子目录。Codex 全局技能默认位于 `~/.codex/skills/`，设置 `CODEX_HOME` 后位于其 `skills/` 子目录。多 Agent 安装可能通过共享存储去重，并链接到这些目标目录。skills.sh CLI 可发现 76 个仓库技能，其中包括 66 个插件技能和仓库维护技能。
 
 ### 可用插件
 
