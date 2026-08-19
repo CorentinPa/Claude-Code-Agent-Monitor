@@ -61,6 +61,14 @@ Shutdown closes the transport and the server, then exits `0`. A 2-second deadlin
 
 Only the stdio transport does this. HTTP servers outlive any single client by design and stop on `SIGINT`/`SIGTERM` only; the REPL owns its own lifecycle.
 
+### HTTP session lifecycle
+
+Each Streamable HTTP or SSE client gets its own `McpServer`, tracked under the session id returned in the `mcp-session-id` header (`sessionId` query parameter for legacy SSE). Send that id on every later request, or the server answers `Bad Request: No valid session or initialization`.
+
+Sessions are released three ways: an explicit `DELETE /mcp` carrying the session id, an SSE stream disconnecting, and an idle sweep for everything else. The sweep matters because terminating a session is optional in the protocol — the SDK client's `close()` does not send `DELETE` (only `terminateSession()` does), so a client that crashes or simply walks away would otherwise pin its `McpServer` for the life of the process. Any request on a session counts as activity. `GET /health` reports the live count as `activeSessions`.
+
+Tune the timeout with `MCP_HTTP_SESSION_TIMEOUT_MS` (default 30 minutes, floor 60 seconds so a typo cannot reap live sessions), or set it to `0` to disable reaping and manage sessions yourself.
+
 ## Tool Catalog
 
 ### Observability
@@ -231,6 +239,7 @@ All dashboard fetches reject HTTP redirects. Binary transcript-image responses a
 | `MCP_HTTP_PORT` | `8819` | HTTP transport port |
 | `MCP_HTTP_AUTH_TOKEN` | unset | Bearer token required by `/mcp`, `/sse`, and `/messages`; `/health` remains probeable |
 | `MCP_HTTP_AUTH_TOKEN_FILE` | unset | File-backed MCP client token |
+| `MCP_HTTP_SESSION_TIMEOUT_MS` | `1800000` | Close an HTTP/SSE session after this long with no request; `0` disables reaping. Clamped to `[60000, 86400000]` |
 | `MCP_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, or `error` |
 
 Direct loopback URLs (`127.0.0.1`, `localhost`, or `::1`) and the private Compose service `agent-monitor` may use a bearer token over HTTP. A tokenized container-host alias such as `host.docker.internal`, `gateway.docker.internal`, or `host.containers.internal` must use HTTPS. Startup fails instead of sending the token over an unsafe route.

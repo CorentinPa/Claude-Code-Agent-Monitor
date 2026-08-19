@@ -53,6 +53,7 @@ describe("Streamable HTTP session tracking", () => {
   let port: number;
   let base: string;
   let shutdown: () => Promise<void>;
+  let reapIdleSessions: (now?: number) => Promise<number>;
   let writeSpy: typeof process.stdout.write;
 
   before(async () => {
@@ -70,7 +71,7 @@ describe("Streamable HTTP session tracking", () => {
     writeSpy = process.stdout.write.bind(process.stdout);
     process.stdout.write = (() => true) as typeof process.stdout.write;
     try {
-      ({ shutdown } = await startHttpServer(
+      ({ shutdown, reapIdleSessions } = await startHttpServer(
         config,
         () => buildServer(config, api, logger),
         logger,
@@ -155,6 +156,61 @@ describe("Streamable HTTP session tracking", () => {
     assert.equal(res.status, 400);
     const body = (await res.json()) as { error?: { message?: string } };
     assert.match(String(body.error?.message), /No valid session/);
+  });
+
+  it("reaps a session abandoned without DELETE", async () => {
+    const activeSessions = async () =>
+      (await (await fetch(`${base}/health`)).json()).activeSessions as number;
+
+    const before = await activeSessions();
+    const res = await fetch(`${base}/mcp`, {
+      method: "POST",
+      headers: JSON_HEADERS,
+      body: JSON.stringify(INITIALIZE),
+    });
+    const sessionId = res.headers.get("mcp-session-id")!;
+    await res.text();
+    assert.equal(await activeSessions(), before + 1);
+
+    // A client that simply vanishes never sends DELETE, so only the idle
+    // sweep can reclaim it. Force it with a clock far past the timeout.
+    const reaped = await reapIdleSessions(Date.now() + 2 * 60 * 60 * 1000);
+    assert.ok(reaped >= 1, `expected at least one reaped session, got ${reaped}`);
+    assert.equal(await activeSessions(), 0, "idle sweep must release the session");
+
+    // The reaped session must no longer route.
+    const afterReap = await fetch(`${base}/mcp`, {
+      method: "POST",
+      headers: { ...JSON_HEADERS, "mcp-session-id": sessionId },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 4, method: "tools/list" }),
+    });
+    assert.equal(afterReap.status, 400);
+  });
+
+  it("leaves an active session alone", async () => {
+    const res = await fetch(`${base}/mcp`, {
+      method: "POST",
+      headers: JSON_HEADERS,
+      body: JSON.stringify(INITIALIZE),
+    });
+    const sessionId = res.headers.get("mcp-session-id")!;
+    await res.text();
+
+    // Swept at "now": the session was just used, so it must survive.
+    assert.equal(await reapIdleSessions(Date.now()), 0);
+
+    const listed = await fetch(`${base}/mcp`, {
+      method: "POST",
+      headers: { ...JSON_HEADERS, "mcp-session-id": sessionId },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 5, method: "tools/list" }),
+    });
+    assert.equal(listed.status, 200);
+    await listed.text();
+
+    await fetch(`${base}/mcp`, {
+      method: "DELETE",
+      headers: { ...JSON_HEADERS, "mcp-session-id": sessionId },
+    });
   });
 
   it("still serves the legacy SSE endpoint its own session", async () => {
