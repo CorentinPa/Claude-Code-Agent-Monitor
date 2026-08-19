@@ -83,6 +83,26 @@ function tokensMatch(provided: string | undefined, expected: string): boolean {
   return timingSafeEqual(providedBuffer, expectedBuffer);
 }
 
+/**
+ * Tears down an untracked transport/server pair without letting a teardown
+ * error escape into the request path — the client's response is already sent
+ * by the time this runs, so the only useful action is to log.
+ */
+async function closeQuietly(
+  transport: Transport,
+  server: McpServer,
+  logger: Logger
+): Promise<void> {
+  try {
+    await transport.close?.();
+    await server.close();
+  } catch (err) {
+    logger.error("Error closing an uninitialized Streamable HTTP session", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+}
+
 /** Pure helper exported for security regression tests. */
 export function isHttpRequestAuthorized(
   headers: Record<string, string | string[] | undefined>,
@@ -180,10 +200,21 @@ export async function startHttpServer(
         logger.info("New Streamable HTTP session");
         const transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => randomUUID(),
+          // The SDK assigns `transport.sessionId` *while* handling the
+          // initialize request, so reading the field before or right after
+          // constructing the transport yields undefined. Register from this
+          // callback instead — filing the session under any other id (e.g. a
+          // second randomUUID()) means the id handed to the client in the
+          // `mcp-session-id` response header is not in `transports`, and every
+          // follow-up request falls through to the 400 below.
+          onsessioninitialized: (sid: string) => {
+            transports.set(sid, { transport, type: "streamable" });
+            logger.debug("Streamable HTTP session initialized", { sessionId: sid });
+          },
         });
 
         transport.onclose = () => {
-          const sid = (transport as unknown as { sessionId?: string }).sessionId;
+          const sid = transport.sessionId;
           if (sid) transports.delete(sid);
           logger.debug("Streamable HTTP session closed", { sessionId: sid });
         };
@@ -191,10 +222,14 @@ export async function startHttpServer(
         const server = buildServerFn();
         await server.connect(transport);
 
-        const sid = (transport as unknown as { sessionId?: string }).sessionId ?? randomUUID();
-        transports.set(sid, { transport, type: "streamable" });
-
         await transport.handleRequest(req, res, req.body);
+
+        // A handshake the SDK rejected never fires `onsessioninitialized`, so
+        // nothing tracks this pair and no client can ever reach it. Close it
+        // here rather than leaking an McpServer for the process lifetime.
+        if (!transport.sessionId) {
+          await closeQuietly(transport, server, logger);
+        }
         return;
       }
 
