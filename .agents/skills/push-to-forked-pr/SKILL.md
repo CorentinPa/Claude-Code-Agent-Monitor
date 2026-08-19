@@ -21,7 +21,8 @@ If neither holds, abort and tell the user only the fork owner can push.
 ### 1. Read the PR's head metadata
 
 ```bash
-gh pr view <N> --json state,headRefName,headRefOid,headRepository,headRepositoryOwner,maintainerCanModify,url
+PR_NUMBER=<N>
+gh pr view "$PR_NUMBER" --json state,headRefName,headRefOid,headRepository,headRepositoryOwner,maintainerCanModify,url
 ```
 
 Capture:
@@ -33,14 +34,26 @@ Capture:
 - `headRefOid` → the PR's current head SHA. Your local HEAD must be a descendant.
 - `maintainerCanModify` → must be `true` if you are not the fork owner.
 
-If `headRepository.nameWithOwner` matches the upstream's `nameWithOwner`, this PR is **internal** — just `git push origin <branch>` and exit the skill.
+If `headRepository.nameWithOwner` matches the upstream's `nameWithOwner`, this PR is **internal**:
+
+```bash
+HEAD_BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName --jq .headRefName)
+HEAD_REF_OID=$(gh pr view "$PR_NUMBER" --json headRefOid --jq .headRefOid)
+git merge-base --is-ancestor "$HEAD_REF_OID" HEAD && echo ok || echo NOT-DESCENDANT   # abort if NOT-DESCENDANT
+git push origin "HEAD:${HEAD_BRANCH}"
+```
+
+Exit the skill once this push lands — do not continue to the fork-push steps below.
 
 ### 2. Confirm you can actually push
 
 ```bash
-gh auth status                # who am I?
-git remote get-url origin     # confirm origin is the UPSTREAM, not the fork
+gh auth status                        # who am I?
+git remote get-url origin             # fetch URL — confirm origin is the UPSTREAM, not the fork
+git remote get-url --push origin      # push URL — can differ from the fetch URL if `pushurl` is configured
 ```
+
+For the internal-PR path above, compare the **push** URL (not just the fetch URL) against the expected upstream `nameWithOwner` before relying on `git push origin` — a configured `pushurl` can silently redirect the push to a different destination than the fetch URL suggests.
 
 You may push to the fork branch iff the active gh user is:
 
@@ -105,11 +118,12 @@ Stop on the first red. Report which check failed and **do not push**.
 
 ### 6. Stage, commit, push to the fork (not origin)
 
-Exclude session-local noise (`.claude/settings.local.json` is harness state, not work):
+Exclude session-local noise (`.claude/settings.local.json` is harness state, not work) and never stage blindly:
 
 ```bash
-git add -A
-git restore --staged .claude/settings.local.json   # only if it shows as modified
+git status                          # review exactly what changed
+git add <path1> <path2> ...         # stage only the files for this PR's change — never `git add -A`
+git status                          # confirm the staged diff matches intent (and excludes .claude/settings.local.json) before committing
 ```
 
 Commit with a real body (use `-F` for multi-paragraph messages), ending with the `Co-Authored-By` trailer your harness requires — copy it verbatim from the harness instructions rather than from this file, so the model name never goes stale.
@@ -117,12 +131,17 @@ Commit with a real body (use `-F` for multi-paragraph messages), ending with the
 Then push to the fork. Add a one-off remote so it's clear in `git remote -v` and the destination URL doesn't end up in the user's shell history:
 
 ```bash
-FORK_REPO=$(gh pr view <N> --json headRepository --jq '.headRepository.nameWithOwner')
-HEAD_BRANCH=$(gh pr view <N> --json headRefName     --jq .headRefName)
+FORK_REPO=$(gh pr view "$PR_NUMBER" --json headRepository --jq '.headRepository.nameWithOwner')
+HEAD_BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName   --jq .headRefName)
 LOCAL_BRANCH=$(git branch --show-current)
 
-git remote add pr<N>-fork "https://github.com/${FORK_REPO}.git"
-git push pr<N>-fork "${LOCAL_BRANCH}:${HEAD_BRANCH}"
+if [ -z "$LOCAL_BRANCH" ]; then
+  echo "Detached HEAD — refusing to push (source ref would be empty and delete ${HEAD_BRANCH} on the fork)." >&2
+  exit 1
+fi
+
+git remote add "pr${PR_NUMBER}-fork" "https://github.com/${FORK_REPO}.git"
+git push "pr${PR_NUMBER}-fork" "HEAD:${HEAD_BRANCH}"    # push HEAD itself, not "$LOCAL_BRANCH" — safe even if the local branch name differs
 ```
 
 `gh` configures git's credential helper, so HTTPS pushes pick up the right token automatically. Don't rewrite to SSH unless asked.
@@ -131,7 +150,7 @@ git push pr<N>-fork "${LOCAL_BRANCH}:${HEAD_BRANCH}"
 
 ```bash
 LOCAL_HEAD=$(git rev-parse HEAD)
-PR_HEAD=$(gh pr view <N> --json headRefOid --jq .headRefOid)
+PR_HEAD=$(gh pr view "$PR_NUMBER" --json headRefOid --jq .headRefOid)
 [ "$LOCAL_HEAD" = "$PR_HEAD" ] && echo "PR updated ✓" || echo "MISMATCH — push went somewhere else"
 ```
 
@@ -144,7 +163,7 @@ Report the new HEAD SHA, the PR URL, and the diff stat back to the user.
 | Symptom | Cause | Fix |
 |---|---|---|
 | `Permission denied` on push | Authenticated as the wrong user, or `maintainerCanModify: false` and you are not the fork owner | Abort. Only the fork owner can push to the branch. |
-| `! [rejected] non-fast-forward` | Someone else pushed to the PR since you started | `git fetch pr<N>-fork "${HEAD_BRANCH}"`, then rebase or merge. **Never** force-push someone else's PR branch without explicit permission. |
+| `! [rejected] non-fast-forward` | Someone else pushed to the PR since you started | `git fetch "pr${PR_NUMBER}-fork" "${HEAD_BRANCH}"`, then rebase or merge. **Never** force-push someone else's PR branch without explicit permission. |
 | Push succeeds, but PR head SHA doesn't update | You pushed to a branch with a different name on the fork | Re-check `headRefName` and use explicit refspec `LOCAL:HEAD_BRANCH`. |
 | Commit shows "unverified" on the PR | Author email isn't tied to a verified GitHub account | Amend with the user's real identity (step 4) and push again (fast-forward, not force). |
 | `Could not resolve host` | Network or proxy issue | Surface the error. Don't blanket-retry. |
@@ -158,3 +177,4 @@ Report the new HEAD SHA, the PR URL, and the diff stat back to the user.
 - **Never force-push** to a fork PR branch without explicit user permission. The fork owner will lose any commits they had locally.
 - **Always run the repo's tests/builds first.** A fork-PR push triggers CI on the fork *and* surfaces on the upstream's PR view — pushing red code is doubly visible.
 - **Always exclude `.claude/settings.local.json`** unless the user explicitly says to include it. It's harness session state, not the work.
+- **Never stage with `git add -A`.** Stage explicit paths for the requested change so unrelated files or local secrets can't ride along.
