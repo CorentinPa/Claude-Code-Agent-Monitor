@@ -74,7 +74,7 @@ interface TransportEntry {
   transport: Transport;
   type: "streamable" | "sse";
   /** `Date.now()` of the last request routed to this session, used by the
-   * idle reaper. Refreshed by {@link touch}. */
+   * idle reaper. Refreshed by the `/mcp` and `/messages` handlers. */
   lastActivityMs: number;
 }
 

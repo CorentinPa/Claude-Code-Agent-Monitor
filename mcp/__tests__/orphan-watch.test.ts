@@ -188,6 +188,32 @@ describe("watchForOrphanedHost", () => {
     assert.deepEqual(exits, [0]);
   });
 
+  it("routes a synchronously throwing shutdown into onShutdownError and still exits", async () => {
+    const stdin = new EventEmitter();
+    const exits: number[] = [];
+    const errors: unknown[] = [];
+
+    watchForOrphanedHost({
+      // Throws before ever returning a promise — must not escape into the
+      // process-level exception path.
+      shutdown: (() => {
+        throw new Error("closed synchronously");
+      }) as unknown as () => Promise<void>,
+      onShutdownError: (error) => errors.push(error),
+      stdin,
+      getPpid: () => 4242,
+      intervalMs: 5,
+      exit: (code) => exits.push(code),
+    });
+
+    stdin.emit("end");
+    await wait(10);
+
+    assert.equal(errors.length, 1);
+    assert.match(String(errors[0]), /closed synchronously/);
+    assert.deepEqual(exits, [0]);
+  });
+
   it("stop() detaches every listener and the poll without shutting down", async () => {
     const stdin = new EventEmitter();
     const exits: number[] = [];

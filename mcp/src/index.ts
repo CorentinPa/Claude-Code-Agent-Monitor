@@ -103,6 +103,7 @@ async function main() {
 
   let shutdownFn: (() => Promise<void>) | undefined;
   let orphanWatch: OrphanWatch | undefined;
+  let signalShutdownStarted = false;
 
   // ── stdio mode (default, backward compatible) ───────────────
   if (transport === "stdio") {
@@ -173,8 +174,11 @@ async function main() {
   // ── Graceful shutdown ───────────────────────────────────────
   const onSignal = async (signal: string) => {
     // Orphan shutdown already owns the teardown (and its own exit deadline);
-    // running shutdownFn a second time here would race it.
-    if (orphanWatch?.hasTriggered()) return;
+    // running shutdownFn a second time here would race it. The same applies to
+    // a second signal arriving while the first shutdownFn is still in flight —
+    // SIGINT then SIGTERM would otherwise close the transport and server twice.
+    if (signalShutdownStarted || orphanWatch?.hasTriggered()) return;
+    signalShutdownStarted = true;
     orphanWatch?.stop();
     logger.info(`Received ${signal}, shutting down`);
     if (transport !== "stdio") printShutdown();

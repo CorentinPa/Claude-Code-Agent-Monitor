@@ -102,7 +102,12 @@ export function watchForOrphanedHost(options: OrphanWatchOptions): OrphanWatch {
     const deadline = setTimeout(() => exit(0), shutdownTimeoutMs);
     deadline.unref?.();
 
-    shutdown()
+    // `shutdown` is injectable, so a caller's implementation may throw
+    // synchronously before returning a promise. Starting the chain from a
+    // resolved promise routes that into the same handler instead of letting
+    // it escape into the process-level exception path.
+    Promise.resolve()
+      .then(shutdown)
       .catch((error) => onShutdownError?.(error))
       .finally(() => {
         clearTimeout(deadline);
