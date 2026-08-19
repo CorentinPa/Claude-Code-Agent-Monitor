@@ -104,6 +104,7 @@ For cloud deployment, Run Agent containers, remote hooks, Kubernetes, Terraform,
 | `MCP_HTTP_PORT` | `8819` | Port for the MCP HTTP+SSE server (only when `MCP_TRANSPORT=http`) |
 | `MCP_HTTP_HOST` | `127.0.0.1` | Bind address for the MCP HTTP server |
 | `MCP_HTTP_AUTH_TOKEN` / `_FILE` | unset | Protect MCP `/mcp`, `/sse`, and `/messages`; `/health` stays probeable |
+| `MCP_HTTP_SESSION_TIMEOUT_MS` | `1800000` | Close an idle MCP HTTP/SSE session after this long with no request; `0` disables reaping |
 | `DASHBOARD_TOKEN_FILE` | unset | File-backed dashboard API/WebSocket token |
 | `DASHBOARD_HOOK_TOKEN` / `_FILE` | unset | Dedicated credential for remote hook ingestion |
 | `DASHBOARD_ENV_PATH` | repo `.env` | Writable dotenv path for persisted Settings overrides |

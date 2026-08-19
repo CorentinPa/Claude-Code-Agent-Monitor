@@ -1651,6 +1651,8 @@ Protocol transports and REPL no longer maintain separate tool implementations. D
 - `MCP_DASHBOARD_API_TOKEN` / `MCP_DASHBOARD_API_TOKEN_FILE` authenticates the MCP service to dashboards protected by `DASHBOARD_TOKEN`.
 - `MCP_HTTP_AUTH_TOKEN` / `MCP_HTTP_AUTH_TOKEN_FILE` independently protects HTTP/SSE MCP clients; `/health` remains available to probes.
 - Tokenized direct loopback HTTP is allowed because traffic stays on the machine. Tokenized container-host aliases require HTTPS.
+- A stdio server self-terminates when its host process disappears — stdin reaching end/close, or the process being re-parented away from the parent it started under (polled every 5s, compared against the startup ppid rather than PID 1 so an init-parented container launch is not a false positive). A host that dies without `SIGTERM`/`SIGINT` therefore leaves no orphan.
+- HTTP/SSE sessions are tracked under the id returned to the client, released on `DELETE /mcp` or SSE disconnect, and swept once idle past `MCP_HTTP_SESSION_TIMEOUT_MS` (default 30 minutes, `0` disables) because terminating a session is optional in the protocol. `GET /health` reports the live count as `activeSessions`.
 - Every MCP dashboard request rejects redirects.
 - History uploads are capped at 50 MiB per file and 100 MiB total per call. Binary responses are streamed with a 10 MiB cap. Backup restore accepts one file up to 25 MiB.
 - Only GET requests retry automatically.

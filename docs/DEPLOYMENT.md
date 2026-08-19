@@ -108,6 +108,8 @@ Services:
 
 Nginx proxies the UI, authenticated REST API, and WebSocket. It returns `404` for `/api/hooks`, `/api/metrics`, `/mcp`, `/sse`, and `/messages` by default. Prometheus scrapes `/api/metrics` on the private network with `dashboard-token`.
 
+The MCP HTTP service keeps one MCP server per client session. Sessions end on `DELETE /mcp` or SSE disconnect, and anything left behind by a client that vanished without terminating is swept once idle past `MCP_HTTP_SESSION_TIMEOUT_MS` (default 30 minutes; `0` disables the sweep). Watch `activeSessions` on `GET /health` — a count that climbs and never falls is the signal that clients are dropping without terminating.
+
 To expose authenticated remote hooks behind TLS:
 
 ```bash
