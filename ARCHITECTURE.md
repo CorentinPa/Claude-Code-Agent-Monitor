@@ -574,6 +574,7 @@ graph TD
     EB["eventBus.ts<br/>Pub/sub + connection state"]
     WS["useWebSocket.ts<br/>Auto-reconnect hook"]
     NOTIF["useNotifications.ts<br/>Browser notification triggers"]
+    SND["useSoundCues.ts + sound.ts<br/>Web Audio cue engine"]
     API["api.ts<br/>Typed fetch client"]
     TYPES["types.ts<br/>Interfaces + configs"]
     FMT["format.ts<br/>Date/time/model-name utilities"]
@@ -583,6 +584,7 @@ graph TD
     APP --> WS
     APP --> EB
     APP --> NOTIF
+    APP --> SND
     NOTIF --> EB
     WS --> TYPES
     EB --> TYPES
@@ -1048,12 +1050,15 @@ graph TD
     WS --> EB
     EB --> SUB1 & SUB2 & SUB3 & SUB4 & SUB5 & SUB6
     EB --> SUB7["Tabby companion subscriber"]
+    EB --> SUB8["Sound cue subscriber"]
 
     style BC fill:#10b981,stroke:#34d399,color:#fff
     style EB fill:#f59e0b,stroke:#fbbf24,color:#000
 ```
 
 The **Tabby companion** (see [Tabby Companion Subsystem](#tabby-companion-subsystem)) is an additional read-only `eventBus` subscriber. It consumes the existing message envelope above and introduces **no new WebSocket message types** and no protocol changes.
+
+The **sound cue engine** (`useSoundCues` + `lib/sound.ts`) is a second read-only subscriber with the same properties: it maps existing message types to synthesized Web Audio cues and adds no server code, routes, message types, or schema.
 
 ### Client Reconnection
 
@@ -1784,6 +1789,7 @@ graph TD
         REST["REST API<br/>(initial load + refresh)"]
         WSM["WebSocket Messages<br/>(real-time updates)"]
         LS["localStorage<br/>(notification prefs)"]
+        LS2["localStorage<br/>(sound prefs:<br/>agent-monitor-sound)"]
     end
 
     subgraph "Distribution"
@@ -1793,6 +1799,7 @@ graph TD
     subgraph "App-Level Hooks"
         NOTIF_H["useNotifications<br/>reads prefs, fires<br/>browser notifications"]
         TABBY_H["useTabbyBrain<br/>derives cat mood +<br/>speech from WS stream"]
+        SOUND_H["useSoundCues<br/>maps WS messages to<br/>synthesized audio cues"]
     end
 
     subgraph "Page State"
@@ -1811,9 +1818,11 @@ graph TD
     EB --> US1 & US2 & US3 & US4 & US5 & US6 & US8 & US7
     EB --> NOTIF_H
     EB --> TABBY_H
+    EB --> SOUND_H
     LS --> NOTIF_H
     LS --> TABBY_H
     LS --> US7
+    LS2 --> SOUND_H
 ```
 
 **Why no Redux / Zustand / Context:**

@@ -610,6 +610,7 @@
           <a href="#prometheus-grafana" class="nav-link"><span class="nav-icon">◈</span>Prometheus &amp; Grafana</a>
           <a href="#i18n" class="nav-link"><span class="nav-icon">◈</span>Internationalization</a>
           <a href="#tabby" class="nav-link"><span class="nav-icon">🐾</span>Tabby</a>
+          <a href="#sound-cues" class="nav-link"><span class="nav-icon">🔊</span>Sound Cues</a>
 
           <div class="nav-section">Ops & Reference</div>
           <a href="#deployment" class="nav-link"><span class="nav-icon">◈</span>Deployment Modes</a>
@@ -6366,6 +6367,126 @@ xattr -cr "/Applications/Claude Code Monitor.app"</code></pre>
           </ul>
         </section>
 
+        <!-- ─── Sound Cues ─────────────────────────────────────────────────── -->
+        <section id="sound-cues">
+          <div class="section-label">◈ Components &amp; UI</div>
+          <h2>🔊 Sound Cues</h2>
+
+          <p>
+            The dashboard gives you <strong>subtle audio feedback</strong> for live session
+            activity, so you can leave it on a second monitor and still hear when a run finishes or
+            fails. Sound is <strong>on by default</strong> and can be switched off entirely in one
+            click from <strong>Settings → Sound</strong>. Like Tabby, it is a purely additive
+            client-side subscriber to the existing <code>eventBus</code> WebSocket stream:
+            <strong>no server code, no new API routes, no new message types, and no new
+            dependencies</strong>.
+          </p>
+
+          <h3>Zero-dependency synthesis</h3>
+
+          <p>
+            There are no <code>.mp3</code> or <code>.wav</code> assets anywhere in the repository
+            and no audio library in <code>package.json</code>. Every cue is generated at play time
+            with the <strong>Web Audio API</strong>: a short list of oscillators (sine or triangle),
+            each with its own exponential gain envelope, mixed through a master gain node and a
+            low-pass filter so the result sits behind your work rather than cutting through it. The
+            whole engine is one file, <code>client/src/lib/sound.ts</code>.
+          </p>
+
+          <h3>The cues</h3>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cue</th>
+                  <th>When it fires</th>
+                  <th>What it sounds like</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>sessionStart</code></td>
+                  <td>A new session appears</td>
+                  <td>Rising perfect fifth (C5 → G5)</td>
+                </tr>
+                <tr>
+                  <td><code>sessionComplete</code></td>
+                  <td>A session finishes responding or closes</td>
+                  <td>Resolving major arpeggio (E5 → G5 → C6)</td>
+                </tr>
+                <tr>
+                  <td><code>sessionError</code></td>
+                  <td>A session enters the error state</td>
+                  <td>Soft falling minor third on a triangle wave</td>
+                </tr>
+                <tr>
+                  <td><code>subagentSpawn</code></td>
+                  <td>A subagent spawns</td>
+                  <td>Single short pluck</td>
+                </tr>
+                <tr>
+                  <td><code>notification</code></td>
+                  <td>Claude Code emits a notification event</td>
+                  <td>Detuned pair ringing like a small bell</td>
+                </tr>
+                <tr>
+                  <td><code>connected</code> / <code>disconnected</code></td>
+                  <td>The dashboard WebSocket returns or drops</td>
+                  <td>Two-note lift or drop</td>
+                </tr>
+                <tr>
+                  <td><code>click</code></td>
+                  <td>You press a button, link, tab, or switch</td>
+                  <td>Barely-audible tick</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>
+            Cues live inside a C-major set so overlapping tails never sound dissonant, and every
+            envelope decays exponentially rather than cutting off, which avoids the click of a hard
+            stop.
+          </p>
+
+          <h3>Staying out of your way</h3>
+
+          <ul>
+            <li>
+              <strong>Per-cue cooldown</strong> — the same cue will not repeat within about 350 ms
+              (45 ms for the interaction tick).
+            </li>
+            <li>
+              <strong>Global burst budget</strong> — at most 4 cues start within any 1.2 s window,
+              so importing history or reconnecting after a drop never turns a flood of WebSocket
+              messages into a flood of beeps.
+            </li>
+            <li>
+              <strong>Autoplay policy</strong> — nothing plays until your first pointer, key, or
+              touch interaction with the page. Cues before that are silently dropped, not queued.
+            </li>
+            <li>
+              If the browser has no Web Audio support at all, every call is a safe no-op and the
+              dashboard simply stays silent.
+            </li>
+          </ul>
+
+          <h3>Settings</h3>
+
+          <p>
+            <strong>Settings → Sound</strong> has a master toggle, a volume slider, and an
+            individual switch for each cue. Flipping a switch on plays that cue immediately so you
+            can hear exactly what you just enabled, and a preview button plays the completion chime
+            on demand. Preferences persist to <code>localStorage</code> under
+            <code>agent-monitor-sound</code> and take effect instantly across the app — no reload.
+            By default, session start, session complete, session error, notifications, and the
+            interaction tick are on; subagent spawns and connection changes are off because they are
+            the chattiest. The wiring lives in <code>client/src/hooks/useSoundCues.ts</code>, mounted
+            once in <code>client/src/App.tsx</code>.
+          </p>
+        </section>
+
         <!-- ─── Deployment ─────────────────────────────────────────────────── -->
         <section id="deployment">
           <div class="section-label">◈ Operations</div>
@@ -6919,7 +7040,7 @@ npm run install-hooks</code></pre>
     <!-- Body-content translations — must load before script.js so the
          i18n engine sees window.__WIKI_CONTENT_I18N. Both are deferred, so they
          run in document order. -->
-    <script src="i18n-content.js?v=84" defer></script>
+    <script src="i18n-content.js?v=85" defer></script>
     <script src="script.js?v=56" defer></script>
     <script>
       (function () {

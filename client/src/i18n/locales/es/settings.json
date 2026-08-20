@@ -10,6 +10,25 @@
     "enable": "Mostrar Tabby",
     "enableDesc": "Mostrar el compañero de esquina en todo el panel (⌘B para abrir)"
   },
+  "sound": {
+    "title": "Sonido",
+    "description": "Tonos breves y discretos para la actividad de sesiones en vivo. Se generan en el navegador: sin descargas ni seguimiento.",
+    "enable": "Activar señales de sonido",
+    "enableDesc": "Reproduce un tono sutil cuando las sesiones empiezan, terminan o fallan",
+    "volume": "Volumen",
+    "playWhen": "Reproducir un tono cuando...",
+    "newSession": "Comienza una sesión",
+    "sessionComplete": "Una sesión termina de responder",
+    "sessionError": "Una sesión falla",
+    "subagentSpawned": "Se genera un subagente",
+    "notification": "Claude Code envía una notificación",
+    "connection": "La conexión en vivo se cae o vuelve",
+    "interaction": "Al hacer clic en botones y enlaces",
+    "interactionDesc": "Un tic apenas audible en cada pulsación",
+    "preview": "Escuchar sonido",
+    "throttleInfo": "Los tonos están limitados, así que una ráfaga de actividad nunca se convierte en una ráfaga de sonido.",
+    "disabledInfo": "Las señales de sonido están desactivadas: el panel permanece en completo silencio"
+  },
   "pricing": {
     "title": "Precios de modelos Claude de Anthropic",
     "navClaude": "Precios de Claude",
