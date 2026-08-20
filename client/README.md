@@ -834,6 +834,36 @@ export function timeAgo(date: string | Date | null | undefined): string;
 //           timeAgo(null) → "—"
 ```
 
+### Browser storage keys
+
+The client keeps every user preference in the browser rather than the database,
+so preferences stay per-machine and no settings round-trip is needed. There is
+no central store — each feature owns its own key — so this is the inventory:
+
+| Key | Storage | Owner | Holds |
+| --- | --- | --- | --- |
+| `agent-monitor-sound` | local | `lib/sound.ts` | Audio-cue preferences: master switch, volume, per-cue flags. Defaults to enabled |
+| `agent-monitor-notifications` | local | `hooks/useNotifications.ts` | Browser-notification preferences. Defaults to disabled (opt-in, needs permission) |
+| `agent-monitor-update-dismissed-sha` | local | `components/UpdateNotifier.tsx` | Upstream SHA the user dismissed, so a new commit re-surfaces the notice |
+| `agent-dashboard-tabby-enabled` | local | `components/Tabby/prefs.ts` | Whether the Tabby companion is shown |
+| `agent-dashboard-tabby-muted` | local | `components/Tabby/prefs.ts` | Whether Tabby's speech bubbles are muted |
+| `agent-dashboard-tabby-pos` | local | `components/Tabby/prefs.ts` | Tabby's docked edge and vertical offset, as a viewport fraction |
+| `ccam-data-scope` | local | `lib/dataScope.ts` | App-wide data scope — selected remote sources and providers |
+| `sidebar-collapsed` | local | `components/Sidebar.tsx` | Sidebar collapsed state |
+| `sidebar-connection-stats` | local | `components/Sidebar.tsx` | Cumulative WebSocket stats for the connection modal |
+| `provider-onboarding-shown-v1` | **session** | `components/SplashScreen.tsx` | Splash shown once per browser session, not once ever |
+
+Conventions worth keeping:
+
+- **Reads must never throw.** Private mode and quota limits make storage
+  unavailable at any moment; every reader wraps access in `try`/`catch` and
+  falls back to defaults.
+- **Merge over defaults rather than trusting the parse.** A key written by an
+  older build can be missing fields, so readers spread the stored object over a
+  complete default object instead of using it directly.
+- **Writes are best-effort.** A failed write should not break the interaction
+  that triggered it; the in-memory value still applies for the session.
+
 ### Audio cues (lib/sound.ts + hooks/useSoundCues.ts)
 
 `lib/sound.ts` is a self-contained audio-cue engine. It ships **no audio files and no third-party dependency** — every cue is synthesized at play time with the Web Audio API from a declarative list of partials (frequency, offset, duration, peak gain, oscillator type), routed through a master gain node and a low-pass filter.
