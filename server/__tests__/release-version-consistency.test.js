@@ -166,4 +166,22 @@ describe("release version consistency", () => {
     }
     assert.match(readText("deployments/scripts/deploy.sh"), new RegExp(`--tag ${packageVersion}`));
   });
+
+  it("keeps the citation metadata on the shipping release", () => {
+    // CITATION.cff drifted to 1.1.0 and stayed there across many releases
+    // because nothing asserted it. Anything that carries the release version
+    // needs a guard here, or it silently rots.
+    // CITATION.cff is YAML, so parse it rather than pattern-matching the line:
+    // a regex has to hand-handle "2.0.11", '2.0.11', and bare 2.0.11, and would
+    // quietly accept an unterminated quote.
+    const citation = yaml.load(readText("CITATION.cff"));
+
+    assert.ok(citation && typeof citation === "object", "CITATION.cff must be valid YAML");
+    assert.equal(
+      typeof citation.version,
+      "string",
+      "CITATION.cff must declare a quoted string version"
+    );
+    assert.equal(citation.version, packageVersion, "CITATION.cff must track the root release");
+  });
 });
