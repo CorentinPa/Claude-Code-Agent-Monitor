@@ -7449,3 +7449,154 @@ Object.assign(window.__WIKI_CONTENT_I18N.plain.es, {
   "Loopback port": "Puerto de loopback",
   "Why This Over Alternatives": "Por qué elegirlo frente a las alternativas",
 });
+
+// ─── Sound cues (Settings → Sound) ───
+Object.assign(window.__WIKI_CONTENT_I18N.zh, {
+  "The dashboard gives you <strong>subtle audio feedback</strong> for live session activity, so you can leave it on a second monitor and still hear when a run finishes or fails. Sound is <strong>on by default</strong> and can be switched off entirely in one click from <strong>Settings → Sound</strong>. Like Tabby, it is a purely additive client-side subscriber to the existing <code>eventBus</code> WebSocket stream: <strong>no server code, no new API routes, no new message types, and no new dependencies</strong>.":
+    "仪表盘会为实时会话活动提供<strong>轻柔的音频反馈</strong>，因此你可以把它放在副屏上，仍然能听到某次运行完成或失败。声音<strong>默认开启</strong>，也可以在<strong>设置 → 声音</strong>中一键完全关闭。与 Tabby 一样，它只是现有 <code>eventBus</code> WebSocket 流的一个纯附加的客户端订阅者：<strong>没有服务端代码、没有新的 API 路由、没有新的消息类型，也没有新的依赖</strong>。",
+  "There are no <code>.mp3</code> or <code>.wav</code> assets anywhere in the repository and no audio library in <code>package.json</code>. Every cue is generated at play time with the <strong>Web Audio API</strong>: a short list of oscillators (sine or triangle), each with its own exponential gain envelope, mixed through a master gain node and a low-pass filter so the result sits behind your work rather than cutting through it. The whole engine is one file, <code>client/src/lib/sound.ts</code>.":
+    "仓库中没有任何 <code>.mp3</code> 或 <code>.wav</code> 资源，<code>package.json</code> 里也没有音频库。每个提示音都在播放时由 <strong>Web Audio API</strong> 生成：一小组振荡器（正弦或三角波），各自带指数增益包络，经主增益节点与低通滤波器混合，使声音退到你的工作之后而不是刺穿它。整个引擎只有一个文件：<code>client/src/lib/sound.ts</code>。",
+  "A session finishes responding or closes": "会话回复完成或关闭",
+  "A session enters the error state": "会话进入错误状态",
+  "Soft falling minor third on a triangle wave": "三角波上轻柔的下行小三度",
+  "Claude Code emits a notification event": "Claude Code 发出通知事件",
+  "Detuned pair ringing like a small bell": "失谐音对，如同小铃铛",
+  "The dashboard WebSocket returns or drops": "仪表盘 WebSocket 恢复或断开",
+  "You press a button, link, tab, or switch": "你按下按钮、链接、标签页或开关",
+  "Cues live inside a C-major set so overlapping tails never sound dissonant, and every envelope decays exponentially rather than cutting off, which avoids the click of a hard stop.":
+    "所有提示音都落在 C 大调音集内，因此叠加的尾音不会不协和；每个包络都以指数衰减而非硬切断，避免了硬停带来的爆音。",
+  "<strong>Per-cue cooldown</strong> — the same cue will not repeat within about 350 ms (45 ms for the interaction tick).":
+    "<strong>单个提示音冷却</strong> — 同一提示音在约 350 ms 内不会重复（交互滴答声为 45 ms）。",
+  "<strong>Global burst budget</strong> — at most 4 cues start within any 1.2 s window, so importing history or reconnecting after a drop never turns a flood of WebSocket messages into a flood of beeps.":
+    "<strong>全局突发预算</strong> — 任意 1.2 s 窗口内最多启动 4 个提示音，因此导入历史或断线重连时，大量 WebSocket 消息不会变成一连串提示音。",
+  "<strong>Autoplay policy</strong> — nothing plays until your first pointer, key, or touch interaction with the page. Cues before that are silently dropped, not queued.":
+    "<strong>自动播放策略</strong> — 在你首次对页面进行指针、按键或触摸交互之前不会播放任何声音。之前的提示音会被静默丢弃，而不是排队。",
+  "If the browser has no Web Audio support at all, every call is a safe no-op and the dashboard simply stays silent.":
+    "如果浏览器完全不支持 Web Audio，每次调用都是安全的空操作，仪表盘只是保持静音。",
+  "<strong>Settings → Sound</strong> has a master toggle, a volume slider, and an individual switch for each cue. Flipping a switch on plays that cue immediately so you can hear exactly what you just enabled, and a preview button plays the completion chime on demand. Preferences persist to <code>localStorage</code> under <code>agent-monitor-sound</code> and take effect instantly across the app — no reload. By default, session start, session complete, session error, notifications, and the interaction tick are on; subagent spawns and connection changes are off because they are the chattiest. The wiring lives in <code>client/src/hooks/useSoundCues.ts</code>, mounted once in <code>client/src/App.tsx</code>.":
+    "<strong>设置 → 声音</strong>提供总开关、音量滑块，以及每种提示音的独立开关。打开某个开关会立即播放该提示音，让你清楚听到刚刚启用的是什么；试听按钮可随时播放完成提示音。偏好设置保存在 <code>localStorage</code> 的 <code>agent-monitor-sound</code> 键下，在整个应用内即时生效 — 无需重新加载。默认情况下，会话开始、会话完成、会话出错、通知和交互滴答声为开启；子代理启动和连接变化为关闭，因为它们最为频繁。接线逻辑位于 <code>client/src/hooks/useSoundCues.ts</code>，在 <code>client/src/App.tsx</code> 中挂载一次。",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.plain.zh, {
+  "🔊 Sound Cues": "🔊 声音提示",
+  "Sound Cues": "声音提示",
+  "Zero-dependency synthesis": "零依赖合成",
+  "The cues": "提示音一览",
+  "Staying out of your way": "不打扰你的工作",
+  Cue: "提示音",
+  "When it fires": "触发时机",
+  "What it sounds like": "听感",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.vi, {
+  "The dashboard gives you <strong>subtle audio feedback</strong> for live session activity, so you can leave it on a second monitor and still hear when a run finishes or fails. Sound is <strong>on by default</strong> and can be switched off entirely in one click from <strong>Settings → Sound</strong>. Like Tabby, it is a purely additive client-side subscriber to the existing <code>eventBus</code> WebSocket stream: <strong>no server code, no new API routes, no new message types, and no new dependencies</strong>.":
+    "Dashboard cung cấp <strong>phản hồi âm thanh tinh tế</strong> cho hoạt động phiên trực tiếp, nên bạn có thể để nó ở màn hình phụ mà vẫn nghe được khi một lần chạy hoàn tất hay thất bại. Âm thanh <strong>bật sẵn theo mặc định</strong> và có thể tắt hoàn toàn chỉ bằng một cú nhấp trong <strong>Settings → Sound</strong>. Giống như Tabby, đây thuần túy là một subscriber phía client bổ sung cho luồng WebSocket <code>eventBus</code> sẵn có: <strong>không có mã máy chủ, không có route API mới, không có loại thông điệp mới và không có phụ thuộc mới</strong>.",
+  "There are no <code>.mp3</code> or <code>.wav</code> assets anywhere in the repository and no audio library in <code>package.json</code>. Every cue is generated at play time with the <strong>Web Audio API</strong>: a short list of oscillators (sine or triangle), each with its own exponential gain envelope, mixed through a master gain node and a low-pass filter so the result sits behind your work rather than cutting through it. The whole engine is one file, <code>client/src/lib/sound.ts</code>.":
+    "Không có tệp <code>.mp3</code> hay <code>.wav</code> nào trong kho mã và không có thư viện âm thanh nào trong <code>package.json</code>. Mọi tín hiệu đều được tạo ra ngay lúc phát bằng <strong>Web Audio API</strong>: một danh sách ngắn các bộ dao động (sine hoặc triangle), mỗi bộ có envelope gain suy giảm theo hàm mũ riêng, trộn qua một node gain tổng và một bộ lọc thông thấp để kết quả nằm phía sau công việc của bạn thay vì xuyên qua nó. Toàn bộ engine gói gọn trong một tệp: <code>client/src/lib/sound.ts</code>.",
+  "A session finishes responding or closes": "Một phiên phản hồi xong hoặc đóng lại",
+  "A session enters the error state": "Một phiên chuyển sang trạng thái lỗi",
+  "Soft falling minor third on a triangle wave":
+    "Quãng ba thứ đi xuống nhẹ nhàng trên sóng triangle",
+  "Claude Code emits a notification event": "Claude Code phát ra một sự kiện thông báo",
+  "Detuned pair ringing like a small bell": "Cặp âm lệch tần ngân như một chiếc chuông nhỏ",
+  "The dashboard WebSocket returns or drops": "WebSocket của dashboard trở lại hoặc mất",
+  "You press a button, link, tab, or switch": "Bạn nhấn nút, liên kết, tab hoặc công tắc",
+  "Cues live inside a C-major set so overlapping tails never sound dissonant, and every envelope decays exponentially rather than cutting off, which avoids the click of a hard stop.":
+    'Các tín hiệu nằm trong tập âm Đô trưởng nên phần đuôi âm chồng lấn không bao giờ nghịch tai, và mọi envelope đều suy giảm theo hàm mũ thay vì cắt đột ngột, tránh tiếng "pop" của một điểm dừng cứng.',
+  "<strong>Per-cue cooldown</strong> — the same cue will not repeat within about 350 ms (45 ms for the interaction tick).":
+    "<strong>Thời gian chờ cho từng tín hiệu</strong> — cùng một tín hiệu sẽ không lặp lại trong khoảng 350 ms (45 ms với tiếng tích tương tác).",
+  "<strong>Global burst budget</strong> — at most 4 cues start within any 1.2 s window, so importing history or reconnecting after a drop never turns a flood of WebSocket messages into a flood of beeps.":
+    "<strong>Ngân sách bùng nổ toàn cục</strong> — tối đa 4 tín hiệu bắt đầu trong bất kỳ cửa sổ 1.2 s nào, nên việc nhập lịch sử hay kết nối lại sau khi mất kết nối không bao giờ biến một loạt thông điệp WebSocket thành một loạt tiếng bíp.",
+  "<strong>Autoplay policy</strong> — nothing plays until your first pointer, key, or touch interaction with the page. Cues before that are silently dropped, not queued.":
+    "<strong>Chính sách autoplay</strong> — không có gì phát ra trước lần tương tác bằng con trỏ, phím hoặc chạm đầu tiên của bạn với trang. Các tín hiệu trước thời điểm đó bị bỏ qua âm thầm chứ không xếp hàng chờ.",
+  "If the browser has no Web Audio support at all, every call is a safe no-op and the dashboard simply stays silent.":
+    "Nếu trình duyệt hoàn toàn không hỗ trợ Web Audio, mọi lệnh gọi đều là no-op an toàn và dashboard chỉ đơn giản là im lặng.",
+  "<strong>Settings → Sound</strong> has a master toggle, a volume slider, and an individual switch for each cue. Flipping a switch on plays that cue immediately so you can hear exactly what you just enabled, and a preview button plays the completion chime on demand. Preferences persist to <code>localStorage</code> under <code>agent-monitor-sound</code> and take effect instantly across the app — no reload. By default, session start, session complete, session error, notifications, and the interaction tick are on; subagent spawns and connection changes are off because they are the chattiest. The wiring lives in <code>client/src/hooks/useSoundCues.ts</code>, mounted once in <code>client/src/App.tsx</code>.":
+    "<strong>Settings → Sound</strong> có công tắc tổng, thanh trượt âm lượng và một công tắc riêng cho từng tín hiệu. Bật một công tắc sẽ phát ngay tín hiệu đó để bạn nghe chính xác thứ vừa bật, và nút nghe thử phát tiếng chuông hoàn tất bất cứ lúc nào. Tùy chọn được lưu vào <code>localStorage</code> dưới khóa <code>agent-monitor-sound</code> và có hiệu lực tức thì trên toàn ứng dụng — không cần tải lại. Theo mặc định, phiên bắt đầu, phiên hoàn tất, phiên lỗi, thông báo và tiếng tích tương tác được bật; subagent được tạo và thay đổi kết nối được tắt vì chúng ồn ào nhất. Phần đấu nối nằm tại <code>client/src/hooks/useSoundCues.ts</code>, được gắn một lần trong <code>client/src/App.tsx</code>.",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.plain.vi, {
+  "🔊 Sound Cues": "🔊 Tín hiệu âm thanh",
+  "Sound Cues": "Tín hiệu âm thanh",
+  "Zero-dependency synthesis": "Tổng hợp không phụ thuộc",
+  "The cues": "Các tín hiệu",
+  "Staying out of your way": "Không làm phiền bạn",
+  Cue: "Tín hiệu",
+  "When it fires": "Khi nào phát",
+  "What it sounds like": "Nghe như thế nào",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.ko, {
+  "The dashboard gives you <strong>subtle audio feedback</strong> for live session activity, so you can leave it on a second monitor and still hear when a run finishes or fails. Sound is <strong>on by default</strong> and can be switched off entirely in one click from <strong>Settings → Sound</strong>. Like Tabby, it is a purely additive client-side subscriber to the existing <code>eventBus</code> WebSocket stream: <strong>no server code, no new API routes, no new message types, and no new dependencies</strong>.":
+    "대시보드는 라이브 세션 활동에 대해 <strong>은은한 오디오 피드백</strong>을 제공하므로, 보조 모니터에 띄워 두어도 실행이 끝났는지 실패했는지 소리로 알 수 있습니다. 사운드는 <strong>기본으로 켜져 있으며</strong> <strong>설정 → 사운드</strong>에서 클릭 한 번으로 완전히 끌 수 있습니다. Tabby처럼 기존 <code>eventBus</code> WebSocket 스트림에 대한 순수하게 추가적인 클라이언트 측 구독자일 뿐입니다: <strong>서버 코드 없음, 새 API 라우트 없음, 새 메시지 타입 없음, 새 의존성 없음</strong>.",
+  "There are no <code>.mp3</code> or <code>.wav</code> assets anywhere in the repository and no audio library in <code>package.json</code>. Every cue is generated at play time with the <strong>Web Audio API</strong>: a short list of oscillators (sine or triangle), each with its own exponential gain envelope, mixed through a master gain node and a low-pass filter so the result sits behind your work rather than cutting through it. The whole engine is one file, <code>client/src/lib/sound.ts</code>.":
+    "저장소 어디에도 <code>.mp3</code>나 <code>.wav</code> 자산이 없고 <code>package.json</code>에도 오디오 라이브러리가 없습니다. 모든 큐는 재생 시점에 <strong>Web Audio API</strong>로 생성됩니다: 짧은 오실레이터 목록(사인 또는 삼각파)에 각각 지수 게인 엔벨로프를 걸고, 마스터 게인 노드와 로우패스 필터를 거쳐 믹싱하여 결과가 작업을 뚫고 나오는 대신 그 뒤에 자리 잡도록 합니다. 엔진 전체가 <code>client/src/lib/sound.ts</code> 한 파일입니다.",
+  "A session finishes responding or closes": "세션이 응답을 마치거나 종료될 때",
+  "A session enters the error state": "세션이 오류 상태에 들어갈 때",
+  "Soft falling minor third on a triangle wave": "삼각파의 부드러운 하행 단3도",
+  "Claude Code emits a notification event": "Claude Code가 알림 이벤트를 낼 때",
+  "Detuned pair ringing like a small bell": "작은 종처럼 울리는 디튠된 한 쌍",
+  "The dashboard WebSocket returns or drops": "대시보드 WebSocket이 복구되거나 끊길 때",
+  "You press a button, link, tab, or switch": "버튼, 링크, 탭, 스위치를 누를 때",
+  "Cues live inside a C-major set so overlapping tails never sound dissonant, and every envelope decays exponentially rather than cutting off, which avoids the click of a hard stop.":
+    "큐는 다장조 음 집합 안에 머물러 겹치는 잔향이 불협화음이 되지 않으며, 모든 엔벨로프는 딱 끊기지 않고 지수적으로 감쇠하여 하드 스톱 특유의 팝 소리를 피합니다.",
+  "<strong>Per-cue cooldown</strong> — the same cue will not repeat within about 350 ms (45 ms for the interaction tick).":
+    "<strong>큐별 쿨다운</strong> — 같은 큐는 약 350 ms 이내에 반복되지 않습니다(상호작용 틱은 45 ms).",
+  "<strong>Global burst budget</strong> — at most 4 cues start within any 1.2 s window, so importing history or reconnecting after a drop never turns a flood of WebSocket messages into a flood of beeps.":
+    "<strong>전역 버스트 예산</strong> — 1.2 s 창 안에서 최대 4개의 큐만 시작되므로, 히스토리를 가져오거나 끊긴 뒤 재연결할 때 쏟아지는 WebSocket 메시지가 쏟아지는 알림음이 되지 않습니다.",
+  "<strong>Autoplay policy</strong> — nothing plays until your first pointer, key, or touch interaction with the page. Cues before that are silently dropped, not queued.":
+    "<strong>자동재생 정책</strong> — 페이지와의 첫 포인터·키·터치 상호작용 전에는 아무것도 재생되지 않습니다. 그 이전의 큐는 대기열에 쌓이지 않고 조용히 버려집니다.",
+  "If the browser has no Web Audio support at all, every call is a safe no-op and the dashboard simply stays silent.":
+    "브라우저가 Web Audio를 전혀 지원하지 않으면 모든 호출이 안전한 no-op이 되고 대시보드는 그저 조용할 뿐입니다.",
+  "<strong>Settings → Sound</strong> has a master toggle, a volume slider, and an individual switch for each cue. Flipping a switch on plays that cue immediately so you can hear exactly what you just enabled, and a preview button plays the completion chime on demand. Preferences persist to <code>localStorage</code> under <code>agent-monitor-sound</code> and take effect instantly across the app — no reload. By default, session start, session complete, session error, notifications, and the interaction tick are on; subagent spawns and connection changes are off because they are the chattiest. The wiring lives in <code>client/src/hooks/useSoundCues.ts</code>, mounted once in <code>client/src/App.tsx</code>.":
+    "<strong>설정 → 사운드</strong>에는 마스터 토글, 볼륨 슬라이더, 그리고 각 큐의 개별 스위치가 있습니다. 스위치를 켜면 해당 큐가 즉시 재생되어 방금 무엇을 켰는지 정확히 들을 수 있고, 미리 듣기 버튼은 완료 차임을 원할 때 재생합니다. 설정은 <code>localStorage</code>의 <code>agent-monitor-sound</code> 키에 저장되며 앱 전체에 즉시 적용됩니다 — 새로고침이 필요 없습니다. 기본적으로 세션 시작, 세션 완료, 세션 오류, 알림, 상호작용 틱이 켜져 있고, 서브에이전트 생성과 연결 변화는 가장 잦기 때문에 꺼져 있습니다. 연결 로직은 <code>client/src/hooks/useSoundCues.ts</code>에 있으며 <code>client/src/App.tsx</code>에서 한 번 마운트됩니다.",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.plain.ko, {
+  "🔊 Sound Cues": "🔊 사운드 큐",
+  "Sound Cues": "사운드 큐",
+  "Zero-dependency synthesis": "의존성 없는 합성",
+  "The cues": "큐 목록",
+  "Staying out of your way": "방해하지 않기",
+  Cue: "큐",
+  "When it fires": "언제 울리는가",
+  "What it sounds like": "어떤 소리인가",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.es, {
+  "The dashboard gives you <strong>subtle audio feedback</strong> for live session activity, so you can leave it on a second monitor and still hear when a run finishes or fails. Sound is <strong>on by default</strong> and can be switched off entirely in one click from <strong>Settings → Sound</strong>. Like Tabby, it is a purely additive client-side subscriber to the existing <code>eventBus</code> WebSocket stream: <strong>no server code, no new API routes, no new message types, and no new dependencies</strong>.":
+    "El panel ofrece <strong>retroalimentación de audio discreta</strong> para la actividad de sesiones en vivo, de modo que puedes dejarlo en un segundo monitor y aun así oír cuándo una ejecución termina o falla. El sonido está <strong>activado por defecto</strong> y se puede desactivar por completo con un clic desde <strong>Configuración → Sonido</strong>. Como Tabby, es un suscriptor del lado del cliente puramente aditivo al flujo WebSocket <code>eventBus</code> ya existente: <strong>sin código de servidor, sin nuevas rutas de API, sin nuevos tipos de mensaje y sin nuevas dependencias</strong>.",
+  "There are no <code>.mp3</code> or <code>.wav</code> assets anywhere in the repository and no audio library in <code>package.json</code>. Every cue is generated at play time with the <strong>Web Audio API</strong>: a short list of oscillators (sine or triangle), each with its own exponential gain envelope, mixed through a master gain node and a low-pass filter so the result sits behind your work rather than cutting through it. The whole engine is one file, <code>client/src/lib/sound.ts</code>.":
+    "No hay ningún archivo <code>.mp3</code> ni <code>.wav</code> en el repositorio ni ninguna biblioteca de audio en <code>package.json</code>. Cada señal se genera en el momento de reproducirse con la <strong>Web Audio API</strong>: una lista corta de osciladores (seno o triángulo), cada uno con su propia envolvente de ganancia exponencial, mezclados a través de un nodo de ganancia maestro y un filtro paso bajo para que el resultado se quede detrás de tu trabajo en lugar de atravesarlo. Todo el motor es un solo archivo, <code>client/src/lib/sound.ts</code>.",
+  "A session finishes responding or closes": "Una sesión termina de responder o se cierra",
+  "A session enters the error state": "Una sesión entra en estado de error",
+  "Soft falling minor third on a triangle wave":
+    "Tercera menor descendente suave en onda triangular",
+  "Claude Code emits a notification event": "Claude Code emite un evento de notificación",
+  "Detuned pair ringing like a small bell": "Par desafinado que suena como una campanita",
+  "The dashboard WebSocket returns or drops": "El WebSocket del panel vuelve o se cae",
+  "You press a button, link, tab, or switch": "Pulsas un botón, enlace, pestaña o interruptor",
+  "Cues live inside a C-major set so overlapping tails never sound dissonant, and every envelope decays exponentially rather than cutting off, which avoids the click of a hard stop.":
+    "Las señales viven dentro de un conjunto de do mayor, así que las colas superpuestas nunca suenan disonantes, y cada envolvente decae exponencialmente en lugar de cortarse, lo que evita el chasquido de una parada brusca.",
+  "<strong>Per-cue cooldown</strong> — the same cue will not repeat within about 350 ms (45 ms for the interaction tick).":
+    "<strong>Enfriamiento por señal</strong> — la misma señal no se repite dentro de unos 350 ms (45 ms para el tic de interacción).",
+  "<strong>Global burst budget</strong> — at most 4 cues start within any 1.2 s window, so importing history or reconnecting after a drop never turns a flood of WebSocket messages into a flood of beeps.":
+    "<strong>Presupuesto global de ráfaga</strong> — como máximo 4 señales comienzan en cualquier ventana de 1.2 s, así que importar el historial o reconectar tras una caída nunca convierte una avalancha de mensajes WebSocket en una avalancha de pitidos.",
+  "<strong>Autoplay policy</strong> — nothing plays until your first pointer, key, or touch interaction with the page. Cues before that are silently dropped, not queued.":
+    "<strong>Política de autoreproducción</strong> — nada suena hasta tu primera interacción de puntero, tecla o toque con la página. Las señales previas se descartan en silencio, no se encolan.",
+  "If the browser has no Web Audio support at all, every call is a safe no-op and the dashboard simply stays silent.":
+    "Si el navegador no soporta Web Audio en absoluto, cada llamada es una operación nula segura y el panel simplemente permanece en silencio.",
+  "<strong>Settings → Sound</strong> has a master toggle, a volume slider, and an individual switch for each cue. Flipping a switch on plays that cue immediately so you can hear exactly what you just enabled, and a preview button plays the completion chime on demand. Preferences persist to <code>localStorage</code> under <code>agent-monitor-sound</code> and take effect instantly across the app — no reload. By default, session start, session complete, session error, notifications, and the interaction tick are on; subagent spawns and connection changes are off because they are the chattiest. The wiring lives in <code>client/src/hooks/useSoundCues.ts</code>, mounted once in <code>client/src/App.tsx</code>.":
+    "<strong>Configuración → Sonido</strong> tiene un interruptor maestro, un control de volumen y un interruptor individual para cada señal. Activar un interruptor reproduce esa señal de inmediato para que oigas exactamente lo que acabas de habilitar, y un botón de vista previa reproduce el tono de finalización cuando quieras. Las preferencias persisten en <code>localStorage</code> bajo <code>agent-monitor-sound</code> y surten efecto al instante en toda la aplicación, sin recargar. Por defecto están activados el inicio de sesión, la finalización de sesión, el error de sesión, las notificaciones y el tic de interacción; la generación de subagentes y los cambios de conexión están desactivados porque son los más ruidosos. La conexión vive en <code>client/src/hooks/useSoundCues.ts</code>, montada una sola vez en <code>client/src/App.tsx</code>.",
+});
+
+Object.assign(window.__WIKI_CONTENT_I18N.plain.es, {
+  "🔊 Sound Cues": "🔊 Señales de sonido",
+  "Sound Cues": "Señales de sonido",
+  "Zero-dependency synthesis": "Síntesis sin dependencias",
+  "The cues": "Las señales",
+  "Staying out of your way": "Sin estorbarte",
+  Cue: "Señal",
+  "When it fires": "Cuándo suena",
+  "What it sounds like": "Cómo suena",
+});

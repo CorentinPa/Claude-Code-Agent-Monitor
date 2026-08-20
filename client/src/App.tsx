@@ -10,6 +10,8 @@
  *    {@link eventBus} so any page can subscribe without prop drilling.
  * 3. {@link useNotifications} listens for alert-worthy events and surfaces OS
  *    notifications when permitted.
+ * 4. {@link useSoundCues} plays subtle, synthesized audio cues for the same
+ *    class of events (opt-out via Settings -> Sound).
  *
  * ## Routing
  * All feature pages nest under {@link Layout}, which owns the sidebar and
@@ -42,6 +44,7 @@
  * Docker Compose profiles are documented in `monitoring/README.md`.
  *
  * ## Internal dependencies
+ * - `./hooks/useSoundCues`
  * - `./components/Layout`
  * - `./components/SplashScreen`
  * - `./pages/Dashboard`
@@ -84,6 +87,7 @@ import { Run } from "./pages/Run";
 import { NotFound } from "./pages/NotFound";
 import { useWebSocket } from "./hooks/useWebSocket";
 import { useNotifications } from "./hooks/useNotifications";
+import { useSoundCues } from "./hooks/useSoundCues";
 import { eventBus } from "./lib/eventBus";
 import type { WSMessage } from "./lib/types";
 
@@ -113,6 +117,7 @@ export default function App() {
 
   const { connected } = useWebSocket(onMessage);
   useNotifications();
+  useSoundCues();
 
   return (
     <BrowserRouter>

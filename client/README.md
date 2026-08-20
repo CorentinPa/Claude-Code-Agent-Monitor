@@ -218,11 +218,13 @@ client/
 │   │   ├── eventBus.ts     # WebSocket pub/sub + connection state
 │   │   ├── dataScope.ts    # Global data-scope store (app-wide ?sources= selection)
 │   │   ├── format.ts       # Formatters (formatTime, timeAgo, fmtCost)
+│   │   ├── sound.ts        # Web Audio cue synthesis + sound preferences
 │   │   └── types.ts        # TypeScript type definitions
 │   │
 │   ├── hooks/
 │   │   ├── useWebSocket.ts      # Auto-reconnecting WebSocket hook
-│   │   └── useNotifications.ts  # Browser push notification triggers
+│   │   ├── useNotifications.ts  # Browser push notification triggers
+│   │   └── useSoundCues.ts      # Event-bus → synthesized audio cues
 │   │
 │   ├── i18n/               # Internationalization (en / zh / vi / ko / es)
 │   ├── App.tsx             # Root component + router setup
@@ -831,6 +833,24 @@ export function timeAgo(date: string | Date | null | undefined): string;
 // Examples: timeAgo('2024-03-18T12:00:00Z') → "2 hours ago"
 //           timeAgo(null) → "—"
 ```
+
+### Audio cues (lib/sound.ts + hooks/useSoundCues.ts)
+
+`lib/sound.ts` is a self-contained audio-cue engine. It ships **no audio files and no third-party dependency** — every cue is synthesized at play time with the Web Audio API from a declarative list of partials (frequency, offset, duration, peak gain, oscillator type), routed through a master gain node and a low-pass filter.
+
+| Export | Purpose |
+| --- | --- |
+| `playCue(cue, { force })` | Plays one of `sessionStart`, `sessionComplete`, `sessionError`, `subagentSpawn`, `notification`, `connected`, `disconnected`, `click`. Returns whether audio was actually scheduled. `force` bypasses the per-cue flag and the rate limiter (used by the Settings previews). |
+| `getSoundPrefs()` / `setSoundPrefs(patch)` | Read / merge-write the `SoundPrefs` object persisted to `localStorage` under `agent-monitor-sound`. Defaults have `enabled: true`. |
+| `subscribeToSoundPrefs(handler)` | Subscribe to preference changes within the tab; returns an unsubscribe function. |
+| `installSoundUnlock()` / `unlockSound()` | Satisfy browser autoplay policy — cues stay silent until the first pointer / key / touch gesture. |
+| `DEFAULT_SOUND_PREFS` | The shipped defaults, also used as the merge base for partial saved objects. |
+
+`hooks/useSoundCues.ts` is the only consumer of the engine in the running app. Mounted once in `App.tsx`, it subscribes to `eventBus` (mapping `session_created`, `session_updated` with `status: "error"`, `agent_created` for subagents, and `new_event` for `Stop` / `SessionEnd` / `Notification`), to `eventBus.onConnection`, and installs a single delegated `pointerdown` listener for the interaction tick. It adds **no new WebSocket message types** and no server-side code.
+
+Playback is throttled by a per-cue cooldown (~350 ms; 45 ms for `click`) plus a global budget of 4 cues per 1.2 s, so a burst of WebSocket traffic never becomes a burst of sound. Every call degrades to a silent no-op when sound is disabled, the volume is zero, the cue's own toggle is off, no gesture has happened yet, or Web Audio is unavailable.
+
+Users control all of this from **Settings → Sound** (master toggle, volume slider, per-cue switches, preview button).
 
 ### Type Definitions (lib/types.ts)
 
