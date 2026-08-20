@@ -161,6 +161,19 @@ const SETTINGS_SECTIONS: {
   { id: "about", labelKey: "about.title", Icon: Server },
 ];
 
+// Keys that change a range input's value - the only ones that should trigger a
+// volume preview cue (Tab / Enter / character keys must stay silent).
+const VOLUME_PREVIEW_KEYS = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "Home",
+  "End",
+  "PageUp",
+  "PageDown",
+]);
+
 // ─── Notification preferences ───
 
 const NOTIF_KEY = "agent-monitor-notifications";
@@ -2185,7 +2198,11 @@ export function Settings() {
                   value={Math.round(soundPrefs.volume * 100)}
                   onChange={(e) => updateSoundPrefs({ volume: Number(e.target.value) / 100 })}
                   onPointerUp={() => playCue("sessionStart", { force: true })}
-                  onKeyUp={() => playCue("sessionStart", { force: true })}
+                  onKeyUp={(e) => {
+                    // Only the keys that actually move a range input; a bare
+                    // Tab or Enter must not fire a preview.
+                    if (VOLUME_PREVIEW_KEYS.has(e.key)) playCue("sessionStart", { force: true });
+                  }}
                   className="w-full accent-blue-500 cursor-pointer"
                   aria-label={t("sound.volume", "Volume")}
                 />

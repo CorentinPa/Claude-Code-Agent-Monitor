@@ -65,8 +65,12 @@ export const DEFAULT_SOUND_PREFS: SoundPrefs = {
   onInteraction: true,
 };
 
+/** The per-cue boolean flags in {@link SoundPrefs}, excluding the master switch
+ *  and the numeric volume - so a cue can never be gated on a non-boolean. */
+type CueFlag = Exclude<keyof SoundPrefs, "enabled" | "volume">;
+
 /** Maps a cue to the preference flag that gates it (master switch aside). */
-const CUE_PREF: Record<CueName, keyof SoundPrefs> = {
+const CUE_PREF: Record<CueName, CueFlag> = {
   sessionStart: "onSessionStart",
   sessionComplete: "onSessionComplete",
   sessionError: "onSessionError",
@@ -215,6 +219,10 @@ const COOLDOWN_MS: Partial<Record<CueName, number>> = {
 };
 /** Default per-cue cooldown when the map above has no entry. */
 const DEFAULT_COOLDOWN_MS = 350;
+/** Cues exempt from the shared burst budget. The budget exists to absorb bursty
+ *  WebSocket traffic; user-driven ticks are not that traffic, and letting a few
+ *  fast clicks fill the window would silence a session cue arriving right after. */
+const BUDGET_EXEMPT: ReadonlySet<CueName> = new Set<CueName>(["click"]);
 
 // ─── Audio graph ───
 
@@ -295,6 +303,12 @@ function allow(cue: CueName, now: number): boolean {
   const cooldown = COOLDOWN_MS[cue] ?? DEFAULT_COOLDOWN_MS;
   const last = lastPlayed.get(cue);
   if (last !== undefined && now - last < cooldown) return false;
+
+  // Exempt cues keep their own cooldown but never consume the shared budget.
+  if (BUDGET_EXEMPT.has(cue)) {
+    lastPlayed.set(cue, now);
+    return true;
+  }
 
   recent = recent.filter((t) => now - t < BURST_WINDOW_MS);
   if (recent.length >= BURST_LIMIT) return false;

@@ -13,13 +13,16 @@
 
 import { useEffect } from "react";
 import { eventBus } from "../lib/eventBus";
-import { installSoundUnlock, playCue } from "../lib/sound";
+import { installSoundUnlock, playCue, unlockSound } from "../lib/sound";
 import type { WSMessage, Session, Agent, DashboardEvent } from "../lib/types";
 
 /** Selector for elements whose activation earns an interaction tick. Limited to
  *  genuine controls so that plain text clicks and drags stay silent. */
 const INTERACTIVE_SELECTOR =
   'button, a[href], [role="button"], [role="tab"], [role="switch"], summary, input[type="checkbox"], input[type="radio"]';
+
+/** Upper bound on the per-session status map backing the error-cue dedup. */
+const MAX_TRACKED_SESSIONS = 500;
 
 /**
  * Wires dashboard events to audio cues for the lifetime of the component.
@@ -41,9 +44,17 @@ export function useSoundCues() {
       if (control.hasAttribute("disabled") || control.getAttribute("aria-disabled") === "true") {
         return;
       }
+      // This handler runs on the capture phase, ahead of installSoundUnlock's
+      // bubble-phase listener, so unlock here or the very first tick is lost.
+      unlockSound();
       playCue("click");
     };
     window.addEventListener("pointerdown", onPointerDown, { capture: true, passive: true });
+
+    // A session that stays in the error state keeps emitting `session_updated`.
+    // Remember the last status per session so the cue marks the transition into
+    // `error` rather than replaying once per cooldown window while it sits there.
+    const lastStatus = new Map<string, string>();
 
     const unsubscribeConnection = eventBus.onConnection((connected) => {
       playCue(connected ? "connected" : "disconnected");
@@ -56,7 +67,17 @@ export function useSoundCues() {
           break;
         case "session_updated": {
           const session = msg.data as Session;
-          if (session.status === "error") playCue("sessionError");
+          const previous = lastStatus.get(session.id);
+          if (session.status !== previous) {
+            // Bound the map so a long-lived tab tracking many sessions cannot
+            // grow it without limit; the oldest insertion is the first key.
+            if (!lastStatus.has(session.id) && lastStatus.size >= MAX_TRACKED_SESSIONS) {
+              const oldest = lastStatus.keys().next().value;
+              if (oldest !== undefined) lastStatus.delete(oldest);
+            }
+            lastStatus.set(session.id, session.status);
+            if (session.status === "error") playCue("sessionError");
+          }
           break;
         }
         case "agent_created": {
@@ -81,6 +102,7 @@ export function useSoundCues() {
       window.removeEventListener("pointerdown", onPointerDown, { capture: true });
       unsubscribeConnection();
       unsubscribeMessages();
+      lastStatus.clear();
     };
   }, []);
 }

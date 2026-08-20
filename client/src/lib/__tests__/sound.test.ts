@@ -71,6 +71,7 @@ async function freshModule(seed?: unknown) {
 }
 
 beforeEach(() => {
+  vi.useFakeTimers({ shouldAdvanceTime: true });
   vi.stubGlobal("AudioContext", FakeAudioContext);
   (window as unknown as { AudioContext: unknown }).AudioContext = FakeAudioContext;
 });
@@ -178,6 +179,19 @@ describe("playCue", () => {
       playCue("connected"),
     ];
     expect(results.filter(Boolean)).toHaveLength(4);
+  });
+
+  it("keeps the interaction tick out of the shared burst budget", async () => {
+    // Regression: `click` used to consume the 4-per-1.2s budget, so a few fast
+    // presses could silence a session cue arriving right after them.
+    const { playCue, unlockSound } = await freshModule();
+    unlockSound();
+    for (let i = 0; i < 6; i += 1) {
+      // Each tick is allowed by its own 45 ms cooldown once time has moved on.
+      vi.setSystemTime(new Date(Date.now() + 60));
+      expect(playCue("click")).toBe(true);
+    }
+    expect(playCue("sessionComplete")).toBe(true);
   });
 
   it("force bypasses the per-cue flag, the throttle, and the gesture gate", async () => {
