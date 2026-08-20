@@ -728,6 +728,9 @@ API-backed commands need the server running — when it isn't, **read-only comma
 | `npm run build`         | Build the React client to `client/dist/`                   |
 | `npm start`             | Start production server (serves built client)              |
 | `npm test`              | Run the full suite (server `node --test` + client Vitest)  |
+| `npm run verify`        | Run the whole local gate in one command: authorship-header audit, Prettier check, client typecheck, backend tests, frontend tests |
+| `npm run check:headers` | Audit that every applicable source file carries the authorship header |
+| `npm run typecheck:client` | Typecheck the client (`tsc -b`) — the same check the production build runs before Vite |
 | `npm run test:server`   | Run backend tests (`node --test server/__tests__/`)        |
 | `npm run test:client`   | Run frontend Vitest tests, including **render snapshots for every screen** (`client/src/pages/__tests__/screens.snapshot.test.tsx`); regenerate baselines after intentional UI changes with `cd client && npx vitest run -u` |
 | `npm run install-hooks` | Configure Claude Code hooks in `~/.claude/settings.json`   |

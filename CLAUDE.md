@@ -24,6 +24,7 @@
 - Setup: `npm run setup`
 - Dev: `npm run dev`
 - Prod build/start: `npm run build` then `npm start`
+- Full local gate (headers + format + client typecheck + server + client tests): `npm run verify`
 - Server tests: `npm run test:server`
 - Client tests: `npm run test:client`
 - MCP install/build/start: `npm run mcp:install`, `npm run mcp:build`, `npm run mcp:start`
@@ -32,6 +33,7 @@
 - CLI (after setup): `ccam <command>` — terminal access to the full dashboard surface (`bin/ccam.js`; `ccam help` lists commands)
 
 ## Testing and verification policy
+- `npm run verify` runs the whole local gate in one command (header audit, format check, client typecheck, server tests, client tests) and is the fastest way to confirm a change-set before opening a PR. It includes `tsc -b` because Vitest transpiles without typechecking — a test file can pass locally and still break the production build.
 - Backend changes: run `npm run test:server` before finishing.
 - Frontend changes: run `npm run test:client` when relevant. This includes per-screen render snapshots (`client/src/pages/__tests__/screens.snapshot.test.tsx`). If a UI change is intentional, review the snapshot diff and regenerate baselines with `cd client && npx vitest run -u`; never blindly update snapshots to make tests pass.
 - MCP changes: run `npm run mcp:typecheck` and `npm run mcp:build`.

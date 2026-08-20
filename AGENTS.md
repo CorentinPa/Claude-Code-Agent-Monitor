@@ -20,6 +20,7 @@
 - `scripts/` for hook/install/import/cleanup utilities.
 
 ## Validation expectations
+- Full local gate (headers + format + client typecheck + server + client tests): `npm run verify`
 - Backend changes: run `npm run test:server` when possible.
 - Frontend changes: run `npm run test:client` when possible.
 - MCP changes: run `npm run mcp:typecheck` and `npm run mcp:build`.
