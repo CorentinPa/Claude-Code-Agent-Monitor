@@ -3,7 +3,9 @@
  * @description Application shell that frames every authenticated route: persistent
  * sidebar, main content column, update notifier, and the Tabby assistant overlay.
  * The layout is the single parent route in {@link App} — child pages render inside
- * React Router's `<Outlet />` so navigation never remounts chrome.
+ * React Router's `<Outlet />` so navigation never remounts chrome. As the one
+ * component guaranteed to mount exactly once per page load, it also applies the
+ * user's theme preference and re-applies it on system/storage changes.
  *
  * ## Sidebar persistence
  * Collapsed state is read once from `localStorage` via {@link loadCollapsed} and
@@ -45,6 +47,7 @@
  * - `./Sidebar`
  * - `./UpdateNotifier`
  * - `./Tabby/Tabby`
+ * - `../lib/theme`
  *
  * ## Public surface
  * - `Layout` — exported API; see TSDoc on the symbol for behavior.
@@ -69,12 +72,13 @@
  *
  * ----------------------------------------------------------------------------- */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Outlet } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Sidebar, SIDEBAR_STORAGE_KEY, loadCollapsed } from "./Sidebar";
 import { UpdateNotifier } from "./UpdateNotifier";
 import { Tabby } from "./Tabby/Tabby";
+import { applyTheme, subscribeToThemePrefs } from "../lib/theme";
 
 /** Props for {@link Layout}. */
 interface LayoutProps {
@@ -98,6 +102,11 @@ export function Layout({ wsConnected }: LayoutProps) {
       } catch {}
       return next;
     });
+  }, []);
+
+  useEffect(() => {
+    applyTheme();
+    return subscribeToThemePrefs(applyTheme);
   }, []);
 
   return (
