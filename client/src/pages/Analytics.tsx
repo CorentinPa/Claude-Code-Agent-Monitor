@@ -78,6 +78,15 @@ import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
 import { fmt, fmtCost, fmtCostFull, formatModelName } from "../lib/format";
 import { getCurrencyPrefs } from "../lib/currency";
+import {
+  CHART_TOOLTIP_BG,
+  CHART_TOOLTIP_BORDER,
+  CHART_TRACK,
+  CHART_HEATMAP_EMPTY,
+  CHART_OVERLAY_1,
+  CHART_OVERLAY_2,
+} from "../lib/chartTheme";
+import { getEffectiveTheme } from "../lib/theme";
 import { Tip } from "../components/Tip";
 import { PaginatedLegend } from "../components/PaginatedLegend";
 import { Skeleton, StatValueSkeleton, TextSkeleton } from "../components/Skeleton";
@@ -89,7 +98,7 @@ function ChartTooltip({ x, y, children }: { x: number; y: number; children: Reac
   const nearRight = x > window.innerWidth - 200;
   return (
     <div
-      className="fixed z-50 px-2 py-1.5 text-xs bg-[#12121f] border border-[#2a2a4a] rounded shadow-xl text-gray-200 pointer-events-none whitespace-nowrap"
+      className={`fixed z-50 px-2 py-1.5 text-xs bg-[${CHART_TOOLTIP_BG}] border border-[${CHART_TOOLTIP_BORDER}] rounded shadow-xl text-gray-200 pointer-events-none whitespace-nowrap`}
       style={{
         left: nearRight ? x - 14 : x + 14,
         top: y - 10,
@@ -128,17 +137,28 @@ function useTooltip() {
 // ── Heatmap ──────────────────────────────────────────────────────────────────
 
 function cellColor(count: number, max: number) {
-  if (count === 0) return "#161625";
+  const isLight = getEffectiveTheme() === "light";
+  if (count === 0) return CHART_HEATMAP_EMPTY;
   // Log scale + RGB interpolation across a wide color ramp for maximum perceptual range
   const t = Math.log(count + 1) / Math.log(Math.max(max, 1) + 1);
-  // Ramp: near-black indigo → deep indigo → bright indigo → lavender
   type RGB = [number, number, number];
-  const stops: RGB[] = [
-    [22, 20, 60], // near-black indigo
-    [55, 48, 163], // deep indigo
-    [99, 102, 241], // bright indigo
-    [199, 210, 254], // lavender
-  ];
+  // Dark: near-black indigo -> deep indigo -> bright indigo -> lavender.
+  // Light: near-white lavender -> light lavender -> bright indigo -> deep indigo
+  // (same four indigo landmarks, direction reversed so low counts stay pale
+  // on a light canvas instead of near-black).
+  const stops: RGB[] = isLight
+    ? [
+        [238, 238, 252],
+        [199, 210, 254],
+        [99, 102, 241],
+        [49, 46, 129],
+      ]
+    : [
+        [22, 20, 60],
+        [55, 48, 163],
+        [99, 102, 241],
+        [199, 210, 254],
+      ];
   const scaled = t * (stops.length - 1);
   const lo = Math.min(Math.floor(scaled), stops.length - 2);
   const frac = scaled - lo;
@@ -267,7 +287,7 @@ function Heatmap({ weeks }: { weeks: Array<Array<{ date: string; count: number }
                   height: 13,
                   borderRadius: 2,
                   backgroundColor: cellColor(cell.count, maxCount),
-                  border: "1px solid rgba(255,255,255,0.04)",
+                  border: `1px solid ${CHART_OVERLAY_1}`,
                   flexShrink: 0,
                   cursor: "default",
                 }}
@@ -289,7 +309,7 @@ function Heatmap({ weeks }: { weeks: Array<Array<{ date: string; count: number }
                 height: 13,
                 borderRadius: 2,
                 backgroundColor: cellColor(v, maxCount),
-                border: "1px solid rgba(255,255,255,0.06)",
+                border: `1px solid ${CHART_OVERLAY_2}`,
               }}
             />
           );
@@ -514,7 +534,7 @@ function DonutChart({
     <div className="flex items-center justify-center gap-6 w-full">
       {node}
       <svg width={128} height={128} viewBox="0 0 128 128" className="flex-shrink-0">
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#1e1e2e" strokeWidth={stroke} />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={CHART_TRACK} strokeWidth={stroke} />
         {segments.map(({ label, value, color }, i) => {
           const dash = (value / total) * circumference;
           const gap = circumference - dash;
