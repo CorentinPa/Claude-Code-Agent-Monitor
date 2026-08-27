@@ -269,7 +269,7 @@ export function SessionComplexityScatter({ data, onSessionClick }: SessionComple
       .range([MIN_BUBBLE_R, MAX_BUBBLE_R]);
 
     // Grid lines
-    const gridColor = "var(--surface-5)";
+    const gridColor = "rgb(var(--surface-5))";
 
     g.append("g")
       .attr("class", "grid-x")
@@ -310,9 +310,9 @@ export function SessionComplexityScatter({ data, onSessionClick }: SessionComple
           .tickFormat((d) => fmtXTick(d as number))
       )
       .call((sel) => {
-        sel.select(".domain").attr("stroke", "var(--border-light)");
-        sel.selectAll(".tick line").attr("stroke", "var(--border-light)");
-        sel.selectAll(".tick text").attr("fill", "var(--gray-500)").attr("font-size", "11");
+        sel.select(".domain").attr("stroke", "rgb(var(--border-light))");
+        sel.selectAll(".tick line").attr("stroke", "rgb(var(--border-light))");
+        sel.selectAll(".tick text").attr("fill", "rgb(var(--gray-500))").attr("font-size", "11");
       });
 
     // X axis label
@@ -320,7 +320,7 @@ export function SessionComplexityScatter({ data, onSessionClick }: SessionComple
       .attr("x", innerW / 2)
       .attr("y", innerH + 44)
       .attr("text-anchor", "middle")
-      .attr("fill", "var(--gray-500)")
+      .attr("fill", "rgb(var(--gray-500))")
       .attr("font-size", "11")
       .text(t("complexity.duration"));
 
@@ -328,9 +328,9 @@ export function SessionComplexityScatter({ data, onSessionClick }: SessionComple
     g.append("g")
       .call(d3.axisLeft(yScale).ticks(5).tickFormat(d3.format("d")))
       .call((sel) => {
-        sel.select(".domain").attr("stroke", "var(--border-light)");
-        sel.selectAll(".tick line").attr("stroke", "var(--border-light)");
-        sel.selectAll(".tick text").attr("fill", "var(--gray-500)").attr("font-size", "11");
+        sel.select(".domain").attr("stroke", "rgb(var(--border-light))");
+        sel.selectAll(".tick line").attr("stroke", "rgb(var(--border-light))");
+        sel.selectAll(".tick text").attr("fill", "rgb(var(--gray-500))").attr("font-size", "11");
       });
 
     // Y axis label
@@ -339,7 +339,7 @@ export function SessionComplexityScatter({ data, onSessionClick }: SessionComple
       .attr("x", -innerH / 2)
       .attr("y", -40)
       .attr("text-anchor", "middle")
-      .attr("fill", "var(--gray-500)")
+      .attr("fill", "rgb(var(--gray-500))")
       .attr("font-size", "11")
       .text(t("complexity.agentCount"));
 

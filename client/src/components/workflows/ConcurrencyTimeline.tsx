@@ -155,7 +155,7 @@ function LaneRow({ lane, color, maxCount, onShowTip, onHideTip }: LaneRowProps) 
           className="absolute top-0 bottom-0 flex items-center text-[11px] font-medium tabular-nums"
           style={{
             left: barPct > 15 ? "8px" : `calc(${barPct}% + 6px)`,
-            color: barPct > 15 ? "white" : "var(--gray-400)",
+            color: barPct > 15 ? "white" : "rgb(var(--gray-400))",
           }}
         >
           {lane.count}

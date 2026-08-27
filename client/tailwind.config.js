@@ -4,6 +4,17 @@
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
+// Colors backed by CSS variables need this factory (not a plain `var(--x)`
+// string) so Tailwind's opacity modifiers (e.g. bg-accent/15) can generate
+// rgb(var(--x) / <alpha>) — the underlying variable stores an "R G B" channel
+// triple, not a hex string, to make that possible.
+function withOpacityValue(variable) {
+  return ({ opacityValue }) =>
+    opacityValue === undefined
+      ? `rgb(var(${variable}))`
+      : `rgb(var(${variable}) / ${opacityValue})`;
+}
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
@@ -11,33 +22,33 @@ export default {
     extend: {
       colors: {
         gray: {
-          50: "var(--gray-50)",
-          100: "var(--gray-100)",
-          200: "var(--gray-200)",
-          300: "var(--gray-300)",
-          400: "var(--gray-400)",
-          500: "var(--gray-500)",
-          600: "var(--gray-600)",
-          700: "var(--gray-700)",
-          800: "var(--gray-800)",
-          900: "var(--gray-900)",
-          950: "var(--gray-950)",
+          50: withOpacityValue("--gray-50"),
+          100: withOpacityValue("--gray-100"),
+          200: withOpacityValue("--gray-200"),
+          300: withOpacityValue("--gray-300"),
+          400: withOpacityValue("--gray-400"),
+          500: withOpacityValue("--gray-500"),
+          600: withOpacityValue("--gray-600"),
+          700: withOpacityValue("--gray-700"),
+          800: withOpacityValue("--gray-800"),
+          900: withOpacityValue("--gray-900"),
+          950: withOpacityValue("--gray-950"),
         },
         surface: {
-          0: "var(--surface-0)",
-          1: "var(--surface-1)",
-          2: "var(--surface-2)",
-          3: "var(--surface-3)",
-          4: "var(--surface-4)",
-          5: "var(--surface-5)",
+          0: withOpacityValue("--surface-0"),
+          1: withOpacityValue("--surface-1"),
+          2: withOpacityValue("--surface-2"),
+          3: withOpacityValue("--surface-3"),
+          4: withOpacityValue("--surface-4"),
+          5: withOpacityValue("--surface-5"),
         },
         border: {
-          DEFAULT: "var(--border)",
-          light: "var(--border-light)",
+          DEFAULT: withOpacityValue("--border"),
+          light: withOpacityValue("--border-light"),
         },
         accent: {
-          DEFAULT: "var(--accent)",
-          hover: "var(--accent-hover)",
+          DEFAULT: withOpacityValue("--accent"),
+          hover: withOpacityValue("--accent-hover"),
           muted: "var(--accent-muted)",
         },
       },

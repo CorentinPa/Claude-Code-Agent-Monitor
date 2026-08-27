@@ -10,28 +10,31 @@
 
 :root {
   color-scheme: dark;
-  --surface-0: #06060a;
-  --surface-1: #0c0c14;
-  --surface-2: #13131e;
-  --surface-3: #1a1a28;
-  --surface-4: #222233;
-  --surface-5: #2a2a3d;
-  --border: #2a2a3d;
-  --border-light: #363650;
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
+  /* RGB channel triples (no #, no rgb()): required so Tailwind's opacity
+     modifiers (e.g. bg-accent/15) can inject alpha via rgb(var(--x) / <a>).
+     A bare var(--x) string can't be parsed into channels at build time. */
+  --surface-0: 6 6 10;
+  --surface-1: 12 12 20;
+  --surface-2: 19 19 30;
+  --surface-3: 26 26 40;
+  --surface-4: 34 34 51;
+  --surface-5: 42 42 61;
+  --border: 42 42 61;
+  --border-light: 54 54 80;
+  --accent: 99 102 241;
+  --accent-hover: 129 140 248;
   --accent-muted: rgba(99, 102, 241, 0.15);
-  --gray-50: #f9fafb;
-  --gray-100: #f3f4f6;
-  --gray-200: #e5e7eb;
-  --gray-300: #d1d5db;
-  --gray-400: #9ca3af;
-  --gray-500: #6b7280;
-  --gray-600: #4b5563;
-  --gray-700: #374151;
-  --gray-800: #1f2937;
-  --gray-900: #111827;
-  --gray-950: #030712;
+  --gray-50: 249 250 251;
+  --gray-100: 243 244 246;
+  --gray-200: 229 231 235;
+  --gray-300: 209 213 219;
+  --gray-400: 156 163 175;
+  --gray-500: 107 114 128;
+  --gray-600: 75 85 99;
+  --gray-700: 55 65 81;
+  --gray-800: 31 41 55;
+  --gray-900: 17 24 39;
+  --gray-950: 3 7 18;
   /* Chart/visualization tokens */
   --chart-tooltip-bg: #12121f;
   --chart-tooltip-border: #2a2a4a;
@@ -75,28 +78,28 @@
 
 [data-theme="light"] {
   color-scheme: light;
-  --surface-0: #ffffff;
-  --surface-1: #f8f9fb;
-  --surface-2: #f1f2f5;
-  --surface-3: #e7e9ee;
-  --surface-4: #dde0e6;
-  --surface-5: #d1d5db;
-  --border: #e2e4e9;
-  --border-light: #cbced6;
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
+  --surface-0: 255 255 255;
+  --surface-1: 248 249 251;
+  --surface-2: 241 242 245;
+  --surface-3: 231 233 238;
+  --surface-4: 221 224 230;
+  --surface-5: 209 213 219;
+  --border: 226 228 233;
+  --border-light: 203 206 214;
+  --accent: 99 102 241;
+  --accent-hover: 129 140 248;
   --accent-muted: rgba(99, 102, 241, 0.12);
-  --gray-50: #030712;
-  --gray-100: #111827;
-  --gray-200: #1f2937;
-  --gray-300: #374151;
-  --gray-400: #4b5563;
-  --gray-500: #6b7280;
-  --gray-600: #9ca3af;
-  --gray-700: #d1d5db;
-  --gray-800: #e5e7eb;
-  --gray-900: #f3f4f6;
-  --gray-950: #f9fafb;
+  --gray-50: 3 7 18;
+  --gray-100: 17 24 39;
+  --gray-200: 31 41 55;
+  --gray-300: 55 65 81;
+  --gray-400: 75 85 99;
+  --gray-500: 107 114 128;
+  --gray-600: 156 163 175;
+  --gray-700: 209 213 219;
+  --gray-800: 229 231 235;
+  --gray-900: 243 244 246;
+  --gray-950: 249 250 251;
   --chart-tooltip-bg: #ffffff;
   --chart-tooltip-border: #e2e4e9;
   --chart-tooltip-title: #111827;

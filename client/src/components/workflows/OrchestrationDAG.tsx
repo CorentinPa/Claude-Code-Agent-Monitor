@@ -191,9 +191,9 @@ function successRate(completed: number, total: number): string {
 function outcomeColorSet(status: string) {
   return (
     OUTCOME_COLORS[status] ?? {
-      fill: "var(--surface-4)",
-      stroke: "var(--border-light)",
-      text: "var(--gray-400)",
+      fill: "rgb(var(--surface-4))",
+      stroke: "rgb(var(--border-light))",
+      text: "rgb(var(--gray-400))",
     }
   );
 }
@@ -615,7 +615,7 @@ export function OrchestrationDAG({ data, onNodeClick, selectedNode }: Orchestrat
       .attr("x", (_, i) => layerXPositions[i] ?? 0)
       .attr("y", 22)
       .attr("text-anchor", "middle")
-      .attr("fill", "var(--gray-500)")
+      .attr("fill", "rgb(var(--gray-500))")
       .attr("font-size", "10px")
       .attr("font-weight", "500")
       .attr("letter-spacing", "0.08em")
@@ -679,7 +679,7 @@ export function OrchestrationDAG({ data, onNodeClick, selectedNode }: Orchestrat
         .append("path")
         .attr("d", path)
         .attr("fill", "none")
-        .attr("stroke", isZero ? "var(--surface-5)" : "#4f46e5")
+        .attr("stroke", isZero ? "rgb(var(--surface-5))" : "#4f46e5")
         .attr("stroke-width", isZero ? 1 : stroke)
         .attr("stroke-opacity", isZero ? 0.3 : 0.55)
         .attr("stroke-linecap", "round");

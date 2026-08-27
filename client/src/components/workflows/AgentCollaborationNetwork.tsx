@@ -310,7 +310,7 @@ export function AgentCollaborationNetwork({
       .attr("orient", "auto")
       .append("path")
       .attr("d", "M0,0 L10,3 L0,6 Z")
-      .attr("fill", "var(--gray-500)");
+      .attr("fill", "rgb(var(--gray-500))");
 
     // Clone data
     const simNodes = nodes.map((n) => ({ ...n }));
@@ -343,7 +343,7 @@ export function AgentCollaborationNetwork({
       .data(simLinks)
       .join("path")
       .attr("fill", "none")
-      .attr("stroke", "var(--gray-500)")
+      .attr("stroke", "rgb(var(--gray-500))")
       .attr("stroke-opacity", 0.55)
       .attr("stroke-width", (d) => Math.max(1.5, strokeScale(d.weight)))
       .attr("marker-end", "url(#arrowhead)");
@@ -627,8 +627,8 @@ export function AgentCollaborationNetwork({
           </span>
           <div className="ml-auto flex items-center gap-1.5">
             <svg width="20" height="8" className="flex-shrink-0">
-              <line x1="0" y1="4" x2="14" y2="4" stroke="var(--gray-500)" strokeWidth="1.5" />
-              <polygon points="14,1 20,4 14,7" fill="var(--gray-500)" />
+              <line x1="0" y1="4" x2="14" y2="4" stroke="rgb(var(--gray-500))" strokeWidth="1.5" />
+              <polygon points="14,1 20,4 14,7" fill="rgb(var(--gray-500))" />
             </svg>
             <span className="text-[11px] text-gray-500">{t("pipeline.legendDesc")}</span>
           </div>

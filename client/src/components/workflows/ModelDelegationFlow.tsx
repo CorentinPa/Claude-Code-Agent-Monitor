@@ -194,7 +194,7 @@ function renderFlow(
     .attr("x", PADDING.left + NODE_W / 2)
     .attr("y", labelY)
     .attr("text-anchor", "middle")
-    .attr("fill", "var(--gray-500)")
+    .attr("fill", "rgb(var(--gray-500))")
     .attr("font-size", 11)
     .attr("font-family", "Inter, sans-serif")
     .attr("letter-spacing", "0.08em")
@@ -204,7 +204,7 @@ function renderFlow(
     .attr("x", PADDING.left + NODE_W + COL_GAP + NODE_W / 2)
     .attr("y", labelY)
     .attr("text-anchor", "middle")
-    .attr("fill", "var(--gray-500)")
+    .attr("fill", "rgb(var(--gray-500))")
     .attr("font-size", 11)
     .attr("font-family", "Inter, sans-serif")
     .attr("letter-spacing", "0.08em")
@@ -228,7 +228,7 @@ function renderFlow(
     g.append("path")
       .attr("d", `M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`)
       .attr("fill", "none")
-      .attr("stroke", "var(--surface-5)")
+      .attr("stroke", "rgb(var(--surface-5))")
       .attr("stroke-width", 1.5)
       .attr("opacity", 0.7);
   });
@@ -300,7 +300,7 @@ function renderFlow(
       ng.append("text")
         .attr("x", 12)
         .attr("y", 66)
-        .attr("fill", "var(--gray-500)")
+        .attr("fill", "rgb(var(--gray-500))")
         .attr("font-size", 9.5)
         .attr("font-family", "Inter, sans-serif")
         .text(t("modelDelegation.tokensCount", { tokens: fmtTokens(node.totalTokens) }));
@@ -312,7 +312,7 @@ function renderFlow(
         .attr("x", NODE_W - 10)
         .attr("y", 66)
         .attr("text-anchor", "end")
-        .attr("fill", "var(--gray-500)")
+        .attr("fill", "rgb(var(--gray-500))")
         .attr("font-size", 9.5)
         .attr("font-family", "Inter, sans-serif")
         .text(t("modelDelegation.sessionsCount", { count: node.sessionCount }));

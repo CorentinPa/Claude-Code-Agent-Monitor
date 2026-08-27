@@ -158,7 +158,7 @@ function renderHistogram(svg: SVGSVGElement, histo: HistogramBucket[], opts: His
     .attr("x2", innerW)
     .attr("y1", (d) => yScale(d))
     .attr("y2", (d) => yScale(d))
-    .attr("stroke", "var(--surface-5)")
+    .attr("stroke", "rgb(var(--surface-5))")
     .attr("stroke-width", 1);
 
   // Y axis (sessions)
@@ -173,7 +173,7 @@ function renderHistogram(svg: SVGSVGElement, histo: HistogramBucket[], opts: His
     )
     .call((ax) => ax.select(".domain").remove())
     .selectAll("text")
-    .attr("fill", "var(--gray-500)")
+    .attr("fill", "rgb(var(--gray-500))")
     .attr("font-size", 10)
     .attr("font-family", "Inter, sans-serif");
 
@@ -183,7 +183,7 @@ function renderHistogram(svg: SVGSVGElement, histo: HistogramBucket[], opts: His
     .call(d3.axisBottom(xScale).tickSize(0).tickPadding(8))
     .call((ax) => ax.select(".domain").remove())
     .selectAll("text")
-    .attr("fill", "var(--gray-400)")
+    .attr("fill", "rgb(var(--gray-400))")
     .attr("font-size", 10)
     .attr("font-family", "Inter, sans-serif");
 
@@ -192,7 +192,7 @@ function renderHistogram(svg: SVGSVGElement, histo: HistogramBucket[], opts: His
     .attr("x", innerW / 2)
     .attr("y", innerH + 38)
     .attr("text-anchor", "middle")
-    .attr("fill", "var(--gray-500)")
+    .attr("fill", "rgb(var(--gray-500))")
     .attr("font-size", 10)
     .attr("font-weight", 500)
     .attr("font-family", "Inter, sans-serif")
@@ -203,7 +203,7 @@ function renderHistogram(svg: SVGSVGElement, histo: HistogramBucket[], opts: His
     .attr("x", -innerH / 2)
     .attr("y", -38)
     .attr("text-anchor", "middle")
-    .attr("fill", "var(--gray-500)")
+    .attr("fill", "rgb(var(--gray-500))")
     .attr("font-size", 10)
     .attr("font-weight", 500)
     .attr("font-family", "Inter, sans-serif")
@@ -249,7 +249,7 @@ function renderHistogram(svg: SVGSVGElement, histo: HistogramBucket[], opts: His
         .attr("y", innerH - 1)
         .attr("width", bw)
         .attr("height", 1)
-        .attr("fill", "var(--surface-5)");
+        .attr("fill", "rgb(var(--surface-5))");
     }
 
     // Transparent, full-height hover target on top of the bar.
