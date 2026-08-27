@@ -573,5 +573,12 @@
     "removeKeep": "Supprimer (conserver les données)",
     "remoteSourceBadgeTitle": "Collecté depuis une machine distante"
   },
-  "cursorPathsNote": "Information : les sessions Cursor comptent aussi ici — Cursor utilise justement les mêmes chemins ~/.claude que Claude Code (localement et sur les distantes synchronisées)."
+  "cursorPathsNote": "Information : les sessions Cursor comptent aussi ici — Cursor utilise justement les mêmes chemins ~/.claude que Claude Code (localement et sur les distantes synchronisées).",
+  "appearance": {
+    "title": "Apparence",
+    "description": "Choisis l'apparence du tableau de bord. «Système» suit le réglage de l'OS et se met à jour en direct s'il change.",
+    "dark": "Sombre",
+    "light": "Clair",
+    "system": "Système"
+  }
 }

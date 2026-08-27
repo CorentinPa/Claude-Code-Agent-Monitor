@@ -2769,6 +2769,12 @@ Components that consume this: SessionDetail, Analytics (donut chart + breakdown)
 
 `client/src/lib/currency.ts` owns an optional USD → EUR display-currency preference (`localStorage` key `ccam-currency-prefs`, `{ enabled, eurPerUsd }`), following the same singleton + `CustomEvent` pattern as `sound.ts`. `eurPerUsd` is set manually in Settings → Dashboard Data, not fetched from a live rate feed. `format.ts`'s `fmtCost`/`fmtCostFull`/`fmtCostBare`, `SessionCard`'s local cost formatter, `Settings.tsx`'s pricing-table `formatUsdRate`, and `Run.tsx`'s footer cost stat all read this preference to convert the amount and swap the `$`/`€` symbol. Conversion is display-only: stored costs, exports, and the pricing rules themselves stay in USD.
 
+### Theme (Client)
+
+`client/src/lib/theme.ts` owns a `dark | light | system` preference (`localStorage` key `ccam-theme`), following the same singleton + `CustomEvent` pattern as `sound.ts`/`currency.ts`. `"system"` resolves via `prefers-color-scheme` and stays live-reactive to OS changes. `applyTheme()` sets `data-theme` on `<html>`; every other color in the app follows automatically through CSS custom properties defined in `client/src/index.css` (`:root` for dark, `[data-theme="light"]` for light) that `tailwind.config.js`'s `gray`/`surface`/`border`/`accent` colors resolve through. An inline script in `index.html` applies the theme before first paint to avoid a flash of the wrong theme.
+
+Chart/visualization colors (`client/src/lib/chartTheme.ts` plus 12 files under `client/src/pages/` and `client/src/components/workflows/`) split into **data-mark colors** (categorical series/per-tool/per-family accent hues — identical in both themes, already readable on either background) and **canvas-dependent colors** (tooltip chrome, ring/donut tracks, heatmap empty cells, `OrchestrationDAG`'s node gradient fills — real distinct light-mode values via dedicated CSS variables).
+
 ### Data Flow
 
 ```mermaid

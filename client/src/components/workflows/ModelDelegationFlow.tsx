@@ -64,6 +64,14 @@ import { useTranslation } from "react-i18next";
 import * as d3 from "d3";
 import type { ModelDelegationData } from "../../lib/types";
 import { formatModelName } from "../../lib/format";
+import {
+  CHART_TOOLTIP_BG,
+  CHART_TOOLTIP_BORDER,
+  CHART_TOOLTIP_TITLE,
+  CHART_TOOLTIP_LABEL,
+  CHART_TOOLTIP_VALUE,
+  CHART_TOOLTIP_DESC,
+} from "../../lib/chartTheme";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -89,25 +97,25 @@ const FAMILY_COLORS = {
   opus: {
     grad: ["#7c3aed", "#a855f7"] as [string, string],
     stroke: "#a855f7",
-    text: "#e9d5ff",
+    text: "var(--family-opus-text)",
     badge: "rgba(168,85,247,0.15)",
   },
   sonnet: {
     grad: ["#1d4ed8", "#3b82f6"] as [string, string],
     stroke: "#3b82f6",
-    text: "#bfdbfe",
+    text: "var(--family-sonnet-text)",
     badge: "rgba(59,130,246,0.15)",
   },
   haiku: {
     grad: ["#065f46", "#10b981"] as [string, string],
     stroke: "#10b981",
-    text: "#a7f3d0",
+    text: "var(--family-haiku-text)",
     badge: "rgba(16,185,129,0.15)",
   },
   other: {
     grad: ["#374151", "#6b7280"] as [string, string],
     stroke: "#6b7280",
-    text: "#d1d5db",
+    text: "var(--family-other-text)",
     badge: "rgba(107,114,128,0.15)",
   },
 } as const;
@@ -186,7 +194,7 @@ function renderFlow(
     .attr("x", PADDING.left + NODE_W / 2)
     .attr("y", labelY)
     .attr("text-anchor", "middle")
-    .attr("fill", "#6b7280")
+    .attr("fill", "rgb(var(--gray-500))")
     .attr("font-size", 11)
     .attr("font-family", "Inter, sans-serif")
     .attr("letter-spacing", "0.08em")
@@ -196,7 +204,7 @@ function renderFlow(
     .attr("x", PADDING.left + NODE_W + COL_GAP + NODE_W / 2)
     .attr("y", labelY)
     .attr("text-anchor", "middle")
-    .attr("fill", "#6b7280")
+    .attr("fill", "rgb(var(--gray-500))")
     .attr("font-size", 11)
     .attr("font-family", "Inter, sans-serif")
     .attr("letter-spacing", "0.08em")
@@ -220,7 +228,7 @@ function renderFlow(
     g.append("path")
       .attr("d", `M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`)
       .attr("fill", "none")
-      .attr("stroke", "#2a2a3d")
+      .attr("stroke", "rgb(var(--surface-5))")
       .attr("stroke-width", 1.5)
       .attr("opacity", 0.7);
   });
@@ -292,7 +300,7 @@ function renderFlow(
       ng.append("text")
         .attr("x", 12)
         .attr("y", 66)
-        .attr("fill", "#6b7280")
+        .attr("fill", "rgb(var(--gray-500))")
         .attr("font-size", 9.5)
         .attr("font-family", "Inter, sans-serif")
         .text(t("modelDelegation.tokensCount", { tokens: fmtTokens(node.totalTokens) }));
@@ -304,7 +312,7 @@ function renderFlow(
         .attr("x", NODE_W - 10)
         .attr("y", 66)
         .attr("text-anchor", "end")
-        .attr("fill", "#6b7280")
+        .attr("fill", "rgb(var(--gray-500))")
         .attr("font-size", 9.5)
         .attr("font-family", "Inter, sans-serif")
         .text(t("modelDelegation.sessionsCount", { count: node.sessionCount }));
@@ -440,9 +448,9 @@ export function ModelDelegationFlow({ data }: ModelDelegationFlowProps) {
           opacity: 0,
           left: 0,
           top: 0,
-          background: "#12121f",
-          border: "1px solid #2a2a4a",
-          color: "#e2e8f0",
+          background: CHART_TOOLTIP_BG,
+          border: `1px solid ${CHART_TOOLTIP_BORDER}`,
+          color: CHART_TOOLTIP_TITLE,
           minWidth: 240,
           maxWidth: 320,
           transition: "opacity 120ms ease-out",
@@ -490,13 +498,12 @@ function buildModelDelegationTooltip(
       : t("modelDelegation.tooltip.subagentModel");
 
   const title = document.createElement("p");
-  title.style.cssText = "font-size:12px;font-weight:600;color:#e2e8f0;margin:0";
+  title.style.cssText = `font-size:12px;font-weight:600;color:${CHART_TOOLTIP_TITLE};margin:0`;
   title.textContent = node.label;
   el.appendChild(title);
 
   const subtitle = document.createElement("p");
-  subtitle.style.cssText =
-    "font-size:10px;color:#64748b;margin:2px 0 8px;text-transform:uppercase;letter-spacing:0.05em";
+  subtitle.style.cssText = `font-size:10px;color:${CHART_TOOLTIP_LABEL};margin:2px 0 8px;text-transform:uppercase;letter-spacing:0.05em`;
   subtitle.textContent = `${sideLabel} · ${node.family}`;
   el.appendChild(subtitle);
 
@@ -505,10 +512,10 @@ function buildModelDelegationTooltip(
     row.style.cssText =
       "display:flex;justify-content:space-between;gap:16px;font-size:11px;line-height:1.6";
     const lbl = document.createElement("span");
-    lbl.style.color = "#64748b";
+    lbl.style.color = CHART_TOOLTIP_LABEL;
     lbl.textContent = label;
     const val = document.createElement("span");
-    val.style.cssText = "color:#cbd5e1;font-weight:500;font-variant-numeric:tabular-nums";
+    val.style.cssText = `color:${CHART_TOOLTIP_VALUE};font-weight:500;font-variant-numeric:tabular-nums`;
     val.textContent = value;
     row.appendChild(lbl);
     row.appendChild(val);
@@ -523,13 +530,12 @@ function buildModelDelegationTooltip(
   addRow(t("modelDelegation.tooltip.totalTokens"), node.totalTokens.toLocaleString());
 
   const desc = document.createElement("p");
-  desc.style.cssText =
-    "font-size:11px;color:#94a3b8;line-height:1.45;border-top:1px solid #2a2a4a;padding-top:8px;margin:8px 0 0";
+  desc.style.cssText = `font-size:11px;color:${CHART_TOOLTIP_DESC};line-height:1.45;border-top:1px solid ${CHART_TOOLTIP_BORDER};padding-top:8px;margin:8px 0 0`;
   desc.textContent = describeFamily(node.family, t);
   el.appendChild(desc);
 
   const hint = document.createElement("p");
-  hint.style.cssText = "font-size:11px;color:#64748b;line-height:1.45;margin:6px 0 0";
+  hint.style.cssText = `font-size:11px;color:${CHART_TOOLTIP_LABEL};line-height:1.45;margin:6px 0 0`;
   hint.textContent =
     node.side === "main"
       ? t("modelDelegation.tooltip.lines.main")

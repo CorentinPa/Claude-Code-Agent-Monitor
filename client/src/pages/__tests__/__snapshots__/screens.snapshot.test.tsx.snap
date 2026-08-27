@@ -1268,51 +1268,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1320,51 +1294,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1372,51 +1320,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1424,51 +1346,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1476,51 +1372,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1528,51 +1398,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1580,51 +1424,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1632,51 +1450,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1684,51 +1476,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1736,51 +1502,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1788,51 +1528,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1840,51 +1554,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1892,51 +1580,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1944,51 +1606,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -1996,51 +1632,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -2048,51 +1658,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -2100,51 +1684,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -2152,51 +1710,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -2204,51 +1736,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -2256,51 +1762,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -2308,51 +1788,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -2360,51 +1814,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -2412,51 +1840,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -2464,51 +1866,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -2516,51 +1892,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -2568,51 +1918,25 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                </div>
-                <div
-                  class="flex flex-col"
-                  style="gap: 3px;"
-                >
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
-                  />
-                  <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
                 <div
@@ -2620,16 +1944,692 @@ exports[`screen snapshots > Analytics 1`] = `
                   style="gap: 3px;"
                 >
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                   <div
-                    style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.04); flex-shrink: 0; cursor: default;"
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                </div>
+                <div
+                  class="flex flex-col"
+                  style="gap: 3px;"
+                >
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
+                  />
+                  <div
+                    style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-1); flex-shrink: 0; cursor: default;"
                   />
                 </div>
               </div>
@@ -2640,19 +2640,19 @@ exports[`screen snapshots > Analytics 1`] = `
                   Less
                 </span>
                 <div
-                  style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.06);"
+                  style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-2);"
                 />
                 <div
-                  style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(22, 22, 37); border: 1px solid rgba(255, 255, 255, 0.06);"
+                  style="width: 13px; height: 13px; border-radius: 2px; background-color: var(--chart-heatmap-empty); border: 1px solid var(--chart-overlay-2);"
                 />
                 <div
-                  style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(199, 210, 254); border: 1px solid rgba(255, 255, 255, 0.06);"
+                  style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(199, 210, 254); border: 1px solid var(--chart-overlay-2);"
                 />
                 <div
-                  style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(199, 210, 254); border: 1px solid rgba(255, 255, 255, 0.06);"
+                  style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(199, 210, 254); border: 1px solid var(--chart-overlay-2);"
                 />
                 <div
-                  style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(199, 210, 254); border: 1px solid rgba(255, 255, 255, 0.06);"
+                  style="width: 13px; height: 13px; border-radius: 2px; background-color: rgb(199, 210, 254); border: 1px solid var(--chart-overlay-2);"
                 />
                 <span>
                   More
@@ -7288,6 +7288,55 @@ exports[`screen snapshots > Settings 1`] = `
         class="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1"
       >
         <button
+          class="inline-flex items-center gap-1.5 text-xs whitespace-nowrap px-2.5 py-1.5 rounded-lg border transition-colors flex-shrink-0 border-border text-gray-400 hover:text-gray-200 hover:bg-surface-3"
+          data-settings-section="appearance"
+          type="button"
+        >
+          <svg
+            class="lucide lucide-sun w-3.5 h-3.5"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="4"
+            />
+            <path
+              d="M12 2v2"
+            />
+            <path
+              d="M12 20v2"
+            />
+            <path
+              d="m4.93 4.93 1.41 1.41"
+            />
+            <path
+              d="m17.66 17.66 1.41 1.41"
+            />
+            <path
+              d="M2 12h2"
+            />
+            <path
+              d="M20 12h2"
+            />
+            <path
+              d="m6.34 17.66-1.41 1.41"
+            />
+            <path
+              d="m19.07 4.93-1.41 1.41"
+            />
+          </svg>
+          Appearance
+        </button>
+        <button
           class="inline-flex items-center gap-1.5 text-xs whitespace-nowrap px-2.5 py-1.5 rounded-lg border transition-colors flex-shrink-0 bg-accent/15 border-accent/30 text-accent"
           data-settings-section="data-display"
           type="button"
@@ -7746,6 +7795,222 @@ exports[`screen snapshots > Settings 1`] = `
         </div>
       </div>
     </div>
+    <section
+      class="scroll-mt-24"
+      id="appearance"
+    >
+      <div
+        class="mb-4"
+      >
+        <h3
+          class="flex items-center gap-2 text-sm font-medium text-gray-300"
+        >
+          <svg
+            class="lucide lucide-sun h-4 w-4 text-gray-500"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="4"
+            />
+            <path
+              d="M12 2v2"
+            />
+            <path
+              d="M12 20v2"
+            />
+            <path
+              d="m4.93 4.93 1.41 1.41"
+            />
+            <path
+              d="m17.66 17.66 1.41 1.41"
+            />
+            <path
+              d="M2 12h2"
+            />
+            <path
+              d="M20 12h2"
+            />
+            <path
+              d="m6.34 17.66-1.41 1.41"
+            />
+            <path
+              d="m19.07 4.93-1.41 1.41"
+            />
+          </svg>
+          Appearance
+        </h3>
+        <p
+          class="mt-0.5 text-xs text-gray-500"
+        >
+          Choose how the dashboard looks. “System” follows your OS setting and updates live if it changes.
+        </p>
+      </div>
+      <div
+        class="card p-4"
+      >
+        <div
+          aria-label="Appearance"
+          class="grid grid-cols-1 gap-2 sm:grid-cols-3"
+          role="radiogroup"
+        >
+          <button
+            aria-checked="true"
+            aria-label="Dark"
+            class="flex items-center gap-2 rounded-lg border p-3 text-left transition-colors border-accent bg-accent/10 shadow-[0_0_0_1px_rgba(129,140,248,0.14)]"
+            role="radio"
+            type="button"
+          >
+            <svg
+              class="lucide lucide-moon h-4 w-4 flex-shrink-0 text-gray-400"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"
+              />
+            </svg>
+            <span
+              class="text-sm font-medium text-gray-200"
+            >
+              Dark
+            </span>
+            <svg
+              class="lucide lucide-check ml-auto h-4 w-4 flex-none text-accent"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20 6 9 17l-5-5"
+              />
+            </svg>
+          </button>
+          <button
+            aria-checked="false"
+            aria-label="Light"
+            class="flex items-center gap-2 rounded-lg border p-3 text-left transition-colors border-border bg-surface-2 hover:border-gray-600"
+            role="radio"
+            type="button"
+          >
+            <svg
+              class="lucide lucide-sun h-4 w-4 flex-shrink-0 text-gray-400"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="4"
+              />
+              <path
+                d="M12 2v2"
+              />
+              <path
+                d="M12 20v2"
+              />
+              <path
+                d="m4.93 4.93 1.41 1.41"
+              />
+              <path
+                d="m17.66 17.66 1.41 1.41"
+              />
+              <path
+                d="M2 12h2"
+              />
+              <path
+                d="M20 12h2"
+              />
+              <path
+                d="m6.34 17.66-1.41 1.41"
+              />
+              <path
+                d="m19.07 4.93-1.41 1.41"
+              />
+            </svg>
+            <span
+              class="text-sm font-medium text-gray-200"
+            >
+              Light
+            </span>
+          </button>
+          <button
+            aria-checked="false"
+            aria-label="System"
+            class="flex items-center gap-2 rounded-lg border p-3 text-left transition-colors border-border bg-surface-2 hover:border-gray-600"
+            role="radio"
+            type="button"
+          >
+            <svg
+              class="lucide lucide-monitor h-4 w-4 flex-shrink-0 text-gray-400"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect
+                height="14"
+                rx="2"
+                width="20"
+                x="2"
+                y="3"
+              />
+              <line
+                x1="8"
+                x2="16"
+                y1="21"
+                y2="21"
+              />
+              <line
+                x1="12"
+                x2="12"
+                y1="17"
+                y2="21"
+              />
+            </svg>
+            <span
+              class="text-sm font-medium text-gray-200"
+            >
+              System
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
     <section
       class="scroll-mt-24"
       id="data-display"
@@ -12463,7 +12728,7 @@ exports[`screen snapshots > Workflows 1`] = `
             aria-hidden="true"
             class="fixed z-50 px-3 py-2 rounded-lg shadow-2xl pointer-events-none"
             role="tooltip"
-            style="display: none; opacity: 0; left: 0px; top: 0px; background: rgb(18, 18, 31); border: 1px solid rgb(42, 42, 74); color: rgb(226, 232, 240); min-width: 240px; max-width: 320px; transition: opacity 120ms ease-out;"
+            style="display: none; opacity: 0; left: 0px; top: 0px; background: var(--chart-tooltip-bg); border: 1px solid var(--chart-tooltip-border); color: var(--chart-tooltip-title); min-width: 240px; max-width: 320px; transition: opacity 120ms ease-out;"
           />
         </div>
       </div>

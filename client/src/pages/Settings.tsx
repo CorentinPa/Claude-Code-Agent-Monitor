@@ -111,6 +111,9 @@ import {
   Cloud,
   Volume2,
   VolumeX,
+  Moon,
+  Sun,
+  Monitor,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
@@ -134,6 +137,7 @@ import {
   type CurrencyPrefs,
 } from "../lib/currency";
 import { subscribeToPush, unsubscribeFromPush } from "../lib/push";
+import { getThemePrefs, setThemePrefs, subscribeToThemePrefs, type ThemeMode } from "../lib/theme";
 import { Tip } from "../components/Tip";
 import { ImportHistory } from "../components/ImportHistory";
 import { RemoteSources } from "../components/RemoteSources";
@@ -150,6 +154,7 @@ const SETTINGS_SECTIONS: {
   fallback?: string;
   Icon: typeof DollarSign;
 }[] = [
+  { id: "appearance", labelKey: "appearance.title", Icon: Sun },
   { id: "data-display", labelKey: "display.title", Icon: Layers },
   { id: "claude-pricing", labelKey: "pricing.navClaude", Icon: DollarSign },
   { id: "gpt-pricing", labelKey: "pricing.navGpt", Icon: DollarSign },
@@ -1019,6 +1024,11 @@ export function Settings() {
   const updateCurrencyPrefs = useCallback((patch: Partial<CurrencyPrefs>) => {
     setCurrencyPrefsState(setCurrencyPrefs(patch));
   }, []);
+  const [themePrefs, setThemePrefsState] = useState(getThemePrefs);
+  const updateThemePrefs = useCallback((mode: ThemeMode) => {
+    setThemePrefsState(setThemePrefs({ mode }));
+  }, []);
+  useEffect(() => subscribeToThemePrefs(() => setThemePrefsState(getThemePrefs())), []);
   // Free-typed buffer for the rate field, separate from the committed
   // preference: an in-progress edit (e.g. clearing the field to retype it)
   // must not be clamped by `sanitizeRate` on every keystroke.
@@ -1710,6 +1720,53 @@ export function Settings() {
           </div>
         </div>
       </div>
+
+      {/* ─── APPEARANCE ─── */}
+      <section id="appearance" className="scroll-mt-24">
+        <div className="mb-4">
+          <h3 className="flex items-center gap-2 text-sm font-medium text-gray-300">
+            <Sun className="h-4 w-4 text-gray-500" />
+            {t("appearance.title")}
+          </h3>
+          <p className="mt-0.5 text-xs text-gray-500">{t("appearance.description")}</p>
+        </div>
+        <div className="card p-4">
+          <div
+            className="grid grid-cols-1 gap-2 sm:grid-cols-3"
+            role="radiogroup"
+            aria-label={t("appearance.title")}
+          >
+            {(
+              [
+                { mode: "dark", label: t("appearance.dark"), Icon: Moon },
+                { mode: "light", label: t("appearance.light"), Icon: Sun },
+                { mode: "system", label: t("appearance.system"), Icon: Monitor },
+              ] as const
+            ).map(({ mode, label, Icon }) => {
+              const selected = themePrefs.mode === mode;
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  aria-label={label}
+                  onClick={() => updateThemePrefs(mode)}
+                  className={`flex items-center gap-2 rounded-lg border p-3 text-left transition-colors ${
+                    selected
+                      ? "border-accent bg-accent/10 shadow-[0_0_0_1px_rgba(129,140,248,0.14)]"
+                      : "border-border bg-surface-2 hover:border-gray-600"
+                  }`}
+                >
+                  <Icon className="h-4 w-4 flex-shrink-0 text-gray-400" />
+                  <span className="text-sm font-medium text-gray-200">{label}</span>
+                  {selected && <Check className="ml-auto h-4 w-4 flex-none text-accent" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
       {/* ─── PRODUCT DATA DISPLAY ─── */}
       <section id="data-display" className="scroll-mt-24">

@@ -66,6 +66,14 @@
 
 import { useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  CHART_TOOLTIP_BG,
+  CHART_TOOLTIP_BORDER,
+  CHART_TOOLTIP_TITLE,
+  CHART_TOOLTIP_LABEL,
+  CHART_TOOLTIP_VALUE,
+  CHART_TOOLTIP_DESC,
+} from "../../lib/chartTheme";
 import type { ConcurrencyData, ConcurrencyLane } from "../../lib/types";
 
 // ── Color palette ─────────────────────────────────────────────────────────────
@@ -147,7 +155,7 @@ function LaneRow({ lane, color, maxCount, onShowTip, onHideTip }: LaneRowProps) 
           className="absolute top-0 bottom-0 flex items-center text-[11px] font-medium tabular-nums"
           style={{
             left: barPct > 15 ? "8px" : `calc(${barPct}% + 6px)`,
-            color: barPct > 15 ? "white" : "var(--color-gray-400)",
+            color: barPct > 15 ? "white" : "rgb(var(--gray-400))",
           }}
         >
           {lane.count}
@@ -179,15 +187,14 @@ function buildLaneTooltip(
   const dot = document.createElement("span");
   dot.style.cssText = `display:inline-block;width:8px;height:8px;border-radius:9999px;background:${color}`;
   const title = document.createElement("p");
-  title.style.cssText = "font-size:12px;font-weight:600;color:#e2e8f0;margin:0";
+  title.style.cssText = `font-size:12px;font-weight:600;color:${CHART_TOOLTIP_TITLE};margin:0`;
   title.textContent = displayName;
   header.appendChild(dot);
   header.appendChild(title);
   el.appendChild(header);
 
   const subtitle = document.createElement("p");
-  subtitle.style.cssText =
-    "font-size:10px;color:#64748b;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.05em";
+  subtitle.style.cssText = `font-size:10px;color:${CHART_TOOLTIP_LABEL};margin:0 0 8px;text-transform:uppercase;letter-spacing:0.05em`;
   subtitle.textContent = t("concurrency.tooltip.lane");
   el.appendChild(subtitle);
 
@@ -196,10 +203,10 @@ function buildLaneTooltip(
     row.style.cssText =
       "display:flex;justify-content:space-between;gap:16px;font-size:11px;line-height:1.6";
     const lbl = document.createElement("span");
-    lbl.style.color = "#64748b";
+    lbl.style.color = CHART_TOOLTIP_LABEL;
     lbl.textContent = label;
     const val = document.createElement("span");
-    val.style.cssText = "color:#cbd5e1;font-weight:500;font-variant-numeric:tabular-nums";
+    val.style.cssText = `color:${CHART_TOOLTIP_VALUE};font-weight:500;font-variant-numeric:tabular-nums`;
     val.textContent = value;
     row.appendChild(lbl);
     row.appendChild(val);
@@ -211,13 +218,12 @@ function buildLaneTooltip(
   addRow(t("concurrency.tooltip.avgEnd"), `${endPct}%`);
 
   const desc = document.createElement("p");
-  desc.style.cssText =
-    "font-size:11px;color:#94a3b8;line-height:1.45;border-top:1px solid #2a2a4a;padding-top:8px;margin:8px 0 0";
+  desc.style.cssText = `font-size:11px;color:${CHART_TOOLTIP_DESC};line-height:1.45;border-top:1px solid ${CHART_TOOLTIP_BORDER};padding-top:8px;margin:8px 0 0`;
   desc.textContent = describeLaneTiming(lane.avgStart, lane.avgEnd, t);
   el.appendChild(desc);
 
   const hint = document.createElement("p");
-  hint.style.cssText = "font-size:10px;color:#64748b;line-height:1.45;margin:6px 0 0";
+  hint.style.cssText = `font-size:10px;color:${CHART_TOOLTIP_LABEL};line-height:1.45;margin:6px 0 0`;
   hint.textContent = t("concurrency.tooltip.barHint");
   el.appendChild(hint);
 }
@@ -352,9 +358,9 @@ export function ConcurrencyTimeline({ data }: ConcurrencyTimelineProps) {
           opacity: 0,
           left: 0,
           top: 0,
-          background: "#12121f",
-          border: "1px solid #2a2a4a",
-          color: "#e2e8f0",
+          background: CHART_TOOLTIP_BG,
+          border: `1px solid ${CHART_TOOLTIP_BORDER}`,
+          color: CHART_TOOLTIP_TITLE,
           minWidth: 240,
           maxWidth: 320,
           transition: "opacity 120ms ease-out",
