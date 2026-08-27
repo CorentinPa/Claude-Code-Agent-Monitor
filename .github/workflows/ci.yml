@@ -221,7 +221,7 @@ jobs:
             fi
             echo "::endgroup::"
             echo "DMG build attempt ${attempt} failed; detaching stale volumes"
-            for vol in "/Volumes/Claude Code Monitor"*; do
+            for vol in "/Volumes/XanaOS"*; do
               if [ -d "${vol}" ]; then
                 hdiutil detach -force "${vol}" || true
               fi

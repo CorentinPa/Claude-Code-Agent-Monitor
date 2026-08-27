@@ -84,7 +84,7 @@
  * ----------------------------------------------------------------------------- */
 
 /** Human-readable product name shown in window title and About menu. */
-export const APP_NAME = "Claude Code Monitor";
+export const APP_NAME = "XanaOS";
 
 /**
  * Application identifier. Must match `appId` in electron-builder.yml: on Windows

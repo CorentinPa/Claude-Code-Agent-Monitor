@@ -221,7 +221,7 @@ export function createTray(actions: TrayActions): Tray {
       { type: "separator" },
       { label: `Version ${app.getVersion()}`, enabled: false },
       {
-        label: "Quit Claude Code Monitor",
+        label: "Quit XanaOS",
         accelerator: "CmdOrCtrl+Q",
         click: () => actions.requestQuit(),
       },
