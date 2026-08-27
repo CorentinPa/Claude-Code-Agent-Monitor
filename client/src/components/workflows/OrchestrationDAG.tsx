@@ -571,6 +571,7 @@ export function OrchestrationDAG({ data, onNodeClick, selectedNode }: Orchestrat
       grad
         .append("stop")
         .attr("offset", "100%")
+        // OUTCOME_COLORS[*].stroke must stay a literal hex color: this concatenates a hex-alpha suffix, which breaks if stroke becomes a var(--x) reference.
         .attr("stop-color", colors.stroke + "55");
     }
 
@@ -1070,6 +1071,7 @@ function textColorForKind(kind: DAGNode["kind"]): string {
 
 function badgeBgForKind(kind: DAGNode["kind"], status?: string): string {
   if (kind === "outcome" && status) {
+    // OUTCOME_COLORS[*].stroke must stay a literal hex color: this concatenates a hex-alpha suffix, which breaks if stroke becomes a var(--x) reference.
     return outcomeColorSet(status).stroke + "33";
   }
   switch (kind) {
