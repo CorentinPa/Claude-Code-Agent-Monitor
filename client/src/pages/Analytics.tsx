@@ -79,8 +79,6 @@ import { useDataScope } from "../lib/dataScope";
 import { fmt, fmtCost, fmtCostFull, formatModelName } from "../lib/format";
 import { getCurrencyPrefs } from "../lib/currency";
 import {
-  CHART_TOOLTIP_BG,
-  CHART_TOOLTIP_BORDER,
   CHART_TRACK,
   CHART_HEATMAP_EMPTY,
   CHART_OVERLAY_1,
@@ -98,7 +96,7 @@ function ChartTooltip({ x, y, children }: { x: number; y: number; children: Reac
   const nearRight = x > window.innerWidth - 200;
   return (
     <div
-      className={`fixed z-50 px-2 py-1.5 text-xs bg-[${CHART_TOOLTIP_BG}] border border-[${CHART_TOOLTIP_BORDER}] rounded shadow-xl text-gray-200 pointer-events-none whitespace-nowrap`}
+      className={`fixed z-50 px-2 py-1.5 text-xs bg-[var(--chart-tooltip-bg)] border border-[var(--chart-tooltip-border)] rounded shadow-xl text-gray-200 pointer-events-none whitespace-nowrap`}
       style={{
         left: nearRight ? x - 14 : x + 14,
         top: y - 10,

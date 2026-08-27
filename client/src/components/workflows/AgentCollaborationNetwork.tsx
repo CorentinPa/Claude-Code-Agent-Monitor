@@ -64,7 +64,6 @@ import {
   CHART_TOOLTIP_VALUE,
   CHART_TOOLTIP_DESC,
   CHART_TOOLTIP_TITLE,
-  CHART_TOOLTIP_BG,
   CHART_TOOLTIP_BORDER,
 } from "../../lib/chartTheme";
 
@@ -612,7 +611,7 @@ export function AgentCollaborationNetwork({
         ref={tooltipRef}
         role="tooltip"
         aria-hidden="true"
-        className={`fixed z-50 px-3 py-2 bg-[${CHART_TOOLTIP_BG}] border border-[${CHART_TOOLTIP_BORDER}] rounded-lg shadow-2xl pointer-events-none`}
+        className={`fixed z-50 px-3 py-2 bg-[var(--chart-tooltip-bg)] border border-[var(--chart-tooltip-border)] rounded-lg shadow-2xl pointer-events-none`}
         style={{
           opacity: 0,
           left: 0,
