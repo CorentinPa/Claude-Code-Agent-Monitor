@@ -70,7 +70,7 @@ describe("Sidebar", () => {
     expect(hrefs).toContain("/activity");
   });
 
-  it("should expose all five languages through the custom dropdown", async () => {
+  it("should expose all six languages through the custom dropdown", async () => {
     const user = userEvent.setup();
     renderSidebar(true);
 
@@ -81,6 +81,7 @@ describe("Sidebar", () => {
     expect(screen.getByRole("option", { name: "Vietnamese VI" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Korean 한국어" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Spanish ES" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "French FR" })).toBeInTheDocument();
   });
 
   it("should switch to Vietnamese when Vietnamese option is clicked", async () => {
@@ -106,6 +107,19 @@ describe("Sidebar", () => {
     await waitFor(() => {
       expect(screen.getByText("대시보드")).toBeInTheDocument();
       expect(screen.getByText("칸반 보드")).toBeInTheDocument();
+    });
+  });
+
+  it("should switch to French when French option is clicked", async () => {
+    const user = userEvent.setup();
+    renderSidebar(true);
+
+    await user.click(screen.getByRole("button", { name: "English" }));
+    await user.click(screen.getByRole("option", { name: "French FR" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Tableau de bord")).toBeInTheDocument();
+      expect(screen.getByText("Tableau Kanban")).toBeInTheDocument();
     });
   });
 

@@ -763,7 +763,7 @@ Both popover classes use the same fixed-position + viewport-clamp algorithm: anc
 
 ## Internationalization Architecture
 
-The client localization stack is powered by `i18next` + `react-i18next` (`client/src/i18n/index.ts`) and currently supports five languages: English (`en`), Chinese (`zh`), Vietnamese (`vi`), Korean (`ko`), and Spanish (`es`). The sidebar uses the shared custom `Select` dropdown, so locale choices remain compact as languages grow. Language detection prefers `localStorage` (`i18nextLng`) and falls back to the browser locale (`navigator`) with `en` as final fallback.
+The client localization stack is powered by `i18next` + `react-i18next` (`client/src/i18n/index.ts`) and currently supports six languages: English (`en`), Chinese (`zh`), Vietnamese (`vi`), Korean (`ko`), Spanish (`es`), and French (`fr`). The sidebar uses the shared custom `Select` dropdown, so locale choices remain compact as languages grow. Language detection prefers `localStorage` (`i18nextLng`) and falls back to the browser locale (`navigator`) with `en` as final fallback.
 
 ```mermaid
 flowchart LR
@@ -771,7 +771,7 @@ flowchart LR
     B --> C["Resolved language<br/>en | zh | vi | ko | es (fallback en)"]
     C --> D["Namespace resources<br/>common/nav/dashboard/sessions/..."]
     D --> E["React pages/components<br/>useTranslation(ns)"]
-    E --> F["format.ts locale mapping<br/>en-US | zh-CN | vi-VN | ko-KR | es-ES"]
+    E --> F["format.ts locale mapping<br/>en-US | zh-CN | vi-VN | ko-KR | es-ES | fr-FR"]
     F --> G["Localized labels,<br/>dates, number formatting,<br/>and model name display"]
 ```
 

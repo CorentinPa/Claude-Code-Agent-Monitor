@@ -1,0 +1,45 @@
+{
+  "title": "Tableau Kanban",
+  "subtitle": "Vue Kanban de tous les agents par statut",
+  "subtitleSessions": "Vue Kanban de toutes les sessions par statut",
+  "viewToggle": {
+    "agents": "Agents",
+    "sessions": "Sessions"
+  },
+  "noAgents": "Aucun agent suivi pour l'instant",
+  "noAgentsDesc": "Démarrez une session d'agent surveillée avec les hooks installés pour voir les agents apparaître ici.",
+  "agentCount": "{{count}} agent suivi",
+  "agentCount_plural": "{{count}} agents suivis",
+  "noAgentsInColumn": "Aucun agent",
+  "noSessions": "Aucune session suivie pour l'instant",
+  "noSessionsDesc": "Démarrez une session d'agent surveillée avec les hooks installés pour voir les sessions apparaître ici.",
+  "sessionCount": "{{count}} session suivie",
+  "sessionCount_plural": "{{count}} sessions suivies",
+  "noSessionsInColumn": "Aucune session",
+  "ran": "exécuté ",
+  "running": "en cours ",
+  "session": {
+    "anonymous": "Session sans titre",
+    "agentSummary_one": "{{count}} agent",
+    "agentSummary_other": "{{count}} agents",
+    "subagentSummary_one": "{{count}} sous-agent",
+    "subagentSummary_other": "{{count}} sous-agents",
+    "turnSummary_one": "{{count}} tour",
+    "turnSummary_other": "{{count}} tours"
+  },
+  "tooltip": {
+    "agent": {
+      "working": "L'agent traite activement du travail en ce moment.\n\nIl repasse à En attente lorsque ce tour se termine.",
+      "waiting": "L'agent a terminé son tour ou a besoin d'une réponse humaine, comme une approbation de permission.\n\nIl se remet au travail lorsque la session continue.",
+      "completed": "L'agent s'est complètement terminé pour cette session.\n\nAucune activité supplémentaire ne sera enregistrée pour cet agent.",
+      "error": "L'agent a enregistré une erreur et ne continuera pas tant que la session n'est pas reprise ou réessayée."
+    },
+    "session": {
+      "active": "La session est en plein tour — un agent travaille actuellement et l'utilisateur ne bloque rien. Cet état est bref : la session repasse à En attente lorsque le tour se termine.",
+      "waiting": "La session attend votre réponse. Un tour a peut-être été terminé, ou l'agent a peut-être besoin d'une permission ou d'une entrée.\n\nCherchez ici les sessions auxquelles vous devez répondre.",
+      "completed": "La session s'est complètement fermée car sa CLI s'est terminée proprement ou parce qu'elle a été explicitement fermée.\n\nTous les agents de cette session sont également terminés.",
+      "error": "La session s'est terminée avec une erreur — un échec irrécupérable ou une erreur d'API en amont a mis fin à l'exécution.",
+      "abandoned": "La session est devenue obsolète sans signal de sortie propre. Marquée comme abandonnée après plus de 5 minutes sans activité (par exemple après /resume, une coupure réseau ou une CLI tuée). Différent de Terminé : aucune sortie réelle n'a été observée."
+    }
+  }
+}
