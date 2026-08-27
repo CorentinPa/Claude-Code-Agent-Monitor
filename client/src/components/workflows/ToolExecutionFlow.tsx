@@ -58,6 +58,14 @@ import { sankey, sankeyLinkHorizontal } from "d3-sankey";
 import type { SankeyGraph, SankeyNode, SankeyLink } from "d3-sankey";
 import { useTranslation } from "react-i18next";
 import type { ToolFlowData } from "../../lib/types";
+import {
+  CHART_TOOLTIP_BG,
+  CHART_TOOLTIP_BORDER,
+  CHART_TOOLTIP_TITLE,
+  CHART_TOOLTIP_LABEL,
+  CHART_TOOLTIP_VALUE,
+  CHART_TOOLTIP_DESC,
+} from "../../lib/chartTheme";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -479,14 +487,18 @@ export function ToolExecutionFlow({
         .attr("text-anchor", anchor)
         .style("font-size", "12px")
         .style("font-family", "Inter, -apple-system, sans-serif")
-        .style("fill", "#e2e8f0")
+        .style("fill", CHART_TOOLTIP_TITLE)
         .style("pointer-events", "none")
         .style("user-select", "none");
 
       text.append("tspan").text(label).style("font-weight", "500");
 
       if (pct) {
-        text.append("tspan").text(pct).style("fill", "#64748b").style("font-size", "11px");
+        text
+          .append("tspan")
+          .text(pct)
+          .style("fill", CHART_TOOLTIP_LABEL)
+          .style("font-size", "11px");
       }
     });
 
@@ -532,9 +544,9 @@ export function ToolExecutionFlow({
           opacity: 0,
           left: 0,
           top: 0,
-          background: "#12121f",
-          border: "1px solid #2a2a4a",
-          color: "#e2e8f0",
+          background: CHART_TOOLTIP_BG,
+          border: `1px solid ${CHART_TOOLTIP_BORDER}`,
+          color: CHART_TOOLTIP_TITLE,
           minWidth: 240,
           maxWidth: 320,
           transition: "opacity 120ms ease-out",
@@ -557,10 +569,10 @@ function appendTipRow(parent: HTMLElement, label: string, value: string) {
   row.style.cssText =
     "display:flex;justify-content:space-between;gap:16px;font-size:11px;line-height:1.6";
   const lbl = document.createElement("span");
-  lbl.style.color = "#64748b";
+  lbl.style.color = CHART_TOOLTIP_LABEL;
   lbl.textContent = label;
   const val = document.createElement("span");
-  val.style.cssText = "color:#cbd5e1;font-weight:500;font-variant-numeric:tabular-nums";
+  val.style.cssText = `color:${CHART_TOOLTIP_VALUE};font-weight:500;font-variant-numeric:tabular-nums`;
   val.textContent = value;
   row.appendChild(lbl);
   row.appendChild(val);
@@ -581,13 +593,12 @@ function buildToolFlowTooltip(
     const name = localizeToolLabel(payload.rawName);
 
     const title = document.createElement("p");
-    title.style.cssText = "font-size:12px;font-weight:600;color:#e2e8f0;margin:0";
+    title.style.cssText = `font-size:12px;font-weight:600;color:${CHART_TOOLTIP_TITLE};margin:0`;
     title.textContent = name;
     el.appendChild(title);
 
     const subtitle = document.createElement("p");
-    subtitle.style.cssText =
-      "font-size:10px;color:#64748b;margin:2px 0 8px;text-transform:uppercase;letter-spacing:0.05em";
+    subtitle.style.cssText = `font-size:10px;color:${CHART_TOOLTIP_LABEL};margin:2px 0 8px;text-transform:uppercase;letter-spacing:0.05em`;
     subtitle.textContent = t("toolFlow.tooltip.node");
     el.appendChild(subtitle);
 
@@ -595,8 +606,7 @@ function buildToolFlowTooltip(
     appendTipRow(el, t("toolFlow.tooltip.shareOfAll"), fmtPct(payload.shareOfTotal));
 
     const desc = document.createElement("p");
-    desc.style.cssText =
-      "font-size:11px;color:#94a3b8;line-height:1.45;border-top:1px solid #2a2a4a;padding-top:8px;margin:8px 0 0";
+    desc.style.cssText = `font-size:11px;color:${CHART_TOOLTIP_DESC};line-height:1.45;border-top:1px solid ${CHART_TOOLTIP_BORDER};padding-top:8px;margin:8px 0 0`;
     desc.textContent = t("toolFlow.tooltip.nodeDescFmt", { name });
     el.appendChild(desc);
     return;
@@ -607,9 +617,9 @@ function buildToolFlowTooltip(
   const tgt = localizeToolLabel(payload.target);
 
   const title = document.createElement("p");
-  title.style.cssText = "font-size:12px;font-weight:600;color:#e2e8f0;margin:0";
+  title.style.cssText = `font-size:12px;font-weight:600;color:${CHART_TOOLTIP_TITLE};margin:0`;
   const tspanArrow = document.createElement("span");
-  tspanArrow.style.color = "#64748b";
+  tspanArrow.style.color = CHART_TOOLTIP_LABEL;
   tspanArrow.textContent = " → ";
   title.appendChild(document.createTextNode(src));
   title.appendChild(tspanArrow);
@@ -617,8 +627,7 @@ function buildToolFlowTooltip(
   el.appendChild(title);
 
   const subtitle = document.createElement("p");
-  subtitle.style.cssText =
-    "font-size:10px;color:#64748b;margin:2px 0 8px;text-transform:uppercase;letter-spacing:0.05em";
+  subtitle.style.cssText = `font-size:10px;color:${CHART_TOOLTIP_LABEL};margin:2px 0 8px;text-transform:uppercase;letter-spacing:0.05em`;
   subtitle.textContent = t("toolFlow.tooltip.link");
   el.appendChild(subtitle);
 
@@ -635,8 +644,7 @@ function buildToolFlowTooltip(
   );
 
   const desc = document.createElement("p");
-  desc.style.cssText =
-    "font-size:11px;color:#94a3b8;line-height:1.45;border-top:1px solid #2a2a4a;padding-top:8px;margin:8px 0 0";
+  desc.style.cssText = `font-size:11px;color:${CHART_TOOLTIP_DESC};line-height:1.45;border-top:1px solid ${CHART_TOOLTIP_BORDER};padding-top:8px;margin:8px 0 0`;
   desc.textContent = t("toolFlow.tooltip.linkDescFmt", { source: src, target: tgt });
   el.appendChild(desc);
 }

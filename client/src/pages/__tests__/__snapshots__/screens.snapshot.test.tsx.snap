@@ -12728,7 +12728,7 @@ exports[`screen snapshots > Workflows 1`] = `
             aria-hidden="true"
             class="fixed z-50 px-3 py-2 rounded-lg shadow-2xl pointer-events-none"
             role="tooltip"
-            style="display: none; opacity: 0; left: 0px; top: 0px; background: rgb(18, 18, 31); border: 1px solid rgb(42, 42, 74); color: rgb(226, 232, 240); min-width: 240px; max-width: 320px; transition: opacity 120ms ease-out;"
+            style="display: none; opacity: 0; left: 0px; top: 0px; background: var(--chart-tooltip-bg); border: 1px solid var(--chart-tooltip-border); color: var(--chart-tooltip-title); min-width: 240px; max-width: 320px; transition: opacity 120ms ease-out;"
           />
         </div>
       </div>
