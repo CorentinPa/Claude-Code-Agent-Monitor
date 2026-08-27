@@ -1,0 +1,22 @@
+{
+  "title": "Tableau de bord",
+  "subtitle": "Vue d'ensemble en temps réel de l'activité des agents",
+  "totalSessions": "Total des sessions",
+  "activeAgents": "Agents actifs",
+  "activeSubagents": "Sous-agents actifs",
+  "eventsToday": "Événements aujourd'hui",
+  "totalEvents": "Total des événements",
+  "totalCost": "Coût total",
+  "viewBoard": "Voir le tableau",
+  "viewAll": "Tout voir",
+  "activeAgentsSection": "Agents actifs",
+  "recentActivity": "Activité récente",
+  "noAgents": "Aucun agent actif",
+  "noAgentsDesc": "Les agents apparaîtront ici lorsqu'une session surveillée sera en cours.",
+  "noActivity": "Aucune activité pour l'instant",
+  "noActivityDesc": "Les événements des sessions surveillées s'afficheront ici en temps réel.",
+  "failedConnect": "Échec de la connexion au serveur",
+  "failedLoad": "Échec du chargement des données",
+  "activeTrend": " actif",
+  "totalTrend": " dans les sessions actives"
+}

@@ -41,7 +41,7 @@ describe("i18n resources", () => {
     for (const namespace of namespaces) {
       const english = flattenResource(i18n.getResourceBundle("en", namespace));
 
-      for (const language of ["zh", "vi", "ko", "es"]) {
+      for (const language of ["zh", "vi", "ko", "es", "fr"]) {
         const locale = flattenResource(i18n.getResourceBundle(language, namespace));
 
         expect(Object.keys(locale).sort(), `${language}/${namespace} keys`).toEqual(
@@ -85,6 +85,10 @@ describe("i18n resources", () => {
     await i18n.changeLanguage("es");
     expect(i18n.t("common:agent")).toBe("agente");
     expect(i18n.t("common:subagent")).toBe("subagente");
+
+    await i18n.changeLanguage("fr");
+    expect(i18n.t("common:agent")).toBe("agent");
+    expect(i18n.t("common:subagent")).toBe("sous-agent");
   });
 
   it("should provide Spanish translations for navigation keys", async () => {
@@ -111,6 +115,32 @@ describe("i18n resources", () => {
 
     expect(i18n.resolvedLanguage?.startsWith("es")).toBe(true);
     expect(i18n.t("nav:dashboard")).toBe("Panel");
+  });
+
+  it("should provide French translations for navigation keys", async () => {
+    await i18n.changeLanguage("fr");
+
+    expect(i18n.t("nav:dashboard")).toBe("Tableau de bord");
+    expect(i18n.t("nav:agentBoard")).toBe("Tableau Kanban");
+    expect(i18n.t("nav:languageShort.fr")).toBe("FR");
+  });
+
+  it("should provide French translations across every feature namespace", async () => {
+    await i18n.changeLanguage("fr");
+
+    expect(i18n.t("common:awaitingReason.session_start.label")).toBe("En attente d'instruction");
+    expect(i18n.t("analytics:total30d")).toBe("Total (30 j)");
+    expect(i18n.t("ccConfig:tabs.skills")).toBe("Skills");
+    expect(i18n.t("run:fields.prompt")).toBe("Instruction");
+    expect(i18n.t("settings:hooks.title")).toBe("Configuration des hooks");
+    expect(i18n.t("workflows:runs.promptLabel")).toBe("Instruction");
+  });
+
+  it("should support non-explicit French locale tags", async () => {
+    await i18n.changeLanguage("fr-FR");
+
+    expect(i18n.resolvedLanguage?.startsWith("fr")).toBe(true);
+    expect(i18n.t("nav:dashboard")).toBe("Tableau de bord");
   });
 
   it("should support non-explicit Vietnamese locale tags", async () => {
@@ -194,7 +224,7 @@ describe("i18n resources", () => {
       "hookGate.continue",
     ];
 
-    for (const language of ["en", "zh", "vi", "ko", "es"]) {
+    for (const language of ["en", "zh", "vi", "ko", "es", "fr"]) {
       for (const key of keys) {
         expect(i18n.getResource(language, "splash", key)).toBeTruthy();
       }
@@ -220,7 +250,7 @@ describe("i18n resources", () => {
       "pricing.gpt.tooltip.apiPricingBody",
     ];
 
-    for (const language of ["en", "zh", "vi", "ko", "es"]) {
+    for (const language of ["en", "zh", "vi", "ko", "es", "fr"]) {
       for (const key of keys) {
         expect(i18n.getResource(language, "settings", key)).toBeTruthy();
       }
