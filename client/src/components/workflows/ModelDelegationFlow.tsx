@@ -97,25 +97,25 @@ const FAMILY_COLORS = {
   opus: {
     grad: ["#7c3aed", "#a855f7"] as [string, string],
     stroke: "#a855f7",
-    text: "#e9d5ff",
+    text: "var(--family-opus-text)",
     badge: "rgba(168,85,247,0.15)",
   },
   sonnet: {
     grad: ["#1d4ed8", "#3b82f6"] as [string, string],
     stroke: "#3b82f6",
-    text: "#bfdbfe",
+    text: "var(--family-sonnet-text)",
     badge: "rgba(59,130,246,0.15)",
   },
   haiku: {
     grad: ["#065f46", "#10b981"] as [string, string],
     stroke: "#10b981",
-    text: "#a7f3d0",
+    text: "var(--family-haiku-text)",
     badge: "rgba(16,185,129,0.15)",
   },
   other: {
     grad: ["#374151", "#6b7280"] as [string, string],
     stroke: "#6b7280",
-    text: "#d1d5db",
+    text: "var(--family-other-text)",
     badge: "rgba(107,114,128,0.15)",
   },
 } as const;

@@ -105,8 +105,8 @@ describe("chart color migration", () => {
     for (const { name, source } of CASES) {
       expect(
         source,
-        `${name} should not interpolate a CHART_TOOLTIP constant into a Tailwind arbitrary-value class`
-      ).not.toMatch(/\[\$\{CHART_TOOLTIP/);
+        `${name} should not interpolate a JS constant into a Tailwind arbitrary-value class`
+      ).not.toMatch(/\[\$\{[A-Z_]/);
     }
   });
 });

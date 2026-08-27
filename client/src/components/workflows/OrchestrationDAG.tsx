@@ -633,7 +633,7 @@ export function OrchestrationDAG({ data, onNodeClick, selectedNode }: Orchestrat
         .attr("y1", 32)
         .attr("x2", sepX)
         .attr("y2", svgHeight - PADDING_BOTTOM + 8)
-        .attr("stroke", "#1f1f30")
+        .attr("stroke", "var(--dag-layer-separator)")
         .attr("stroke-width", 1)
         .attr("stroke-dasharray", "4 4");
     }
@@ -1071,7 +1071,9 @@ function textColorForKind(kind: DAGNode["kind"]): string {
 
 function badgeBgForKind(kind: DAGNode["kind"], status?: string): string {
   if (kind === "outcome" && status) {
-    // OUTCOME_COLORS[*].stroke must stay a literal hex color: this concatenates a hex-alpha suffix, which breaks if stroke becomes a var(--x) reference.
+    // This concatenates a hex-alpha suffix onto stroke; OUTCOME_COLORS[*].stroke must stay literal hex,
+    // AND outcomeColorSet()'s fallback branch (line ~195) already returns a var() reference here -
+    // currently unreachable since the server only emits completed/error statuses, but latent if that ever changes.
     return outcomeColorSet(status).stroke + "33";
   }
   switch (kind) {

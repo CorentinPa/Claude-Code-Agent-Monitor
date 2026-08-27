@@ -9,6 +9,7 @@
 @tailwind utilities;
 
 :root {
+  color-scheme: dark;
   --surface-0: #06060a;
   --surface-1: #0c0c14;
   --surface-2: #13131e;
@@ -64,9 +65,16 @@
   --dag-completed-text: #4ade80;
   --dag-error-text: #f87171;
   --dag-abandoned-text: #facc15;
+  --dag-layer-separator: #1f1f30;
+  /* ModelDelegationFlow node text-fill per family (canvas-dependent; see Task 17) */
+  --family-opus-text: #e9d5ff;
+  --family-sonnet-text: #bfdbfe;
+  --family-haiku-text: #a7f3d0;
+  --family-other-text: #d1d5db;
 }
 
 [data-theme="light"] {
+  color-scheme: light;
   --surface-0: #ffffff;
   --surface-1: #f8f9fb;
   --surface-2: #f1f2f5;
@@ -120,6 +128,11 @@
   --dag-completed-text: #15803d;
   --dag-error-text: #b91c1c;
   --dag-abandoned-text: #a16207;
+  --dag-layer-separator: #e5e7eb;
+  --family-opus-text: #6d28d9;
+  --family-sonnet-text: #1d4ed8;
+  --family-haiku-text: #16a34a;
+  --family-other-text: #4b5563;
 }
 
 @layer base {
