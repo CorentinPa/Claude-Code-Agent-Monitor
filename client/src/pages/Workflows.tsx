@@ -77,6 +77,7 @@ import { api } from "../lib/api";
 import { useDataScope } from "../lib/dataScope";
 import { eventBus } from "../lib/eventBus";
 import type { WorkflowData, WSMessage } from "../lib/types";
+import { CHART_TOOLTIP_BG, CHART_TOOLTIP_BORDER } from "../lib/chartTheme";
 
 import { WorkflowStats } from "../components/workflows/WorkflowStats";
 import { OrchestrationDAG } from "../components/workflows/OrchestrationDAG";
@@ -492,10 +493,12 @@ function ChartInfoPopover({ infoKey, title }: { infoKey: string; title: string }
         <div
           ref={popoverRef}
           role="tooltip"
-          className="fixed z-50 p-3.5 bg-[#12121f] border border-[#2a2a4a] rounded-lg shadow-2xl text-[11px] text-gray-300 pointer-events-none"
+          className={`fixed z-50 p-3.5 bg-[${CHART_TOOLTIP_BG}] border border-[${CHART_TOOLTIP_BORDER}] rounded-lg shadow-2xl text-[11px] text-gray-300 pointer-events-none`}
           style={{ left: coords.left, top: coords.top, width: POPOVER_W }}
         >
-          <p className="text-xs font-semibold text-gray-100 mb-2.5 pb-2 border-b border-[#2a2a4a]">
+          <p
+            className={`text-xs font-semibold text-gray-100 mb-2.5 pb-2 border-b border-[${CHART_TOOLTIP_BORDER}]`}
+          >
             {title}
           </p>
 
