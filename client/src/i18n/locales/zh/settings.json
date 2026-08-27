@@ -573,5 +573,12 @@
     "removeKeep": "移除（保留数据）",
     "remoteSourceBadgeTitle": "从远程机器收集"
   },
-  "cursorPathsNote": "仅供参考：Cursor 会话也会计入——Cursor 与 Claude Code 使用相同的 ~/.claude 路径（本机及已同步的远程机器）。"
+  "cursorPathsNote": "仅供参考：Cursor 会话也会计入——Cursor 与 Claude Code 使用相同的 ~/.claude 路径（本机及已同步的远程机器）。",
+  "appearance": {
+    "title": "外观",
+    "description": "选择仪表盘的外观。“跟随系统”会使用操作系统的设置，并在其更改时实时更新。",
+    "dark": "深色",
+    "light": "浅色",
+    "system": "跟随系统"
+  }
 }

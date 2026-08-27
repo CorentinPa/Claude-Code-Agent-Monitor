@@ -573,5 +573,12 @@
     "removeKeep": "Eliminar (conservar datos)",
     "remoteSourceBadgeTitle": "Recopilado desde una máquina remota"
   },
-  "cursorPathsNote": "Informativo: Las sesiones de Cursor también se cuentan aquí — Cursor usa las mismas rutas ~/.claude que Claude Code (localmente y en remotos sincronizados)."
+  "cursorPathsNote": "Informativo: Las sesiones de Cursor también se cuentan aquí — Cursor usa las mismas rutas ~/.claude que Claude Code (localmente y en remotos sincronizados).",
+  "appearance": {
+    "title": "Apariencia",
+    "description": "Elige el aspecto del panel. “Sistema” sigue el ajuste del sistema operativo y se actualiza en vivo si cambia.",
+    "dark": "Oscuro",
+    "light": "Claro",
+    "system": "Sistema"
+  }
 }

@@ -573,5 +573,12 @@
     "removeKeep": "Remove (keep data)",
     "remoteSourceBadgeTitle": "Collected from a remote machine"
   },
-  "cursorPathsNote": "Informational: Cursor sessions count here too — Cursor happens to use the same ~/.claude paths as Claude Code (locally and on synced remotes)."
+  "cursorPathsNote": "Informational: Cursor sessions count here too — Cursor happens to use the same ~/.claude paths as Claude Code (locally and on synced remotes).",
+  "appearance": {
+    "title": "Appearance",
+    "description": "Choose how the dashboard looks. “System” follows your OS setting and updates live if it changes.",
+    "dark": "Dark",
+    "light": "Light",
+    "system": "System"
+  }
 }

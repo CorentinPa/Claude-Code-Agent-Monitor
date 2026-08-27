@@ -573,5 +573,12 @@
     "removeKeep": "Xóa (giữ dữ liệu)",
     "remoteSourceBadgeTitle": "Được thu thập từ một máy từ xa"
   },
-  "cursorPathsNote": "Chỉ mang tính thông tin: phiên Cursor cũng được tính — Cursor tình cờ dùng cùng đường dẫn ~/.claude với Claude Code (cục bộ và trên máy từ xa đã đồng bộ)."
+  "cursorPathsNote": "Chỉ mang tính thông tin: phiên Cursor cũng được tính — Cursor tình cờ dùng cùng đường dẫn ~/.claude với Claude Code (cục bộ và trên máy từ xa đã đồng bộ).",
+  "appearance": {
+    "title": "Giao diện",
+    "description": "Chọn giao diện hiển thị của bảng điều khiển. “Hệ thống” sẽ theo cài đặt của hệ điều hành và cập nhật ngay khi thay đổi.",
+    "dark": "Tối",
+    "light": "Sáng",
+    "system": "Hệ thống"
+  }
 }
