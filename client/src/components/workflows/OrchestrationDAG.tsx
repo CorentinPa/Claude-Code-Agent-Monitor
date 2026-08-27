@@ -56,6 +56,12 @@ import { useRef, useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import * as d3 from "d3";
 import type { OrchestrationData } from "../../lib/types";
+import {
+  CHART_TOOLTIP_BORDER,
+  CHART_TOOLTIP_LABEL,
+  CHART_TOOLTIP_VALUE,
+  CHART_TOOLTIP_DESC,
+} from "../../lib/chartTheme";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -112,9 +118,17 @@ const BADGE_H = 14;
 // Layer labels are now computed via i18n inside the component
 
 const OUTCOME_COLORS: Record<string, { fill: string; stroke: string; text: string }> = {
-  completed: { fill: "#052e16", stroke: "#16a34a", text: "#4ade80" },
-  error: { fill: "#1f0808", stroke: "#dc2626", text: "#f87171" },
-  abandoned: { fill: "#1c1a04", stroke: "#ca8a04", text: "#facc15" },
+  completed: {
+    fill: "var(--dag-completed-fill)",
+    stroke: "#16a34a",
+    text: "var(--dag-completed-text)",
+  },
+  error: { fill: "var(--dag-error-fill)", stroke: "#dc2626", text: "var(--dag-error-text)" },
+  abandoned: {
+    fill: "var(--dag-abandoned-fill)",
+    stroke: "#ca8a04",
+    text: "var(--dag-abandoned-text)",
+  },
 };
 
 const KIND_GRADIENTS: Record<
@@ -124,36 +138,36 @@ const KIND_GRADIENTS: Record<
   session: {
     id: "grad-session",
     stops: [
-      { offset: "0%", color: "#312e81" },
-      { offset: "100%", color: "#4338ca" },
+      { offset: "0%", color: "var(--dag-session-fill-from)" },
+      { offset: "100%", color: "var(--dag-session-fill-to)" },
     ],
   },
   main: {
     id: "grad-main",
     stops: [
-      { offset: "0%", color: "#1e3a5f" },
-      { offset: "100%", color: "#1d4ed8" },
+      { offset: "0%", color: "var(--dag-main-fill-from)" },
+      { offset: "100%", color: "var(--dag-main-fill-to)" },
     ],
   },
   subagent: {
     id: "grad-subagent",
     stops: [
-      { offset: "0%", color: "#052e16" },
-      { offset: "100%", color: "#166534" },
+      { offset: "0%", color: "var(--dag-subagent-fill-from)" },
+      { offset: "100%", color: "var(--dag-subagent-fill-to)" },
     ],
   },
   nested: {
     id: "grad-nested",
     stops: [
-      { offset: "0%", color: "#134e4a" },
-      { offset: "100%", color: "#0f766e" },
+      { offset: "0%", color: "var(--dag-nested-fill-from)" },
+      { offset: "100%", color: "var(--dag-nested-fill-to)" },
     ],
   },
   outcome: {
     id: "grad-outcome",
     stops: [
-      { offset: "0%", color: "#1e1b4b" },
-      { offset: "100%", color: "#4338ca" },
+      { offset: "0%", color: "var(--dag-outcome-fill-from)" },
+      { offset: "100%", color: "var(--dag-outcome-fill-to)" },
     ],
   },
 };
@@ -175,7 +189,13 @@ function successRate(completed: number, total: number): string {
 }
 
 function outcomeColorSet(status: string) {
-  return OUTCOME_COLORS[status] ?? { fill: "#1a1a28", stroke: "#363650", text: "#9ca3af" };
+  return (
+    OUTCOME_COLORS[status] ?? {
+      fill: "var(--surface-4)",
+      stroke: "var(--border-light)",
+      text: "var(--gray-400)",
+    }
+  );
 }
 
 // ── Layout builder ────────────────────────────────────────────────────────────
@@ -594,7 +614,7 @@ export function OrchestrationDAG({ data, onNodeClick, selectedNode }: Orchestrat
       .attr("x", (_, i) => layerXPositions[i] ?? 0)
       .attr("y", 22)
       .attr("text-anchor", "middle")
-      .attr("fill", "#6b7280")
+      .attr("fill", "var(--gray-500)")
       .attr("font-size", "10px")
       .attr("font-weight", "500")
       .attr("letter-spacing", "0.08em")
@@ -658,7 +678,7 @@ export function OrchestrationDAG({ data, onNodeClick, selectedNode }: Orchestrat
         .append("path")
         .attr("d", path)
         .attr("fill", "none")
-        .attr("stroke", isZero ? "#2a2a3d" : "#4f46e5")
+        .attr("stroke", isZero ? "var(--surface-5)" : "#4f46e5")
         .attr("stroke-width", isZero ? 1 : stroke)
         .attr("stroke-opacity", isZero ? 0.3 : 0.55)
         .attr("stroke-linecap", "round");
@@ -847,7 +867,9 @@ export function OrchestrationDAG({ data, onNodeClick, selectedNode }: Orchestrat
         <div className="flex items-center gap-1.5 ml-2">
           <span
             className="inline-block h-[2px] w-8 rounded flex-shrink-0"
-            style={{ background: "linear-gradient(to right, #312e81, #4f46e5)" }}
+            style={{
+              background: "linear-gradient(to right, var(--dag-session-fill-from), #4f46e5)",
+            }}
           />
           <span className="text-[11px] text-gray-500">{t("orchestration.edgeWeight")}</span>
         </div>
@@ -858,7 +880,7 @@ export function OrchestrationDAG({ data, onNodeClick, selectedNode }: Orchestrat
         ref={tipRef}
         role="tooltip"
         aria-hidden="true"
-        className="fixed z-50 px-3 py-2 bg-[#12121f] border border-[#2a2a4a] rounded-lg shadow-2xl pointer-events-none"
+        className="fixed z-50 px-3 py-2 bg-[var(--chart-tooltip-bg)] border border-[var(--chart-tooltip-border)] rounded-lg shadow-2xl pointer-events-none"
         style={{
           display: "none",
           opacity: 0,
@@ -927,10 +949,10 @@ function buildDAGTooltipContent(el: HTMLDivElement, node: DAGNode, t: TFn) {
     row.style.cssText =
       "display:flex;justify-content:space-between;gap:16px;font-size:11px;line-height:1.6";
     const lbl = document.createElement("span");
-    lbl.style.color = "#64748b";
+    lbl.style.color = CHART_TOOLTIP_LABEL;
     lbl.textContent = label;
     const val = document.createElement("span");
-    val.style.cssText = "color:#cbd5e1;font-weight:500;font-variant-numeric:tabular-nums";
+    val.style.cssText = `color:${CHART_TOOLTIP_VALUE};font-weight:500;font-variant-numeric:tabular-nums`;
     val.textContent = value;
     row.appendChild(lbl);
     row.appendChild(val);
@@ -939,13 +961,12 @@ function buildDAGTooltipContent(el: HTMLDivElement, node: DAGNode, t: TFn) {
   el.appendChild(rowList);
 
   const desc = document.createElement("p");
-  desc.style.cssText =
-    "font-size:11px;color:#94a3b8;line-height:1.45;border-top:1px solid #2a2a4a;padding-top:8px;margin:0";
+  desc.style.cssText = `font-size:11px;color:${CHART_TOOLTIP_DESC};line-height:1.45;border-top:1px solid ${CHART_TOOLTIP_BORDER};padding-top:8px;margin:0`;
   desc.textContent = meta.description;
   el.appendChild(desc);
 
   const hint = document.createElement("p");
-  hint.style.cssText = "font-size:10px;color:#64748b;line-height:1.45;margin:6px 0 0";
+  hint.style.cssText = `font-size:10px;color:${CHART_TOOLTIP_LABEL};line-height:1.45;margin:6px 0 0`;
   hint.textContent = t("orchestration.tooltip.tipClickToFilter");
   el.appendChild(hint);
 }
@@ -1035,15 +1056,15 @@ function borderColorForKind(kind: DAGNode["kind"]): string {
 function textColorForKind(kind: DAGNode["kind"]): string {
   switch (kind) {
     case "session":
-      return "#a5b4fc";
+      return "var(--dag-session-text)";
     case "main":
-      return "#93c5fd";
+      return "var(--dag-main-text)";
     case "subagent":
-      return "#86efac";
+      return "var(--dag-subagent-text)";
     case "nested":
-      return "#5eead4";
+      return "var(--dag-nested-text)";
     case "outcome":
-      return "#c4b5fd";
+      return "var(--dag-outcome-text)";
   }
 }
 
@@ -1074,11 +1095,11 @@ function fmtCount(n: number): string {
 // ── Legend data ───────────────────────────────────────────────────────────────
 
 const LEGEND_ITEMS = [
-  { label: "Sessions", color: "#312e81", border: "#6366f1" },
-  { label: "Main Agent", color: "#1e3a5f", border: "#3b82f6" },
-  { label: "Subagent Types", color: "#052e16", border: "#22c55e" },
-  { label: "Compactions", color: "#134e4a", border: "#14b8a6" },
-  { label: "Completed", color: "#052e16", border: "#16a34a" },
-  { label: "Error", color: "#1f0808", border: "#dc2626" },
-  { label: "Abandoned", color: "#1c1a04", border: "#ca8a04" },
+  { label: "Sessions", color: "var(--dag-session-fill-from)", border: "#6366f1" },
+  { label: "Main Agent", color: "var(--dag-main-fill-from)", border: "#3b82f6" },
+  { label: "Subagent Types", color: "var(--dag-subagent-fill-from)", border: "#22c55e" },
+  { label: "Compactions", color: "var(--dag-nested-fill-from)", border: "#14b8a6" },
+  { label: "Completed", color: "var(--dag-completed-fill)", border: "#16a34a" },
+  { label: "Error", color: "var(--dag-error-fill)", border: "#dc2626" },
+  { label: "Abandoned", color: "var(--dag-abandoned-fill)", border: "#ca8a04" },
 ];
