@@ -99,3 +99,25 @@ describe("currencySymbol / currencyCode", () => {
     expect(currencyCode()).toBe("EUR");
   });
 });
+
+describe("composeCurrency", () => {
+  it("prefixes the symbol with no separator for USD in en-US", async () => {
+    const { composeCurrency } = await freshModule();
+    expect(composeCurrency("43.00", "en-US")).toBe("$43.00");
+  });
+
+  it("prefixes the symbol with no separator for EUR in en-US (US convention for a foreign currency)", async () => {
+    const { composeCurrency } = await freshModule({ enabled: true });
+    expect(composeCurrency("43.00", "en-US")).toBe("$43.00".replace("$", "€"));
+  });
+
+  it("suffixes the symbol with a space for EUR in fr-FR (French convention)", async () => {
+    const { composeCurrency } = await freshModule({ enabled: true });
+    expect(composeCurrency("43,00", "fr-FR")).toBe("43,00 €");
+  });
+
+  it("suffixes the symbol with a space for USD in fr-FR too (French convention applies regardless of currency)", async () => {
+    const { composeCurrency } = await freshModule();
+    expect(composeCurrency("43,00", "fr-FR")).toBe("43,00 $");
+  });
+});

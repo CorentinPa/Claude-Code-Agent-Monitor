@@ -274,6 +274,25 @@ describe("fmtCostBare", () => {
   });
 });
 
+describe("currency symbol placement follows the active UI locale", () => {
+  afterEach(async () => {
+    setCurrencyPrefs(DEFAULT_CURRENCY_PREFS);
+    await i18n.changeLanguage("en");
+  });
+
+  it("suffixes the € after the amount in French, per French convention", async () => {
+    setCurrencyPrefs({ enabled: true, eurPerUsd: 0.86 });
+    await i18n.changeLanguage("fr");
+    expect(fmtCost(50)).toBe("43,00 €");
+    expect(fmtCostFull(50)).toBe("43,00 €");
+  });
+
+  it("also suffixes the $ in French when EUR display is off (French convention applies to any currency)", async () => {
+    await i18n.changeLanguage("fr");
+    expect(fmtCost(50)).toBe("50,00 $");
+  });
+});
+
 describe("formatModelName", () => {
   it("returns null for falsy input", () => {
     expect(formatModelName(null)).toBeNull();

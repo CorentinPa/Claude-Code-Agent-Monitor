@@ -97,6 +97,7 @@ import {
   XCircle,
   Clock,
   CircleDollarSign,
+  Coins,
   Hash,
   ShieldAlert,
   Info,
@@ -120,6 +121,7 @@ import {
 } from "lucide-react";
 import { api, RUN_EFFORT_CHOICES } from "../lib/api";
 import { fmtCostFull } from "../lib/format";
+import { getCurrencyPrefs } from "../lib/currency";
 import type {
   CodexApprovalPolicy,
   CodexSandbox,
@@ -1753,7 +1755,7 @@ function TokenMeter({ stats }: { stats: TokenStats }) {
         {stats.costUsd != null && (
           <span>
             <span className="text-gray-500">{t("tokens.cost")}:</span>{" "}
-            <span className="font-mono text-gray-200">${stats.costUsd.toFixed(4)}</span>
+            <span className="font-mono text-gray-200">{fmtCostFull(stats.costUsd, 4)}</span>
           </span>
         )}
       </span>
@@ -4142,7 +4144,7 @@ function ResultFooter({ result }: { result: ResultEnvelope }) {
       )}
       {typeof result.total_cost_usd === "number" && (
         <Stat
-          icon={CircleDollarSign}
+          icon={getCurrencyPrefs().enabled ? Coins : CircleDollarSign}
           label={t("footer.cost")}
           value={fmtCostFull(result.total_cost_usd, 4)}
         />

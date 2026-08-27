@@ -34,7 +34,7 @@
     "navClaude": "Tarifs Claude",
     "navGpt": "Tarifs Codex",
     "description": "Tarifs de l'API Anthropic par million de tokens (USD). Utilisez % comme joker dans les motifs. Certains modèles ont un tarif de lancement à durée limitée (affiché en violet) ; l'utilisation à la date de coupure ou avant est facturée à ce tarif, et l'utilisation après à ce tarif standard.",
-    "introNote": "Lancement ${{input}}/${{output}} jusqu'au {{until}}",
+    "introNote": "Lancement {{input}}/{{output}} jusqu'au {{until}}",
     "introRatesTitle": "Tarifs de lancement",
     "introRatesHint": "Laissez la date vide pour aucune promotion",
     "introUntil": "Jusqu'au (date)",

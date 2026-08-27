@@ -34,7 +34,7 @@
     "navClaude": "Precios de Claude",
     "navGpt": "Precios de Codex",
     "description": "Tarifas de API de Anthropic por millón de tokens (USD). Usa % como comodín en los patrones. Algunos modelos tienen una tarifa introductoria por tiempo limitado (mostrada en violeta); el uso en o antes de su fecha de corte se factura a esa tarifa, y el uso posterior a la tarifa estándar.",
-    "introNote": "Intro ${{input}}/${{output}} hasta {{until}}",
+    "introNote": "Intro {{input}}/{{output}} hasta {{until}}",
     "introRatesTitle": "Tarifas introductorias",
     "introRatesHint": "Deja la fecha vacía para sin promoción",
     "introUntil": "Hasta (fecha)",

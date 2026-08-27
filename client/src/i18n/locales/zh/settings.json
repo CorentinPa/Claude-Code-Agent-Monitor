@@ -34,7 +34,7 @@
     "navClaude": "Claude 定价",
     "navGpt": "Codex 定价",
     "description": "每百万 Token 的 Anthropic API 费率（美元）。在模式中使用 % 作为通配符。部分模型有限时优惠费率（以紫色显示）；在截止日期当天及之前的用量按该费率计费，之后按标准费率计费。",
-    "introNote": "优惠 ${{input}}/${{output}}，截止 {{until}}",
+    "introNote": "优惠 {{input}}/{{output}}，截止 {{until}}",
     "introRatesTitle": "优惠费率",
     "introRatesHint": "留空日期表示无优惠",
     "introUntil": "截止（日期）",

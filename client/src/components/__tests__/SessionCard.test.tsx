@@ -9,6 +9,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router";
+import i18n from "i18next";
 import { SessionCard } from "../SessionCard";
 import type { Session } from "../../lib/types";
 import { setCurrencyPrefs, DEFAULT_CURRENCY_PREFS } from "../../lib/currency";
@@ -35,7 +36,22 @@ function LocationProbe() {
 }
 
 describe("SessionCard", () => {
-  afterEach(() => setCurrencyPrefs(DEFAULT_CURRENCY_PREFS));
+  afterEach(async () => {
+    setCurrencyPrefs(DEFAULT_CURRENCY_PREFS);
+    await i18n.changeLanguage("en");
+  });
+
+  it("suffixes the € after the amount when the UI language is French", async () => {
+    setCurrencyPrefs({ enabled: true, eurPerUsd: 0.86 });
+    await i18n.changeLanguage("fr");
+    render(
+      <MemoryRouter>
+        <SessionCard session={makeSession({ cost: 54.85 })} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("47,17 €")).toBeInTheDocument();
+  });
 
   it("shows the session cost in dollars by default", () => {
     render(

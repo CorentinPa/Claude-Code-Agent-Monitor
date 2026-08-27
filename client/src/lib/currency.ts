@@ -106,6 +106,26 @@ export function currencyCode(): string {
   return getCurrencyPrefs().enabled ? "EUR" : "USD";
 }
 
+/**
+ * Places {@link currencySymbol} before or after `amountText` following the
+ * convention `Intl` uses for the active currency at `locale` - e.g. `"$43.00"`
+ * (USD, en-US) vs `"43,00 €"` (EUR, fr-FR). `amountText` is taken as-is (it
+ * may already be abbreviated with a K/M suffix), only the symbol's position
+ * and separator are derived from `Intl`.
+ */
+export function composeCurrency(amountText: string, locale: string): string {
+  const symbol = currencySymbol();
+  const parts = new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currencyCode(),
+    currencyDisplay: "narrowSymbol",
+  }).formatToParts(1);
+  const currencyIsFirst = parts[0]?.type === "currency";
+  const hasSpace = parts.some((p) => p.type === "literal" && /\s/.test(p.value));
+  const sep = hasSpace ? " " : "";
+  return currencyIsFirst ? `${symbol}${sep}${amountText}` : `${amountText}${sep}${symbol}`;
+}
+
 /** A stored/patched rate must be finite and positive; otherwise fall back to the default. */
 function sanitizeRate(value: number): number {
   if (!Number.isFinite(value) || value <= 0) return DEFAULT_CURRENCY_PREFS.eurPerUsd;

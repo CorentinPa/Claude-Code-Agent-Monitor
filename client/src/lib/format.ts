@@ -164,7 +164,7 @@
  * ----------------------------------------------------------------------------- */
 
 import i18n from "../i18n";
-import { convertCost, currencySymbol } from "./currency";
+import { convertCost, composeCurrency } from "./currency";
 
 // ===========================================================================
 // Timestamp parsing + locale resolution (shared internals)
@@ -421,16 +421,20 @@ export function fmt(n: number): string {
  *   `"$7.89"`. Non-finite *or negative* input yields `"$0.00"`.
  * @remarks Unlike {@link fmt}, negatives are clamped (a cost is never shown below zero)
  *   and the abbreviated tiers keep two decimals to preserve cents-level precision. Caps
- *   at the millions suffix - there is no billions tier for costs.
+ *   at the millions suffix - there is no billions tier for costs. The decimal mark and the
+ *   symbol's position both follow the active UI locale and currency (see
+ *   `currency.ts`'s `composeCurrency`), e.g. `"$1.23K"` (en-US) vs `"1,23K €"` (fr-FR).
  * @example fmtCost(12_500) // "$12.50K"   fmtCost(3.5) // "$3.50"   fmtCost(-1) // "$0.00"
  */
 export function fmtCost(n: number): string {
-  if (!Number.isFinite(n) || n < 0) return `${currencySymbol()}0.00`; // guard NaN/Infinity/negative
-  const symbol = currencySymbol();
+  const locale = getCurrentLocale();
+  const twoDecimals = (value: number) =>
+    value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (!Number.isFinite(n) || n < 0) return composeCurrency(twoDecimals(0), locale); // guard NaN/Infinity/negative
   const amount = convertCost(n);
-  if (amount >= 1_000_000) return `${symbol}${(amount / 1_000_000).toFixed(2)}M`; // millions
-  if (amount >= 1_000) return `${symbol}${(amount / 1_000).toFixed(2)}K`; // thousands
-  return `${symbol}${amount.toFixed(2)}`; // < $1000: full cents
+  if (amount >= 1_000_000) return composeCurrency(`${twoDecimals(amount / 1_000_000)}M`, locale); // millions
+  if (amount >= 1_000) return composeCurrency(`${twoDecimals(amount / 1_000)}K`, locale); // thousands
+  return composeCurrency(twoDecimals(amount), locale); // < $1000: full cents
 }
 
 /**
@@ -447,8 +451,9 @@ export function fmtCost(n: number): string {
  *   forces exactly `decimals` places (no trimming, no rounding drift beyond `toLocaleString`).
  */
 export function fmtCostFull(n: number, decimals = 2): string {
-  if (!Number.isFinite(n) || n < 0) return `${currencySymbol()}0.00`; // guard NaN/Infinity/negative
-  return `${currencySymbol()}${fmtCostBare(n, decimals)}`;
+  const locale = getCurrentLocale();
+  if (!Number.isFinite(n) || n < 0) return composeCurrency("0.00", locale); // guard NaN/Infinity/negative
+  return composeCurrency(fmtCostBare(n, decimals), locale);
 }
 
 /**

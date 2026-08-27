@@ -68,6 +68,7 @@ import {
   FolderOpen,
   Cpu,
   DollarSign,
+  Coins,
   Clock,
   BarChart3,
 } from "lucide-react";
@@ -76,6 +77,7 @@ import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { useDataScope } from "../lib/dataScope";
 import { fmt, fmtCost, fmtCostFull, formatModelName } from "../lib/format";
+import { getCurrencyPrefs } from "../lib/currency";
 import { Tip } from "../components/Tip";
 import { PaginatedLegend } from "../components/PaginatedLegend";
 import { Skeleton, StatValueSkeleton, TextSkeleton } from "../components/Skeleton";
@@ -983,7 +985,7 @@ export function Analytics() {
               ? `${costData.breakdown.length} ${t("common:cost.model", { count: costData.breakdown.length })}`
               : undefined
           }
-          icon={DollarSign}
+          icon={getCurrencyPrefs().enabled ? Coins : DollarSign}
           color="text-emerald-400"
           loading={!costData}
         />
