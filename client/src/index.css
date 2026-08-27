@@ -31,6 +31,39 @@
   --gray-800: #1f2937;
   --gray-900: #111827;
   --gray-950: #030712;
+  /* Chart/visualization tokens */
+  --chart-tooltip-bg: #12121f;
+  --chart-tooltip-border: #2a2a4a;
+  --chart-tooltip-title: #e2e8f0;
+  --chart-tooltip-label: #64748b;
+  --chart-tooltip-value: #cbd5e1;
+  --chart-tooltip-desc: #94a3b8;
+  --chart-track: #2a2a3d;
+  --chart-heatmap-empty: #161625;
+  --chart-overlay-1: rgba(255, 255, 255, 0.04);
+  --chart-overlay-2: rgba(255, 255, 255, 0.06);
+  /* OrchestrationDAG node fills/text (canvas-dependent; see Task 17) */
+  --dag-session-fill-from: #312e81;
+  --dag-session-fill-to: #4338ca;
+  --dag-main-fill-from: #1e3a5f;
+  --dag-main-fill-to: #1d4ed8;
+  --dag-subagent-fill-from: #052e16;
+  --dag-subagent-fill-to: #166534;
+  --dag-nested-fill-from: #134e4a;
+  --dag-nested-fill-to: #0f766e;
+  --dag-outcome-fill-from: #1e1b4b;
+  --dag-outcome-fill-to: #4338ca;
+  --dag-completed-fill: #052e16;
+  --dag-error-fill: #1f0808;
+  --dag-abandoned-fill: #1c1a04;
+  --dag-session-text: #a5b4fc;
+  --dag-main-text: #93c5fd;
+  --dag-subagent-text: #86efac;
+  --dag-nested-text: #5eead4;
+  --dag-outcome-text: #c4b5fd;
+  --dag-completed-text: #4ade80;
+  --dag-error-text: #f87171;
+  --dag-abandoned-text: #facc15;
 }
 
 [data-theme="light"] {
@@ -56,6 +89,37 @@
   --gray-800: #e5e7eb;
   --gray-900: #f3f4f6;
   --gray-950: #f9fafb;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-border: #e2e4e9;
+  --chart-tooltip-title: #111827;
+  --chart-tooltip-label: #6b7280;
+  --chart-tooltip-value: #374151;
+  --chart-tooltip-desc: #4b5563;
+  --chart-track: #e5e7eb;
+  --chart-heatmap-empty: #f3f4f6;
+  --chart-overlay-1: rgba(0, 0, 0, 0.04);
+  --chart-overlay-2: rgba(0, 0, 0, 0.06);
+  --dag-session-fill-from: #e0e7ff;
+  --dag-session-fill-to: #c7d2fe;
+  --dag-main-fill-from: #dbeafe;
+  --dag-main-fill-to: #bfdbfe;
+  --dag-subagent-fill-from: #dcfce7;
+  --dag-subagent-fill-to: #bbf7d0;
+  --dag-nested-fill-from: #ccfbf1;
+  --dag-nested-fill-to: #99f6e4;
+  --dag-outcome-fill-from: #e0e7ff;
+  --dag-outcome-fill-to: #c7d2fe;
+  --dag-completed-fill: #dcfce7;
+  --dag-error-fill: #fee2e2;
+  --dag-abandoned-fill: #fef9c3;
+  --dag-session-text: #4338ca;
+  --dag-main-text: #1d4ed8;
+  --dag-subagent-text: #16a34a;
+  --dag-nested-text: #0f766e;
+  --dag-outcome-text: #6d28d9;
+  --dag-completed-text: #15803d;
+  --dag-error-text: #b91c1c;
+  --dag-abandoned-text: #a16207;
 }
 
 @layer base {
