@@ -8,6 +8,52 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --surface-0: #06060a;
+  --surface-1: #0c0c14;
+  --surface-2: #13131e;
+  --surface-3: #1a1a28;
+  --surface-4: #222233;
+  --surface-5: #2a2a3d;
+  --border: #2a2a3d;
+  --border-light: #363650;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-muted: rgba(99, 102, 241, 0.15);
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+}
+
+[data-theme="light"] {
+  --surface-0: #ffffff;
+  --surface-1: #f8f9fb;
+  --surface-2: #f1f2f5;
+  --surface-3: #e7e9ee;
+  --surface-4: #dde0e6;
+  --surface-5: #d1d5db;
+  --border: #e2e4e9;
+  --border-light: #cbced6;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-muted: rgba(99, 102, 241, 0.12);
+  --gray-100: #111827;
+  --gray-200: #1f2937;
+  --gray-300: #374151;
+  --gray-400: #4b5563;
+  --gray-500: #6b7280;
+  --gray-600: #9ca3af;
+  --gray-700: #d1d5db;
+  --gray-800: #e5e7eb;
+  --gray-900: #f3f4f6;
+}
+
 @layer base {
   * {
     scrollbar-width: thin;
