@@ -539,7 +539,7 @@ const SPLASH_CSS = `
   display: inline-flex;
   margin-bottom: 2.75rem;
   opacity: 0;
-  animation: splashMark 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards;
+  animation: splashMark 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
 }
 .splash-mark-glow {
   position: absolute;
