@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1280" viewBox="0 0 1280 1280">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="72%">
+      <stop offset="0%" stop-color="#161426"/>
+      <stop offset="55%" stop-color="#090915"/>
+      <stop offset="100%" stop-color="#020206"/>
+    </radialGradient>
+
+    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#401f78"/>
+      <stop offset="30%" stop-color="#b56cff"/>
+      <stop offset="55%" stop-color="#6c37d8"/>
+      <stop offset="100%" stop-color="#2a195a"/>
+    </linearGradient>
+
+    <linearGradient id="whiteMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="38%" stop-color="#f4efff"/>
+      <stop offset="72%" stop-color="#d9d0ec"/>
+      <stop offset="100%" stop-color="#c3b9d9"/>
+    </linearGradient>
+
+    <linearGradient id="purpleMetal" x1="10%" y1="0%" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="#f2dfff"/>
+      <stop offset="24%" stop-color="#c480ff"/>
+      <stop offset="58%" stop-color="#8b45ef"/>
+      <stop offset="100%" stop-color="#5c26c9"/>
+    </linearGradient>
+
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#efedf7"/>
+      <stop offset="55%" stop-color="#f8f5ff"/>
+      <stop offset="100%" stop-color="#9c5dff"/>
+    </linearGradient>
+
+    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2e2145" stop-opacity="0"/>
+      <stop offset="40%" stop-color="#6731d4" stop-opacity=".55"/>
+      <stop offset="50%" stop-color="#a459ff"/>
+      <stop offset="60%" stop-color="#6731d4" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#2e2145" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="purpleGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="textGlow" x="-20%" y="-50%" width="140%" height="200%">
+      <feGaussianBlur stdDeviation="2.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="1280" fill="#000"/>
+  <circle cx="640" cy="640" r="620" fill="url(#bg)"/>
+
+  <!-- Purple arc -->
+  <path d="M 330 285
+           C 490 118, 743 95, 931 236"
+        fill="none" stroke="url(#ring)" stroke-width="7"
+        stroke-linecap="round" filter="url(#softGlow)" opacity=".98"/>
+  <path d="M 273 793
+           C 208 653, 209 500, 273 362"
+        fill="none" stroke="url(#ring)" stroke-width="6"
+        stroke-linecap="round" filter="url(#softGlow)" opacity=".85"/>
+  <path d="M 1007 367
+           C 1063 513, 1055 663, 1003 792"
+        fill="none" stroke="url(#ring)" stroke-width="6"
+        stroke-linecap="round" filter="url(#softGlow)" opacity=".75"/>
+
+  <!-- Main X / left structure -->
+  <g filter="url(#purpleGlow)">
+    <path d="M 300 288
+             L 414 288
+             C 438 288, 452 298, 469 314
+             L 710 560
+             L 461 810
+             C 445 826, 432 829, 412 829
+             L 303 829
+             L 549 583
+             C 566 566, 566 549, 549 532
+             Z"
+          fill="url(#whiteMetal)"
+          stroke="#efe8ff" stroke-width="2.2"/>
+  </g>
+
+  <!-- Right upper arm -->
+  <g filter="url(#purpleGlow)">
+    <path d="M 649 452
+             L 794 307
+             C 810 292, 826 288, 847 288
+             L 949 288
+             L 719 521
+             Z"
+          fill="url(#purpleMetal)"
+          stroke="#d2adff" stroke-width="2"/>
+  </g>
+
+  <!-- Right lower arm -->
+  <g filter="url(#purpleGlow)">
+    <path d="M 652 663
+             L 721 594
+             L 951 829
+             L 852 829
+             C 828 829, 813 823, 799 809
+             Z"
+          fill="url(#purpleMetal)"
+          stroke="#b47aff" stroke-width="2"/>
+  </g>
+
+  <!-- Inner highlights -->
+  <path d="M 319 291 L 414 291 C 437 291 450 301 467 317"
+        fill="none" stroke="#ffffff" stroke-opacity=".6" stroke-width="2"/>
+  <path d="M 795 309 C 811 294 826 291 846 291 L 930 291"
+        fill="none" stroke="#ffffff" stroke-opacity=".5" stroke-width="1.8"/>
+
+  <!-- Wordmark -->
+  <text x="640" y="977"
+        text-anchor="middle"
+        font-family="Orbitron, Rajdhani, Eurostile, Arial, sans-serif"
+        font-size="72"
+        font-weight="300"
+        letter-spacing="24"
+        fill="url(#textGrad)"
+        filter="url(#textGlow)">XANAOS</text>
+
+  <!-- Lower light line -->
+  <rect x="305" y="1034" width="670" height="2.5" rx="1.25" fill="url(#lineGrad)"/>
+  <g filter="url(#purpleGlow)">
+    <circle cx="625" cy="1035" r="4.5" fill="#fff"/>
+    <circle cx="625" cy="1035" r="10" fill="#8b3dff" opacity=".45"/>
+  </g>
+</svg>
