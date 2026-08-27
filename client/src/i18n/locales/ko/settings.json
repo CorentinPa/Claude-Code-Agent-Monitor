@@ -166,7 +166,7 @@
     "sessionComplete": "세션이 완료될 때",
     "sessionError": "세션에 오류가 발생할 때",
     "subagentSpawned": "Subagent가 생성될 때",
-    "testTitle": "Agent Monitor",
+    "testTitle": "XanaOS",
     "testBody": "알림이 정상적으로 작동합니다!",
     "sendTest": "테스트 알림 보내기",
     "disabledInfo": "알림이 비활성화되어 있습니다 - 세션 이벤트 알림을 받으려면 활성화하세요"

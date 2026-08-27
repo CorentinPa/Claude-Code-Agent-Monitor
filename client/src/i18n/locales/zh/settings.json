@@ -166,7 +166,7 @@
     "sessionComplete": "会话完成",
     "sessionError": "会话出错",
     "subagentSpawned": "Subagent生成",
-    "testTitle": "Agent 监控",
+    "testTitle": "XanaOS",
     "testBody": "通知功能正常！",
     "sendTest": "发送测试通知",
     "disabledInfo": "通知已禁用 - 启用以获取会话事件提醒"

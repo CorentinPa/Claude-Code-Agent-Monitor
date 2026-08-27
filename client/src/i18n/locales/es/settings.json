@@ -166,7 +166,7 @@
     "sessionComplete": "Se completa una sesión",
     "sessionError": "Errores de sesión",
     "subagentSpawned": "Se inicia un subagente",
-    "testTitle": "Agent Monitor",
+    "testTitle": "XanaOS",
     "testBody": "¡Las notificaciones funcionan!",
     "sendTest": "Enviar Notificación de Prueba",
     "disabledInfo": "Las notificaciones están deshabilitadas - habilita para recibir alertas de eventos de sesión"

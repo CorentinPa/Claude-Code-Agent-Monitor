@@ -1,6 +1,6 @@
 /**
  * @file Sidebar.test.tsx
- * @description Unit tests for the Sidebar component, which is responsible for rendering the application's sidebar navigation. The tests cover rendering of the brand name, subtitle, navigation links, WebSocket connection status, and version number. The tests use React Testing Library and Vitest for assertions and mocking.
+ * @description Unit tests for the Sidebar component, which is responsible for rendering the application's sidebar navigation. The tests cover rendering of the brand name, navigation links, WebSocket connection status, and version number. The tests use React Testing Library and Vitest for assertions and mocking.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -26,12 +26,7 @@ describe("Sidebar", () => {
 
   it("should render the brand name", () => {
     renderSidebar(true);
-    expect(screen.getByText("Agent Dashboard")).toBeInTheDocument();
-  });
-
-  it("should render the subtitle", () => {
-    renderSidebar(true);
-    expect(screen.getByText("Claude Code Monitor")).toBeInTheDocument();
+    expect(screen.getByText("XanaOS")).toBeInTheDocument();
   });
 
   it("should render all navigation links", () => {
