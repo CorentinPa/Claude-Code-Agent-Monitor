@@ -83,7 +83,15 @@ const APP_VERSION = (() => {
 // API reference pages are served by Express even in development, while the
 // dashboard favicon normally comes from Vite's public directory. Keep one
 // explicit server route so Swagger and ReDoc always share the app identity.
-const DASHBOARD_FAVICON_PATH = path.join(__dirname, "..", "client", "public", "favicon.svg");
+// Prefer the built client/dist copy when it exists: packaged desktop builds
+// (electron-builder's extraResources) ship client/dist only, never
+// client/public, so falling back to the source-only path there 404s.
+const DASHBOARD_FAVICON_PATH = (() => {
+  const fs = require("fs");
+  const distPath = path.join(__dirname, "..", "client", "dist", "favicon.svg");
+  if (fs.existsSync(distPath)) return distPath;
+  return path.join(__dirname, "..", "client", "public", "favicon.svg");
+})();
 
 function createApp() {
   const app = express();
