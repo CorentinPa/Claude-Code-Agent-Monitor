@@ -75,6 +75,7 @@ import {
   Cpu,
   RefreshCw,
   DollarSign,
+  Coins,
   ChevronDown,
   ChevronRight,
   GitBranch,
@@ -125,9 +126,11 @@ import {
   formatDateTime,
   formatDuration,
   fmtCostFull,
+  fmtCostBare,
   timeAgo,
   formatModelName,
 } from "../lib/format";
+import { getCurrencyPrefs } from "../lib/currency";
 import type {
   Session,
   Agent,
@@ -646,8 +649,12 @@ export function SessionDetail() {
             </span>
             {cost && cost.total_cost > 0 && (
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
-                <DollarSign className="w-3 h-3" />
-                {fmtCostFull(cost.total_cost).slice(1)}
+                {getCurrencyPrefs().enabled ? (
+                  <Coins className="w-3 h-3" />
+                ) : (
+                  <DollarSign className="w-3 h-3" />
+                )}
+                {fmtCostBare(cost.total_cost)}
               </span>
             )}
           </div>
@@ -1012,7 +1019,11 @@ export function SessionDetail() {
           {cost && cost.breakdown.length > 0 && cost.total_cost > 0 && (
             <div className="mt-8">
               <h3 className="text-sm font-medium text-gray-300 mb-4 flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
+                {getCurrencyPrefs().enabled ? (
+                  <Coins className="w-4 h-4" />
+                ) : (
+                  <DollarSign className="w-4 h-4" />
+                )}
                 {t("detail.costBreakdown")}
               </h3>
               <div className="card overflow-x-auto">

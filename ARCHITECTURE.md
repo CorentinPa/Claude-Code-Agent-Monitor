@@ -2765,6 +2765,10 @@ The function handles:
 
 Components that consume this: SessionDetail, Analytics (donut chart + breakdown), Dashboard (model stats), MessageList, SessionCard, AgentCard, SessionComplexityScatter, SessionDrillIn, ModelDelegationFlow, and EventDetail.
 
+### Display Currency (Client)
+
+`client/src/lib/currency.ts` owns an optional USD → EUR display-currency preference (`localStorage` key `ccam-currency-prefs`, `{ enabled, eurPerUsd }`), following the same singleton + `CustomEvent` pattern as `sound.ts`. `eurPerUsd` is set manually in Settings → Dashboard Data, not fetched from a live rate feed. `format.ts`'s `fmtCost`/`fmtCostFull`/`fmtCostBare`, `SessionCard`'s local cost formatter, `Settings.tsx`'s pricing-table `formatUsdRate`, and `Run.tsx`'s footer cost stat all read this preference to convert the amount and swap the `$`/`€` symbol. Conversion is display-only: stored costs, exports, and the pricing rules themselves stay in USD.
+
 ### Data Flow
 
 ```mermaid

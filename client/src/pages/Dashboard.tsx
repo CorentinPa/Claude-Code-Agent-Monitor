@@ -79,6 +79,7 @@ import {
   Bot,
   Zap,
   DollarSign,
+  Coins,
   Activity,
   ArrowRight,
   RefreshCw,
@@ -104,7 +105,8 @@ import { AgentCard } from "../components/AgentCard";
 import { AgentStatusBadge } from "../components/StatusBadge";
 import { EmptyState } from "../components/EmptyState";
 import { Tip } from "../components/Tip";
-import { timeAgo, fmt, fmtCost, formatModelName } from "../lib/format";
+import { timeAgo, fmt, fmtCost, fmtCostFull, formatModelName } from "../lib/format";
+import { getCurrencyPrefs } from "../lib/currency";
 import type { Stats, Agent, DashboardEvent, WSMessage, WorkflowData, Session } from "../lib/types";
 
 interface SystemInfo {
@@ -1286,12 +1288,8 @@ export function Dashboard() {
             <StatCard
               label={t("totalCost")}
               value={totalCost !== null ? fmtCost(totalCost) : ""}
-              raw={
-                totalCost !== null
-                  ? `$${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  : undefined
-              }
-              icon={DollarSign}
+              raw={totalCost !== null ? fmtCostFull(totalCost) : undefined}
+              icon={getCurrencyPrefs().enabled ? Coins : DollarSign}
               accentColor="text-emerald-400"
               loading={totalCost === null}
             />

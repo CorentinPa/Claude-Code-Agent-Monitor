@@ -34,7 +34,7 @@
     "navClaude": "Claude Pricing",
     "navGpt": "Codex Pricing",
     "description": "Anthropic API rates per million tokens (USD). Use % as wildcard in patterns. Some models have a time-limited introductory rate (shown in violet); usage on or before its cutoff date is billed at that rate, and usage after it at the standard rate.",
-    "introNote": "Intro ${{input}}/${{output}} through {{until}}",
+    "introNote": "Intro {{input}}/{{output}} through {{until}}",
     "introRatesTitle": "Introductory rates",
     "introRatesHint": "Leave the date empty for no promo",
     "introUntil": "Through (date)",
@@ -119,7 +119,13 @@
     "claudeDescription": "Show only Claude Code data.",
     "codexDescription": "Show only Codex data.",
     "bothDescription": "Combine Claude Code and Codex data.",
-    "beta": "Beta"
+    "beta": "Beta",
+    "currencyTitle": "Display Currency",
+    "currencyDescription": "Convert every displayed cost from USD to EUR using a manually set exchange rate. Stored data and exports always stay in USD.",
+    "currencyToggleLabel": "Show costs in euros",
+    "currencyToggleDescription": "Applies everywhere a cost is shown, including the pricing tables below.",
+    "currencyRateLabel": "EUR per USD rate",
+    "currencyRateHint": "Update this whenever the exchange rate changes."
   },
   "hooks": {
     "title": "Hook Configuration",

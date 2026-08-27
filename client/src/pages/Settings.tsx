@@ -123,7 +123,16 @@ import {
   subscribeToSoundPrefs,
   type SoundPrefs,
 } from "../lib/sound";
-import { fmt, fmtCost, getCurrentLocale } from "../lib/format";
+import { fmt, fmtCost, fmtCostFull, getCurrentLocale } from "../lib/format";
+import {
+  getCurrencyPrefs,
+  setCurrencyPrefs,
+  subscribeToCurrencyPrefs,
+  convertCost,
+  currencyCode,
+  composeCurrency,
+  type CurrencyPrefs,
+} from "../lib/currency";
 import { subscribeToPush, unsubscribeFromPush } from "../lib/push";
 import { Tip } from "../components/Tip";
 import { ImportHistory } from "../components/ImportHistory";
@@ -301,15 +310,16 @@ function formatUptime(seconds: number): string {
   return `${m}m`;
 }
 
-/** Format a published USD-per-million-token rate without exposing float noise. */
-function formatUsdRate(rate: number): string {
+/** Format a published USD-per-million-token rate without exposing float noise,
+ *  converted to the active display currency (see `lib/currency.ts`). */
+export function formatUsdRate(rate: number): string {
   if (!Number.isFinite(rate) || rate <= 0) return "—";
   return new Intl.NumberFormat(getCurrentLocale(), {
     style: "currency",
-    currency: "USD",
+    currency: currencyCode(),
     minimumFractionDigits: 2,
     maximumFractionDigits: 4,
-  }).format(rate);
+  }).format(convertCost(rate));
 }
 
 function useCountUp(end: number | null, durationMs = 1000) {
@@ -627,7 +637,11 @@ function GptPricingTable({
       <div className="mb-4">
         <div>
           <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-gray-500" />
+            {getCurrencyPrefs().enabled ? (
+              <Coins className="w-4 h-4 text-gray-500" />
+            ) : (
+              <DollarSign className="w-4 h-4 text-gray-500" />
+            )}
             {t("pricing.gpt.title")}
             <PricingInfoTooltip provider="gpt" />
           </h3>
@@ -1001,6 +1015,25 @@ export function Settings() {
     },
     []
   );
+  const [currencyPrefs, setCurrencyPrefsState] = useState<CurrencyPrefs>(getCurrencyPrefs);
+  const updateCurrencyPrefs = useCallback((patch: Partial<CurrencyPrefs>) => {
+    setCurrencyPrefsState(setCurrencyPrefs(patch));
+  }, []);
+  // Free-typed buffer for the rate field, separate from the committed
+  // preference: an in-progress edit (e.g. clearing the field to retype it)
+  // must not be clamped by `sanitizeRate` on every keystroke.
+  const [rateInput, setRateInput] = useState(() => String(getCurrencyPrefs().eurPerUsd));
+  useEffect(() => {
+    setRateInput(String(currencyPrefs.eurPerUsd));
+  }, [currencyPrefs.eurPerUsd]);
+  const commitRateInput = useCallback(() => {
+    const parsed = Number(rateInput);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      updateCurrencyPrefs({ eurPerUsd: parsed });
+    } else {
+      setRateInput(String(currencyPrefs.eurPerUsd));
+    }
+  }, [rateInput, currencyPrefs.eurPerUsd, updateCurrencyPrefs]);
   const [abandonHours, setAbandonHours] = useState("24");
   const [purgeDays, setPurgeDays] = useState("90");
   const [claudeHome, setClaudeHomeState] = useState("");
@@ -1142,6 +1175,7 @@ export function Settings() {
 
   // Keep the panel honest if preferences are changed anywhere else in the tab.
   useEffect(() => subscribeToSoundPrefs(() => setSoundPrefsState(getSoundPrefs())), []);
+  useEffect(() => subscribeToCurrencyPrefs(() => setCurrencyPrefsState(getCurrencyPrefs())), []);
 
   useEffect(() => {
     if (!actionResult) return;
@@ -1613,6 +1647,7 @@ export function Settings() {
         <div ref={tocRef} className="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1">
           {SETTINGS_SECTIONS.map(({ id, labelKey, fallback, Icon }) => {
             const active = activeSection === id;
+            const SectionIcon = Icon === DollarSign && getCurrencyPrefs().enabled ? Coins : Icon;
             return (
               <button
                 key={id}
@@ -1629,7 +1664,7 @@ export function Settings() {
                     : "border-border text-gray-400 hover:text-gray-200 hover:bg-surface-3"
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <SectionIcon className="w-3.5 h-3.5" />
                 {t(labelKey, fallback ?? "")}
               </button>
             );
@@ -1652,19 +1687,19 @@ export function Settings() {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-emerald-400" />
+              {getCurrencyPrefs().enabled ? (
+                <Coins className="w-6 h-6 text-emerald-400" />
+              ) : (
+                <DollarSign className="w-6 h-6 text-emerald-400" />
+              )}
             </div>
             <div>
               <p className="text-sm text-gray-500">{t("common:cost.totalEstimatedCost")}</p>
               <p className="text-2xl font-semibold text-gray-100">
-                <Tip
-                  raw={
-                    totalCost !== null
-                      ? `$${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                      : undefined
-                  }
-                >
-                  {totalCost !== null ? fmtCost(animatedTotalCost) : "$-.--"}
+                <Tip raw={totalCost !== null ? fmtCostFull(totalCost) : undefined}>
+                  {totalCost !== null
+                    ? fmtCost(animatedTotalCost)
+                    : composeCurrency("-.--", getCurrentLocale())}
                 </Tip>
               </p>
             </div>
@@ -1731,6 +1766,34 @@ export function Settings() {
             })}
           </div>
         </div>
+        <div className="card p-4 mt-3">
+          <Toggle
+            checked={currencyPrefs.enabled}
+            onChange={(v) => updateCurrencyPrefs({ enabled: v })}
+            label={t("display.currencyToggleLabel")}
+            description={t("display.currencyToggleDescription")}
+          />
+          {currencyPrefs.enabled && (
+            <div className="mt-3 pt-3 border-t border-border flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <label htmlFor="currency-rate" className="text-sm text-gray-300">
+                  {t("display.currencyRateLabel")}
+                </label>
+                <p className="text-xs text-gray-500 mt-0.5">{t("display.currencyRateHint")}</p>
+              </div>
+              <input
+                id="currency-rate"
+                type="number"
+                min="0"
+                step="0.01"
+                value={rateInput}
+                onChange={(e) => setRateInput(e.target.value)}
+                onBlur={commitRateInput}
+                className="w-24 flex-shrink-0 rounded-md border border-border bg-surface-2 px-2 py-1.5 text-sm text-gray-200 text-right"
+              />
+            </div>
+          )}
+        </div>
       </section>
 
       {/* ─── CLAUDE PRICING ─── */}
@@ -1738,7 +1801,11 @@ export function Settings() {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-gray-500" />
+              {getCurrencyPrefs().enabled ? (
+                <Coins className="w-4 h-4 text-gray-500" />
+              ) : (
+                <DollarSign className="w-4 h-4 text-gray-500" />
+              )}
               {t("pricing.title")}
               <PricingInfoTooltip />
             </h3>
@@ -1838,58 +1905,58 @@ export function Settings() {
                       {rule.intro_until && (
                         <div className="text-[11px] font-normal text-violet-400/80 mt-0.5">
                           {t("pricing.introNote", {
-                            input: rule.intro_input_per_mtok,
-                            output: rule.intro_output_per_mtok,
+                            input: formatUsdRate(rule.intro_input_per_mtok ?? 0),
+                            output: formatUsdRate(rule.intro_output_per_mtok ?? 0),
                             until: rule.intro_until,
                           })}
                         </div>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-400 text-right font-mono">
-                      ${rule.input_per_mtok}
+                      {formatUsdRate(rule.input_per_mtok)}
                       {rule.intro_until && (
                         <span className="block text-[11px] text-violet-400/80">
-                          ${rule.intro_input_per_mtok}
+                          {formatUsdRate(rule.intro_input_per_mtok ?? 0)}
                         </span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-400 text-right font-mono">
-                      ${rule.output_per_mtok}
+                      {formatUsdRate(rule.output_per_mtok)}
                       {rule.intro_until && (
                         <span className="block text-[11px] text-violet-400/80">
-                          ${rule.intro_output_per_mtok}
+                          {formatUsdRate(rule.intro_output_per_mtok ?? 0)}
                         </span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-400 text-right font-mono">
-                      ${rule.cache_read_per_mtok}
+                      {formatUsdRate(rule.cache_read_per_mtok)}
                       {rule.intro_until && (
                         <span className="block text-[11px] text-violet-400/80">
-                          ${rule.intro_cache_read_per_mtok}
+                          {formatUsdRate(rule.intro_cache_read_per_mtok ?? 0)}
                         </span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-400 text-right font-mono">
-                      ${rule.cache_write_per_mtok}
+                      {formatUsdRate(rule.cache_write_per_mtok)}
                       {rule.intro_until && (
                         <span className="block text-[11px] text-violet-400/80">
-                          ${rule.intro_cache_write_per_mtok}
+                          {formatUsdRate(rule.intro_cache_write_per_mtok ?? 0)}
                         </span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-400 text-right font-mono">
-                      ${rule.cache_write_1h_per_mtok}
+                      {formatUsdRate(rule.cache_write_1h_per_mtok)}
                       {rule.intro_until && (
                         <span className="block text-[11px] text-violet-400/80">
-                          ${rule.intro_cache_write_1h_per_mtok}
+                          {formatUsdRate(rule.intro_cache_write_1h_per_mtok ?? 0)}
                         </span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-400 text-right font-mono">
-                      {rule.fast_input_per_mtok ? `$${rule.fast_input_per_mtok}` : "-"}
+                      {rule.fast_input_per_mtok ? formatUsdRate(rule.fast_input_per_mtok) : "-"}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-400 text-right font-mono">
-                      {rule.fast_output_per_mtok ? `$${rule.fast_output_per_mtok}` : "-"}
+                      {rule.fast_output_per_mtok ? formatUsdRate(rule.fast_output_per_mtok) : "-"}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 transition-opacity">

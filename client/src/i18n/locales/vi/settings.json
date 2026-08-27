@@ -34,7 +34,7 @@
     "navClaude": "Giá Claude",
     "navGpt": "Giá Codex",
     "description": "Đơn giá API Anthropic theo một triệu token (USD). Dùng % làm ký tự đại diện trong mẫu. Một số mô hình có mức giá giới thiệu có thời hạn (hiển thị màu tím); usage vào hoặc trước ngày kết thúc tính theo mức đó, sau đó tính theo mức chuẩn.",
-    "introNote": "Ưu đãi ${{input}}/${{output}} đến {{until}}",
+    "introNote": "Ưu đãi {{input}}/{{output}} đến {{until}}",
     "introRatesTitle": "Giá giới thiệu",
     "introRatesHint": "Để trống ngày nếu không có ưu đãi",
     "introUntil": "Đến (ngày)",
@@ -119,7 +119,13 @@
     "claudeDescription": "Chỉ hiển thị dữ liệu Claude Code.",
     "codexDescription": "Chỉ hiển thị dữ liệu Codex.",
     "bothDescription": "Kết hợp dữ liệu Claude Code và Codex.",
-    "beta": "Beta"
+    "beta": "Beta",
+    "currencyTitle": "Đơn Vị Tiền Tệ Hiển Thị",
+    "currencyDescription": "Chuyển đổi mọi chi phí hiển thị từ USD sang EUR bằng tỷ giá hối đoái do bạn tự thiết lập. Dữ liệu lưu trữ và xuất luôn giữ nguyên bằng USD.",
+    "currencyToggleLabel": "Hiển thị chi phí bằng euro",
+    "currencyToggleDescription": "Áp dụng ở mọi nơi hiển thị chi phí, bao gồm cả bảng giá bên dưới.",
+    "currencyRateLabel": "Tỷ giá EUR trên USD",
+    "currencyRateHint": "Cập nhật giá trị này khi tỷ giá hối đoái thay đổi."
   },
   "hooks": {
     "title": "Cấu hình hook",

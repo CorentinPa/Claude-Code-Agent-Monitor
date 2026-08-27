@@ -34,7 +34,7 @@
     "navClaude": "Tarifs Claude",
     "navGpt": "Tarifs Codex",
     "description": "Tarifs de l'API Anthropic par million de tokens (USD). Utilisez % comme joker dans les motifs. Certains modèles ont un tarif de lancement à durée limitée (affiché en violet) ; l'utilisation à la date de coupure ou avant est facturée à ce tarif, et l'utilisation après à ce tarif standard.",
-    "introNote": "Lancement ${{input}}/${{output}} jusqu'au {{until}}",
+    "introNote": "Lancement {{input}}/{{output}} jusqu'au {{until}}",
     "introRatesTitle": "Tarifs de lancement",
     "introRatesHint": "Laissez la date vide pour aucune promotion",
     "introUntil": "Jusqu'au (date)",
@@ -119,7 +119,13 @@
     "claudeDescription": "Afficher uniquement les données Claude Code.",
     "codexDescription": "Afficher uniquement les données Codex.",
     "bothDescription": "Combiner les données Claude Code et Codex.",
-    "beta": "Bêta"
+    "beta": "Bêta",
+    "currencyTitle": "Devise d'affichage",
+    "currencyDescription": "Convertit tous les coûts affichés de USD en EUR à l'aide d'un taux de change défini manuellement. Les données stockées et les exports restent toujours en USD.",
+    "currencyToggleLabel": "Afficher les coûts en euros",
+    "currencyToggleDescription": "S'applique partout où un coût est affiché, y compris dans les tableaux de tarifs ci-dessous.",
+    "currencyRateLabel": "Taux EUR par USD",
+    "currencyRateHint": "Mets à jour cette valeur quand le taux de change change."
   },
   "hooks": {
     "title": "Configuration des hooks",
