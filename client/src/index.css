@@ -20,6 +20,7 @@
   --accent: #6366f1;
   --accent-hover: #818cf8;
   --accent-muted: rgba(99, 102, 241, 0.15);
+  --gray-50: #f9fafb;
   --gray-100: #f3f4f6;
   --gray-200: #e5e7eb;
   --gray-300: #d1d5db;
@@ -29,6 +30,7 @@
   --gray-700: #374151;
   --gray-800: #1f2937;
   --gray-900: #111827;
+  --gray-950: #030712;
 }
 
 [data-theme="light"] {
@@ -43,6 +45,7 @@
   --accent: #6366f1;
   --accent-hover: #818cf8;
   --accent-muted: rgba(99, 102, 241, 0.12);
+  --gray-50: #030712;
   --gray-100: #111827;
   --gray-200: #1f2937;
   --gray-300: #374151;
@@ -52,6 +55,7 @@
   --gray-700: #d1d5db;
   --gray-800: #e5e7eb;
   --gray-900: #f3f4f6;
+  --gray-950: #f9fafb;
 }
 
 @layer base {
