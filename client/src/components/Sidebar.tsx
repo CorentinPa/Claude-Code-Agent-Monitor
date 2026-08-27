@@ -553,8 +553,8 @@ export function Sidebar({ wsConnected, collapsed, onToggle }: SidebarProps) {
       {/* Brand */}
       <div className="px-3 py-4 border-b border-border flex-shrink-0">
         <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3 px-2"}`}>
-          <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
-            <Activity className="w-4 h-4 text-accent" />
+          <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <img src="/favicon.svg" alt="" className="w-full h-full" />
           </div>
           {!collapsed && (
             <div className="min-w-0">

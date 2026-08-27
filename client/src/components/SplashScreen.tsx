@@ -434,74 +434,9 @@ export function SplashScreen() {
   );
 }
 
-/** The hexagon node-graph brand mark (mirrors public/favicon.svg), scaled up
- *  with animated connector lines and pulsing outer nodes. */
+/** The XanaOS brand mark (mirrors public/xanaos-logo.svg). */
 function BrandMark() {
-  return (
-    <svg viewBox="0 0 32 32" width="96" height="96" className="splash-svg">
-      <defs>
-        <linearGradient id="splashBg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#6366f1" />
-          <stop offset="100%" stopColor="#818cf8" />
-        </linearGradient>
-        <linearGradient id="splashGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#a5b4fc" stopOpacity="0.95" />
-          <stop offset="100%" stopColor="#c7d2fe" stopOpacity="0.6" />
-        </linearGradient>
-      </defs>
-      <polygon
-        className="splash-hex"
-        points="16,2 28,9 28,23 16,30 4,23 4,9"
-        fill="url(#splashBg)"
-      />
-      <circle cx="16" cy="16" r="3" fill="white" opacity="0.95" />
-      <line
-        className="splash-line"
-        x1="16"
-        y1="13"
-        x2="16"
-        y2="7"
-        stroke="white"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <line
-        className="splash-line splash-line-2"
-        x1="18.6"
-        y1="17.5"
-        x2="24"
-        y2="20.5"
-        stroke="white"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <line
-        className="splash-line splash-line-3"
-        x1="13.4"
-        y1="17.5"
-        x2="8"
-        y2="20.5"
-        stroke="white"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <circle className="splash-node" cx="16" cy="6" r="1.8" fill="url(#splashGlow)" />
-      <circle
-        className="splash-node splash-node-2"
-        cx="24.5"
-        cy="21"
-        r="1.8"
-        fill="url(#splashGlow)"
-      />
-      <circle
-        className="splash-node splash-node-3"
-        cx="7.5"
-        cy="21"
-        r="1.8"
-        fill="url(#splashGlow)"
-      />
-    </svg>
-  );
+  return <img src="/xanaos-logo.svg" alt="" width={96} height={96} className="splash-svg" />;
 }
 
 /** Faint background constellation: a handful of nodes joined by thin lines that
@@ -604,7 +539,7 @@ const SPLASH_CSS = `
   display: inline-flex;
   margin-bottom: 2.75rem;
   opacity: 0;
-  animation: splashMark 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards;
+  animation: splashMark 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
 }
 .splash-mark-glow {
   position: absolute;
@@ -615,13 +550,6 @@ const SPLASH_CSS = `
   animation: splashGlowPulse 2.6s ease-in-out infinite;
 }
 .splash-svg { position: relative; display: block; filter: drop-shadow(0 8px 28px rgba(99, 102, 241, 0.45)); }
-.splash-hex { transform-origin: center; animation: splashHexBreathe 3.4s ease-in-out infinite; }
-.splash-line { stroke-dasharray: 8; stroke-dashoffset: 8; opacity: 0.75; animation: splashDraw 0.7s ease 0.5s forwards; }
-.splash-line-2 { animation-delay: 0.62s; }
-.splash-line-3 { animation-delay: 0.74s; }
-.splash-node { opacity: 0; animation: splashNodePop 0.5s ease 0.85s forwards, splashNodePulse 2.4s ease-in-out 1.4s infinite; }
-.splash-node-2 { animation-delay: 0.98s, 1.6s; }
-.splash-node-3 { animation-delay: 1.1s, 1.8s; }
 
 .splash-greeting {
   display: flex;
@@ -777,11 +705,7 @@ const SPLASH_CSS = `
 @keyframes splashDrift { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-24px, -16px, 0) scale(1.05); } }
 @keyframes splashTwinkle { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.7; } }
 @keyframes splashMark { from { opacity: 0; transform: translateY(14px) scale(0.82); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes splashHexBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
 @keyframes splashGlowPulse { 0%, 100% { opacity: 0.55; transform: scale(0.96); } 50% { opacity: 1; transform: scale(1.06); } }
-@keyframes splashDraw { to { stroke-dashoffset: 0; } }
-@keyframes splashNodePop { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
-@keyframes splashNodePulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
 @keyframes splashRise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes splashGateFade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes splashGateRise { from { opacity: 0; transform: translateY(10px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -804,9 +728,6 @@ const SPLASH_CSS = `
   .splash-star,
   .splash-mark,
   .splash-mark-glow,
-  .splash-hex,
-  .splash-line,
-  .splash-node,
   .splash-dot,
   .splash-greeting,
   .splash-tagline,
