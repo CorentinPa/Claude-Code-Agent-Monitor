@@ -503,8 +503,7 @@ function buildModelDelegationTooltip(
   el.appendChild(title);
 
   const subtitle = document.createElement("p");
-  subtitle.style.cssText =
-    "font-size:10px;color:#64748b;margin:2px 0 8px;text-transform:uppercase;letter-spacing:0.05em";
+  subtitle.style.cssText = `font-size:10px;color:${CHART_TOOLTIP_LABEL};margin:2px 0 8px;text-transform:uppercase;letter-spacing:0.05em`;
   subtitle.textContent = `${sideLabel} · ${node.family}`;
   el.appendChild(subtitle);
 
