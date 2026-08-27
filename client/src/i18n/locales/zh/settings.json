@@ -119,7 +119,13 @@
     "claudeDescription": "仅显示 Claude Code 数据。",
     "codexDescription": "仅显示 Codex 数据。",
     "bothDescription": "合并 Claude Code 和 Codex 数据。",
-    "beta": "测试版"
+    "beta": "测试版",
+    "currencyTitle": "显示货币",
+    "currencyDescription": "使用手动设置的汇率，将所有显示的费用从美元转换为欧元。存储的数据和导出内容始终保持美元。",
+    "currencyToggleLabel": "以欧元显示费用",
+    "currencyToggleDescription": "适用于所有显示费用的位置，包括下方的定价表。",
+    "currencyRateLabel": "欧元兑美元汇率",
+    "currencyRateHint": "汇率变化时请更新此值。"
   },
   "hooks": {
     "title": "钩子配置",

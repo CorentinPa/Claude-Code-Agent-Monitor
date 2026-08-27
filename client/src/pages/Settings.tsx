@@ -124,6 +124,14 @@ import {
   type SoundPrefs,
 } from "../lib/sound";
 import { fmt, fmtCost, getCurrentLocale } from "../lib/format";
+import {
+  getCurrencyPrefs,
+  setCurrencyPrefs,
+  subscribeToCurrencyPrefs,
+  convertCost,
+  currencyCode,
+  type CurrencyPrefs,
+} from "../lib/currency";
 import { subscribeToPush, unsubscribeFromPush } from "../lib/push";
 import { Tip } from "../components/Tip";
 import { ImportHistory } from "../components/ImportHistory";
@@ -301,15 +309,16 @@ function formatUptime(seconds: number): string {
   return `${m}m`;
 }
 
-/** Format a published USD-per-million-token rate without exposing float noise. */
-function formatUsdRate(rate: number): string {
+/** Format a published USD-per-million-token rate without exposing float noise,
+ *  converted to the active display currency (see `lib/currency.ts`). */
+export function formatUsdRate(rate: number): string {
   if (!Number.isFinite(rate) || rate <= 0) return "—";
   return new Intl.NumberFormat(getCurrentLocale(), {
     style: "currency",
-    currency: "USD",
+    currency: currencyCode(),
     minimumFractionDigits: 2,
     maximumFractionDigits: 4,
-  }).format(rate);
+  }).format(convertCost(rate));
 }
 
 function useCountUp(end: number | null, durationMs = 1000) {
@@ -1001,6 +1010,25 @@ export function Settings() {
     },
     []
   );
+  const [currencyPrefs, setCurrencyPrefsState] = useState<CurrencyPrefs>(getCurrencyPrefs);
+  const updateCurrencyPrefs = useCallback((patch: Partial<CurrencyPrefs>) => {
+    setCurrencyPrefsState(setCurrencyPrefs(patch));
+  }, []);
+  // Free-typed buffer for the rate field, separate from the committed
+  // preference: an in-progress edit (e.g. clearing the field to retype it)
+  // must not be clamped by `sanitizeRate` on every keystroke.
+  const [rateInput, setRateInput] = useState(() => String(getCurrencyPrefs().eurPerUsd));
+  useEffect(() => {
+    setRateInput(String(currencyPrefs.eurPerUsd));
+  }, [currencyPrefs.eurPerUsd]);
+  const commitRateInput = useCallback(() => {
+    const parsed = Number(rateInput);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      updateCurrencyPrefs({ eurPerUsd: parsed });
+    } else {
+      setRateInput(String(currencyPrefs.eurPerUsd));
+    }
+  }, [rateInput, currencyPrefs.eurPerUsd, updateCurrencyPrefs]);
   const [abandonHours, setAbandonHours] = useState("24");
   const [purgeDays, setPurgeDays] = useState("90");
   const [claudeHome, setClaudeHomeState] = useState("");
@@ -1142,6 +1170,7 @@ export function Settings() {
 
   // Keep the panel honest if preferences are changed anywhere else in the tab.
   useEffect(() => subscribeToSoundPrefs(() => setSoundPrefsState(getSoundPrefs())), []);
+  useEffect(() => subscribeToCurrencyPrefs(() => setCurrencyPrefsState(getCurrencyPrefs())), []);
 
   useEffect(() => {
     if (!actionResult) return;
@@ -1730,6 +1759,34 @@ export function Settings() {
               );
             })}
           </div>
+        </div>
+        <div className="card p-4 mt-3">
+          <Toggle
+            checked={currencyPrefs.enabled}
+            onChange={(v) => updateCurrencyPrefs({ enabled: v })}
+            label={t("display.currencyToggleLabel")}
+            description={t("display.currencyToggleDescription")}
+          />
+          {currencyPrefs.enabled && (
+            <div className="mt-3 pt-3 border-t border-border flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <label htmlFor="currency-rate" className="text-sm text-gray-300">
+                  {t("display.currencyRateLabel")}
+                </label>
+                <p className="text-xs text-gray-500 mt-0.5">{t("display.currencyRateHint")}</p>
+              </div>
+              <input
+                id="currency-rate"
+                type="number"
+                min="0"
+                step="0.01"
+                value={rateInput}
+                onChange={(e) => setRateInput(e.target.value)}
+                onBlur={commitRateInput}
+                className="w-24 flex-shrink-0 rounded-md border border-border bg-surface-2 px-2 py-1.5 text-sm text-gray-200 text-right"
+              />
+            </div>
+          )}
         </div>
       </section>
 

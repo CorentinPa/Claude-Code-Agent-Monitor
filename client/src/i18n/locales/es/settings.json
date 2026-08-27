@@ -119,7 +119,13 @@
     "claudeDescription": "Mostrar solo datos de Claude Code.",
     "codexDescription": "Mostrar solo datos de Codex.",
     "bothDescription": "Combinar datos de Claude Code y Codex.",
-    "beta": "Beta"
+    "beta": "Beta",
+    "currencyTitle": "Moneda de Visualización",
+    "currencyDescription": "Convierte todos los costos mostrados de USD a EUR usando un tipo de cambio configurado manualmente. Los datos almacenados y las exportaciones siempre permanecen en USD.",
+    "currencyToggleLabel": "Mostrar costos en euros",
+    "currencyToggleDescription": "Se aplica en todos los lugares donde se muestra un costo, incluidas las tablas de precios a continuación.",
+    "currencyRateLabel": "Tipo de cambio EUR por USD",
+    "currencyRateHint": "Actualiza este valor cuando cambie el tipo de cambio."
   },
   "hooks": {
     "title": "Configuración de ganchos",

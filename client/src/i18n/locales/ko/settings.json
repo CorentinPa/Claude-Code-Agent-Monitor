@@ -119,7 +119,13 @@
     "claudeDescription": "Claude Code 데이터만 표시합니다.",
     "codexDescription": "Codex 데이터만 표시합니다.",
     "bothDescription": "Claude Code와 Codex 데이터를 함께 표시합니다.",
-    "beta": "베타"
+    "beta": "베타",
+    "currencyTitle": "표시 통화",
+    "currencyDescription": "수동으로 설정한 환율을 사용하여 표시되는 모든 비용을 USD에서 EUR로 변환합니다. 저장된 데이터와 내보내기는 항상 USD로 유지됩니다.",
+    "currencyToggleLabel": "비용을 유로로 표시",
+    "currencyToggleDescription": "아래 가격표를 포함하여 비용이 표시되는 모든 곳에 적용됩니다.",
+    "currencyRateLabel": "USD 대비 EUR 환율",
+    "currencyRateHint": "환율이 변경되면 이 값을 업데이트하세요."
   },
   "hooks": {
     "title": "Hook 설정",

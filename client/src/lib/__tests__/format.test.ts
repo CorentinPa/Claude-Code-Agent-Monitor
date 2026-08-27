@@ -13,11 +13,14 @@ import {
   truncate,
   fmt,
   fmtCost,
+  fmtCostFull,
+  fmtCostBare,
   formatDateTime,
   formatTime,
   getCurrentLocale,
   formatModelName,
 } from "../format";
+import { setCurrencyPrefs, DEFAULT_CURRENCY_PREFS } from "../currency";
 
 describe("formatMs", () => {
   it("should return 0s for negative values", () => {
@@ -202,6 +205,8 @@ describe("fmt", () => {
 });
 
 describe("fmtCost", () => {
+  afterEach(() => setCurrencyPrefs(DEFAULT_CURRENCY_PREFS));
+
   it("should format small costs with dollar sign", () => {
     expect(fmtCost(0)).toBe("$0.00");
     expect(fmtCost(833.97)).toBe("$833.97");
@@ -215,6 +220,57 @@ describe("fmtCost", () => {
 
   it("should format millions with M suffix", () => {
     expect(fmtCost(1_000_000)).toBe("$1.00M");
+  });
+
+  it("should guard non-finite and negative input", () => {
+    expect(fmtCost(NaN)).toBe("$0.00");
+    expect(fmtCost(-5)).toBe("$0.00");
+  });
+
+  it("should convert to EUR and swap the symbol when the currency preference is enabled", () => {
+    setCurrencyPrefs({ enabled: true, eurPerUsd: 0.86 });
+    expect(fmtCost(50)).toBe("€43.00");
+    // The K/M tiering is chosen on the converted (displayed) amount, not the raw
+    // USD one: $1000 -> €860 stays below the K threshold, $2000 -> €1720 crosses it.
+    expect(fmtCost(1000)).toBe("€860.00");
+    expect(fmtCost(2000)).toBe("€1.72K");
+  });
+});
+
+describe("fmtCostFull", () => {
+  afterEach(() => setCurrencyPrefs(DEFAULT_CURRENCY_PREFS));
+
+  it("should format with two decimals and comma grouping by default", () => {
+    expect(fmtCostFull(1234.5)).toBe("$1,234.50");
+    expect(fmtCostFull(0)).toBe("$0.00");
+  });
+
+  it("should honor a custom decimals count", () => {
+    expect(fmtCostFull(0.12345, 4)).toBe("$0.1235");
+  });
+
+  it("should guard non-finite and negative input", () => {
+    expect(fmtCostFull(NaN)).toBe("$0.00");
+    expect(fmtCostFull(-1)).toBe("$0.00");
+  });
+
+  it("should convert to EUR and swap the symbol when the currency preference is enabled", () => {
+    setCurrencyPrefs({ enabled: true, eurPerUsd: 0.86 });
+    expect(fmtCostFull(50)).toBe("€43.00");
+  });
+});
+
+describe("fmtCostBare", () => {
+  afterEach(() => setCurrencyPrefs(DEFAULT_CURRENCY_PREFS));
+
+  it("should format the amount with no currency symbol", () => {
+    expect(fmtCostBare(1234.5)).toBe("1,234.50");
+    expect(fmtCostBare(0)).toBe("0.00");
+  });
+
+  it("should apply the EUR conversion with no currency symbol when enabled", () => {
+    setCurrencyPrefs({ enabled: true, eurPerUsd: 0.86 });
+    expect(fmtCostBare(50)).toBe("43.00");
   });
 });
 

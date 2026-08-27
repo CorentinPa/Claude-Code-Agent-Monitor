@@ -63,6 +63,7 @@
  * - `fmt` — exported API; see TSDoc on the symbol for behavior.
  * - `fmtCost` — exported API; see TSDoc on the symbol for behavior.
  * - `fmtCostFull` — exported API; see TSDoc on the symbol for behavior.
+ * - `fmtCostBare` — exported API; see TSDoc on the symbol for behavior.
  * - `shortModel` — exported API; see TSDoc on the symbol for behavior.
  * - `formatModelName` — exported API; see TSDoc on the symbol for behavior.
  * - `pathBasename` — exported API; see TSDoc on the symbol for behavior.
@@ -140,6 +141,11 @@
  *   the signature and return type as stable unless release notes say otherwise.
  *   When behavior changes, update the `@file` overview and relevant tests.
  *
+ * **fmtCostBare**
+ *   Part of this module's public contract. Downstream imports should treat
+ *   the signature and return type as stable unless release notes say otherwise.
+ *   When behavior changes, update the `@file` overview and relevant tests.
+ *
  * **shortModel**
  *   Part of this module's public contract. Downstream imports should treat
  *   the signature and return type as stable unless release notes say otherwise.
@@ -158,6 +164,7 @@
  * ----------------------------------------------------------------------------- */
 
 import i18n from "../i18n";
+import { convertCost, currencySymbol } from "./currency";
 
 // ===========================================================================
 // Timestamp parsing + locale resolution (shared internals)
@@ -418,10 +425,12 @@ export function fmt(n: number): string {
  * @example fmtCost(12_500) // "$12.50K"   fmtCost(3.5) // "$3.50"   fmtCost(-1) // "$0.00"
  */
 export function fmtCost(n: number): string {
-  if (!Number.isFinite(n) || n < 0) return "$0.00"; // guard NaN/Infinity/negative
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`; // millions
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(2)}K`; // thousands
-  return `$${n.toFixed(2)}`; // < $1000: full cents
+  if (!Number.isFinite(n) || n < 0) return `${currencySymbol()}0.00`; // guard NaN/Infinity/negative
+  const symbol = currencySymbol();
+  const amount = convertCost(n);
+  if (amount >= 1_000_000) return `${symbol}${(amount / 1_000_000).toFixed(2)}M`; // millions
+  if (amount >= 1_000) return `${symbol}${(amount / 1_000).toFixed(2)}K`; // thousands
+  return `${symbol}${amount.toFixed(2)}`; // < $1000: full cents
 }
 
 /**
@@ -438,11 +447,26 @@ export function fmtCost(n: number): string {
  *   forces exactly `decimals` places (no trimming, no rounding drift beyond `toLocaleString`).
  */
 export function fmtCostFull(n: number, decimals = 2): string {
-  if (!Number.isFinite(n) || n < 0) return "$0.00"; // guard NaN/Infinity/negative
-  return `$${n.toLocaleString(getCurrentLocale(), {
+  if (!Number.isFinite(n) || n < 0) return `${currencySymbol()}0.00`; // guard NaN/Infinity/negative
+  return `${currencySymbol()}${fmtCostBare(n, decimals)}`;
+}
+
+/**
+ * Format a dollar amount with commas but no leading currency symbol - the bare
+ * numeric counterpart of {@link fmtCostFull}, for callers that render the
+ * symbol separately (e.g. next to an icon).
+ * @param n A dollar amount.
+ * @param decimals Fixed number of fraction digits to show (default 2).
+ * @returns The un-abbreviated, symbol-less amount with locale-aware digit grouping
+ *   and the active currency conversion applied, e.g. `"1,234.50"`. `"0.00"` for
+ *   non-finite/negative input.
+ */
+export function fmtCostBare(n: number, decimals = 2): string {
+  if (!Number.isFinite(n) || n < 0) return (0).toFixed(decimals); // guard NaN/Infinity/negative
+  return convertCost(n).toLocaleString(getCurrentLocale(), {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  })}`;
+  });
 }
 
 // ===========================================================================

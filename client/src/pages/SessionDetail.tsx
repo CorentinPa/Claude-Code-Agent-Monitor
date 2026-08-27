@@ -125,6 +125,7 @@ import {
   formatDateTime,
   formatDuration,
   fmtCostFull,
+  fmtCostBare,
   timeAgo,
   formatModelName,
 } from "../lib/format";
@@ -647,7 +648,7 @@ export function SessionDetail() {
             {cost && cost.total_cost > 0 && (
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
                 <DollarSign className="w-3 h-3" />
-                {fmtCostFull(cost.total_cost).slice(1)}
+                {fmtCostBare(cost.total_cost)}
               </span>
             )}
           </div>

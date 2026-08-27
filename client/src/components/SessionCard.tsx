@@ -70,6 +70,7 @@ import {
 } from "../lib/types";
 import type { Session } from "../lib/types";
 import { formatDuration, timeAgo, formatModelName } from "../lib/format";
+import { convertCost, currencySymbol } from "../lib/currency";
 
 interface SessionCardProps {
   session: Session;
@@ -86,10 +87,12 @@ function isTransientProcessCard(metadata: string | null | undefined): boolean {
 }
 
 function formatCost(cost: number): string {
-  if (!Number.isFinite(cost) || cost <= 0) return "$0";
-  if (cost >= 1) return `$${cost.toFixed(2)}`;
-  if (cost >= 0.01) return `$${cost.toFixed(3)}`;
-  return `$${cost.toFixed(4)}`;
+  const symbol = currencySymbol();
+  if (!Number.isFinite(cost) || cost <= 0) return `${symbol}0`;
+  const amount = convertCost(cost);
+  if (amount >= 1) return `${symbol}${amount.toFixed(2)}`;
+  if (amount >= 0.01) return `${symbol}${amount.toFixed(3)}`;
+  return `${symbol}${amount.toFixed(4)}`;
 }
 
 /** Two compact, distinct request rows give terse Claude and Codex follow-ups

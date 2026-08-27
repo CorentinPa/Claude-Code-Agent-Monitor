@@ -6,11 +6,12 @@
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router";
 import { SessionCard } from "../SessionCard";
 import type { Session } from "../../lib/types";
+import { setCurrencyPrefs, DEFAULT_CURRENCY_PREFS } from "../../lib/currency";
 
 function makeSession(overrides: Partial<Session> = {}): Session {
   return {
@@ -34,6 +35,29 @@ function LocationProbe() {
 }
 
 describe("SessionCard", () => {
+  afterEach(() => setCurrencyPrefs(DEFAULT_CURRENCY_PREFS));
+
+  it("shows the session cost in dollars by default", () => {
+    render(
+      <MemoryRouter>
+        <SessionCard session={makeSession({ cost: 54.85 })} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("$54.85")).toBeInTheDocument();
+  });
+
+  it("converts the session cost to euros when the currency preference is enabled", () => {
+    setCurrencyPrefs({ enabled: true, eurPerUsd: 0.86 });
+    render(
+      <MemoryRouter>
+        <SessionCard session={makeSession({ cost: 54.85 })} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("€47.17")).toBeInTheDocument();
+  });
+
   it("keeps a named Codex session title clean without a duplicate provider ID badge", () => {
     render(
       <MemoryRouter>

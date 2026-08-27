@@ -119,6 +119,7 @@ import {
   Eye,
 } from "lucide-react";
 import { api, RUN_EFFORT_CHOICES } from "../lib/api";
+import { fmtCostFull } from "../lib/format";
 import type {
   CodexApprovalPolicy,
   CodexSandbox,
@@ -4143,7 +4144,7 @@ function ResultFooter({ result }: { result: ResultEnvelope }) {
         <Stat
           icon={CircleDollarSign}
           label={t("footer.cost")}
-          value={`$${result.total_cost_usd.toFixed(4)}`}
+          value={fmtCostFull(result.total_cost_usd, 4)}
         />
       )}
       {typeof result.num_turns === "number" && (
