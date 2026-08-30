@@ -995,9 +995,9 @@ export function Settings() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totalCost, setTotalCost] = useState<number | null>(null);
-  // Modèles ayant de l'usage enregistré mais aucune règle de tarification : leur
-  // coût vaut 0 dans le total, ce qui le sous-estime silencieusement. On les
-  // affiche pour que l'utilisateur sache qu'il manque une règle.
+  // Models with recorded usage but no matching pricing rule: their cost is $0 in
+  // the total, which silently understates it. Surfaced so the user knows a rule
+  // is missing rather than reading the zero as real.
   const [unpricedModels, setUnpricedModels] = useState<UnpricedModel[]>([]);
   const [sysInfo, setSysInfo] = useState<SystemInfo | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -1726,7 +1726,7 @@ export function Settings() {
         </div>
       </div>
 
-      {/* Usage non tarifée : le total ci-dessus l'exclut, donc il le sous-estime. */}
+      {/* Unpriced usage: the total above excludes it, so it under-reports cost. */}
       {unpricedModels.length > 0 && (
         <div className="card p-4 border-amber-500/30 bg-amber-500/5">
           <div className="flex items-start gap-3">
