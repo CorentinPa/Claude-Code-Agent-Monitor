@@ -68,6 +68,8 @@
     },
     "failedLoad": "Failed to load session",
     "loading": "Loading session...",
+    "endSession": "End Session",
+    "confirmEndSession": "Confirm End Session",
     "notFound": "Session not found",
     "backToSessions": "Back to Sessions",
     "agents": "Agents",

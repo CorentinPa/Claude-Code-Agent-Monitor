@@ -34,6 +34,12 @@
     "navClaude": "Claude Pricing",
     "navGpt": "Codex Pricing",
     "description": "Anthropic API rates per million tokens (USD). Use % as wildcard in patterns. Some models have a time-limited introductory rate (shown in violet); usage on or before its cutoff date is billed at that rate, and usage after it at the standard rate.",
+    "unpriced": {
+      "title": "Usage with no pricing rule",
+      "description": "These models have recorded usage but match no pricing rule, so their cost counts as $0 and the total above is understated.",
+      "tokens": "{{tokens}} tokens not priced",
+      "action": "Add a pricing rule"
+    },
     "introNote": "Intro {{input}}/{{output}} through {{until}}",
     "introRatesTitle": "Introductory rates",
     "introRatesHint": "Leave the date empty for no promo",

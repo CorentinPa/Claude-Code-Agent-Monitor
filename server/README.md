@@ -1003,6 +1003,7 @@ Loaded on first run from `db.js`:
 const DEFAULT_PRICING = [
   ["claude-fable-5%", "Claude Fable 5", 10, 50, 1, 12.5, 20],
   ["claude-mythos-5%", "Claude Mythos 5", 10, 50, 1, 12.5, 20],
+  ["claude-opus-5%", "Claude Opus 5", 5, 25, 0.5, 6.25, 10],
   ["claude-opus-4-8%", "Claude Opus 4.8", 5, 25, 0.5, 6.25, 10],
   ["claude-sonnet-4-6%", "Claude Sonnet 4.6", 3, 15, 0.3, 3.75, 6],
   ["claude-haiku-4-5%", "Claude Haiku 4.5", 1, 5, 0.1, 1.25, 2],

@@ -86,6 +86,7 @@ import {
   ExternalLink,
   Workflow,
   Hourglass,
+  Ban,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
@@ -168,6 +169,11 @@ export function SessionDetail() {
   // handle on /run. Drives the "Open in Run page" banner up top.
   const [isDashboardRun, setIsDashboardRun] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // "End Session" manual-abandon action: requires a confirming second click
+  // before it calls the API (mirrors the two-step Settings cleanup button).
+  const [confirmAbandon, setConfirmAbandon] = useState(false);
+  const [abandoning, setAbandoning] = useState(false);
+  const [abandonError, setAbandonError] = useState<string | null>(null);
   const [expandedAgents, setExpandedAgents] = useState<Set<string>>(() => {
     return new Set<string>();
   });
@@ -272,6 +278,25 @@ export function SessionDetail() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const handleAbandon = useCallback(async () => {
+    if (!session) return;
+    if (!confirmAbandon) {
+      setConfirmAbandon(true);
+      return;
+    }
+    setAbandoning(true);
+    setAbandonError(null);
+    try {
+      await api.sessions.abandon(session.id);
+      await load();
+      setConfirmAbandon(false);
+    } catch (err) {
+      setAbandonError(err instanceof Error ? err.message : t("detail.failedLoad"));
+    } finally {
+      setAbandoning(false);
+    }
+  }, [session, confirmAbandon, load, t]);
 
   // Load transcripts list (for Agent → Conversation navigation ID mapping)
   useEffect(() => {
@@ -668,6 +693,27 @@ export function SessionDetail() {
             </div>
           )}
         </div>
+        {session.status === "active" && (
+          <div className="flex flex-col items-end gap-1">
+            <button
+              onClick={handleAbandon}
+              disabled={abandoning}
+              className={`text-xs px-2.5 py-1.5 rounded-md border transition-colors disabled:opacity-50 inline-flex items-center gap-1.5 ${
+                confirmAbandon
+                  ? "bg-red-500/20 text-red-400 border-red-500/30"
+                  : "text-gray-400 hover:text-gray-300 hover:bg-surface-4 border-border"
+              }`}
+            >
+              {abandoning ? (
+                <RefreshCw className="w-3 h-3 animate-spin" />
+              ) : (
+                <Ban className="w-3 h-3" />
+              )}
+              {confirmAbandon ? t("detail.confirmEndSession") : t("detail.endSession")}
+            </button>
+            {abandonError && <p className="text-xs text-red-400 max-w-[16rem]">{abandonError}</p>}
+          </div>
+        )}
         <button onClick={load} className="btn-ghost">
           <RefreshCw className="w-4 h-4" />
         </button>
