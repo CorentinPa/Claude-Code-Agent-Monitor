@@ -585,6 +585,26 @@
     "description": "Choisis l'apparence du tableau de bord. «Système» suit le réglage de l'OS et se met à jour en direct s'il change.",
     "dark": "Sombre",
     "light": "Clair",
-    "system": "Système"
+    "system": "Système",
+    "accent": {
+      "title": "Couleur d'accentuation",
+      "description": "Remplace les tokens d'accentuation. Un token laissé intact conserve la valeur du thème.",
+      "reset": "Rétablir le thème",
+      "presets": "Palettes d'accentuation",
+      "mutedNote": "Le token muted est un remplissage translucide : seule sa teinte est définie ici, la transparence suit le thème actif.",
+      "token": {
+        "accent": "Accent",
+        "accentHover": "Accent survol",
+        "accentMuted": "Accent atténué"
+      },
+      "preset": {
+        "indigo": "Indigo",
+        "violet": "Violet",
+        "sky": "Ciel",
+        "emerald": "Émeraude",
+        "amber": "Ambre",
+        "rose": "Rose"
+      }
+    }
   }
 }
