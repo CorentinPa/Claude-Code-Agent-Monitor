@@ -451,6 +451,15 @@ All endpoints return JSON unless noted. Error responses use:
 
 The OpenAPI spec is generated from `server/openapi.js` (`createOpenApiSpec()`), merged with supplementary fragments under `server/openapi-extra/`, and is the source of truth for request/response contracts. It now documents every backend route (75 path entries). Both Swagger UI and ReDoc (`server/lib/redoc.js`) render the same spec; the ReDoc bundle is served locally so the reference works offline / air-gapped. They explicitly use the same local `/favicon.svg` as the dashboard, including when Express serves the references without Vite. In production, unmatched `/api/*` paths return an API-shaped `404` rather than the dashboard SPA, so the first-run dashboard overlay can never cover the reference pages. A committed `openapi.yaml` at the repo root mirrors the live spec — regenerate it after API changes with `npm run openapi:yaml` (never hand-edit it).
 
+### In-app manual
+
+| Method | Path                  | Description                                                        |
+| ------ | --------------------- | ------------------------------------------------------------------ |
+| `GET`  | `/api/manual`         | Table of contents: every top-level `docs/*.md`, with title and size |
+| `GET`  | `/api/manual/:slug`   | One document's raw Markdown                                         |
+
+`server/routes/manual.js` backs the dashboard's Documentation page, which renders the repository manual in-app instead of linking out to a separate site. Nothing is cached or copied: a document added under `docs/` appears on the next request. The `:slug` is matched against the directory listing rather than joined onto a path, so an unknown or traversing slug returns `404` without touching the filesystem. When `docs/` is absent the listing is empty and the page renders its empty state; packaged desktop builds ship the Markdown files as an extraResource so the page keeps working offline.
+
 ### Core Endpoints
 
 | Method  | Path                | Description                                      |

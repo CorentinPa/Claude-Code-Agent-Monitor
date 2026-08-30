@@ -605,6 +605,11 @@
         "amber": "Ámbar",
         "rose": "Rosa"
       }
+    },
+    "docs": {
+      "title": "Documentación",
+      "description": "El manual del repositorio, renderizado en su propia página dentro del panel.",
+      "label": "Mostrar la entrada en la barra lateral"
     }
   }
 }

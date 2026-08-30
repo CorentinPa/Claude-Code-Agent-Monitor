@@ -605,6 +605,11 @@
         "amber": "Amber",
         "rose": "Rose"
       }
+    },
+    "docs": {
+      "title": "Documentation",
+      "description": "The repository manual, rendered on its own page inside the dashboard.",
+      "label": "Show the entry in the sidebar"
     }
   }
 }

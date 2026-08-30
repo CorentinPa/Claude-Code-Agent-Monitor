@@ -61,6 +61,8 @@ tags:
     description: Spawn and supervise Claude Code or interactive Codex runs from the dashboard, stream output over WebSocket, and manage run history
   - name: Push
     description: Web Push notification subscriptions and broadcast (VAPID); also fires native Electron notifications when hosted in the desktop app
+  - name: Manual
+    description: Read-only access to the repository's Markdown manual (docs/*.md), rendered in-app by the dashboard's Documentation page
 components:
   parameters:
     SessionIdPath:
@@ -4119,6 +4121,19 @@ components:
           example:
             - local
             - 4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11
+    SessionAbandonResponse:
+      type: object
+      description: Response for POST /api/sessions/{id}/abandon.
+      required:
+        - session
+        - agents_updated
+      properties:
+        session:
+          $ref: '#/components/schemas/Session'
+        agents_updated:
+          type: integer
+          description: Count of this session's agents that were `waiting`/`working` and got marked `completed` as part of this call.
+          example: 1
     RemoteSource:
       type: object
       description: A configured remote SSH machine the dashboard pulls Claude Code and Codex history from. NO secrets are stored on this record — SSH authentication defers entirely to the host's SSH stack (ssh-agent, `~/.ssh/config`, and key files). `host` is an SSH destination (`user@host`) or a `~/.ssh/config` alias.
@@ -4653,6 +4668,57 @@ components:
           description: Events attributed to this run's inner agents, ordered by created_at then id. Capped at 5000 rows.
           items:
             $ref: '#/components/schemas/DashboardEvent'
+    ManualDocumentSummary:
+      type: object
+      required:
+        - slug
+        - title
+        - bytes
+      description: One document in the manual, without its body.
+      properties:
+        slug:
+          type: string
+          description: The file name without its `.md` extension, lowercased.
+          example: hooks
+        title:
+          type: string
+          description: The document's first Markdown H1, with code-span backticks stripped; the file name when the document has no H1.
+          example: Hook System Integration Guide
+        bytes:
+          type: integer
+          description: Size of the Markdown source in bytes, for a reading-length hint.
+          example: 38299
+    ManualListResponse:
+      type: object
+      required:
+        - documents
+      description: Every top-level Markdown file under `docs/`, alphabetically. Empty when the directory is absent, which is how a packaged build that did not ship `docs/` reports itself.
+      properties:
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManualDocumentSummary'
+    ManualDocumentResponse:
+      type: object
+      required:
+        - slug
+        - title
+        - markdown
+      description: One document with its raw Markdown source, unrendered.
+      properties:
+        slug:
+          type: string
+          example: hooks
+        title:
+          type: string
+          example: Hook System Integration Guide
+        markdown:
+          type: string
+          description: The file's Markdown source, byte-for-byte as it sits in the repository.
+          example: |-
+            # Hook System Integration Guide
+
+            Comprehensive guide...
 paths:
   /api/health:
     get:
@@ -9954,6 +10020,51 @@ paths:
                 sources:
                   - local
                   - 4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11
+  /api/sessions/{id}/abandon:
+    post:
+      tags:
+        - Sessions
+      summary: Manually end a stuck session
+      description: Marks a session `abandoned` right now and marks any of its agents still `waiting`/`working` as `completed`, using the same session+agent transition the stale-session sweep applies in bulk on an inactivity threshold (see `POST /api/settings/cleanup`). Intended for a specific session stuck showing a live status — e.g. its owning CLI process was killed or the machine slept — that the automatic sweep hasn't reached yet or can't run for (the process-liveness probe backing the reap watchdog is unavailable on Windows and inside containers). A successful call broadcasts `session_updated` plus one `agent_updated` per agent it completed. Returns 400 with code `ALREADY_TERMINAL` when the session is already `completed`, `error`, or `abandoned`. Returns 404 with code `NOT_FOUND` when the session does not exist.
+      operationId: abandonSession
+      parameters:
+        - $ref: '#/components/parameters/SessionIdPath'
+          example: b7f3a2c1-4e5d-4a8b-9c2f-1d6e8a0b3c4d
+      responses:
+        '200':
+          description: Session abandoned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionAbandonResponse'
+              example:
+                session:
+                  id: b7f3a2c1-4e5d-4a8b-9c2f-1d6e8a0b3c4d
+                  name: Stuck session
+                  status: abandoned
+                  ended_at: '2026-06-25T15:07:44.220Z'
+                  updated_at: '2026-06-25T15:07:44.220Z'
+                agents_updated: 1
+        '400':
+          description: Session already ended
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: ALREADY_TERMINAL
+                  message: Session is already abandoned
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Session not found
   /api/remote-sources:
     get:
       tags:
@@ -10651,6 +10762,60 @@ paths:
                 error:
                   code: WORKFLOW_DETAIL_FAILED
                   message: database is locked
+  /api/manual:
+    get:
+      tags:
+        - Manual
+      summary: List the manual's documents
+      description: 'Lists the top-level Markdown files under `docs/` with their titles and sizes, so the Documentation page can render a table of contents. Subdirectories (screenshots, plan archives) are ignored. Nothing is cached: a document added to the repository appears on the next request.'
+      operationId: manualList
+      responses:
+        '200':
+          description: The manual's documents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManualListResponse'
+              example:
+                documents:
+                  - slug: api
+                    title: API Reference
+                    bytes: 63502
+                  - slug: hooks
+                    title: Hook System Integration Guide
+                    bytes: 38299
+  /api/manual/{slug}:
+    get:
+      tags:
+        - Manual
+      summary: Get one document's Markdown
+      description: Returns the raw Markdown source of a single document. The slug is matched against the directory listing rather than joined onto a filesystem path, so an unknown or traversing slug returns 404 instead of reaching the filesystem.
+      operationId: manualGetDocument
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: The file name without its `.md` extension, case-insensitive.
+          schema:
+            type: string
+          example: hooks
+      responses:
+        '200':
+          description: The document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManualDocumentResponse'
+        '404':
+          description: No document matches this slug
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: ENOTFOUND
+                  message: 'Unknown manual document: nope'
   /api/sessions/{id}/transcript-image:
     get:
       tags:

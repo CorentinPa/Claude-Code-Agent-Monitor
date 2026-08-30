@@ -41,6 +41,8 @@ const EXPECTED_API_PATHS = [
   "/api/events/facets",
   "/api/stats",
   "/api/metrics",
+  "/api/manual",
+  "/api/manual/{slug}",
   "/api/analytics",
   "/api/hooks/event",
   "/api/hooks/codex",

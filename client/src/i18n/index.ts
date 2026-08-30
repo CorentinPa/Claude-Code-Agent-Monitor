@@ -164,6 +164,12 @@ import ccConfig_fr from "./locales/fr/ccConfig.json";
 import run_fr from "./locales/fr/run.json";
 import alerts_fr from "./locales/fr/alerts.json";
 import splash_fr from "./locales/fr/splash.json";
+import docs_en from "./locales/en/docs.json";
+import docs_zh from "./locales/zh/docs.json";
+import docs_vi from "./locales/vi/docs.json";
+import docs_ko from "./locales/ko/docs.json";
+import docs_es from "./locales/es/docs.json";
+import docs_fr from "./locales/fr/docs.json";
 
 i18n
   .use(LanguageDetector)
@@ -186,6 +192,7 @@ i18n
         run: run_en,
         alerts: alerts_en,
         splash: splash_en,
+        docs: docs_en,
       },
       zh: {
         common: common_zh,
@@ -203,6 +210,7 @@ i18n
         run: run_zh,
         alerts: alerts_zh,
         splash: splash_zh,
+        docs: docs_zh,
       },
       vi: {
         common: common_vi,
@@ -220,6 +228,7 @@ i18n
         run: run_vi,
         alerts: alerts_vi,
         splash: splash_vi,
+        docs: docs_vi,
       },
       ko: {
         common: common_ko,
@@ -237,6 +246,7 @@ i18n
         run: run_ko,
         alerts: alerts_ko,
         splash: splash_ko,
+        docs: docs_ko,
       },
       es: {
         common: common_es,
@@ -254,6 +264,7 @@ i18n
         run: run_es,
         alerts: alerts_es,
         splash: splash_es,
+        docs: docs_es,
       },
       fr: {
         common: common_fr,
@@ -271,6 +282,7 @@ i18n
         run: run_fr,
         alerts: alerts_fr,
         splash: splash_fr,
+        docs: docs_fr,
       },
     },
     supportedLngs: ["en", "zh", "vi", "ko", "es", "fr"],
@@ -292,6 +304,7 @@ i18n
       "run",
       "alerts",
       "splash",
+      "docs",
     ],
     defaultNS: "common",
     interpolation: { escapeValue: false },

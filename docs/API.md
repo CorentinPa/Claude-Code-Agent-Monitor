@@ -20,6 +20,7 @@ Complete REST API and WebSocket documentation for Agent Dashboard.
   - [Import History](#import-history)
   - [Notifications](#notifications)
   - [Remote Data Sources](#remote-data-sources)
+  - [Manual](#manual)
 - [WebSocket API](#websocket-api)
 - [Error Handling](#error-handling)
 - [Rate Limiting](#rate-limiting)
@@ -1275,6 +1276,30 @@ DELETE /api/run/:id                   Stop (SIGTERM → SIGKILL after 5 s)
 `provider` defaults to `"claude"`. Claude keeps `"headless"` (single-shot, prompt in argv via `-p`) and `"conversation"` modes, including `resumeSessionId` support. Codex always uses a real multi-turn app-server thread; its `permissionMode` is an approval policy (`"untrusted"`, `"on-request"`, or `"never"`) and its `sandbox` is `"read-only"`, `"workspace-write"`, or `"danger-full-access"`. Codex's model list is retrieved from the signed-in local app server, while Claude returns its supported aliases plus locally observed models because the Claude CLI has no model-list command. `run_stream` carries parsed Claude stream-json envelopes or normalized Codex app-server events; `run_status` and `run_input_ack` cover both providers. Concurrency is effectively uncapped (default ceiling 10000, override with `RUN_MAX_CONCURRENT`) — the ceiling exists only to prevent fork-bomb footguns from a buggy client.
 
 Spawned `claude` processes fire the dashboard's hooks like any other CLI session, so they show up in `/api/sessions`, the analytics, the Kanban board, and the Workflows page automatically — the Run page itself just owns the live streaming UX.
+
+### Manual
+
+Read-only access to the repository's Markdown manual (`docs/*.md`), backing the dashboard's **Documentation** page: the reference material renders inside the app instead of behind a link to a separate site.
+
+```http
+GET /api/manual              Table of contents: [{ slug, title, bytes }]
+GET /api/manual/:slug        One document: { slug, title, markdown }
+```
+
+`slug` is the file name without its `.md` extension, matched case-insensitively. Nothing is cached or copied, so a document added under `docs/` appears on the next request and an edit is served immediately. `title` is the document's first Markdown H1 with code-span backticks stripped, falling back to the file name.
+
+The slug is resolved **against the directory listing**, never joined onto a filesystem path, so an unknown or traversing slug (`../../server/db`) returns `404 ENOTFOUND` without touching the filesystem. Subdirectories under `docs/` (screenshots, plan archives) are ignored: the manual is the flat set of documents.
+
+When `docs/` is absent the listing is empty and the page renders its empty state rather than failing. Packaged desktop builds ship the Markdown files as an electron-builder extraResource, so the page keeps working offline.
+
+```json
+{
+  "documents": [
+    { "slug": "api", "title": "API Reference", "bytes": 63502 },
+    { "slug": "hooks", "title": "Hook System Integration Guide", "bytes": 38299 }
+  ]
+}
+```
 
 ---
 

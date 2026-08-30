@@ -408,6 +408,8 @@ import type {
   WorkflowRun,
   WorkflowRunsResponse,
   WorkflowRunDetail,
+  ManualDocument,
+  ManualListResponse,
 } from "./types";
 
 import { activeProvidersParam, activeSourcesParam } from "./dataScope";
@@ -532,6 +534,27 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
  * per-method docs below focus on the specific route, params, and response shape.
  */
 export const api = {
+  // ───────────────────────────── In-app manual ─────────────────────────────
+  /** The repository's Markdown manual (`docs/*.md`), rendered by the
+   *  Documentation page. Read-only; maps to `server/routes/manual.js`. */
+  manual: {
+    /**
+     * GET /api/manual - the table of contents.
+     *
+     * @returns Every top-level document under `docs/`, alphabetically. The list
+     *   is empty when the directory was not shipped, which the page renders as
+     *   its empty state rather than an error.
+     */
+    list: () => request<ManualListResponse>("/manual"),
+    /**
+     * GET /api/manual/:slug - one document's raw Markdown.
+     *
+     * @param slug File name without its `.md` extension, case-insensitive.
+     * @returns The document; rejects with a 404 error when no document matches.
+     */
+    get: (slug: string) => request<ManualDocument>(`/manual/${encodeURIComponent(slug)}`),
+  },
+
   // ───────────────────────── Updates / self-update API ─────────────────────────
   /** Self-update status: whether this install is a git clone and, if so,
    *  whether the tracked upstream/origin remote is ahead. Backs the "update

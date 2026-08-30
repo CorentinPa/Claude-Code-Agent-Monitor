@@ -45,6 +45,12 @@ extraResources:
       - "!**/*.test.js"
   - from: "../package.json"
     to: "app/package.json"
+  # The in-app Documentation page reads docs/*.md through /api/manual. Markdown
+  # only (no screenshots), so shipping the manual costs a few hundred kilobytes
+  # and keeps the page working offline in the packaged app.
+  - from: "../docs"
+    to: "app/docs"
+    filter: ["*.md"]
   - from: "../node_modules"
     to: "app/node_modules"
     filter:

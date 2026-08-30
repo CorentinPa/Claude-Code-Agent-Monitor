@@ -119,6 +119,7 @@ import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { tabbyPrefs } from "../components/Tabby/prefs";
+import { getDocsLinkEnabled, setDocsLinkEnabled } from "../lib/docs";
 import {
   getSoundPrefs,
   playCue,
@@ -1035,6 +1036,11 @@ export function Settings() {
   const [pricingResetRevision, setPricingResetRevision] = useState(0);
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(loadNotifPrefs);
   const [tabbyEnabled, setTabbyEnabled] = useState(() => tabbyPrefs.getEnabled());
+  const [docsLink, setDocsLink] = useState(getDocsLinkEnabled);
+  const updateDocsLink = useCallback((v: boolean) => {
+    setDocsLinkEnabled(v);
+    setDocsLink(v);
+  }, []);
   const setTabby = useCallback((v: boolean) => {
     tabbyPrefs.setEnabled(v);
     setTabbyEnabled(v);
@@ -1960,6 +1966,22 @@ export function Settings() {
           </div>
 
           <p className="mt-3 text-xs text-gray-500">{t("appearance.accent.mutedNote")}</p>
+        </div>
+
+        {/* Sidebar extras. The Documentation page always exists at /docs; this
+            only controls whether the sidebar advertises it. */}
+        <div className="card mt-3 p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-200">{t("appearance.docs.title")}</p>
+            <p className="mt-0.5 text-xs text-gray-500">{t("appearance.docs.description")}</p>
+          </div>
+          <div className="mt-3">
+            <Toggle
+              checked={docsLink}
+              onChange={updateDocsLink}
+              label={t("appearance.docs.label")}
+            />
+          </div>
         </div>
       </section>
 

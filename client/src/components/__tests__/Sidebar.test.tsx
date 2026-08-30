@@ -4,11 +4,12 @@
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
-import { beforeEach, describe, it, expect } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, it, expect } from "vitest";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { Sidebar } from "../Sidebar";
+import { setDocsLinkEnabled } from "../../lib/docs";
 import i18n from "../../i18n";
 
 function renderSidebar(wsConnected: boolean, collapsed = false) {
@@ -134,6 +135,29 @@ describe("Sidebar", () => {
     await waitFor(() => {
       expect(screen.getByTitle("Panel")).toBeInTheDocument();
       expect(screen.getByTitle("Tablero Kanban")).toBeInTheDocument();
+    });
+  });
+
+  describe("documentation entry", () => {
+    afterEach(() => {
+      localStorage.removeItem("ccam-docs-link");
+    });
+
+    it("stays hidden until the preference is enabled", () => {
+      renderSidebar(true);
+      expect(screen.queryByRole("link", { name: "Documentation" })).not.toBeInTheDocument();
+    });
+
+    it("appears in the navigation, after Settings, once enabled", async () => {
+      renderSidebar(true);
+      act(() => setDocsLinkEnabled(true));
+
+      const link = await screen.findByRole("link", { name: "Documentation" });
+      expect(link).toHaveAttribute("href", "/docs");
+
+      const labels = screen.getAllByRole("link").map((el) => el.textContent);
+      expect(labels[labels.length - 1]).toBe("Documentation");
+      expect(labels[labels.length - 2]).toBe("Settings");
     });
   });
 });

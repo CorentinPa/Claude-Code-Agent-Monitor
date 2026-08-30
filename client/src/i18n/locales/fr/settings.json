@@ -605,6 +605,11 @@
         "amber": "Ambre",
         "rose": "Rose"
       }
+    },
+    "docs": {
+      "title": "Documentation",
+      "description": "Le manuel du dépôt, rendu sur sa propre page dans le tableau de bord.",
+      "label": "Afficher l'entrée dans la barre latérale"
     }
   }
 }
