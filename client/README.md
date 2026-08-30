@@ -210,6 +210,7 @@ client/
 │   │   ├── Analytics.tsx
 │   │   ├── Workflows.tsx
 │   │   ├── Settings.tsx
+│   │   ├── Docs.tsx          # Repository manual (docs/*.md via /api/manual), Mermaid blocks rendered as diagrams
 │   │   └── NotFound.tsx
 │   │
 │   ├── lib/                # Core utilities & business logic
@@ -219,6 +220,7 @@ client/
 │   │   ├── dataScope.ts    # Global data-scope store (app-wide ?sources= selection)
 │   │   ├── format.ts       # Formatters (formatTime, timeAgo, fmtCost)
 │   │   ├── sound.ts        # Web Audio cue synthesis + sound preferences
+│   │   ├── docs.ts         # "Show the Documentation entry" sidebar preference
 │   │   └── types.ts        # TypeScript type definitions
 │   │
 │   ├── hooks/
@@ -503,9 +505,10 @@ graph TB
     CcConfig["/cc-config"]
     Run["/run"]
     Settings["/settings"]
+    Docs["/docs"]
     NF["/* (NotFound)"]
 
-    Root --> Dashboard & Kanban & Sessions & Detail & Feed & Analytics & Workflows & CcConfig & Run & Settings & NF
+    Root --> Dashboard & Kanban & Sessions & Detail & Feed & Analytics & Workflows & CcConfig & Run & Settings & Docs & NF
 
     style Dashboard fill:#3B82F6
     style Detail fill:#3B82F6
@@ -849,6 +852,7 @@ no central store — each feature owns its own key — so this is the inventory:
 | `agent-dashboard-tabby-muted` | local | `components/Tabby/prefs.ts` | Whether Tabby's speech bubbles are muted |
 | `agent-dashboard-tabby-pos` | local | `components/Tabby/prefs.ts` | Tabby's docked edge and vertical offset, as a viewport fraction |
 | `ccam-data-scope` | local | `lib/dataScope.ts` | App-wide data scope — selected remote sources and providers |
+| `ccam-docs-link` | local | `lib/docs.ts` | Whether the sidebar shows the Documentation entry (`/docs`). Defaults to disabled (opt-in, set in Settings › Appearance) |
 | `sidebar-collapsed` | local | `components/Sidebar.tsx` | Sidebar collapsed state |
 | `sidebar-connection-stats` | local | `components/Sidebar.tsx` | Cumulative WebSocket stats for the connection modal |
 | `provider-onboarding-shown-v1` | **session** | `components/SplashScreen.tsx` | Splash shown once per browser session, not once ever |

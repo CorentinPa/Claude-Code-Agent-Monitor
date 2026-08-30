@@ -70,7 +70,7 @@
  * ============================================================================= */
 
 import { BrowserRouter, Routes, Route, useLocation } from "react-router";
-import { useCallback } from "react";
+import { lazy, Suspense, useCallback } from "react";
 import { Layout } from "./components/Layout";
 import { DocumentTitle } from "./components/DocumentTitle";
 import { SplashScreen } from "./components/SplashScreen";
@@ -82,6 +82,10 @@ import { ActivityFeed } from "./pages/ActivityFeed";
 import { Analytics } from "./pages/Analytics";
 import { Workflows } from "./pages/Workflows";
 import { Settings } from "./pages/Settings";
+// The Documentation page carries the Markdown renderer, and Mermaid behind it,
+// which nothing else in the dashboard needs. Loading it on demand keeps that
+// weight out of the main bundle for the majority of sessions that never open it.
+const Docs = lazy(() => import("./pages/Docs").then((m) => ({ default: m.Docs })));
 import { CcConfig } from "./pages/CcConfig";
 import { Run } from "./pages/Run";
 import { NotFound } from "./pages/NotFound";
@@ -135,6 +139,14 @@ export default function App() {
           <Route path="cc-config" element={<CcConfig />} />
           <Route path="run" element={<Run />} />
           <Route path="settings" element={<Settings />} />
+          <Route
+            path="docs"
+            element={
+              <Suspense fallback={<div className="card h-96 animate-pulse bg-surface-2" />}>
+                <Docs />
+              </Suspense>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

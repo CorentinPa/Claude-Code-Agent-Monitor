@@ -81,11 +81,13 @@ import {
   Check,
   ChevronUp,
   ChevronDown,
+  BookOpen,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { api } from "../lib/api";
 import { eventBus } from "../lib/eventBus";
 import type { UpdateStatusPayload, WSMessage } from "../lib/types";
+import { DOCS_ROUTE, getDocsLinkEnabled, subscribeToDocsLink } from "../lib/docs";
 import { Select } from "./Select";
 
 function isUpdatePayload(x: unknown): x is UpdateStatusPayload {
@@ -103,6 +105,11 @@ const NAV_KEYS = [
   { to: "/run", icon: Play, key: "nav:run" },
   { to: "/settings", icon: Settings, key: "nav:settings" },
 ] as const;
+
+// Rendered after the fixed entries, and only when the user opted in from
+// Settings > Appearance. Kept out of NAV_KEYS so the default navigation shape
+// is still a single literal.
+const DOCS_NAV = { to: DOCS_ROUTE, icon: BookOpen, key: "nav:docs" } as const;
 
 const STORAGE_KEY = "sidebar-collapsed";
 const STATS_STORAGE_KEY = "sidebar-connection-stats";
@@ -353,6 +360,7 @@ export function Sidebar({ wsConnected, collapsed, onToggle }: SidebarProps) {
   const [connectedSince, setConnectedSince] = useState<number | null>(
     wsConnected ? Date.now() : null
   );
+  const [docsLinkEnabled, setDocsLinkEnabled] = useState(getDocsLinkEnabled);
   // Buffers live in refs so the sidebar isn't re-rendered on every WS event -
   // the modal samples them on its own tick while it's open. Cumulative buffers
   // (count, type breakdown, recent list) are hydrated from localStorage so they
@@ -488,6 +496,10 @@ export function Sidebar({ wsConnected, collapsed, onToggle }: SidebarProps) {
     });
   }, [schedulePersist]);
 
+  // The Documentation entry is opt-in; mirror the Settings toggle live so the
+  // user sees it appear or disappear without reloading the dashboard.
+  useEffect(() => subscribeToDocsLink(() => setDocsLinkEnabled(getDocsLinkEnabled())), []);
+
   // Track when the live connection most recently came up so the modal can
   // show an honest "connected since" timestamp instead of stale state.
   useEffect(() => {
@@ -531,6 +543,7 @@ export function Sidebar({ wsConnected, collapsed, onToggle }: SidebarProps) {
         : updateStatus
           ? t("nav:upToDate")
           : t("nav:checkForUpdates");
+  const navItems = docsLinkEnabled ? [...NAV_KEYS, DOCS_NAV] : NAV_KEYS;
   const currentLanguage = normalizeLanguage(i18n.resolvedLanguage ?? i18n.language);
   const languageOptions = SUPPORTED_LANGUAGES.map((language) => ({
     value: language,
@@ -571,7 +584,7 @@ export function Sidebar({ wsConnected, collapsed, onToggle }: SidebarProps) {
           user knows there's more to reach without inspecting the scrollbar. */}
       <div className="flex-1 min-h-0 relative flex">
         <nav ref={navRef} className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 space-y-1">
-          {NAV_KEYS.map(({ to, icon: Icon, key }) => {
+          {navItems.map(({ to, icon: Icon, key }) => {
             const label = t(key);
             return (
               <NavLink

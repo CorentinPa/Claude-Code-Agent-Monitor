@@ -1320,6 +1320,29 @@ export interface RemoteDataUpdatedPayload {
  *  Describes whether the install directory is a git clone that is behind its
  *  canonical remote, and (when it is) exactly how to bring it up to date. Many
  *  fields are optional because a non-git install reports only the bare minimum. */
+/** One document of the in-app manual, without its body. */
+export interface ManualDocumentSummary {
+  /** File name without its `.md` extension, lowercased. */
+  slug: string;
+  /** The document's first Markdown H1, or its file name when it has none. */
+  title: string;
+  /** Size of the Markdown source in bytes, used as a reading-length hint. */
+  bytes: number;
+}
+
+/** Response of `GET /api/manual`: the manual's table of contents. */
+export interface ManualListResponse {
+  documents: ManualDocumentSummary[];
+}
+
+/** Response of `GET /api/manual/:slug`: one document and its Markdown source. */
+export interface ManualDocument {
+  slug: string;
+  title: string;
+  /** The file's Markdown source, byte-for-byte as it sits in the repository. */
+  markdown: string;
+}
+
 export interface UpdateStatusPayload {
   /** False when the install directory isn't a git clone at all - in that case
    *  every other field except `repo_root`/`manual_command`/`message` is absent,

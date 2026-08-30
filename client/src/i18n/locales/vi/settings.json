@@ -605,6 +605,11 @@
         "amber": "Hổ phách",
         "rose": "Hồng"
       }
+    },
+    "docs": {
+      "title": "Tài liệu",
+      "description": "Sổ tay của kho mã, hiển thị trên một trang riêng trong bảng điều khiển.",
+      "label": "Hiển thị mục trong thanh bên"
     }
   }
 }
