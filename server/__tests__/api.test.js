@@ -34,6 +34,7 @@ const EXPECTED_API_PATHS = [
   "/api/sessions/{id}/transcripts",
   "/api/sessions/{id}/transcript",
   "/api/sessions/{id}/transcript-image",
+  "/api/sessions/{id}/abandon",
   "/api/agents",
   "/api/agents/{id}",
   "/api/events",
@@ -317,6 +318,77 @@ describe("Sessions API", () => {
   it("should return 404 when updating nonexistent session", async () => {
     const res = await patch("/api/sessions/nonexistent", { status: "error" });
     assert.equal(res.status, 404);
+  });
+});
+
+// ============================================================
+// POST /api/sessions/:id/abandon
+// ============================================================
+describe("POST /api/sessions/:id/abandon", () => {
+  it("marks an active session abandoned and completes its waiting/working agents", async () => {
+    await post("/api/sessions", { id: "sess-abandon-1", name: "Stuck Session" });
+    await post("/api/agents", {
+      id: "agent-abandon-1",
+      session_id: "sess-abandon-1",
+      name: "Main Agent",
+      type: "main",
+      status: "waiting",
+    });
+    await post("/api/agents", {
+      id: "agent-abandon-2",
+      session_id: "sess-abandon-1",
+      name: "Explorer",
+      type: "subagent",
+      status: "working",
+    });
+
+    const res = await post("/api/sessions/sess-abandon-1/abandon");
+    assert.equal(res.status, 200);
+    assert.equal(res.body.session.status, "abandoned");
+    assert.ok(res.body.session.ended_at);
+    assert.equal(res.body.agents_updated, 2);
+
+    const mainAgent = await fetch("/api/agents/agent-abandon-1");
+    assert.equal(mainAgent.body.agent.status, "completed");
+    assert.ok(mainAgent.body.agent.ended_at);
+    const subAgent = await fetch("/api/agents/agent-abandon-2");
+    assert.equal(subAgent.body.agent.status, "completed");
+  });
+
+  it("does not touch agents that are already completed or errored", async () => {
+    await post("/api/sessions", { id: "sess-abandon-2", name: "Mixed Session" });
+    await post("/api/agents", {
+      id: "agent-abandon-3",
+      session_id: "sess-abandon-2",
+      name: "Done Agent",
+      type: "main",
+      status: "completed",
+    });
+
+    const res = await post("/api/sessions/sess-abandon-2/abandon");
+    assert.equal(res.status, 200);
+    assert.equal(res.body.agents_updated, 0);
+
+    const agent = await fetch("/api/agents/agent-abandon-3");
+    assert.equal(agent.body.agent.status, "completed");
+  });
+
+  it("returns 404 for a nonexistent session", async () => {
+    const res = await post("/api/sessions/nonexistent-abandon/abandon");
+    assert.equal(res.status, 404);
+    assert.equal(res.body.error.code, "NOT_FOUND");
+  });
+
+  it("returns 400 ALREADY_TERMINAL when the session is already ended", async () => {
+    await post("/api/sessions", { id: "sess-abandon-3", name: "Already Done" });
+    await patch("/api/sessions/sess-abandon-3", {
+      status: "completed",
+      ended_at: new Date().toISOString(),
+    });
+
+    const res = await post("/api/sessions/sess-abandon-3/abandon");
+    assert.equal(res.status, 400);
+    assert.equal(res.body.error.code, "ALREADY_TERMINAL");
   });
 });
 

@@ -34,6 +34,12 @@
     "navClaude": "Giá Claude",
     "navGpt": "Giá Codex",
     "description": "Đơn giá API Anthropic theo một triệu token (USD). Dùng % làm ký tự đại diện trong mẫu. Một số mô hình có mức giá giới thiệu có thời hạn (hiển thị màu tím); usage vào hoặc trước ngày kết thúc tính theo mức đó, sau đó tính theo mức chuẩn.",
+    "unpriced": {
+      "title": "Mức sử dụng không có quy tắc giá",
+      "description": "Các mô hình này có mức sử dụng được ghi nhận nhưng không khớp quy tắc giá nào, nên chi phí được tính là 0 $ và tổng ở trên bị thiếu.",
+      "tokens": "{{tokens}} token chưa được tính giá",
+      "action": "Thêm quy tắc giá"
+    },
     "introNote": "Ưu đãi {{input}}/{{output}} đến {{until}}",
     "introRatesTitle": "Giá giới thiệu",
     "introRatesHint": "Để trống ngày nếu không có ưu đãi",

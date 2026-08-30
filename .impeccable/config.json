@@ -1,0 +1,29 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gray-on-color",
+        "value": "*",
+        "files": ["client/src/pages/Settings.tsx"],
+        "createdAt": "2026-08-27T20:16:31.331Z",
+        "reason": "Icon-button hover pairs (text-gray-400 + hover:text-X-400 + hover:bg-X-500/10): gray text and the colored bg are mutually exclusive states (bg only appears on hover, when text also switches off gray), but the static Tailwind-class regex can't see the pseudo-class pairing. Pre-existing pattern reused throughout this file (edit/delete icon buttons)."
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": ["client/src/pages/Settings.tsx"],
+        "createdAt": "2026-08-27T20:18:59.426Z",
+        "reason": "Colored left-accent border on rounded stat cards (border-l-2 + rounded-lg) is an established, repo-wide design convention (also in SessionDetail, AgentCard, Dashboard, SessionCard, MarkdownContent), not an accidental AI-slop tell. Pre-existing code (Son Nguyen, 2026-03-10), predates all session branches. Scoped to this file only, not a repo-wide rule ignore."
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": ["client/src/components/SplashScreen.tsx"],
+        "createdAt": "2026-08-27T21:04:50.750Z",
+        "reason": "splash-hook-gate-realtime is a static info callout (icon + one sentence explaining real-time hook behavior), matching the side-tab rule's own documented exemption for toast/snackbar/callout accents. The rule's exemption only fires for role=status|alert|log or aria-live elements; this static div has neither, so the detector misses it. Consistent with the file's info(blue-left-accent)/warning(full-border) color-coding convention."
+      }
+    ]
+  }
+}
