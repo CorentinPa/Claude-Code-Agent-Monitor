@@ -69,6 +69,8 @@
     },
     "failedLoad": "세션을 불러오지 못했습니다",
     "loading": "세션을 불러오는 중...",
+    "endSession": "세션 종료",
+    "confirmEndSession": "종료 확인",
     "notFound": "세션을 찾을 수 없습니다",
     "backToSessions": "세션으로 돌아가기",
     "agents": "Agent",

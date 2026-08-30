@@ -2,6 +2,7 @@
  * @file Supplementary OpenAPI 3.0 fragments for endpoints that were previously
  * undocumented in the base spec (server/openapi.js). Covers:
  *   - GET    /api/sessions/facets              (Sessions)
+ *   - POST   /api/sessions/{id}/abandon        (Sessions)
  *   - GET    /api/settings/{claude,codex}-home (Settings)
  *   - PUT    /api/settings/{claude,codex}-home (Settings)
  *   - GET    /api/workflows/runs               (Workflows)
@@ -51,6 +52,21 @@ const schemas = {
           "Distinct data-source ids seen across all sessions (the `sessions.source` column). Always includes the built-in `local` history; each configured remote SSH machine contributes its `remote_sources.id`. Powers the source filter dropdown and the `sources` query param on the list/analytics endpoints.",
         items: { type: "string" },
         example: ["local", "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11"],
+      },
+    },
+  },
+
+  SessionAbandonResponse: {
+    type: "object",
+    description: "Response for POST /api/sessions/{id}/abandon.",
+    required: ["session", "agents_updated"],
+    properties: {
+      session: { $ref: "#/components/schemas/Session" },
+      agents_updated: {
+        type: "integer",
+        description:
+          "Count of this session's agents that were `waiting`/`working` and got marked `completed` as part of this call.",
+        example: 1,
       },
     },
   },
@@ -631,6 +647,62 @@ const paths = {
                 ],
                 sources: ["local", "4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11"],
               },
+            },
+          },
+        },
+      },
+    },
+  },
+
+  "/api/sessions/{id}/abandon": {
+    post: {
+      tags: ["Sessions"],
+      summary: "Manually end a stuck session",
+      description:
+        "Marks a session `abandoned` right now and marks any of its agents still `waiting`/`working` as `completed`, using the same session+agent transition the stale-session sweep applies in bulk on an inactivity threshold (see `POST /api/settings/cleanup`). Intended for a specific session stuck showing a live status — e.g. its owning CLI process was killed or the machine slept — that the automatic sweep hasn't reached yet or can't run for (the process-liveness probe backing the reap watchdog is unavailable on Windows and inside containers). A successful call broadcasts `session_updated` plus one `agent_updated` per agent it completed. Returns 400 with code `ALREADY_TERMINAL` when the session is already `completed`, `error`, or `abandoned`. Returns 404 with code `NOT_FOUND` when the session does not exist.",
+      operationId: "abandonSession",
+      parameters: [
+        {
+          $ref: "#/components/parameters/SessionIdPath",
+          example: "b7f3a2c1-4e5d-4a8b-9c2f-1d6e8a0b3c4d",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Session abandoned",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/SessionAbandonResponse" },
+              example: {
+                session: {
+                  id: "b7f3a2c1-4e5d-4a8b-9c2f-1d6e8a0b3c4d",
+                  name: "Stuck session",
+                  status: "abandoned",
+                  ended_at: "2026-06-25T15:07:44.220Z",
+                  updated_at: "2026-06-25T15:07:44.220Z",
+                },
+                agents_updated: 1,
+              },
+            },
+          },
+        },
+        400: {
+          description: "Session already ended",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              example: {
+                error: { code: "ALREADY_TERMINAL", message: "Session is already abandoned" },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Session not found",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              example: { error: { code: "NOT_FOUND", message: "Session not found" } },
             },
           },
         },

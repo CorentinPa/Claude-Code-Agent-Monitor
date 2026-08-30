@@ -143,7 +143,7 @@ import { ImportHistory } from "../components/ImportHistory";
 import { RemoteSources } from "../components/RemoteSources";
 import { Skeleton } from "../components/Skeleton";
 import { AlertsNotifications } from "../components/AlertsNotifications";
-import type { GptModelPricing, ModelPricing, WSMessage } from "../lib/types";
+import type { GptModelPricing, ModelPricing, UnpricedModel, WSMessage } from "../lib/types";
 import { useDataScope, type ProviderScope } from "../lib/dataScope";
 
 // In-page navigation for the (dense) Settings screen. Each entry maps to a
@@ -995,6 +995,10 @@ export function Settings() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totalCost, setTotalCost] = useState<number | null>(null);
+  // Models with recorded usage but no matching pricing rule: their cost is $0 in
+  // the total, which silently understates it. Surfaced so the user knows a rule
+  // is missing rather than reading the zero as real.
+  const [unpricedModels, setUnpricedModels] = useState<UnpricedModel[]>([]);
   const [sysInfo, setSysInfo] = useState<SystemInfo | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionResult, setActionResult] = useState<{
@@ -1136,6 +1140,7 @@ export function Settings() {
       ]);
       setPricing(pricingRes.pricing);
       setTotalCost(costRes.total_cost);
+      setUnpricedModels(costRes.unpriced_models ?? []);
       setSysInfo(infoRes);
       setClaudeHomeState(claudeHomeRes.claude_home);
       setClaudeHomeInput(claudeHomeRes.claude_home);
@@ -1720,6 +1725,50 @@ export function Settings() {
           </div>
         </div>
       </div>
+
+      {/* Unpriced usage: the total above excludes it, so it under-reports cost. */}
+      {unpricedModels.length > 0 && (
+        <div className="card p-4 border-amber-500/30 bg-amber-500/5">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-amber-400">{t("pricing.unpriced.title")}</p>
+              <p className="mt-0.5 text-xs text-gray-400">{t("pricing.unpriced.description")}</p>
+              <ul className="mt-2 space-y-1">
+                {unpricedModels.map((m, i) => (
+                  <li
+                    key={`${m.model}-${i}`}
+                    className="flex flex-wrap items-baseline gap-x-2 text-xs"
+                  >
+                    <code className="text-gray-200">{m.model}</code>
+                    <span className="text-gray-500">
+                      {t("pricing.unpriced.tokens", {
+                        tokens: fmt(
+                          m.input_tokens +
+                            m.output_tokens +
+                            m.cache_read_tokens +
+                            m.cache_write_tokens
+                        ),
+                      })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                onClick={() =>
+                  document
+                    .getElementById("claude-pricing")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
+                className="mt-2 text-xs text-accent hover:underline"
+              >
+                {t("pricing.unpriced.action")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── APPEARANCE ─── */}
       <section id="appearance" className="scroll-mt-24">

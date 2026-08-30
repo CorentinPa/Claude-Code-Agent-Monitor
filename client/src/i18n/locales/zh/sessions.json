@@ -69,6 +69,8 @@
     },
     "failedLoad": "会话加载失败",
     "loading": "正在加载会话...",
+    "endSession": "结束会话",
+    "confirmEndSession": "确认结束",
     "notFound": "未找到会话",
     "backToSessions": "返回会话列表",
     "agents": "Agent",

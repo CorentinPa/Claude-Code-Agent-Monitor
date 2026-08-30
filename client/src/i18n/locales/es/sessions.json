@@ -68,6 +68,8 @@
     },
     "failedLoad": "No se pudo cargar la sesión",
     "loading": "Cargando sesión...",
+    "endSession": "Finalizar Sesión",
+    "confirmEndSession": "Confirmar Finalización",
     "notFound": "Sesión no encontrada",
     "backToSessions": "Volver a Sesiones",
     "agents": "Agentes",

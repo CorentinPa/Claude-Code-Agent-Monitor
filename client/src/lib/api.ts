@@ -687,6 +687,25 @@ export const api = {
       }>(`/sessions/${encodeURIComponent(id)}${qs.size ? `?${qs.toString()}` : ""}`);
     },
     /**
+     * POST /api/sessions/:id/abandon - manually end one stuck session right now.
+     *
+     * Marks the session `abandoned` and any of its agents still `waiting`/
+     * `working` as `completed`, regardless of the automatic stale-session
+     * sweep's inactivity threshold (see {@link api.settings.cleanup}). For a
+     * session stuck showing a live status that the sweep hasn't reached yet or
+     * can't run for (its process-liveness probe is unavailable on Windows and
+     * inside containers).
+     *
+     * @param id The session id.
+     * @returns `{ session, agents_updated }` — the updated session and how many
+     *   of its agents were completed as part of this call.
+     */
+    abandon: (id: string) =>
+      request<{ session: Session; agents_updated: number }>(
+        `/sessions/${encodeURIComponent(id)}/abandon`,
+        { method: "POST" }
+      ),
+    /**
      * GET /api/sessions/:id/stats - per-session rollups for the detail page.
      *
      * Aggregate metrics scoped to a single session (token/tool/cost rollups and

@@ -608,6 +608,45 @@ router.patch("/:id", (req, res) => {
   res.json({ session });
 });
 
+// POST /:id/abandon — Manually end one stuck session right now (the same
+// session+agent transition the stale-session sweep applies in bulk on a
+// time threshold; see POST /settings/cleanup), for cases the sweep hasn't
+// reached yet or can't run for (e.g. the process-liveness probe is
+// unavailable on Windows/containers).
+router.post("/:id/abandon", (req, res) => {
+  const existing = stmts.getSession.get(req.params.id);
+  if (!existing) {
+    return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
+  }
+  if (!sessionIsInScope(existing, req)) {
+    return res.status(404).json({ error: { code: "NOT_FOUND", message: "Session not found" } });
+  }
+  if (["completed", "error", "abandoned"].includes(existing.status)) {
+    return res.status(400).json({
+      error: {
+        code: "ALREADY_TERMINAL",
+        message: `Session is already ${existing.status}`,
+      },
+    });
+  }
+
+  const now = new Date().toISOString();
+  stmts.updateSession.run(null, "abandoned", now, null, req.params.id);
+  const { changes: agentsUpdated } = db
+    .prepare(
+      "UPDATE agents SET status = 'completed', ended_at = ? WHERE session_id = ? AND status IN ('waiting','working')"
+    )
+    .run(now, req.params.id);
+
+  const session = stmts.getSession.get(req.params.id);
+  broadcast("session_updated", session);
+  for (const agent of stmts.listAgentsBySession.all(req.params.id)) {
+    if (agent.ended_at === now) broadcast("agent_updated", agent);
+  }
+
+  res.json({ session, agents_updated: agentsUpdated });
+});
+
 // GET /:id/transcripts — List available transcript files for a session (main + sub-agents)
 router.get("/:id/transcripts", async (req, res) => {
   const session = stmts.getSession.get(req.params.id);

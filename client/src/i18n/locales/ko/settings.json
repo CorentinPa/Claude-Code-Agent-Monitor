@@ -34,6 +34,12 @@
     "navClaude": "Claude 가격",
     "navGpt": "Codex 가격",
     "description": "백만 토큰당 Anthropic API 요금(USD)입니다. 패턴에서는 %를 와일드카드로 사용하세요. 일부 모델은 기간 한정 도입 요금(보라색으로 표시)이 있으며, 마감일 이전 사용량은 해당 요금으로, 이후 사용량은 표준 요금으로 청구됩니다.",
+    "unpriced": {
+      "title": "요금 규칙이 없는 사용량",
+      "description": "이 모델들은 사용량이 기록되었지만 일치하는 요금 규칙이 없어 비용이 $0으로 계산되며, 위의 합계는 실제보다 적게 표시됩니다.",
+      "tokens": "요금이 적용되지 않은 토큰 {{tokens}}개",
+      "action": "요금 규칙 추가"
+    },
     "introNote": "도입가 {{input}}/{{output}}, {{until}}까지",
     "introRatesTitle": "도입 요금",
     "introRatesHint": "프로모션이 없으면 날짜를 비워 두세요",

@@ -69,6 +69,8 @@
     },
     "failedLoad": "Không thể tải phiên",
     "loading": "Đang tải phiên...",
+    "endSession": "Kết thúc phiên",
+    "confirmEndSession": "Xác nhận kết thúc",
     "notFound": "Không tìm thấy phiên",
     "backToSessions": "Quay lại danh sách phiên",
     "agents": "Agent",
