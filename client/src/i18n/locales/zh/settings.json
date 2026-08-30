@@ -585,6 +585,26 @@
     "description": "选择仪表盘的外观。“跟随系统”会使用操作系统的设置，并在其更改时实时更新。",
     "dark": "深色",
     "light": "浅色",
-    "system": "跟随系统"
+    "system": "跟随系统",
+    "accent": {
+      "title": "强调色",
+      "description": "覆盖强调色设计令牌。未修改的令牌保持主题自身的取值。",
+      "reset": "恢复主题取值",
+      "presets": "强调色预设",
+      "mutedNote": "muted 令牌是半透明填充：此处仅设置色相，透明度跟随当前主题。",
+      "token": {
+        "accent": "强调色",
+        "accentHover": "强调色悬停",
+        "accentMuted": "强调色淡化"
+      },
+      "preset": {
+        "indigo": "靛蓝",
+        "violet": "紫罗兰",
+        "sky": "天蓝",
+        "emerald": "翡翠绿",
+        "amber": "琥珀",
+        "rose": "玫瑰"
+      }
+    }
   }
 }

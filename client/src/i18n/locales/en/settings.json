@@ -585,6 +585,26 @@
     "description": "Choose how the dashboard looks. “System” follows your OS setting and updates live if it changes.",
     "dark": "Dark",
     "light": "Light",
-    "system": "System"
+    "system": "System",
+    "accent": {
+      "title": "Accent color",
+      "description": "Overrides the accent design tokens. A token you do not touch keeps the theme's own value.",
+      "reset": "Reset to theme",
+      "presets": "Accent presets",
+      "mutedNote": "The muted token is a translucent fill: only its hue is set here, the transparency follows the active theme.",
+      "token": {
+        "accent": "Accent",
+        "accentHover": "Accent hover",
+        "accentMuted": "Accent muted"
+      },
+      "preset": {
+        "indigo": "Indigo",
+        "violet": "Violet",
+        "sky": "Sky",
+        "emerald": "Emerald",
+        "amber": "Amber",
+        "rose": "Rose"
+      }
+    }
   }
 }

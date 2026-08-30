@@ -78,7 +78,8 @@ import { useTranslation } from "react-i18next";
 import { Sidebar, SIDEBAR_STORAGE_KEY, loadCollapsed } from "./Sidebar";
 import { UpdateNotifier } from "./UpdateNotifier";
 import { Tabby } from "./Tabby/Tabby";
-import { applyTheme, subscribeToThemePrefs } from "../lib/theme";
+import { applyTheme, getEffectiveTheme, subscribeToThemePrefs } from "../lib/theme";
+import { applyAccent, subscribeToAccentPrefs } from "../lib/accent";
 
 /** Props for {@link Layout}. */
 interface LayoutProps {
@@ -105,8 +106,19 @@ export function Layout({ wsConnected }: LayoutProps) {
   }, []);
 
   useEffect(() => {
-    applyTheme();
-    return subscribeToThemePrefs(applyTheme);
+    // Accent overrides ride on top of the theme: re-applied on a theme switch
+    // too, because the muted token carries the active theme's alpha.
+    const apply = () => {
+      applyTheme();
+      applyAccent(getEffectiveTheme());
+    };
+    apply();
+    const unsubscribeTheme = subscribeToThemePrefs(apply);
+    const unsubscribeAccent = subscribeToAccentPrefs(apply);
+    return () => {
+      unsubscribeTheme();
+      unsubscribeAccent();
+    };
   }, []);
 
   return (

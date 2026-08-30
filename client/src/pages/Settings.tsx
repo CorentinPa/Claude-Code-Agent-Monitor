@@ -138,6 +138,17 @@ import {
 } from "../lib/currency";
 import { subscribeToPush, unsubscribeFromPush } from "../lib/push";
 import { getThemePrefs, setThemePrefs, subscribeToThemePrefs, type ThemeMode } from "../lib/theme";
+import {
+  ACCENT_TOKENS,
+  STYLESHEET_ACCENTS,
+  getAccentPrefs,
+  isValidHex,
+  normalizeHex,
+  resetAccentPrefs,
+  setAccentPrefs,
+  type AccentPrefs,
+  type AccentToken,
+} from "../lib/accent";
 import { Tip } from "../components/Tip";
 import { ImportHistory } from "../components/ImportHistory";
 import { RemoteSources } from "../components/RemoteSources";
@@ -147,6 +158,20 @@ import type { GptModelPricing, ModelPricing, UnpricedModel, WSMessage } from "..
 import { useDataScope, type ProviderScope } from "../lib/dataScope";
 
 // In-page navigation for the (dense) Settings screen. Each entry maps to a
+/**
+ * One-click accent palettes. Each is a Tailwind 500 -> 400 pair, matching how
+ * the shipped indigo accent relates to its hover shade, so a preset always
+ * yields a coherent set rather than three unrelated colors.
+ */
+const ACCENT_PRESETS: { key: string; values: AccentPrefs }[] = [
+  { key: "indigo", values: { accent: "#6366f1", accentHover: "#818cf8", accentMuted: "#6366f1" } },
+  { key: "violet", values: { accent: "#8b5cf6", accentHover: "#a78bfa", accentMuted: "#8b5cf6" } },
+  { key: "sky", values: { accent: "#0ea5e9", accentHover: "#38bdf8", accentMuted: "#0ea5e9" } },
+  { key: "emerald", values: { accent: "#10b981", accentHover: "#34d399", accentMuted: "#10b981" } },
+  { key: "amber", values: { accent: "#f59e0b", accentHover: "#fbbf24", accentMuted: "#f59e0b" } },
+  { key: "rose", values: { accent: "#f43f5e", accentHover: "#fb7185", accentMuted: "#f43f5e" } },
+];
+
 // `<section id>` rendered below; the TOC scroll-spies the active one.
 const SETTINGS_SECTIONS: {
   id: string;
@@ -1033,6 +1058,18 @@ export function Settings() {
     setThemePrefsState(setThemePrefs({ mode }));
   }, []);
   useEffect(() => subscribeToThemePrefs(() => setThemePrefsState(getThemePrefs())), []);
+  const [accentPrefs, setAccentPrefsState] = useState<AccentPrefs>(getAccentPrefs);
+  // Hex fields keep their own draft so a partially-typed value ("#63") stays in
+  // the input instead of being rejected on every keystroke. A draft only reaches
+  // the prefs once it parses; blur discards whatever never did.
+  const [accentDrafts, setAccentDrafts] = useState<Partial<Record<AccentToken, string>>>({});
+  const updateAccent = useCallback((patch: Partial<AccentPrefs>) => {
+    setAccentPrefsState(setAccentPrefs(patch));
+  }, []);
+  const accentValue = useCallback(
+    (token: AccentToken) => accentPrefs[token] ?? STYLESHEET_ACCENTS[token],
+    [accentPrefs]
+  );
   // Free-typed buffer for the rate field, separate from the committed
   // preference: an in-progress edit (e.g. clearing the field to retype it)
   // must not be clamped by `sanitizeRate` on every keystroke.
@@ -1814,6 +1851,115 @@ export function Settings() {
               );
             })}
           </div>
+        </div>
+
+        {/* Accent tokens. Overrides are inline custom properties on <html>, so
+            an untouched token keeps whatever index.css defines for the theme. */}
+        <div className="card mt-3 p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-gray-200">{t("appearance.accent.title")}</p>
+              <p className="mt-0.5 text-xs text-gray-500">{t("appearance.accent.description")}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setAccentPrefsState(resetAccentPrefs());
+                setAccentDrafts({});
+              }}
+              disabled={ACCENT_TOKENS.every((token) => accentPrefs[token] === null)}
+              className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs text-gray-400 transition-colors hover:bg-surface-4 hover:text-gray-300 disabled:opacity-50"
+            >
+              <RotateCcw className="h-3 w-3" />
+              {t("appearance.accent.reset")}
+            </button>
+          </div>
+
+          <div
+            className="mt-3 flex flex-wrap gap-2"
+            role="group"
+            aria-label={t("appearance.accent.presets")}
+          >
+            {ACCENT_PRESETS.map(({ key, values }) => {
+              const selected = ACCENT_TOKENS.every((token) => accentPrefs[token] === values[token]);
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={selected}
+                  aria-label={t(`appearance.accent.preset.${key}`)}
+                  title={t(`appearance.accent.preset.${key}`)}
+                  onClick={() => {
+                    updateAccent(values);
+                    setAccentDrafts({});
+                  }}
+                  className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs transition-colors ${
+                    selected
+                      ? "border-accent bg-accent/10 text-gray-200"
+                      : "border-border bg-surface-2 text-gray-400 hover:border-gray-600"
+                  }`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="h-3.5 w-3.5 flex-none rounded-full border border-black/20"
+                    style={{ backgroundColor: values.accent ?? undefined }}
+                  />
+                  {t(`appearance.accent.preset.${key}`)}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {ACCENT_TOKENS.map((token) => {
+              const value = accentValue(token);
+              const draft = accentDrafts[token] ?? value;
+              const invalid = !isValidHex(draft);
+              return (
+                <div key={token}>
+                  <label
+                    htmlFor={`accent-${token}`}
+                    className="block text-xs font-medium text-gray-400"
+                  >
+                    {t(`appearance.accent.token.${token}`)}
+                  </label>
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <input
+                      id={`accent-${token}`}
+                      type="color"
+                      value={value}
+                      onChange={(e) => {
+                        updateAccent({ [token]: e.target.value } as Partial<AccentPrefs>);
+                        setAccentDrafts((d) => ({ ...d, [token]: undefined }));
+                      }}
+                      className="h-8 w-10 flex-none cursor-pointer rounded-md border border-border bg-surface-2 p-1"
+                    />
+                    <input
+                      type="text"
+                      inputMode="text"
+                      spellCheck={false}
+                      value={draft}
+                      aria-label={t(`appearance.accent.token.${token}`)}
+                      aria-invalid={invalid}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setAccentDrafts((d) => ({ ...d, [token]: next }));
+                        if (isValidHex(next)) {
+                          updateAccent({ [token]: normalizeHex(next) } as Partial<AccentPrefs>);
+                        }
+                      }}
+                      onBlur={() => setAccentDrafts((d) => ({ ...d, [token]: undefined }))}
+                      className={`input w-full font-mono text-xs ${
+                        invalid ? "border-red-500/50" : ""
+                      }`}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="mt-3 text-xs text-gray-500">{t("appearance.accent.mutedNote")}</p>
         </div>
       </section>
 

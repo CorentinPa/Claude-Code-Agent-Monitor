@@ -585,6 +585,26 @@
     "description": "대시보드의 화면 모드를 선택하세요. “시스템”은 OS 설정을 따르며 변경 시 즉시 반영됩니다.",
     "dark": "다크",
     "light": "라이트",
-    "system": "시스템"
+    "system": "시스템",
+    "accent": {
+      "title": "강조 색상",
+      "description": "강조 디자인 토큰을 재정의합니다. 건드리지 않은 토큰은 테마 값을 그대로 사용합니다.",
+      "reset": "테마 값으로 되돌리기",
+      "presets": "강조 색상 프리셋",
+      "mutedNote": "muted 토큰은 반투명 채움입니다. 여기서는 색조만 지정하며 투명도는 활성 테마를 따릅니다.",
+      "token": {
+        "accent": "강조",
+        "accentHover": "강조 호버",
+        "accentMuted": "강조 흐림"
+      },
+      "preset": {
+        "indigo": "인디고",
+        "violet": "바이올렛",
+        "sky": "스카이",
+        "emerald": "에메랄드",
+        "amber": "앰버",
+        "rose": "로즈"
+      }
+    }
   }
 }

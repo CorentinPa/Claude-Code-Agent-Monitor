@@ -585,6 +585,26 @@
     "description": "Elige el aspecto del panel. “Sistema” sigue el ajuste del sistema operativo y se actualiza en vivo si cambia.",
     "dark": "Oscuro",
     "light": "Claro",
-    "system": "Sistema"
+    "system": "Sistema",
+    "accent": {
+      "title": "Color de acento",
+      "description": "Sustituye los tokens de acento. Un token que no toques conserva el valor del tema.",
+      "reset": "Restablecer al tema",
+      "presets": "Paletas de acento",
+      "mutedNote": "El token muted es un relleno translúcido: aquí solo se define su tono, la transparencia sigue al tema activo.",
+      "token": {
+        "accent": "Acento",
+        "accentHover": "Acento al pasar",
+        "accentMuted": "Acento atenuado"
+      },
+      "preset": {
+        "indigo": "Índigo",
+        "violet": "Violeta",
+        "sky": "Cielo",
+        "emerald": "Esmeralda",
+        "amber": "Ámbar",
+        "rose": "Rosa"
+      }
+    }
   }
 }

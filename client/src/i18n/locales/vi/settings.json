@@ -585,6 +585,26 @@
     "description": "Chọn giao diện hiển thị của bảng điều khiển. “Hệ thống” sẽ theo cài đặt của hệ điều hành và cập nhật ngay khi thay đổi.",
     "dark": "Tối",
     "light": "Sáng",
-    "system": "Hệ thống"
+    "system": "Hệ thống",
+    "accent": {
+      "title": "Màu nhấn",
+      "description": "Ghi đè các token nhấn. Token bạn không chỉnh sẽ giữ nguyên giá trị của giao diện.",
+      "reset": "Khôi phục theo giao diện",
+      "presets": "Bộ màu nhấn",
+      "mutedNote": "Token muted là nền mờ: ở đây chỉ đặt tông màu, độ trong suốt theo giao diện đang dùng.",
+      "token": {
+        "accent": "Màu nhấn",
+        "accentHover": "Màu nhấn khi di chuột",
+        "accentMuted": "Màu nhấn mờ"
+      },
+      "preset": {
+        "indigo": "Chàm",
+        "violet": "Tím",
+        "sky": "Xanh trời",
+        "emerald": "Ngọc lục bảo",
+        "amber": "Hổ phách",
+        "rose": "Hồng"
+      }
+    }
   }
 }
