@@ -18,6 +18,7 @@
   "noSessionsInColumn": "暂无会话",
   "ran": "运行了 ",
   "running": "运行中 ",
+  "costPending": "进行中",
   "session": {
     "anonymous": "未命名会话",
     "agentSummary_one": "{{count}} 个 Agent",
