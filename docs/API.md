@@ -1137,6 +1137,8 @@ Pulls history from **every enabled** source sequentially (one SSH connection at 
 
 #### The `sources` filter
 
+`GET /api/stats` and `GET /api/pricing/cost` also accept an optional ISO-8601 reporting window, `from` and `to`, which composes with `sources` and `providers`. On `/api/stats` each counter is bounded by the timestamp dating its own rows (`sessions.started_at`, `agents.started_at`, `events.created_at`), so `total_events` agrees with the same `from` sent to `/api/events`; `events_today` and the `agents_by_status` / `sessions_by_status` maps ignore the window. On `/api/pricing/cost` the window bounds `sessions.started_at`. An unparseable bound is ignored rather than rejected, so a malformed window degrades to "no window" instead of "no data".
+
 `GET /api/sessions`, `/api/events`, `/api/agents`, `/api/stats`, and `/api/analytics` accept an optional `sources` query parameter: a comma-separated list of source ids to include (omit for all). `GET /api/sessions/facets` correspondingly returns a `sources: string[]` array (alongside `cwds`) listing the distinct `sessions.source` values so the UI can build the filter dropdown.
 
 ```bash

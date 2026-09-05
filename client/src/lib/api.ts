@@ -600,11 +600,19 @@ export const api = {
      * that local time is *behind* UTC) so the server can compute "today" in the
      * viewer's timezone. Polled/refreshed to keep the header counters current.
      *
+     * An optional `from`/`to` window bounds each counter on the timestamp that
+     * dates its own rows (`sessions.started_at`, `agents.started_at`,
+     * `events.created_at`), so the cards agree with the activity feed's window.
+     * `events_today` keeps its own fixed "today" meaning and ignores the window.
+     *
+     * @param params Optional ISO-8601 time window.
      * @returns {@link Stats} — the small set of headline counters (totals,
      *   active counts, events-today, etc.) shown in the dashboard header.
      */
-    get: () => {
+    get: (params?: { from?: string; to?: string }) => {
       const qs = new URLSearchParams({ tz_offset: String(new Date().getTimezoneOffset()) });
+      if (params?.from) qs.set("from", params.from);
+      if (params?.to) qs.set("to", params.to);
       applyScope(qs);
       return request<Stats>(`/stats?${qs.toString()}`);
     },
@@ -1345,11 +1353,15 @@ export const api = {
      *
      * @returns {@link CostResult} — the aggregate cost breakdown across sessions.
      */
-    totalCost: () => {
+    totalCost: (params?: { from?: string; to?: string }) => {
       // Scope the aggregate to the active data-scope, exactly like the sessions /
       // stats / analytics endpoints — otherwise switching the Data scope selector
       // left the Dashboard "total cost" showing the un-narrowed global total.
+      // The optional window bounds sessions by `started_at`, the same column
+      // this endpoint already dates its daily buckets by.
       const qs = new URLSearchParams({ tz_offset: String(new Date().getTimezoneOffset()) });
+      if (params?.from) qs.set("from", params.from);
+      if (params?.to) qs.set("to", params.to);
       applyScope(qs);
       return request<CostResult>(`/pricing/cost?${qs.toString()}`);
     },

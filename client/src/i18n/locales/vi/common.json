@@ -188,5 +188,19 @@
     }
   },
   "examples": "Ví dụ",
-  "help": "Trợ giúp"
+  "help": "Trợ giúp",
+  "timeRange": {
+    "label": "Khoảng thời gian",
+    "1h": "1 giờ qua",
+    "24h": "24 giờ qua",
+    "7d": "7 ngày qua",
+    "30d": "30 ngày qua",
+    "all": "Toàn bộ",
+    "short": {
+      "1h": "1 giờ",
+      "24h": "24 giờ",
+      "7d": "7 ngày",
+      "30d": "30 ngày"
+    }
+  }
 }

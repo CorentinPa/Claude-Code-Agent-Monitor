@@ -41,5 +41,17 @@
       "error": "La session s'est terminée avec une erreur — un échec irrécupérable ou une erreur d'API en amont a mis fin à l'exécution.",
       "abandoned": "La session est devenue obsolète sans signal de sortie propre. Marquée comme abandonnée après plus de 5 minutes sans activité (par exemple après /resume, une coupure réseau ou une CLI tuée). Différent de Terminé : aucune sortie réelle n'a été observée."
     }
+  },
+  "filters": {
+    "label": "Filtres",
+    "reset": "Réinitialiser",
+    "states": {
+      "label": "États",
+      "all": "Tous les états",
+      "selected": "{{count}} états",
+      "search": "Rechercher un état...",
+      "empty": "Aucun état correspondant",
+      "clear": "Effacer les états"
+    }
   }
 }

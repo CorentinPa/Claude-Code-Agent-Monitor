@@ -592,6 +592,31 @@ export function formatModelName(model: string | null | undefined): string | null
 }
 
 /**
+ * Split a session's `prompt_preview` into displayable lines: trimmed, blank and
+ * duplicate lines dropped, capped at the two most recent turns.
+ *
+ * The server stores the newest human turns newline-separated, oldest first, so
+ * the LAST element is the most recent prompt — list views that show a single
+ * line should take the last element, not the first.
+ *
+ * @param value Raw `prompt_preview` value, possibly null.
+ * @returns Up to two lines, chronological (oldest first); empty when there is nothing to show.
+ */
+export function promptPreviewLines(value: string | null | undefined): string[] {
+  const seen = new Set<string>();
+  return String(value || "")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter((line) => {
+      const key = line.toLocaleLowerCase();
+      if (!line || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(-2);
+}
+
+/**
  * Last segment of a filesystem path. POSIX-only - fine for cwd display.
  * "/Users/dav/code/my-project" → "my-project".
  * @param p An absolute or relative POSIX path, or null/undefined.

@@ -8,6 +8,7 @@ const { stmts, db } = require("../db");
 const { getConnectionCount } = require("../websocket");
 const { parseSources } = require("../lib/source-filter");
 const { parseProviders } = require("../lib/provider-filter");
+const { parseRange } = require("../lib/range-filter");
 const scoped = require("../lib/scoped-stats");
 
 const router = Router();
@@ -23,8 +24,14 @@ router.get("/", (req, res) => {
   // every count against that subset; otherwise use the cached prepared stmts.
   const sources = parseSources(req);
   const providers = parseProviders(req);
-  const isScoped = !!sources || !!providers;
-  const overview = isScoped ? scoped.statsOverview(db, sources, providers) : stmts.stats.get();
+  // A time window forces the dynamic path too: the cached prepared statement is
+  // unbounded by construction. An unparseable bound parses to null, so a bad
+  // `?from=` degrades to the fast unwindowed path instead of emptying the cards.
+  const range = parseRange(req);
+  const isScoped = !!sources || !!providers || !!range;
+  const overview = isScoped
+    ? scoped.statsOverview(db, sources, providers, range)
+    : stmts.stats.get();
   const agentsByStatus = isScoped
     ? scoped.agentStatusCounts(db, sources, providers)
     : stmts.agentStatusCounts.all();

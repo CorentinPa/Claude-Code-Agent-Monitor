@@ -6,6 +6,8 @@
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
+const { rangeColumnClause } = require("./range-filter");
+
 function placeholders(values) {
   return values.map(() => "?").join(",");
 }
@@ -30,23 +32,56 @@ function sessionSubquery(sources, providers) {
   return { sql: `SELECT id FROM sessions ${scope.where}`, params: scope.params };
 }
 
-function statsOverview(db, sources, providers) {
+/**
+ * Dashboard headline counters, optionally bounded to a time window.
+ *
+ * Each counter is windowed on the timestamp that actually dates the row it
+ * counts — `sessions.started_at`, `agents.started_at`, `events.created_at` —
+ * rather than on the owning session's start. That keeps `total_events` in
+ * agreement with the `from` bound the activity feed sends to /api/events: an
+ * event emitted today by a session opened last week belongs in "today".
+ *
+ * @param range Parsed window from `lib/range-filter`, or null for all time.
+ */
+function statsOverview(db, sources, providers, range = null) {
   const scope = sessionScope(sources, providers);
+  // The session subquery stays unwindowed: it exists to scope child rows to the
+  // right machines/providers, and windowing it here would silently re-date
+  // agents and events by their session instead of by themselves.
   const sessions = `SELECT id FROM sessions ${scope.where}`;
-  const active = sessionScope(sources, providers);
-  const activeWhere = active.where
-    ? `${active.where} AND status = 'active'`
-    : "WHERE status = 'active'";
+
+  const sessionRange = rangeColumnClause(range, "started_at");
+  const agentRange = rangeColumnClause(range, "started_at");
+  const eventRange = rangeColumnClause(range, "created_at");
+
+  const and = (clause) => (clause ? ` AND ${clause}` : "");
+  const where = (base, clause) => {
+    const parts = [base, clause].filter(Boolean);
+    return parts.length ? `WHERE ${parts.join(" AND ")}` : "";
+  };
+  const scopeBase = scope.where.replace(/^WHERE /, "");
+
   return db
     .prepare(
       `SELECT
-        (SELECT COUNT(*) FROM sessions ${scope.where}) as total_sessions,
-        (SELECT COUNT(*) FROM sessions ${activeWhere}) as active_sessions,
-        (SELECT COUNT(*) FROM agents WHERE status IN ('working','waiting') AND session_id IN (${sessions})) as active_agents,
-        (SELECT COUNT(*) FROM agents WHERE session_id IN (${sessions})) as total_agents,
-        (SELECT COUNT(*) FROM events WHERE session_id IN (${sessions})) as total_events`
+        (SELECT COUNT(*) FROM sessions ${where(scopeBase, sessionRange.clause)}) as total_sessions,
+        (SELECT COUNT(*) FROM sessions ${where(scopeBase, `status = 'active'${and(sessionRange.clause)}`)}) as active_sessions,
+        (SELECT COUNT(*) FROM agents WHERE status IN ('working','waiting')${and(agentRange.clause)} AND session_id IN (${sessions})) as active_agents,
+        (SELECT COUNT(*) FROM agents WHERE session_id IN (${sessions})${and(agentRange.clause)}) as total_agents,
+        (SELECT COUNT(*) FROM events WHERE session_id IN (${sessions})${and(eventRange.clause)}) as total_events`
     )
-    .get(...scope.params, ...active.params, ...scope.params, ...scope.params, ...scope.params);
+    .get(
+      ...scope.params,
+      ...sessionRange.params,
+      ...scope.params,
+      ...sessionRange.params,
+      ...agentRange.params,
+      ...scope.params,
+      ...scope.params,
+      ...agentRange.params,
+      ...scope.params,
+      ...eventRange.params
+    );
 }
 
 function agentStatusCounts(db, sources, providers) {

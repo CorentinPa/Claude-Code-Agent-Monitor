@@ -161,6 +161,24 @@ components:
         type: string
         example: claude,codex
       description: 'Comma-separated product providers to include: `claude`, `codex`, or both. Omit to include every provider.'
+    RangeFromQuery:
+      name: from
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: Inclusive lower bound of the reporting window, ISO-8601. Composes with `sources` and `providers`; none replaces the others. An unparseable value is IGNORED rather than rejected, so a malformed window degrades to "no window" instead of "no data".
+      example: '2026-03-18T12:00:00.000Z'
+    RangeToQuery:
+      name: to
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: Inclusive upper bound of the reporting window, ISO-8601. Same composition and same lenient parsing as `from`.
+      example: '2026-03-19T12:00:00.000Z'
   schemas:
     ErrorObject:
       type: object
@@ -5726,6 +5744,8 @@ paths:
         The overview counters are spread at the top level of the response object. Two additional maps, `agents_by_status` and `sessions_by_status`, break the counts down by lifecycle status (e.g. agents: working/waiting/completed/error; sessions: active/completed/error/abandoned). **Statuses with a zero count are omitted from these maps**, so callers must not assume every status key is present.
 
         `events_today` is computed in the caller's local day. Pass `tz_offset` as the minutes value from JavaScript's `Date.prototype.getTimezoneOffset()` (for example `420` for US Pacific Daylight Time, `300` for US Eastern Daylight Time, `0` for UTC). When omitted or non-numeric, the server falls back to UTC (offset 0).
+
+        An optional `from`/`to` window bounds each counter on the timestamp that dates its own rows — `sessions.started_at` for `total_sessions`/`active_sessions`, `agents.started_at` for `total_agents`/`active_agents`, `events.created_at` for `total_events` — rather than on the owning session's start, so `total_events` agrees with the same window sent to `/api/events`. **`events_today` and the `agents_by_status` / `sessions_by_status` maps ignore the window**: the first has its own fixed day, the second pair are lifecycle breakdowns the dashboard reads unwindowed.
       parameters:
         - in: query
           name: tz_offset
@@ -5735,6 +5755,8 @@ paths:
           example: 420
         - $ref: '#/components/parameters/SourcesQuery'
           example: local,4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11
+        - $ref: '#/components/parameters/RangeFromQuery'
+        - $ref: '#/components/parameters/RangeToQuery'
       responses:
         '200':
           description: Statistics overview
@@ -6153,7 +6175,7 @@ paths:
         - Pricing
       summary: Get total token cost across all sessions
       operationId: getTotalCost
-      description: Computes the aggregate token cost across EVERY session by matching each (model, speed, inference_geo, service_tier) usage bucket against the most specific pricing rule. Returns `total_cost`, a per-bucket `breakdown`, `feature_costs` (web-search surcharge, code-execution container time with the org free-hours allowance applied), `unpriced_models` (usage with no matching rule, contributing $0 so the total stays honest), and `daily_costs` bucketed by local calendar day. Pass `tz_offset` (minutes; the JS `Date.getTimezoneOffset()` value, e.g. 300 for US Eastern, -120 for CEST) so day boundaries align with the viewer's timezone; omitted/invalid offsets fall back to UTC. Honors the `sources` data-scope filter, like the sessions / stats / analytics endpoints, so the reported cost matches the active scope.
+      description: Computes the aggregate token cost across EVERY session by matching each (model, speed, inference_geo, service_tier) usage bucket against the most specific pricing rule. Returns `total_cost`, a per-bucket `breakdown`, `feature_costs` (web-search surcharge, code-execution container time with the org free-hours allowance applied), `unpriced_models` (usage with no matching rule, contributing $0 so the total stays honest), and `daily_costs` bucketed by local calendar day. Pass `tz_offset` (minutes; the JS `Date.getTimezoneOffset()` value, e.g. 300 for US Eastern, -120 for CEST) so day boundaries align with the viewer's timezone; omitted/invalid offsets fall back to UTC. Honors the `sources` data-scope filter, like the sessions / stats / analytics endpoints, so the reported cost matches the active scope. An optional `from`/`to` window bounds the aggregate on `sessions.started_at` — the same column this endpoint already dates its daily buckets by, since `token_usage` carries no timestamp of its own.
       parameters:
         - name: tz_offset
           in: query
@@ -6169,6 +6191,8 @@ paths:
             type: string
           description: Comma-separated data-source ids to include (local history is `local`; remote SSH machines use their `remote_sources.id`). Omit for all sources. Narrows the aggregate cost to the given origins.
           example: local
+        - $ref: '#/components/parameters/RangeFromQuery'
+        - $ref: '#/components/parameters/RangeToQuery'
       responses:
         '200':
           description: Cost result

@@ -69,7 +69,13 @@ import {
   sessionAwaitingReason,
 } from "../lib/types";
 import type { Session } from "../lib/types";
-import { formatDuration, timeAgo, formatModelName, getCurrentLocale } from "../lib/format";
+import {
+  formatDuration,
+  timeAgo,
+  formatModelName,
+  getCurrentLocale,
+  promptPreviewLines,
+} from "../lib/format";
 import { convertCost, composeCurrency } from "../lib/currency";
 
 interface SessionCardProps {
@@ -102,20 +108,6 @@ function formatCost(cost: number): string {
 
 /** Two compact, distinct request rows give terse Claude and Codex follow-ups
  * surrounding context without allowing a session card to grow unbounded. */
-function promptPreviewLines(value: string | null | undefined): string[] {
-  const seen = new Set<string>();
-  return String(value || "")
-    .split(/\n+/)
-    .map((line) => line.trim())
-    .filter((line) => {
-      const key = line.toLocaleLowerCase();
-      if (!line || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .slice(-2);
-}
-
 export function SessionCard({ session, onClick }: SessionCardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation("kanban");

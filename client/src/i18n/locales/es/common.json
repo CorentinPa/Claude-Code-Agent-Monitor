@@ -188,5 +188,19 @@
     }
   },
   "examples": "Ejemplos",
-  "help": "Ayuda"
+  "help": "Ayuda",
+  "timeRange": {
+    "label": "Periodo",
+    "1h": "Última hora",
+    "24h": "Últimas 24 horas",
+    "7d": "Últimos 7 días",
+    "30d": "Últimos 30 días",
+    "all": "Todo el historial",
+    "short": {
+      "1h": "1 h",
+      "24h": "24 h",
+      "7d": "7 d",
+      "30d": "30 d"
+    }
+  }
 }

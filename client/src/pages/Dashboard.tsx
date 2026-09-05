@@ -105,6 +105,15 @@ import { AgentCard } from "../components/AgentCard";
 import { AgentStatusBadge } from "../components/StatusBadge";
 import { EmptyState } from "../components/EmptyState";
 import { Tip } from "../components/Tip";
+import {
+  DashboardFilters,
+  isDefaultFilters,
+  loadDashboardFilters,
+  saveDashboardFilters,
+} from "../components/DashboardFilters";
+import { rangeStartIso, rangeStartMs } from "../lib/timeRange";
+import type { DashboardFiltersValue, DashboardSessionStatus } from "../components/DashboardFilters";
+import type { SelectOption } from "../components/Select";
 import { timeAgo, fmt, fmtCost, fmtCostFull, formatModelName } from "../lib/format";
 import { getCurrencyPrefs } from "../lib/currency";
 import type { Stats, Agent, DashboardEvent, WSMessage, WorkflowData, Session } from "../lib/types";
@@ -161,20 +170,26 @@ function formatUptime(seconds: number): string {
   return `${m}m`;
 }
 
-function SystemHealthTab() {
+function SystemHealthTab({ sessionStatus }: { sessionStatus: DashboardSessionStatus }) {
   const [info, setInfo] = useState<SystemInfo | null>(null);
   const [workflow, setWorkflow] = useState<WorkflowData | null>(null);
   const [scope] = useDataScope();
 
   const loadData = useCallback(async () => {
     try {
-      const [infoRes, workflowRes] = await Promise.all([api.settings.info(), api.workflows.get()]);
+      // Only the workflow rollups accept a scope: /api/settings/info is a live
+      // process snapshot with nothing to narrow. api.workflows.get treats "all"
+      // as "no filter" and leaves the URL param-free.
+      const [infoRes, workflowRes] = await Promise.all([
+        api.settings.info(),
+        api.workflows.get(sessionStatus),
+      ]);
       setInfo(infoRes as any);
       setWorkflow(workflowRes);
     } catch (e) {
       console.error(e);
     }
-  }, [scope]);
+  }, [scope, sessionStatus]);
 
   useEffect(() => {
     loadData();
@@ -971,6 +986,13 @@ export function Dashboard() {
     localStorage.setItem("dashboard_tab", activeTab);
   }, [activeTab]);
 
+  // Persistent filter state (temporality / agent / provider / session status)
+  const [filters, setFilters] = useState<DashboardFiltersValue>(loadDashboardFilters);
+
+  useEffect(() => {
+    saveDashboardFilters(filters);
+  }, [filters]);
+
   const [stats, setStats] = useState<Stats | null>(null);
   const [activeAgents, setActiveAgents] = useState<Agent[]>([]);
   const [recentEvents, setRecentEvents] = useState<DashboardEvent[]>([]);
@@ -1014,15 +1036,38 @@ export function Dashboard() {
   // source-machine and provider params into the calls below).
   const [scope] = useDataScope();
 
+  // Server-side narrowing for the activity feed. /api/events already accepts
+  // `from` and `session_id`, so the window is applied in SQL instead of being a
+  // post-filter over the last 30 rows. The agent scope resolves to that agent's
+  // session so its subagents' events stay in the feed alongside its own.
+  const scopedSessionId = useMemo(
+    () =>
+      filters.agentId
+        ? (activeAgents.find((a) => a.id === filters.agentId)?.session_id ?? undefined)
+        : undefined,
+    [filters.agentId, activeAgents]
+  );
+
+  // Read by the websocket handler, which must not resubscribe on every scope
+  // change (that would drop buffered messages mid-burst).
+  const scopedSessionIdRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    scopedSessionIdRef.current = scopedSessionId;
+  }, [scopedSessionId]);
+
   const load = useCallback(async () => {
+    // Resolved inside the callback: rangeStartIso() reads the clock, so a
+    // render-body call would hand `load` a new identity every render and spin
+    // the [load] effect below forever.
+    const eventsFrom = rangeStartIso(filters.range);
     try {
       const [statsRes, workingRes, waitingRes, eventsRes, costRes, sessionsRes] = await Promise.all(
         [
-          api.stats.get(),
+          api.stats.get({ from: eventsFrom }),
           api.agents.list({ status: "working", limit: 20 }),
           api.agents.list({ status: "waiting", limit: 20, include_transient: true }),
-          api.events.list({ limit: 30 }),
-          api.pricing.totalCost(),
+          api.events.list({ limit: 30, from: eventsFrom, session_id: scopedSessionId }),
+          api.pricing.totalCost({ from: eventsFrom }),
           api.sessions.list({
             status: "active",
             limit: 100,
@@ -1051,7 +1096,7 @@ export function Dashboard() {
     } catch (err) {
       setError(err instanceof Error ? err.message : t("failedLoad"));
     }
-  }, [t, scope]);
+  }, [t, scope, filters.range, scopedSessionId]);
 
   useEffect(() => {
     load();
@@ -1120,6 +1165,13 @@ export function Dashboard() {
         if (newEvent.tool_name === "update_plan") {
           scheduleLoad();
         }
+        // A live push bypasses the server-side filters applied in `load`, so an
+        // out-of-scope event would leak into a filtered feed. The time window is
+        // always "the last X", which a just-emitted event satisfies by
+        // construction; only the agent/session scope has to be re-checked here.
+        if (scopedSessionIdRef.current && newEvent.session_id !== scopedSessionIdRef.current) {
+          return;
+        }
         setRecentEvents((prev) => {
           // Deduplicate by event ID to prevent WS + polling race condition
           if (newEvent.id && prev.some((e) => e.id === newEvent.id)) return prev;
@@ -1136,6 +1188,55 @@ export function Dashboard() {
   }, [load]);
 
   const wsConnected = useSyncExternalStore(eventBus.onConnection, () => eventBus.connected);
+
+  // Client-side narrowing for the active-agent panel. /api/agents accepts only
+  // status/session_id, so the window is checked here against `updated_at`.
+  // Provider is not handled here: the app-wide data scope (lib/dataScope.ts)
+  // already narrows /api/agents by `?providers=` before these rows arrive.
+  const filteredAgents = useMemo(() => {
+    const windowStart = rangeStartMs(filters.range);
+    return activeAgents.filter((agent) => {
+      if (windowStart !== null && new Date(agent.updated_at).getTime() < windowStart) return false;
+      // Scoping to a main agent keeps its whole subtree: children are rendered
+      // from `allSubagents` via the agent tree, not from this list.
+      if (filters.agentId && agent.id !== filters.agentId) return false;
+      return true;
+    });
+  }, [activeAgents, filters.range, filters.agentId]);
+
+  // Only main agents are offered: the picker scopes a whole delegation tree,
+  // and its selection maps onto one session id for the activity feed.
+  const agentOptions = useMemo<SelectOption<string>[]>(() => {
+    return activeAgents
+      .filter((a) => a.type === "main")
+      .map((a) => {
+        const sessionName = sessionsById.get(a.session_id)?.name?.trim() || "";
+        const isAutoName = /^Session [0-9a-f]{8}$/i.test(sessionName);
+        return {
+          value: a.id,
+          label: sessionName && !isAutoName ? sessionName : a.name,
+          hint: a.session_id.slice(0, 8),
+        };
+      });
+  }, [activeAgents, sessionsById]);
+
+  const filtersAreActive = !isDefaultFilters(filters);
+
+  // Cards whose value the server now recomputes per window carry the window in
+  // their label, so "Total sessions" can never be read as an all-time figure
+  // while a window is set. "Events today" keeps its own fixed meaning and is
+  // deliberately left unsuffixed.
+  const rangeSuffix =
+    filters.range === "all" ? "" : ` · ${t(`common:timeRange.short.${filters.range}`)}`;
+
+  // Same window as the server applies to the other counters, so this
+  // client-derived card cannot be the only one ignoring the filter.
+  const windowedSubagents = useMemo(() => {
+    const windowStart = rangeStartMs(filters.range);
+    return allSubagents.filter(
+      (a) => windowStart === null || new Date(a.started_at).getTime() >= windowStart
+    );
+  }, [allSubagents, filters.range]);
 
   // Memoize agent tree structure to avoid recalculating on every render
   const agentTree = useMemo(() => {
@@ -1223,7 +1324,7 @@ export function Dashboard() {
                   : "text-gray-500 hover:text-gray-300"
               }`}
             >
-              <Activity className="w-3.5 h-3.5" /> Monitor
+              <Activity className="w-3.5 h-3.5" /> {t("tabs.monitor")}
             </button>
             <button
               onClick={() => setActiveTab("health")}
@@ -1233,7 +1334,7 @@ export function Dashboard() {
                   : "text-gray-500 hover:text-gray-300"
               }`}
             >
-              <Server className="w-3.5 h-3.5" /> Health
+              <Server className="w-3.5 h-3.5" /> {t("tabs.health")}
             </button>
           </div>
           <button onClick={load} className="btn-ghost flex-shrink-0">
@@ -1242,12 +1343,19 @@ export function Dashboard() {
         </div>
       </div>
 
+      <DashboardFilters
+        tab={activeTab}
+        value={filters}
+        onChange={setFilters}
+        agentOptions={agentOptions}
+      />
+
       {activeTab === "monitor" ? (
         <div className="flex-1 flex flex-col gap-8 min-h-0">
           {/* Stats grid - 2 rows of 3 avoids the 6-column squeeze */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <StatCard
-              label={t("totalSessions")}
+              label={`${t("totalSessions")}${rangeSuffix}`}
               value={stats ? fmt(stats.total_sessions) : ""}
               raw={stats ? stats.total_sessions.toLocaleString() : undefined}
               icon={FolderOpen}
@@ -1255,18 +1363,18 @@ export function Dashboard() {
               loading={!stats}
             />
             <StatCard
-              label={t("activeAgents")}
+              label={`${t("activeAgents")}${rangeSuffix}`}
               value={stats?.active_agents ?? ""}
               icon={Bot}
               accentColor="text-emerald-400"
               loading={!stats}
             />
             <StatCard
-              label={t("activeSubagents")}
-              value={stats ? allSubagents.filter((a) => a.status === "working").length : ""}
+              label={`${t("activeSubagents")}${rangeSuffix}`}
+              value={stats ? windowedSubagents.filter((a) => a.status === "working").length : ""}
               icon={GitBranch}
               accentColor="text-violet-400"
-              trend={stats ? `${allSubagents.length}${t("totalTrend")}` : undefined}
+              trend={stats ? `${windowedSubagents.length}${t("totalTrend")}` : undefined}
               loading={!stats}
             />
             <StatCard
@@ -1278,7 +1386,7 @@ export function Dashboard() {
               loading={!stats}
             />
             <StatCard
-              label={t("totalEvents")}
+              label={`${t("totalEvents")}${rangeSuffix}`}
               value={stats ? fmt(stats.total_events) : ""}
               raw={stats ? stats.total_events.toLocaleString() : undefined}
               icon={Activity}
@@ -1286,7 +1394,7 @@ export function Dashboard() {
               loading={!stats}
             />
             <StatCard
-              label={t("totalCost")}
+              label={`${t("totalCost")}${rangeSuffix}`}
               value={totalCost !== null ? fmtCost(totalCost) : ""}
               raw={totalCost !== null ? fmtCostFull(totalCost) : undefined}
               icon={getCurrencyPrefs().enabled ? Coins : DollarSign}
@@ -1304,8 +1412,12 @@ export function Dashboard() {
                   {t("viewBoard")} <ArrowRight className="w-3 h-3" />
                 </button>
               </div>
-              {activeAgents.length === 0 ? (
-                <EmptyState icon={Bot} title={t("noAgents")} description={t("noAgentsDesc")} />
+              {filteredAgents.length === 0 ? (
+                <EmptyState
+                  icon={Bot}
+                  title={filtersAreActive ? t("noAgentsFiltered") : t("noAgents")}
+                  description={filtersAreActive ? t("noAgentsFilteredDesc") : t("noAgentsDesc")}
+                />
               ) : (
                 <div className="space-y-2">
                   {(() => {
@@ -1421,7 +1533,7 @@ export function Dashboard() {
                     // was `a.type === "subagent"` with no parentage check,
                     // which surfaced every nested subagent twice: once
                     // indented under its main, and once flush at root level.
-                    const visibleMains = activeAgents
+                    const visibleMains = filteredAgents
                       .filter((a) => a.type === "main")
                       .slice(0, visibleAgentCount);
                     const renderedInTree = new Set<string>();
@@ -1442,7 +1554,7 @@ export function Dashboard() {
                         {visibleMains.map((main) => renderAgentNode(main, 0))}
                         {/* Only true orphans: subagents whose ancestor chain
                             isn't already shown in a tree above. */}
-                        {activeAgents
+                        {filteredAgents
                           .filter((a) => a.type === "subagent" && !renderedInTree.has(a.id))
                           .map((agent) => (
                             <div key={agent.id}>
@@ -1473,8 +1585,8 @@ export function Dashboard() {
               {recentEvents.length === 0 ? (
                 <EmptyState
                   icon={Activity}
-                  title={t("noActivity")}
-                  description={t("noActivityDesc")}
+                  title={filtersAreActive ? t("noActivityFiltered") : t("noActivity")}
+                  description={filtersAreActive ? t("noActivityFilteredDesc") : t("noActivityDesc")}
                 />
               ) : (
                 <div className="card divide-y divide-border">
@@ -1535,7 +1647,7 @@ export function Dashboard() {
           </div>
         </div>
       ) : (
-        <SystemHealthTab />
+        <SystemHealthTab sessionStatus={filters.sessionStatus} />
       )}
     </div>
   );

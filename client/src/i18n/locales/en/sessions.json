@@ -85,5 +85,7 @@
       "loadOlder": "↑ Load older messages"
     }
   },
-  "remoteSourceBadgeTitle": "Collected from a remote machine"
+  "remoteSourceBadgeTitle": "Collected from a remote machine",
+  "tableModel": "Model",
+  "awaitingForTitle": "Waiting on you for {{duration}}"
 }

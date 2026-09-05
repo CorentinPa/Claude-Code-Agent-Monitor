@@ -85,5 +85,7 @@
     "transcript": {
       "loadOlder": "↑ Tải các tin nhắn cũ hơn"
     }
-  }
+  },
+  "tableModel": "Mô hình",
+  "awaitingForTitle": "Đang chờ bạn {{duration}}"
 }

@@ -86,7 +86,14 @@ import { EmptyState } from "../components/EmptyState";
 import { TableRowSkeleton } from "../components/Skeleton";
 import { MultiSelect } from "../components/MultiSelect";
 import { Select } from "../components/Select";
-import { formatDateTime, formatDuration, truncate, fmtCost } from "../lib/format";
+import {
+  formatDateTime,
+  formatDuration,
+  truncate,
+  fmtCost,
+  formatModelName,
+  promptPreviewLines,
+} from "../lib/format";
 import {
   effectiveSessionStatus,
   isSessionAwaitingInput,
@@ -442,7 +449,7 @@ export function Sessions() {
       ) : (
         <>
           <div className="card overflow-x-auto">
-            <table className="w-full min-w-[800px]">
+            <table className="w-full min-w-[900px]">
               <thead>
                 <tr className="border-b border-border text-left">
                   <th className="px-5 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
@@ -461,6 +468,9 @@ export function Sessions() {
                     {t("tableAgents")}
                   </th>
                   <th className="px-5 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                    {t("tableModel")}
+                  </th>
+                  <th className="px-5 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
                     {t("tableCost")}
                   </th>
                   <th className="px-5 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
@@ -474,8 +484,18 @@ export function Sessions() {
                   ? Array.from({ length: 8 }).map((_, i) => (
                       <TableRowSkeleton
                         key={`sk-${i}`}
-                        columns={8}
-                        widths={["w-40", "w-20", "w-28", "w-20", "w-10", "w-16", "w-44", "w-4"]}
+                        columns={9}
+                        widths={[
+                          "w-40",
+                          "w-20",
+                          "w-28",
+                          "w-20",
+                          "w-10",
+                          "w-24",
+                          "w-16",
+                          "w-44",
+                          "w-4",
+                        ]}
                       />
                     ))
                   : null}
@@ -500,6 +520,21 @@ export function Sessions() {
                           <p className="text-[11px] text-gray-600 font-mono">
                             {session.id.slice(0, 12)}
                           </p>
+                          {(() => {
+                            // The server stores the newest turns oldest-first, so
+                            // the last line is the most recent prompt. One line
+                            // only: this is the densest session list in the app.
+                            const previewLines = promptPreviewLines(session.prompt_preview);
+                            const latestPrompt = previewLines[previewLines.length - 1];
+                            return latestPrompt ? (
+                              <p
+                                className="mt-1 max-w-[22rem] truncate text-[11px] text-gray-500"
+                                title={latestPrompt}
+                              >
+                                {latestPrompt}
+                              </p>
+                            ) : null;
+                          })()}
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
                           {session.source && session.source !== "local" && (
@@ -535,6 +570,22 @@ export function Sessions() {
                         {session.todo_summary && (
                           <TodoProgressIndicator progress={session.todo_summary} />
                         )}
+                        {session.awaiting_input_since && (
+                          // "Waiting" alone cannot separate a session that just
+                          // asked from one abandoned this morning; the timestamp
+                          // that already drives the badge carries that answer.
+                          <span
+                            className="text-[11px] text-yellow-500/90 tabular-nums"
+                            title={t("awaitingForTitle", {
+                              duration: formatDuration(
+                                session.awaiting_input_since,
+                                new Date().toISOString()
+                              ),
+                            })}
+                          >
+                            {formatDuration(session.awaiting_input_since, new Date().toISOString())}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-400">
@@ -548,7 +599,16 @@ export function Sessions() {
                     <td className="px-5 py-4 text-sm text-gray-400">
                       {session.agent_count ?? "-"}
                     </td>
-                    <td className="px-5 py-4 text-sm text-gray-400 font-mono">
+                    <td className="px-5 py-4 text-[11px] text-gray-400">
+                      {/* "unknown" is the Codex-ingest sentinel for "no model
+                          recorded" (server/lib/codex-ingest.js); it carries no
+                          more information than a missing value, so it renders
+                          as the same em-dash the rest of this table uses. */}
+                      {(session.model && session.model !== "unknown"
+                        ? formatModelName(session.model)
+                        : null) ?? "-"}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-gray-400 font-mono tabular-nums">
                       {session.cost != null && session.cost > 0 ? fmtCost(session.cost) : "-"}
                     </td>
                     <td
