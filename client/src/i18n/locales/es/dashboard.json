@@ -18,5 +18,29 @@
   "failedConnect": "No se pudo conectar al servidor",
   "failedLoad": "No se pudieron cargar los datos",
   "activeTrend": " activo",
-  "totalTrend": " en sesiones activas"
+  "totalTrend": " en sesiones activas",
+  "tabs": {
+    "monitor": "Supervisión",
+    "health": "Estado"
+  },
+  "filters": {
+    "label": "Filtros",
+    "reset": "Restablecer",
+    "agent": {
+      "label": "Agente",
+      "all": "Todos los agentes"
+    },
+    "sessionStatus": {
+      "label": "Sesiones",
+      "all": "Todas las sesiones",
+      "active": "Activas",
+      "completed": "Completadas"
+    },
+    "statsGlobalNote": "Las tarjetas siguen el periodo; «Eventos hoy» conserva su propio día. El alcance de proveedor está en Ajustes → Datos del panel.",
+    "healthSnapshotNote": "Runtime y almacenamiento son instantáneas; solo los agregados de flujo siguen este filtro."
+  },
+  "noAgentsFiltered": "Ningún agente coincide con estos filtros",
+  "noAgentsFilteredDesc": "Amplía el periodo o quita los filtros de agente y proveedor.",
+  "noActivityFiltered": "Ninguna actividad coincide con estos filtros",
+  "noActivityFilteredDesc": "Amplía el periodo o quita el filtro de agente."
 }

@@ -85,5 +85,7 @@
     "transcript": {
       "loadOlder": "↑ 加载更早的消息"
     }
-  }
+  },
+  "tableModel": "模型",
+  "awaitingForTitle": "已等待你 {{duration}}"
 }

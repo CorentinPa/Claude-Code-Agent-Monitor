@@ -7,6 +7,7 @@ const { Router } = require("express");
 const { stmts, db } = require("../db");
 const { parseSources, sourceColumnClause } = require("../lib/source-filter");
 const { parseProviders, providerColumnClause } = require("../lib/provider-filter");
+const { parseRange, rangeColumnClause } = require("../lib/range-filter");
 const {
   WEB_SEARCH_PER_1K_SEARCHES,
   CODE_EXEC_PER_HOUR,
@@ -574,8 +575,11 @@ router.get("/cost", (req, res) => {
   const tzModifier = Number.isFinite(rawOffset) ? `${-rawOffset} minutes` : "+0 minutes";
   const sourceScope = sourceColumnClause(parseSources(req), "s.source");
   const providerScope = providerColumnClause(parseProviders(req), "s.provider");
-  const clauses = [sourceScope.clause, providerScope.clause].filter(Boolean);
-  const params = [...sourceScope.params, ...providerScope.params];
+  // token_usage carries no timestamp of its own, so the window bounds the same
+  // column this query already dates its buckets by: the session's start.
+  const rangeScope = rangeColumnClause(parseRange(req), "s.started_at");
+  const clauses = [sourceScope.clause, providerScope.clause, rangeScope.clause].filter(Boolean);
+  const params = [...sourceScope.params, ...providerScope.params, ...rangeScope.params];
   const whereClause = clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : "";
 
   const dailyTokens = db

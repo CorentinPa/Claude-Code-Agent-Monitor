@@ -191,6 +191,7 @@ client/
 │   │   ├── StatusBadge.tsx
 │   │   ├── EventDetail.tsx  # Inline hook payload viewer (used by ActivityFeed + SessionDetail)
 │   │   ├── EmptyState.tsx
+│   │   ├── DashboardFilters.tsx # Dashboard filter bar (period / agent / provider / session scope)
 │   │   ├── Sidebar.tsx
 │   │   ├── Layout.tsx
 │   │   ├── SplashScreen.tsx   # First-run provider choice and live-hook setup gate
@@ -202,9 +203,9 @@ client/
 │   │   └── workflows/      # D3.js workflow visualization components (12 files)
 │   │
 │   ├── pages/              # Route pages
-│   │   ├── Dashboard.tsx
-│   │   ├── KanbanBoard.tsx
-│   │   ├── Sessions.tsx       # Server-paginated table with task-progress donut, page-zero transient Codex startup row, searchable multi-project filtering, and custom sort menus
+│   │   ├── Dashboard.tsx      # Monitor + Health tabs behind a persisted filter bar
+│   │   ├── KanbanBoard.tsx    # Agents/Sessions boards behind a persisted state + period filter bar
+│   │   ├── Sessions.tsx       # Server-paginated table with task-progress donut, model column, latest-prompt line, waiting duration, page-zero transient Codex startup row, searchable multi-project filtering, and custom sort menus
 │   │   ├── SessionDetail.tsx  # Overview + full task tracker + agent tree + event timeline + cursor-paginated Conversation tab
 │   │   ├── ActivityFeed.tsx  # Real-time event log; row click expands payload; Session btn navigates
 │   │   ├── Analytics.tsx
@@ -374,6 +375,46 @@ function SessionDetailPage() {
     return unsubscribe;
   }, [sessionId]);
 }
+```
+
+---
+
+## Dashboard Filters
+
+Implemented in [`src/components/DashboardFilters.tsx`](src/components/DashboardFilters.tsx), consumed by
+[`src/pages/Dashboard.tsx`](src/pages/Dashboard.tsx). The whole value is persisted under the
+`dashboard_filters` localStorage key, and unknown enum members read back from storage are dropped rather
+than trusted, so a key written by an older build cannot wedge the UI.
+
+The bar renders **only the controls the active tab's endpoints can actually honour** — no disabled knobs:
+
+| Tab | Control | Where it is applied |
+| --- | --- | --- |
+| Monitor | Period (`1h` / `24h` / `7d` / `30d` / `all`) | `from` on `GET /api/events`, `GET /api/stats` and `GET /api/pricing/cost` (all SQL-side), plus an `updated_at` cut on the active-agent list and a `started_at` cut on the subagent counter |
+| Monitor | Agent (main agents only) | resolved to that agent's `session_id` and sent to `GET /api/events`, so its subagents' events stay in the feed; the agent list keeps the selected main and its whole subtree |
+| Health | Sessions (`all` / `active` / `completed`) | `status` on `GET /api/workflows` |
+
+**Provider is not a control here.** `src/lib/dataScope.ts` already owns the Claude/Codex dimension
+application-wide (Settings → Dashboard Data) and applies it server-side via `?providers=` on every scoped
+endpoint, including the ones this page calls. A page-local provider control would filter a different set of
+panels by a different mechanism, so the bar deliberately omits one.
+
+Five of the six stat cards carry the window in their label (`Total Sessions · 24 h`) because the server
+recomputes them per window; **`Events Today` is deliberately unsuffixed and unwindowed** — it has its own
+fixed day. The Health runtime/storage panels stay live snapshots: `GET /api/settings/info` is a process
+reading with no per-agent or per-timestamp dimension, and `/api/workflows` returns rollups already
+aggregated server-side, carrying neither timestamps nor agent ids to filter on.
+
+`rangeStartIso()` reads the clock, so `Dashboard.tsx` calls it **inside** the `load` callback: computing it in
+the render body would give `load` a new identity every render and spin its effect forever. The websocket
+`new_event` handler re-checks the agent scope before prepending, since a live push bypasses the server-side
+filters; the time window needs no re-check because every window is "the last X", which a just-emitted event
+satisfies by construction.
+
+Validate with:
+
+```bash
+npm run test:client
 ```
 
 ---

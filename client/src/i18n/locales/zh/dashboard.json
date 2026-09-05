@@ -18,5 +18,29 @@
   "failedConnect": "无法连接到服务器",
   "failedLoad": "数据加载失败",
   "activeTrend": " 活跃",
-  "totalTrend": "（活跃会话中）"
+  "totalTrend": "（活跃会话中）",
+  "tabs": {
+    "monitor": "监控",
+    "health": "健康状态"
+  },
+  "filters": {
+    "label": "筛选",
+    "reset": "重置",
+    "agent": {
+      "label": "Agent",
+      "all": "全部 Agent"
+    },
+    "sessionStatus": {
+      "label": "会话",
+      "all": "全部会话",
+      "active": "进行中",
+      "completed": "已完成"
+    },
+    "statsGlobalNote": "卡片跟随所选时间范围；「今日事件」保留其固定的当天口径。提供方范围在 设置 → 仪表盘数据 中设置。",
+    "healthSnapshotNote": "运行时与存储为实时快照；仅工作流聚合数据会跟随此筛选。"
+  },
+  "noAgentsFiltered": "没有 Agent 符合当前筛选",
+  "noAgentsFilteredDesc": "请扩大时间范围，或清除 Agent 与提供方筛选。",
+  "noActivityFiltered": "没有活动符合当前筛选",
+  "noActivityFilteredDesc": "请扩大时间范围，或清除 Agent 筛选。"
 }

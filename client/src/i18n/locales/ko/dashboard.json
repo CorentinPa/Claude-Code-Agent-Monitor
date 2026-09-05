@@ -18,5 +18,29 @@
   "failedConnect": "서버에 연결하지 못했습니다",
   "failedLoad": "데이터를 불러오지 못했습니다",
   "activeTrend": " 활성",
-  "totalTrend": " 활성 세션 기준"
+  "totalTrend": " 활성 세션 기준",
+  "tabs": {
+    "monitor": "모니터",
+    "health": "상태"
+  },
+  "filters": {
+    "label": "필터",
+    "reset": "초기화",
+    "agent": {
+      "label": "Agent",
+      "all": "모든 Agent"
+    },
+    "sessionStatus": {
+      "label": "세션",
+      "all": "모든 세션",
+      "active": "진행 중",
+      "completed": "완료됨"
+    },
+    "statsGlobalNote": "카드는 선택한 기간을 따르며, \"오늘 이벤트\"는 고유한 하루 기준을 유지합니다. 제공자 범위는 설정 → 대시보드 데이터에 있습니다.",
+    "healthSnapshotNote": "런타임과 스토리지는 실시간 스냅숏이며, 워크플로 집계만 이 필터를 따릅니다."
+  },
+  "noAgentsFiltered": "필터와 일치하는 Agent가 없습니다",
+  "noAgentsFilteredDesc": "기간을 넓히거나 Agent 및 제공자 필터를 해제하세요.",
+  "noActivityFiltered": "필터와 일치하는 활동이 없습니다",
+  "noActivityFilteredDesc": "기간을 넓히거나 Agent 필터를 해제하세요."
 }

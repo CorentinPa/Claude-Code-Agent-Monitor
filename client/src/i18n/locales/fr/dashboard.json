@@ -18,5 +18,29 @@
   "failedConnect": "Échec de la connexion au serveur",
   "failedLoad": "Échec du chargement des données",
   "activeTrend": " actif",
-  "totalTrend": " dans les sessions actives"
+  "totalTrend": " dans les sessions actives",
+  "tabs": {
+    "monitor": "Supervision",
+    "health": "Santé"
+  },
+  "filters": {
+    "label": "Filtres",
+    "reset": "Réinitialiser",
+    "agent": {
+      "label": "Agent",
+      "all": "Tous les agents"
+    },
+    "sessionStatus": {
+      "label": "Sessions",
+      "all": "Toutes les sessions",
+      "active": "Actives",
+      "completed": "Terminées"
+    },
+    "statsGlobalNote": "Les cartes suivent la période ; « Événements aujourd'hui » garde sa journée propre. Le périmètre fournisseur est dans Réglages → Données du tableau de bord.",
+    "healthSnapshotNote": "Runtime et stockage sont des instantanés ; seuls les agrégats de flux suivent ce filtre."
+  },
+  "noAgentsFiltered": "Aucun agent ne correspond à ces filtres",
+  "noAgentsFilteredDesc": "Élargissez la période, ou retirez les filtres agent et fournisseur.",
+  "noActivityFiltered": "Aucune activité ne correspond à ces filtres",
+  "noActivityFilteredDesc": "Élargissez la période, ou retirez le filtre agent."
 }

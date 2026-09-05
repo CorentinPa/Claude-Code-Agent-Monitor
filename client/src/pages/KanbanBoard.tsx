@@ -67,6 +67,14 @@ import { useTranslation } from "react-i18next";
 import { RefreshCw, Columns3, ChevronDown, HelpCircle } from "lucide-react";
 import { api } from "../lib/api";
 import { useDataScope } from "../lib/dataScope";
+import {
+  KanbanFilters,
+  loadKanbanFilters,
+  reconcileStatuses,
+  saveKanbanFilters,
+} from "../components/KanbanFilters";
+import type { KanbanFiltersValue } from "../components/KanbanFilters";
+import { isWithinRange } from "../lib/timeRange";
 import { eventBus } from "../lib/eventBus";
 import { isRemoteDataRefreshMessage } from "../lib/remoteDataEvents";
 import { AgentCard } from "../components/AgentCard";
@@ -131,11 +139,25 @@ export function KanbanBoard() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, number>>({});
+  const [filters, setFilters] = useState<KanbanFiltersValue>(loadKanbanFilters);
+
+  useEffect(() => {
+    saveKanbanFilters(filters);
+  }, [filters]);
 
   const setView = useCallback((next: BoardView) => {
     setViewState(next);
     persistView(next);
     setExpanded({}); // reset per-column pagination when switching views
+    // The two boards have different column sets, so a selection made on one
+    // would silently empty the other. Keep only the states that still exist.
+    setFilters((prev) => ({
+      ...prev,
+      statuses: reconcileStatuses(
+        prev.statuses,
+        next === "agents" ? AGENT_COLUMNS : SESSION_COLUMNS
+      ),
+    }));
   }, []);
 
   const loadAgents = useCallback(async () => {
@@ -231,12 +253,32 @@ export function KanbanBoard() {
   // exclude agents that belong in "waiting".
   const isEffectivelyWaiting = (a: Agent) => a.status === "waiting" || isAgentAwaitingInput(a);
 
+  // The window is checked against the value each card is already dated by: an
+  // agent's `updated_at`, a session's `last_activity` falling back to its start
+  // (the same value the Sessions table shows under "Last active").
+  const visibleAgents = useMemo(
+    () => agents.filter((a) => isWithinRange(a.updated_at, filters.range)),
+    [agents, filters.range]
+  );
+  const visibleSessions = useMemo(
+    () => sessions.filter((s) => isWithinRange(s.last_activity || s.started_at, filters.range)),
+    [sessions, filters.range]
+  );
+
+  // An empty selection means "every state", so the board opens complete.
+  const visibleAgentColumns = filters.statuses.length
+    ? AGENT_COLUMNS.filter((c) => filters.statuses.includes(c))
+    : AGENT_COLUMNS;
+  const visibleSessionColumns = filters.statuses.length
+    ? SESSION_COLUMNS.filter((c) => filters.statuses.includes(c))
+    : SESSION_COLUMNS;
+
   const groupedAgents = AGENT_COLUMNS.reduce(
     (acc, status) => {
       acc[status] =
         status === "waiting"
-          ? agents.filter(isEffectivelyWaiting)
-          : agents.filter((a) => a.status === status && !isEffectivelyWaiting(a));
+          ? visibleAgents.filter(isEffectivelyWaiting)
+          : visibleAgents.filter((a) => a.status === status && !isEffectivelyWaiting(a));
       return acc;
     },
     {} as Record<EffectiveAgentStatus, Agent[]>
@@ -246,18 +288,45 @@ export function KanbanBoard() {
     (acc, status) => {
       acc[status] =
         status === "waiting"
-          ? sessions.filter(isSessionAwaitingInput)
-          : sessions.filter((s) => s.status === status && !isSessionAwaitingInput(s));
+          ? visibleSessions.filter(isSessionAwaitingInput)
+          : visibleSessions.filter((s) => s.status === status && !isSessionAwaitingInput(s));
       return acc;
     },
     {} as Record<EffectiveSessionStatus, Session[]>
   );
 
-  const total = view === "agents" ? agents.length : sessions.length;
+  // Counted from the columns actually rendered: a subtitle that reports the raw
+  // fetch would contradict a filtered board, and the empty state below keys off
+  // the same number, so it must mean "nothing to show", not "nothing fetched".
+  const shownCount =
+    view === "agents"
+      ? visibleAgentColumns.reduce((n, c) => n + groupedAgents[c].length, 0)
+      : visibleSessionColumns.reduce((n, c) => n + groupedSessions[c].length, 0);
+  const total = shownCount;
   const subtitle =
     view === "agents"
-      ? t("agentCount", { count: agents.length })
-      : t("sessionCount", { count: sessions.length });
+      ? t("agentCount", { count: shownCount })
+      : t("sessionCount", { count: shownCount });
+
+  // Branch on the view before mapping: a ternary inside the callback widens
+  // `status` to the union of both boards' states, which indexes neither config.
+  const stateOptions = useMemo(
+    () =>
+      view === "agents"
+        ? AGENT_COLUMNS.map((status) => ({
+            value: status as string,
+            label: t(STATUS_CONFIG[status].labelKey),
+          }))
+        : SESSION_COLUMNS.map((status) => ({
+            value: status as string,
+            label: t(SESSION_STATUS_CONFIG[status].labelKey),
+          })),
+    [view, t]
+  );
+
+  const FilterBar = (
+    <KanbanFilters stateOptions={stateOptions} value={filters} onChange={setFilters} />
+  );
 
   const wsConnected = useSyncExternalStore(eventBus.onConnection, () => eventBus.connected);
 
@@ -298,6 +367,7 @@ export function KanbanBoard() {
     return (
       <div className="animate-fade-in flex flex-col min-h-[60vh]">
         {Header}
+        {FilterBar}
         <div className="flex-1 flex items-center justify-center">
           <EmptyState
             icon={Columns3}
@@ -317,10 +387,11 @@ export function KanbanBoard() {
   return (
     <div className="animate-fade-in">
       {Header}
+      {FilterBar}
 
       <div className="flex gap-4 min-h-[600px] overflow-x-auto pb-4 -mx-8 px-8">
         {view === "agents"
-          ? AGENT_COLUMNS.map((status) => {
+          ? visibleAgentColumns.map((status) => {
               const config = STATUS_CONFIG[status];
               const items = groupedAgents[status];
               const limit = expanded[status] || COLUMN_PAGE_SIZE;
@@ -358,7 +429,7 @@ export function KanbanBoard() {
                 </Column>
               );
             })
-          : SESSION_COLUMNS.map((status) => {
+          : visibleSessionColumns.map((status) => {
               const config = SESSION_STATUS_CONFIG[status];
               const items = groupedSessions[status];
               const limit = expanded[status] || COLUMN_PAGE_SIZE;
@@ -469,7 +540,11 @@ function Column({
   const hasChildren = childrenArray.length > 0;
 
   return (
-    <div className="bg-surface-1 rounded-xl border border-border p-3 flex flex-col flex-shrink-0 w-72">
+    <div
+      role="region"
+      aria-label={t(labelKey)}
+      className="bg-surface-1 rounded-xl border border-border p-3 flex flex-col flex-shrink-0 w-72"
+    >
       <div className="flex items-center gap-2 mb-4 px-1">
         <span className={`w-2 h-2 rounded-full ${dotClass} ${pulse ? "animate-pulse-dot" : ""}`} />
         <span className={`text-xs font-semibold uppercase tracking-wider ${color}`}>

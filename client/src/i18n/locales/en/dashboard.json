@@ -18,5 +18,29 @@
   "failedConnect": "Failed to connect to server",
   "failedLoad": "Failed to load data",
   "activeTrend": " active",
-  "totalTrend": " in active sessions"
+  "totalTrend": " in active sessions",
+  "tabs": {
+    "monitor": "Monitor",
+    "health": "Health"
+  },
+  "filters": {
+    "label": "Filters",
+    "reset": "Reset",
+    "agent": {
+      "label": "Agent",
+      "all": "All agents"
+    },
+    "sessionStatus": {
+      "label": "Sessions",
+      "all": "All sessions",
+      "active": "Active",
+      "completed": "Completed"
+    },
+    "statsGlobalNote": "Cards follow the period; \"Events today\" keeps its own fixed day. Provider scope lives in Settings → Dashboard Data.",
+    "healthSnapshotNote": "Runtime and storage are live snapshots; only the workflow rollups follow this filter."
+  },
+  "noAgentsFiltered": "No agent matches these filters",
+  "noAgentsFilteredDesc": "Widen the period, or clear the agent and provider filters.",
+  "noActivityFiltered": "No activity matches these filters",
+  "noActivityFilteredDesc": "Widen the period, or clear the agent filter."
 }

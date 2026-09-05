@@ -18,5 +18,29 @@
   "failedConnect": "Không thể kết nối máy chủ",
   "failedLoad": "Không thể tải dữ liệu",
   "activeTrend": " đang hoạt động",
-  "totalTrend": " trong phiên hoạt động"
+  "totalTrend": " trong phiên hoạt động",
+  "tabs": {
+    "monitor": "Giám sát",
+    "health": "Tình trạng"
+  },
+  "filters": {
+    "label": "Bộ lọc",
+    "reset": "Đặt lại",
+    "agent": {
+      "label": "Agent",
+      "all": "Tất cả Agent"
+    },
+    "sessionStatus": {
+      "label": "Phiên",
+      "all": "Tất cả phiên",
+      "active": "Đang chạy",
+      "completed": "Đã xong"
+    },
+    "statsGlobalNote": "Các thẻ theo khoảng thời gian đã chọn; \"Sự kiện hôm nay\" giữ nguyên ngày riêng của nó. Phạm vi nhà cung cấp nằm ở Cài đặt → Dữ liệu bảng điều khiển.",
+    "healthSnapshotNote": "Runtime và lưu trữ là ảnh chụp tức thời; chỉ số liệu quy trình mới theo bộ lọc này."
+  },
+  "noAgentsFiltered": "Không có Agent nào khớp bộ lọc",
+  "noAgentsFilteredDesc": "Hãy mở rộng khoảng thời gian, hoặc bỏ bộ lọc Agent và nhà cung cấp.",
+  "noActivityFiltered": "Không có hoạt động nào khớp bộ lọc",
+  "noActivityFilteredDesc": "Hãy mở rộng khoảng thời gian, hoặc bỏ bộ lọc Agent."
 }
