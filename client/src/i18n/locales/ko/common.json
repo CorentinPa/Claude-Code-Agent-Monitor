@@ -18,6 +18,7 @@
   "session": "세션",
   "agents": "Agent",
   "agent": "Agent",
+  "mainAgent": "메인 Agent",
   "live": "실시간",
   "offline": "오프라인",
   "running": "실행 중",

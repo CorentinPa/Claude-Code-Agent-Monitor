@@ -66,7 +66,7 @@ import { useTranslation } from "react-i18next";
 import type { DashboardEvent } from "../lib/types";
 import type { AgentInfo } from "../lib/event-grouping";
 import { buildEventSummary } from "../lib/event-summary";
-import { formatModelName, formatDateTimeFull } from "../lib/format";
+import { formatModelName, formatDateTimeFull, localizeAgentName } from "../lib/format";
 import { CopyButton } from "./event-views/primitives";
 import { ToolInputView, ToolResponseView } from "./event-views/tool-views";
 
@@ -90,7 +90,7 @@ type EventDetailProps = {
  *  carries the structural marker `<session>-main`, no need to repeat it). */
 function agentDisplayLabel(info: AgentInfo): string | null {
   if (info.type === "main") {
-    return info.name && info.name.trim().length > 0 ? info.name : null;
+    return info.name && info.name.trim().length > 0 ? localizeAgentName(info.name) : null;
   }
   const type = info.subagent_type?.trim();
   const name = info.name?.trim();
