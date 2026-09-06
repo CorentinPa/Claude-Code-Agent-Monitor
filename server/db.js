@@ -528,9 +528,8 @@ try {
   const setFast = db.prepare(
     "UPDATE model_pricing SET fast_input_per_mtok = ?, fast_output_per_mtok = ? WHERE model_pattern = ? AND fast_input_per_mtok = 0"
   );
+  setFast.run(10, 50, "claude-opus-5%");
   setFast.run(10, 50, "claude-opus-4-8%");
-  setFast.run(30, 150, "claude-opus-4-7%");
-  setFast.run(30, 150, "claude-opus-4-6%");
 }
 
 // Migrate: add time-limited introductory-rate columns to model_pricing.
@@ -558,21 +557,25 @@ try {
 //          cache_write (5m ephemeral writes), cache_write_1h (1h ephemeral writes),
 //          fast_input, fast_output (fast-mode premium; 0 = model has no fast pricing)
 // Each model gets its own explicit row — no catch-all grouping.
-// Rate shape mirrors Anthropic's published table: 5m write = 1.25× input, 1h write = 2× input.
+// Rate shape mirrors Anthropic's published table: 5m write = 1.25× input, 1h write = 2× input,
+// cache read = 0.1× input — except Fable/Mythos 5.1, whose cache reads are 0.025× input.
 const DEFAULT_PRICING = [
-  // Next-gen flagship
+  // Next-gen flagship (5.1 cache reads are 0.025× input, not the usual 0.1×)
+  ["claude-fable-5-1%", "Claude Fable 5.1", 10, 50, 0.25, 12.5, 20, 0, 0],
+  ["claude-mythos-5-1%", "Claude Mythos 5.1", 10, 50, 0.25, 12.5, 20, 0, 0],
   ["claude-fable-5%", "Claude Fable 5", 10, 50, 1, 12.5, 20, 0, 0],
   ["claude-mythos-5%", "Claude Mythos 5", 10, 50, 1, 12.5, 20, 0, 0],
-  // Opus family (fast mode available on 5 / 4.6 / 4.7 / 4.8)
+  // Opus family (fast mode exists on 5 and 4.8 only — 4.7 rejects speed:"fast",
+  // 4.6 accepts it but runs and bills at standard speed)
   ["claude-opus-5%", "Claude Opus 5", 5, 25, 0.5, 6.25, 10, 10, 50],
   ["claude-opus-4-8%", "Claude Opus 4.8", 5, 25, 0.5, 6.25, 10, 10, 50],
-  ["claude-opus-4-7%", "Claude Opus 4.7", 5, 25, 0.5, 6.25, 10, 30, 150],
-  ["claude-opus-4-6%", "Claude Opus 4.6", 5, 25, 0.5, 6.25, 10, 30, 150],
+  ["claude-opus-4-7%", "Claude Opus 4.7", 5, 25, 0.5, 6.25, 10, 0, 0],
+  ["claude-opus-4-6%", "Claude Opus 4.6", 5, 25, 0.5, 6.25, 10, 0, 0],
   ["claude-opus-4-5%", "Claude Opus 4.5", 5, 25, 0.5, 6.25, 10, 0, 0],
   ["claude-opus-4-1%", "Claude Opus 4.1", 15, 75, 1.5, 18.75, 30, 0, 0],
   ["claude-opus-4-2%", "Claude Opus 4", 15, 75, 1.5, 18.75, 30, 0, 0],
   // Sonnet family
-  ["claude-sonnet-5%", "Claude Sonnet 5", 3, 15, 0.3, 3.75, 6, 0, 0],
+  ["claude-sonnet-5%", "Claude Sonnet 5", 2, 10, 0.2, 2.5, 4, 0, 0],
   ["claude-sonnet-4-6%", "Claude Sonnet 4.6", 3, 15, 0.3, 3.75, 6, 0, 0],
   ["claude-sonnet-4-5%", "Claude Sonnet 4.5", 3, 15, 0.3, 3.75, 6, 0, 0],
   ["claude-sonnet-4-2%", "Claude Sonnet 4", 3, 15, 0.3, 3.75, 6, 0, 0],
@@ -705,14 +708,16 @@ repairLegacyGptPricing();
 
 // Known introductory promo rates: [pattern, in, out, cacheRead, cw5m, cw1h, until].
 // Standard rates live in the DEFAULT_PRICING row; these add the time-limited
-// discount on top. Claude Sonnet 5: 2/3-off launch pricing through 2026-08-31.
-const DEFAULT_INTRO_PRICING = [["claude-sonnet-5%", 2, 10, 0.2, 2.5, 4, "2026-08-31"]];
+// discount on top. Empty today: Claude Sonnet 5's launch discount (2/10 through
+// 2026-08-31) was made permanent — the scheduled rise to 3/15 never happened —
+// so 2/10 is now its DEFAULT_PRICING standard rate, not a promo.
+const DEFAULT_INTRO_PRICING = [];
 
 // Backfill the known intro rates. Only fills rows whose intro_until is still
 // NULL, so a user who edits or clears an intro rate in Settings is never
 // overwritten. Shared by startup and the reset-pricing endpoint (which
-// re-seeds standard rates and must re-apply the intro discount too, else Sonnet
-// 5 would silently price at standard until the next restart).
+// re-seeds standard rates and must re-apply the intro discount too, else a
+// running promo would silently price at standard until the next restart).
 function applyIntroPricing(dbHandle = db) {
   const setIntro = dbHandle.prepare(
     `UPDATE model_pricing SET
@@ -725,6 +730,42 @@ function applyIntroPricing(dbHandle = db) {
   }
 }
 applyIntroPricing();
+
+// Correct rates that shipped in an earlier DEFAULT_PRICING and are now wrong.
+// The startup top-up above only INSERTs missing patterns, so existing DBs would
+// keep the stale numbers until someone reset pricing by hand. Each UPDATE is
+// guarded on the exact old default values, so a rate the user edited in
+// Settings is never overwritten, and re-running is a no-op once corrected.
+{
+  // Sonnet 5's launch discount became the permanent price: 2/10 is now standard,
+  // else usage after 2026-08-31 would price at 3/15.
+  db.prepare(
+    `UPDATE model_pricing SET
+       input_per_mtok = 2, output_per_mtok = 10, cache_read_per_mtok = 0.2,
+       cache_write_per_mtok = 2.5, cache_write_1h_per_mtok = 4
+     WHERE model_pattern = 'claude-sonnet-5%'
+       AND input_per_mtok = 3 AND output_per_mtok = 15`
+  ).run();
+  // Drop the now-pointless promo columns on that row: an expired 2/10 discount
+  // on top of a 2/10 standard rate changes no cost, but Settings would keep
+  // showing a promo that ended. Only clears the exact seeded promo.
+  db.prepare(
+    `UPDATE model_pricing SET
+       intro_input_per_mtok = 0, intro_output_per_mtok = 0, intro_cache_read_per_mtok = 0,
+       intro_cache_write_per_mtok = 0, intro_cache_write_1h_per_mtok = 0, intro_until = NULL
+     WHERE model_pattern = 'claude-sonnet-5%'
+       AND intro_until = '2026-08-31'
+       AND intro_input_per_mtok = 2 AND intro_output_per_mtok = 10
+       AND input_per_mtok = 2 AND output_per_mtok = 10`
+  ).run();
+  // Fast mode never existed on Opus 4.6/4.7 (4.7 rejects speed:"fast", 4.6 runs
+  // and bills at standard speed), so the 30/150 premium was pure over-billing.
+  db.prepare(
+    `UPDATE model_pricing SET fast_input_per_mtok = 0, fast_output_per_mtok = 0
+     WHERE model_pattern IN ('claude-opus-4-6%', 'claude-opus-4-7%')
+       AND fast_input_per_mtok = 30 AND fast_output_per_mtok = 150`
+  ).run();
+}
 
 // Migrate: if token_usage has rows without model column (old schema), add it
 try {
