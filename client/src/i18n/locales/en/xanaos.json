@@ -1,0 +1,22 @@
+{
+  "title": "Assistants",
+  "subtitle": "XanaOS assistants discovered under OS/assistantes. Read-only.",
+  "discoveredCount_one": "{{count}} assistant discovered",
+  "discoveredCount_other": "{{count}} assistants discovered",
+  "upCount_one": "{{count}} up",
+  "upCount_other": "{{count}} up",
+  "remoteControlCount_one": "{{count}} Remote Control",
+  "remoteControlCount_other": "{{count}} Remote Control",
+  "subAgentsCount_one": "{{count}} sub-agent",
+  "subAgentsCount_other": "{{count}} sub-agents",
+  "runtimeDistilled": "Runtime distilled {{date}}",
+  "runtimeNotDistilled": "No distilled runtime yet",
+  "noDescription": "No description available.",
+  "statusUp": "Up",
+  "statusBusy": "Busy",
+  "statusOffline": "Offline",
+  "statusNeverDeployed": "Never deployed",
+  "remoteControl": "Remote Control",
+  "emptyDirMissing": "No assistants directory found. Expected a sibling OS/assistantes next to this checkout, or the XANAOS_ASSISTANTS_DIR override.",
+  "emptyNoAssistants": "No assistants found in {{dir}}."
+}

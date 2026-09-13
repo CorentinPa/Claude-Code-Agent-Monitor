@@ -19,6 +19,7 @@ import {
   formatTime,
   getCurrentLocale,
   formatModelName,
+  localizeAgentName,
 } from "../format";
 import { setCurrencyPrefs, DEFAULT_CURRENCY_PREFS } from "../currency";
 
@@ -290,6 +291,31 @@ describe("currency symbol placement follows the active UI locale", () => {
   it("also suffixes the $ in French when EUR display is off (French convention applies to any currency)", async () => {
     await i18n.changeLanguage("fr");
     expect(fmtCost(50)).toBe("50,00 $");
+  });
+});
+
+describe("localizeAgentName", () => {
+  afterEach(async () => {
+    await i18n.changeLanguage("en");
+  });
+
+  it("leaves the English display unchanged", () => {
+    expect(localizeAgentName("Main Agent")).toBe("Main Agent");
+    expect(localizeAgentName("Main Agent - add dark mode")).toBe("Main Agent - add dark mode");
+  });
+
+  it("localizes only the auto-generated head, preserving the stored suffix", async () => {
+    await i18n.changeLanguage("fr");
+    expect(localizeAgentName("Main Agent")).toBe("Agent principal");
+    expect(localizeAgentName("Main Agent - add dark mode")).toBe("Agent principal - add dark mode");
+  });
+
+  it("returns a user-set or subagent name verbatim", async () => {
+    await i18n.changeLanguage("fr");
+    // Not the persisted literal — never rewritten, whatever the locale.
+    expect(localizeAgentName("Reviewer")).toBe("Reviewer");
+    expect(localizeAgentName("Main Agentic - x")).toBe("Main Agentic - x");
+    expect(localizeAgentName(null)).toBe("");
   });
 });
 

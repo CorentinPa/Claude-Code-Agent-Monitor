@@ -18,6 +18,7 @@
   "session": "个会话",
   "agents": "Agent",
   "agent": "Agent",
+  "mainAgent": "主 Agent",
   "live": "在线",
   "offline": "离线",
   "running": "运行中",

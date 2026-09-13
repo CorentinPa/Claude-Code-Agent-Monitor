@@ -229,6 +229,53 @@ describe("AgentCard", () => {
     expect(screen.queryByText(fmtCost(646.5))).not.toBeInTheDocument();
   });
 
+  it("marks a still-running subagent's cost as in progress (usage lands at SubagentStop)", () => {
+    renderCard(
+      <AgentCard
+        agent={makeAgent({ type: "subagent", subagent_type: "qa", ended_at: null })}
+        session={{ id: "s", name: "S", status: "active", cwd: "/x", cost: 646.5 } as never}
+      />
+    );
+    expect(screen.getByText("in progress")).toBeInTheDocument();
+  });
+
+  it("shows no in-progress marker once the subagent has a recorded cost", () => {
+    renderCard(
+      <AgentCard
+        agent={makeAgent({ type: "subagent", subagent_type: "qa", cost: 3.5 })}
+        session={{ id: "s", name: "S", status: "active", cwd: "/x", cost: 646.5 } as never}
+      />
+    );
+    expect(screen.queryByText("in progress")).not.toBeInTheDocument();
+  });
+
+  it("shows no in-progress marker on a finished subagent that recorded no usage", () => {
+    // Compaction pseudo-agents end with no token buckets. Claiming they are
+    // still running would be false; showing nothing stays truthful.
+    renderCard(
+      <AgentCard
+        agent={makeAgent({
+          type: "subagent",
+          subagent_type: "compaction",
+          status: "completed",
+          ended_at: "2026-03-05T10:05:00.000Z",
+        })}
+        session={{ id: "s", name: "S", status: "active", cwd: "/x", cost: 646.5 } as never}
+      />
+    );
+    expect(screen.queryByText("in progress")).not.toBeInTheDocument();
+  });
+
+  it("shows no in-progress marker on a main-agent card", () => {
+    renderCard(
+      <AgentCard
+        agent={makeAgent({ type: "main", ended_at: null })}
+        session={{ id: "s", name: "S", status: "active", cwd: "/x" } as never}
+      />
+    );
+    expect(screen.queryByText("in progress")).not.toBeInTheDocument();
+  });
+
   it("swaps the real session title into the hook-style placeholder (Session <id8>)", () => {
     renderCard(
       <AgentCard

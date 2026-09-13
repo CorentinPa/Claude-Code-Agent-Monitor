@@ -72,6 +72,7 @@ const webhooksRouter = require("./routes/webhooks");
 const remoteSourcesRouter = require("./routes/remote-sources");
 const metricsRouter = require("./routes/metrics");
 const manualRouter = require("./routes/manual");
+const xanaosRouter = require("./routes/xanaos");
 
 const APP_VERSION = (() => {
   try {
@@ -126,6 +127,7 @@ function createApp() {
   app.use("/api/remote-sources", remoteSourcesRouter);
   app.use("/api/metrics", metricsRouter);
   app.use("/api/manual", manualRouter);
+  app.use("/api/xanaos", xanaosRouter);
   app.get("/favicon.svg", (_req, res) => {
     res.type("image/svg+xml").sendFile(DASHBOARD_FAVICON_PATH);
   });

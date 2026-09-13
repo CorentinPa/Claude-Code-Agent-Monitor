@@ -170,6 +170,12 @@ import docs_vi from "./locales/vi/docs.json";
 import docs_ko from "./locales/ko/docs.json";
 import docs_es from "./locales/es/docs.json";
 import docs_fr from "./locales/fr/docs.json";
+import xanaos_en from "./locales/en/xanaos.json";
+import xanaos_zh from "./locales/zh/xanaos.json";
+import xanaos_vi from "./locales/vi/xanaos.json";
+import xanaos_ko from "./locales/ko/xanaos.json";
+import xanaos_es from "./locales/es/xanaos.json";
+import xanaos_fr from "./locales/fr/xanaos.json";
 
 i18n
   .use(LanguageDetector)
@@ -193,6 +199,7 @@ i18n
         alerts: alerts_en,
         splash: splash_en,
         docs: docs_en,
+        xanaos: xanaos_en,
       },
       zh: {
         common: common_zh,
@@ -211,6 +218,7 @@ i18n
         alerts: alerts_zh,
         splash: splash_zh,
         docs: docs_zh,
+        xanaos: xanaos_zh,
       },
       vi: {
         common: common_vi,
@@ -229,6 +237,7 @@ i18n
         alerts: alerts_vi,
         splash: splash_vi,
         docs: docs_vi,
+        xanaos: xanaos_vi,
       },
       ko: {
         common: common_ko,
@@ -247,6 +256,7 @@ i18n
         alerts: alerts_ko,
         splash: splash_ko,
         docs: docs_ko,
+        xanaos: xanaos_ko,
       },
       es: {
         common: common_es,
@@ -265,6 +275,7 @@ i18n
         alerts: alerts_es,
         splash: splash_es,
         docs: docs_es,
+        xanaos: xanaos_es,
       },
       fr: {
         common: common_fr,
@@ -283,6 +294,7 @@ i18n
         alerts: alerts_fr,
         splash: splash_fr,
         docs: docs_fr,
+        xanaos: xanaos_fr,
       },
     },
     supportedLngs: ["en", "zh", "vi", "ko", "es", "fr"],
@@ -305,6 +317,7 @@ i18n
       "alerts",
       "splash",
       "docs",
+      "xanaos",
     ],
     defaultNS: "common",
     interpolation: { escapeValue: false },

@@ -18,6 +18,7 @@
   "session": "phiên",
   "agents": "Agent",
   "agent": "Agent",
+  "mainAgent": "Agent chính",
   "live": "Trực tiếp",
   "offline": "Ngoại tuyến",
   "running": "đang chạy",

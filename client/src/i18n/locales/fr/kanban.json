@@ -18,6 +18,7 @@
   "noSessionsInColumn": "Aucune session",
   "ran": "exécuté ",
   "running": "en cours ",
+  "costPending": "en cours",
   "session": {
     "anonymous": "Session sans titre",
     "agentSummary_one": "{{count}} agent",
