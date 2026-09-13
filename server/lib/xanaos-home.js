@@ -32,15 +32,17 @@ function isDirectory(candidate) {
  * `configured` = an operator set it from Settings; `auto` = the conventional
  * sibling was found; `none` = neither resolved, and the UI sends the operator
  * to Settings instead of rendering an empty list that looks like a bug.
+ * The optional `candidate` parameter allows tests to exercise auto-detection
+ * deterministically; production callers pass nothing.
  */
-function resolveAssistantsDir() {
+function resolveAssistantsDir({ candidate = AUTO_DETECT_CANDIDATE } = {}) {
   const configured = process.env.XANAOS_ASSISTANTS_DIR;
   if (configured && configured.trim() !== "") {
     const resolved = path.resolve(configured.trim());
     return { dir: resolved, source: "configured", exists: isDirectory(resolved) };
   }
-  if (isDirectory(AUTO_DETECT_CANDIDATE)) {
-    return { dir: AUTO_DETECT_CANDIDATE, source: "auto", exists: true };
+  if (isDirectory(candidate)) {
+    return { dir: candidate, source: "auto", exists: true };
   }
   return { dir: null, source: "none", exists: false };
 }

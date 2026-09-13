@@ -410,6 +410,7 @@ import type {
   WorkflowRunDetail,
   ManualDocument,
   ManualListResponse,
+  XanaosAssistantsResponse,
 } from "./types";
 
 import { activeProvidersParam, activeSourcesParam } from "./dataScope";
@@ -553,6 +554,17 @@ export const api = {
      * @returns The document; rejects with a 404 error when no document matches.
      */
     get: (slug: string) => request<ManualDocument>(`/manual/${encodeURIComponent(slug)}`),
+  },
+
+  // ───────────────────────────── XanaOS assistants ─────────────────────────────
+  /** Read-only discovery of XanaOS assistants from the repository's spec layer
+   *  (`OS/assistantes`). Maps to `server/routes/xanaos.js`. */
+  xanaos: {
+    /**
+     * GET /api/xanaos/assistants - the resolved assistants directory and one
+     * card per discovered assistant.
+     */
+    assistants: () => request<XanaosAssistantsResponse>("/xanaos/assistants"),
   },
 
   // ───────────────────────── Updates / self-update API ─────────────────────────

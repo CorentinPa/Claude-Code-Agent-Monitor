@@ -1,0 +1,13 @@
+{
+  "title": "Assistants",
+  "subtitle": "Assistantes XanaOS découvertes sous OS/assistantes. Lecture seule.",
+  "discoveredCount_one": "{{count}} assistante découverte",
+  "discoveredCount_other": "{{count}} assistantes découvertes",
+  "subAgentsCount_one": "{{count}} sous-agent",
+  "subAgentsCount_other": "{{count}} sous-agents",
+  "runtimeDistilled": "Runtime distillé le {{date}}",
+  "runtimeNotDistilled": "Aucun runtime distillé pour l'instant",
+  "noDescription": "Aucune description disponible.",
+  "emptyDirMissing": "Aucun répertoire d'assistantes trouvé. Un OS/assistantes voisin de cette installation, ou la variable XANAOS_ASSISTANTS_DIR, est attendu.",
+  "emptyNoAssistants": "Aucune assistante trouvée dans {{dir}}."
+}

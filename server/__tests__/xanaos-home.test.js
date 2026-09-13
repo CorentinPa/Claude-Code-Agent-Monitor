@@ -1,6 +1,5 @@
 /**
- * @file xanaos-home.test.js
- * @description Tests for the XanaOS assistants-directory resolver: the operator
+ * @file Tests for the XanaOS assistants-directory resolver: the operator
  * override wins, auto-detection falls back to the conventional sibling of the
  * dashboard checkout, an empty value returns to auto-detection, and invalid
  * paths are rejected rather than silently accepted.
@@ -71,5 +70,17 @@ describe("xanaos-home", () => {
     assert.equal(home.getConfigRoot(), path.join(os.homedir(), ".Xanaos"));
     process.env.XANAOS_CONFIG_ROOT = TMP;
     assert.equal(home.getConfigRoot(), TMP);
+  });
+
+  it("auto-detects an existing candidate directory", () => {
+    const resolved = home.resolveAssistantsDir({ candidate: REAL_DIR });
+    assert.equal(resolved.dir, REAL_DIR);
+    assert.equal(resolved.source, "auto");
+    assert.equal(resolved.exists, true);
+  });
+
+  it("reports none when neither a setting nor a candidate resolves", () => {
+    const resolved = home.resolveAssistantsDir({ candidate: path.join(TMP, "absent") });
+    assert.deepEqual(resolved, { dir: null, source: "none", exists: false });
   });
 });

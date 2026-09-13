@@ -88,6 +88,7 @@ import { Settings } from "./pages/Settings";
 const Docs = lazy(() => import("./pages/Docs").then((m) => ({ default: m.Docs })));
 import { CcConfig } from "./pages/CcConfig";
 import { Run } from "./pages/Run";
+import { XanaOS } from "./pages/XanaOS";
 import { NotFound } from "./pages/NotFound";
 import { useWebSocket } from "./hooks/useWebSocket";
 import { useNotifications } from "./hooks/useNotifications";
@@ -138,6 +139,7 @@ export default function App() {
           <Route path="workflows" element={<Workflows />} />
           <Route path="cc-config" element={<CcConfig />} />
           <Route path="run" element={<Run />} />
+          <Route path="xanaos" element={<XanaOS />} />
           <Route path="settings" element={<Settings />} />
           <Route
             path="docs"

@@ -1343,6 +1343,41 @@ export interface ManualDocument {
   markdown: string;
 }
 
+// ───── XanaOS assistants ─────
+
+/** One assistant discovered under the resolved assistants directory
+ *  (OS/assistantes by convention). Discovery only: no live process state,
+ *  sessions, or transcripts — see server/routes/xanaos.js for the scope note. */
+export interface XanaosAssistant {
+  first_name: string;
+  role: string;
+  /** The directory name this card was parsed from, e.g. "Xana-IA-Orchestration". */
+  dir_name: string;
+  /** Absolute path to the assistant's directory under the assistants directory. */
+  path: string;
+  /** First non-heading, non-quote paragraph of the README, truncated to 240
+   *  characters; null when the README is missing or has no such paragraph. */
+  description: string | null;
+  /** Names of subAgents/*.md files, without extension. */
+  sub_agents: string[];
+  /** Whether a distilled runtime/CLAUDE.md exists. */
+  has_runtime: boolean;
+  /** ISO timestamp of runtime/CLAUDE.md's mtime; null when has_runtime is false. */
+  distilled_at: string | null;
+}
+
+/** Response of `GET /api/xanaos/assistants`. */
+export interface XanaosAssistantsResponse {
+  /** Absolute path to the resolved assistants directory, or null when none resolved. */
+  assistants_dir: string | null;
+  /** Where assistants_dir came from: an operator setting, auto-detection, or neither. */
+  assistants_dir_source: "configured" | "auto" | "none";
+  /** Whether assistants_dir actually exists on disk. */
+  assistants_dir_exists: boolean;
+  totals: { discovered: number };
+  assistants: XanaosAssistant[];
+}
+
 export interface UpdateStatusPayload {
   /** False when the install directory isn't a git clone at all - in that case
    *  every other field except `repo_root`/`manual_command`/`message` is absent,

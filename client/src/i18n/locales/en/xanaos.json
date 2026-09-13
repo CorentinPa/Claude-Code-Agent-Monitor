@@ -1,0 +1,13 @@
+{
+  "title": "Assistants",
+  "subtitle": "XanaOS assistants discovered under OS/assistantes. Read-only.",
+  "discoveredCount_one": "{{count}} assistant discovered",
+  "discoveredCount_other": "{{count}} assistants discovered",
+  "subAgentsCount_one": "{{count}} sub-agent",
+  "subAgentsCount_other": "{{count}} sub-agents",
+  "runtimeDistilled": "Runtime distilled {{date}}",
+  "runtimeNotDistilled": "No distilled runtime yet",
+  "noDescription": "No description available.",
+  "emptyDirMissing": "No assistants directory found. Expected a sibling OS/assistantes next to this checkout, or the XANAOS_ASSISTANTS_DIR override.",
+  "emptyNoAssistants": "No assistants found in {{dir}}."
+}
