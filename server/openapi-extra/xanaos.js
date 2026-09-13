@@ -50,6 +50,31 @@ const schemas = {
         nullable: true,
         description: "Modification time of runtime/CLAUDE.md, null when has_runtime is false.",
       },
+      config_dir: {
+        type: "string",
+        nullable: true,
+        description:
+          "Absolute path to the assistant's Claude config dir, null when deployed is false.",
+        example: "/home/corentin/.Xanaos/Xana",
+      },
+      deployed: {
+        type: "boolean",
+        description:
+          "Whether the assistant's config dir exists at all. False means it has never been run.",
+      },
+      up: {
+        type: "boolean",
+        description:
+          "Whether at least one of the assistant's sessions is backed by a verified live process.",
+      },
+      busy: {
+        type: "boolean",
+        description: "Whether at least one verified live session is currently busy.",
+      },
+      remote_control: {
+        type: "boolean",
+        description: "Whether at least one verified live session exposes a Remote Control bridge.",
+      },
     },
   },
   XanaosAssistantsResponse: {
@@ -58,6 +83,7 @@ const schemas = {
       "assistants_dir",
       "assistants_dir_source",
       "assistants_dir_exists",
+      "config_root",
       "totals",
       "assistants",
     ],
@@ -65,10 +91,19 @@ const schemas = {
       assistants_dir: { type: "string", nullable: true },
       assistants_dir_source: { type: "string", enum: ["configured", "auto", "none"] },
       assistants_dir_exists: { type: "boolean" },
+      config_root: {
+        type: "string",
+        description:
+          "Root under which each assistant's Claude config dir is expected, e.g. ~/.Xanaos.",
+      },
       totals: {
         type: "object",
-        required: ["discovered"],
-        properties: { discovered: { type: "integer" } },
+        required: ["discovered", "up", "remote_control"],
+        properties: {
+          discovered: { type: "integer" },
+          up: { type: "integer" },
+          remote_control: { type: "integer" },
+        },
       },
       assistants: {
         type: "array",

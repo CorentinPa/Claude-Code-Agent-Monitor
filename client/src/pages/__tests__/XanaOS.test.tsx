@@ -1,10 +1,10 @@
 /**
  * @file XanaOS.test.tsx
  * @description Unit tests for the Assistants page: discovered assistants
- * render as cards with their sub-agent count and runtime status, the
- * directory-missing empty state shows when the assistants directory does not
- * resolve, and the no-assistants empty state shows when it resolves but is
- * empty.
+ * render as cards with their sub-agent count, runtime status, and live/Remote
+ * Control status; the directory-missing empty state shows when the
+ * assistants directory does not resolve; the no-assistants empty state shows
+ * when it resolves but is empty.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -33,6 +33,11 @@ const XANA: XanaosAssistant = {
   sub_agents: ["routingGuardDesk"],
   has_runtime: true,
   distilled_at: "2026-09-11T20:05:09.739Z",
+  config_dir: "/home/corentin/.Xanaos/Xana",
+  deployed: true,
+  up: true,
+  busy: false,
+  remote_control: true,
 };
 
 const JEREMIE: XanaosAssistant = {
@@ -44,6 +49,11 @@ const JEREMIE: XanaosAssistant = {
   sub_agents: [],
   has_runtime: false,
   distilled_at: null,
+  config_dir: null,
+  deployed: false,
+  up: false,
+  busy: false,
+  remote_control: false,
 };
 
 function renderPage() {
@@ -59,12 +69,13 @@ describe("XanaOS", () => {
     await i18n.changeLanguage("en");
   });
 
-  it("renders one card per discovered assistant", async () => {
+  it("renders one card per discovered assistant, with status and totals", async () => {
     vi.mocked(api.xanaos.assistants).mockResolvedValue({
       assistants_dir: "/vault/OS/assistantes",
       assistants_dir_source: "auto",
       assistants_dir_exists: true,
-      totals: { discovered: 2 },
+      config_root: "/home/corentin/.Xanaos",
+      totals: { discovered: 2, up: 1, remote_control: 1 },
       assistants: [XANA, JEREMIE],
     });
 
@@ -76,6 +87,41 @@ describe("XanaOS", () => {
     expect(screen.getByText("1 sub-agent")).toBeInTheDocument();
     expect(screen.getByText("No description available.")).toBeInTheDocument();
     expect(screen.getByText("No distilled runtime yet")).toBeInTheDocument();
+    expect(screen.getByText("Up")).toBeInTheDocument();
+    expect(screen.getByText("Never deployed")).toBeInTheDocument();
+    expect(screen.getByText("2 assistants discovered")).toBeInTheDocument();
+    expect(screen.getByText("1 up")).toBeInTheDocument();
+    expect(screen.getByText("1 Remote Control")).toBeInTheDocument();
+  });
+
+  it("shows a busy assistant as busy, not merely up", async () => {
+    vi.mocked(api.xanaos.assistants).mockResolvedValue({
+      assistants_dir: "/vault/OS/assistantes",
+      assistants_dir_source: "auto",
+      assistants_dir_exists: true,
+      config_root: "/home/corentin/.Xanaos",
+      totals: { discovered: 1, up: 1, remote_control: 0 },
+      assistants: [{ ...XANA, busy: true, remote_control: false }],
+    });
+
+    renderPage();
+
+    expect(await screen.findByText("Busy")).toBeInTheDocument();
+  });
+
+  it("shows a deployed-but-not-running assistant as offline", async () => {
+    vi.mocked(api.xanaos.assistants).mockResolvedValue({
+      assistants_dir: "/vault/OS/assistantes",
+      assistants_dir_source: "auto",
+      assistants_dir_exists: true,
+      config_root: "/home/corentin/.Xanaos",
+      totals: { discovered: 1, up: 0, remote_control: 0 },
+      assistants: [{ ...XANA, up: false, busy: false, remote_control: false }],
+    });
+
+    renderPage();
+
+    expect(await screen.findByText("Offline")).toBeInTheDocument();
   });
 
   it("shows the directory-missing empty state when nothing resolves", async () => {
@@ -83,7 +129,8 @@ describe("XanaOS", () => {
       assistants_dir: null,
       assistants_dir_source: "none",
       assistants_dir_exists: false,
-      totals: { discovered: 0 },
+      config_root: "/home/corentin/.Xanaos",
+      totals: { discovered: 0, up: 0, remote_control: 0 },
       assistants: [],
     });
 
@@ -97,7 +144,8 @@ describe("XanaOS", () => {
       assistants_dir: "/vault/OS/assistantes",
       assistants_dir_source: "auto",
       assistants_dir_exists: true,
-      totals: { discovered: 0 },
+      config_root: "/home/corentin/.Xanaos",
+      totals: { discovered: 0, up: 0, remote_control: 0 },
       assistants: [],
     });
 

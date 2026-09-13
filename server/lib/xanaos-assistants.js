@@ -114,4 +114,84 @@ function discoverAssistants(assistantsDir) {
   return found.sort((left, right) => left.first_name.localeCompare(right.first_name));
 }
 
-module.exports = { parseAssistantDirName, discoverAssistants };
+/**
+ * The `starttime` of a process, field 22 of /proc/<pid>/stat. The `comm` field
+ * is parenthesised and may itself contain spaces and parentheses, so fields are
+ * counted from after its LAST closing parenthesis; starttime is then index 19,
+ * fields 1 and 2 having been dropped. Returns null where /proc is absent.
+ */
+function readProcStart(pid) {
+  try {
+    const stat = fs.readFileSync(`/proc/${pid}/stat`, "utf8");
+    return stat.slice(stat.lastIndexOf(")") + 2).split(" ")[19] || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether a registry entry is backed by a real process. A registry file
+ * outlives its process, so its presence proves nothing on its own.
+ * `process.kill(pid, 0)` sends no signal and only probes existence; EPERM means
+ * the process exists under another user, which still counts as alive. The
+ * start-time comparison then closes the recycled-PID case. Without /proc the
+ * signal probe is the only check available, and it is used alone.
+ */
+function isProcessAlive(pid, procStart) {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+  } catch (err) {
+    if (err.code !== "EPERM") return false;
+  }
+  const actual = readProcStart(pid);
+  if (actual === null) return true;
+  return String(procStart) === actual;
+}
+
+/**
+ * The assistant's live sessions, read from the session registry its own
+ * runtime maintains under its config dir (`<config dir>/sessions/*.json`).
+ * Entries whose process cannot be verified are dropped rather than reported
+ * as live.
+ */
+function readLiveSessions(configDir) {
+  const dir = path.join(configDir, "sessions");
+  let files;
+  try {
+    files = fs.readdirSync(dir);
+  } catch {
+    return [];
+  }
+  const live = [];
+  for (const file of files) {
+    if (!file.endsWith(".json")) continue;
+    let entry;
+    try {
+      entry = JSON.parse(fs.readFileSync(path.join(dir, file), "utf8"));
+    } catch {
+      // The runtime may be mid-write, or the file may be something else.
+      continue;
+    }
+    if (!entry || typeof entry !== "object") continue;
+    if (!isProcessAlive(entry.pid, entry.procStart)) continue;
+    live.push({
+      pid: entry.pid,
+      session_id: typeof entry.sessionId === "string" ? entry.sessionId : null,
+      name: typeof entry.name === "string" ? entry.name : null,
+      cwd: typeof entry.cwd === "string" ? entry.cwd : null,
+      started_at: Number.isFinite(entry.startedAt) ? new Date(entry.startedAt).toISOString() : null,
+      busy: entry.status === "busy",
+      remote_control: typeof entry.bridgeSessionId === "string" && entry.bridgeSessionId.length > 0,
+    });
+  }
+  return live.sort((left, right) => (right.started_at || "").localeCompare(left.started_at || ""));
+}
+
+module.exports = {
+  parseAssistantDirName,
+  discoverAssistants,
+  readProcStart,
+  isProcessAlive,
+  readLiveSessions,
+};
