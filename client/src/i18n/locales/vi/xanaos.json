@@ -1,0 +1,13 @@
+{
+  "title": "Trợ lý",
+  "subtitle": "Các trợ lý XanaOS được phát hiện dưới OS/assistantes. Chỉ đọc.",
+  "discoveredCount_one": "Đã phát hiện {{count}} trợ lý",
+  "discoveredCount_other": "Đã phát hiện {{count}} trợ lý",
+  "subAgentsCount_one": "{{count}} trợ lý con",
+  "subAgentsCount_other": "{{count}} trợ lý con",
+  "runtimeDistilled": "Runtime đã được chưng cất vào {{date}}",
+  "runtimeNotDistilled": "Chưa có runtime được chưng cất",
+  "noDescription": "Không có mô tả.",
+  "emptyDirMissing": "Không tìm thấy thư mục trợ lý. Cần một OS/assistantes nằm cạnh bản checkout này, hoặc biến XANAOS_ASSISTANTS_DIR.",
+  "emptyNoAssistants": "Không tìm thấy trợ lý nào trong {{dir}}."
+}

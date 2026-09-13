@@ -130,6 +130,7 @@ import {
   fmtCostBare,
   timeAgo,
   formatModelName,
+  localizeAgentName,
 } from "../lib/format";
 import { getCurrencyPrefs } from "../lib/currency";
 import type {
@@ -1151,7 +1152,10 @@ export function SessionDetail() {
               value={filters}
               onChange={setFilters}
               hideSessionFilter
-              agentOptions={agents.map((a) => ({ id: a.id, label: a.name || a.id }))}
+              agentOptions={agents.map((a) => ({
+                id: a.id,
+                label: localizeAgentName(a.name) || a.id,
+              }))}
             />
           </div>
           {events.length === 0 ? (

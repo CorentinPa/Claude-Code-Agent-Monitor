@@ -18,6 +18,7 @@
   "noSessionsInColumn": "세션 없음",
   "ran": "실행됨 ",
   "running": "실행 중 ",
+  "costPending": "진행 중",
   "session": {
     "anonymous": "제목 없는 세션",
     "agentSummary_one": "Agent {{count}}개",

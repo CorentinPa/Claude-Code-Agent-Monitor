@@ -31,6 +31,7 @@
  *
  * ## Public surface
  * - `OrchestrationDAG` — exported API; see TSDoc on the symbol for behavior.
+ * - `LEGEND_ITEMS` — legend swatch table (exported for i18n key coverage tests).
  *
  * ## Testing pointers
  * - Prefer colocated `__tests__` with Vitest + Testing Library for UI.
@@ -857,12 +858,12 @@ export function OrchestrationDAG({ data, onNodeClick, selectedNode }: Orchestrat
           {t("orchestration.legend")}
         </span>
         {LEGEND_ITEMS.map((item) => (
-          <div key={item.label} className="flex items-center gap-1.5">
+          <div key={item.key} className="flex items-center gap-1.5">
             <span
               className="inline-block w-3 h-3 rounded-sm flex-shrink-0"
               style={{ background: item.color, border: `1px solid ${item.border}` }}
             />
-            <span className="text-[11px] text-gray-500">{item.label}</span>
+            <span className="text-[11px] text-gray-500">{t(item.key)}</span>
           </div>
         ))}
         <div className="flex items-center gap-1.5 ml-2">
@@ -1098,12 +1099,20 @@ function fmtCount(n: number): string {
 
 // ── Legend data ───────────────────────────────────────────────────────────────
 
-const LEGEND_ITEMS = [
-  { label: "Sessions", color: "var(--dag-session-fill-from)", border: "#6366f1" },
-  { label: "Main Agent", color: "var(--dag-main-fill-from)", border: "#3b82f6" },
-  { label: "Subagent Types", color: "var(--dag-subagent-fill-from)", border: "#22c55e" },
-  { label: "Compactions", color: "var(--dag-nested-fill-from)", border: "#14b8a6" },
-  { label: "Completed", color: "var(--dag-completed-fill)", border: "#16a34a" },
-  { label: "Error", color: "var(--dag-error-fill)", border: "#dc2626" },
-  { label: "Abandoned", color: "var(--dag-abandoned-fill)", border: "#ca8a04" },
+// Labels are i18n keys resolved at render — the swatch colors are the only
+// thing this table owns. Every key already existed for the layer headings and
+// the shared status vocabulary, so the legend reuses them rather than
+// introducing a parallel set of strings that could drift out of sync.
+export const LEGEND_ITEMS = [
+  { key: "orchestration.sessions", color: "var(--dag-session-fill-from)", border: "#6366f1" },
+  { key: "orchestration.mainAgent", color: "var(--dag-main-fill-from)", border: "#3b82f6" },
+  {
+    key: "orchestration.layers.subagentTypes",
+    color: "var(--dag-subagent-fill-from)",
+    border: "#22c55e",
+  },
+  { key: "orchestration.compactions", color: "var(--dag-nested-fill-from)", border: "#14b8a6" },
+  { key: "common:status.completed", color: "var(--dag-completed-fill)", border: "#16a34a" },
+  { key: "common:status.error", color: "var(--dag-error-fill)", border: "#dc2626" },
+  { key: "common:status.abandoned", color: "var(--dag-abandoned-fill)", border: "#ca8a04" },
 ];
