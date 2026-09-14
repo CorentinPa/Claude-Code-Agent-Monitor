@@ -114,7 +114,14 @@ import {
 import { rangeStartIso, rangeStartMs } from "../lib/timeRange";
 import type { DashboardFiltersValue, DashboardSessionStatus } from "../components/DashboardFilters";
 import type { SelectOption } from "../components/Select";
-import { timeAgo, fmt, fmtCost, fmtCostFull, formatModelName } from "../lib/format";
+import {
+  timeAgo,
+  fmt,
+  fmtCost,
+  fmtCostFull,
+  formatModelName,
+  localizeAgentName,
+} from "../lib/format";
 import { getCurrencyPrefs } from "../lib/currency";
 import type { Stats, Agent, DashboardEvent, WSMessage, WorkflowData, Session } from "../lib/types";
 
@@ -1214,7 +1221,7 @@ export function Dashboard() {
         const isAutoName = /^Session [0-9a-f]{8}$/i.test(sessionName);
         return {
           value: a.id,
-          label: sessionName && !isAutoName ? sessionName : a.name,
+          label: sessionName && !isAutoName ? sessionName : localizeAgentName(a.name),
           hint: a.session_id.slice(0, 8),
         };
       });

@@ -63,6 +63,8 @@ tags:
     description: Web Push notification subscriptions and broadcast (VAPID); also fires native Electron notifications when hosted in the desktop app
   - name: Manual
     description: Read-only access to the repository's Markdown manual (docs/*.md), rendered in-app by the dashboard's Documentation page
+  - name: XanaOS
+    description: Read-only discovery of XanaOS assistants from the repository's spec layer (OS/assistantes), rendered in-app by the dashboard's Assistants page
 components:
   parameters:
     SessionIdPath:
@@ -161,24 +163,6 @@ components:
         type: string
         example: claude,codex
       description: 'Comma-separated product providers to include: `claude`, `codex`, or both. Omit to include every provider.'
-    RangeFromQuery:
-      name: from
-      in: query
-      required: false
-      schema:
-        type: string
-        format: date-time
-      description: Inclusive lower bound of the reporting window, ISO-8601. Composes with `sources` and `providers`; none replaces the others. An unparseable value is IGNORED rather than rejected, so a malformed window degrades to "no window" instead of "no data".
-      example: '2026-03-18T12:00:00.000Z'
-    RangeToQuery:
-      name: to
-      in: query
-      required: false
-      schema:
-        type: string
-        format: date-time
-      description: Inclusive upper bound of the reporting window, ISO-8601. Same composition and same lenient parsing as `from`.
-      example: '2026-03-19T12:00:00.000Z'
   schemas:
     ErrorObject:
       type: object
@@ -4737,6 +4721,167 @@ components:
             # Hook System Integration Guide
 
             Comprehensive guide...
+    XanaosAssistant:
+      type: object
+      required:
+        - first_name
+        - role
+        - dir_name
+        - path
+        - sub_agents
+        - has_runtime
+      description: One assistant discovered under the assistants directory.
+      properties:
+        first_name:
+          type: string
+          example: Xana
+        role:
+          type: string
+          example: Orchestration
+        dir_name:
+          type: string
+          example: Xana-IA-Orchestration
+        path:
+          type: string
+          example: /mnt/DATA2/Second_Cerveau/OS/assistantes/Xana-IA-Orchestration
+        description:
+          type: string
+          nullable: true
+          description: First non-heading, non-quote paragraph of the assistant's README, truncated to 240 characters.
+        sub_agents:
+          type: array
+          items:
+            type: string
+          description: Names of the assistant's sub-agent spec files (subAgents/*.md), without extension.
+        has_runtime:
+          type: boolean
+          description: Whether a distilled runtime/CLAUDE.md exists.
+        distilled_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Modification time of runtime/CLAUDE.md, null when has_runtime is false.
+        config_dir:
+          type: string
+          nullable: true
+          description: Absolute path to the assistant's Claude config dir, null when deployed is false.
+          example: /home/corentin/.Xanaos/Xana
+        deployed:
+          type: boolean
+          description: Whether the assistant's config dir exists at all. False means it has never been run.
+        up:
+          type: boolean
+          description: Whether at least one of the assistant's sessions is backed by a verified live process.
+        busy:
+          type: boolean
+          description: Whether at least one verified live session is currently busy.
+        remote_control:
+          type: boolean
+          description: Whether at least one verified live session exposes a Remote Control bridge.
+    XanaosRecentSession:
+      type: object
+      required:
+        - session_id
+        - modified_at
+        - known
+      description: One session read from the assistant's transcript tree, decorated with what this dashboard's database knows about it when the row exists.
+      properties:
+        session_id:
+          type: string
+          description: The transcript's file name, without extension.
+        modified_at:
+          type: string
+          format: date-time
+        name:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+        known:
+          type: boolean
+          description: Whether a matching row exists in this dashboard's database.
+    XanaosRecentEvent:
+      type: object
+      properties:
+        session_id:
+          type: string
+        event_type:
+          type: string
+        tool_name:
+          type: string
+          nullable: true
+        summary:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    XanaosAssistantDetail:
+      allOf:
+        - $ref: '#/components/schemas/XanaosAssistant'
+        - type: object
+          required:
+            - recent_sessions
+            - recent_events
+          properties:
+            recent_sessions:
+              type: array
+              items:
+                $ref: '#/components/schemas/XanaosRecentSession'
+            recent_events:
+              type: array
+              items:
+                $ref: '#/components/schemas/XanaosRecentEvent'
+    XanaosAssistantsResponse:
+      type: object
+      required:
+        - assistants_dir
+        - assistants_dir_source
+        - assistants_dir_exists
+        - config_root
+        - totals
+        - assistants
+      properties:
+        assistants_dir:
+          type: string
+          nullable: true
+        assistants_dir_source:
+          type: string
+          enum:
+            - configured
+            - auto
+            - none
+        assistants_dir_exists:
+          type: boolean
+        config_root:
+          type: string
+          description: Root under which each assistant's Claude config dir is expected, e.g. ~/.Xanaos.
+        totals:
+          type: object
+          required:
+            - discovered
+            - up
+            - remote_control
+          properties:
+            discovered:
+              type: integer
+            up:
+              type: integer
+            remote_control:
+              type: integer
+        assistants:
+          type: array
+          items:
+            $ref: '#/components/schemas/XanaosAssistant'
 paths:
   /api/health:
     get:
@@ -5744,8 +5889,6 @@ paths:
         The overview counters are spread at the top level of the response object. Two additional maps, `agents_by_status` and `sessions_by_status`, break the counts down by lifecycle status (e.g. agents: working/waiting/completed/error; sessions: active/completed/error/abandoned). **Statuses with a zero count are omitted from these maps**, so callers must not assume every status key is present.
 
         `events_today` is computed in the caller's local day. Pass `tz_offset` as the minutes value from JavaScript's `Date.prototype.getTimezoneOffset()` (for example `420` for US Pacific Daylight Time, `300` for US Eastern Daylight Time, `0` for UTC). When omitted or non-numeric, the server falls back to UTC (offset 0).
-
-        An optional `from`/`to` window bounds each counter on the timestamp that dates its own rows — `sessions.started_at` for `total_sessions`/`active_sessions`, `agents.started_at` for `total_agents`/`active_agents`, `events.created_at` for `total_events` — rather than on the owning session's start, so `total_events` agrees with the same window sent to `/api/events`. **`events_today` and the `agents_by_status` / `sessions_by_status` maps ignore the window**: the first has its own fixed day, the second pair are lifecycle breakdowns the dashboard reads unwindowed.
       parameters:
         - in: query
           name: tz_offset
@@ -5755,8 +5898,6 @@ paths:
           example: 420
         - $ref: '#/components/parameters/SourcesQuery'
           example: local,4d1f0e2a-7b9c-4c33-8a21-9e0f7b6d4c11
-        - $ref: '#/components/parameters/RangeFromQuery'
-        - $ref: '#/components/parameters/RangeToQuery'
       responses:
         '200':
           description: Statistics overview
@@ -6175,7 +6316,7 @@ paths:
         - Pricing
       summary: Get total token cost across all sessions
       operationId: getTotalCost
-      description: Computes the aggregate token cost across EVERY session by matching each (model, speed, inference_geo, service_tier) usage bucket against the most specific pricing rule. Returns `total_cost`, a per-bucket `breakdown`, `feature_costs` (web-search surcharge, code-execution container time with the org free-hours allowance applied), `unpriced_models` (usage with no matching rule, contributing $0 so the total stays honest), and `daily_costs` bucketed by local calendar day. Pass `tz_offset` (minutes; the JS `Date.getTimezoneOffset()` value, e.g. 300 for US Eastern, -120 for CEST) so day boundaries align with the viewer's timezone; omitted/invalid offsets fall back to UTC. Honors the `sources` data-scope filter, like the sessions / stats / analytics endpoints, so the reported cost matches the active scope. An optional `from`/`to` window bounds the aggregate on `sessions.started_at` — the same column this endpoint already dates its daily buckets by, since `token_usage` carries no timestamp of its own.
+      description: Computes the aggregate token cost across EVERY session by matching each (model, speed, inference_geo, service_tier) usage bucket against the most specific pricing rule. Returns `total_cost`, a per-bucket `breakdown`, `feature_costs` (web-search surcharge, code-execution container time with the org free-hours allowance applied), `unpriced_models` (usage with no matching rule, contributing $0 so the total stays honest), and `daily_costs` bucketed by local calendar day. Pass `tz_offset` (minutes; the JS `Date.getTimezoneOffset()` value, e.g. 300 for US Eastern, -120 for CEST) so day boundaries align with the viewer's timezone; omitted/invalid offsets fall back to UTC. Honors the `sources` data-scope filter, like the sessions / stats / analytics endpoints, so the reported cost matches the active scope.
       parameters:
         - name: tz_offset
           in: query
@@ -6191,8 +6332,6 @@ paths:
             type: string
           description: Comma-separated data-source ids to include (local history is `local`; remote SSH machines use their `remote_sources.id`). Omit for all sources. Narrows the aggregate cost to the given origins.
           example: local
-        - $ref: '#/components/parameters/RangeFromQuery'
-        - $ref: '#/components/parameters/RangeToQuery'
       responses:
         '200':
           description: Cost result
@@ -10840,6 +10979,52 @@ paths:
                 error:
                   code: ENOTFOUND
                   message: 'Unknown manual document: nope'
+  /api/xanaos/assistants:
+    get:
+      tags:
+        - XanaOS
+      operationId: listXanaosAssistants
+      summary: Discover XanaOS assistants
+      description: 'Scans the resolved assistants directory (OS/assistantes by convention) for assistant cards: identity, README description, sub-agents, and whether a distilled runtime exists. Read-only; nothing is cached, so a newly distilled assistant appears on the next request.'
+      responses:
+        '200':
+          description: The resolved assistants directory and its discovered assistants.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XanaosAssistantsResponse'
+  /api/xanaos/assistants/{firstName}:
+    get:
+      tags:
+        - XanaOS
+      operationId: getXanaosAssistant
+      summary: 'One assistant''s detail: identity, recent sessions, recent events'
+      description: 'Everything a ''see more'' detail view needs to pilot and analyze one assistant: its card, its recent sessions read from its transcript tree (so history predating the cockpit''s hooks still shows) decorated with what this dashboard''s database knows about them, and the most recent recorded events across those sessions. Read-only; nothing is cached.'
+      parameters:
+        - name: firstName
+          in: path
+          required: true
+          description: The assistant's first name, as parsed from its directory name.
+          schema:
+            type: string
+          example: Xana
+      responses:
+        '200':
+          description: The assistant's card, recent sessions, and recent events.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/XanaosAssistantDetail'
+        '404':
+          description: No assistant matches this first name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: ENOTFOUND
+                  message: 'Unknown assistant: Nobody'
   /api/sessions/{id}/transcript-image:
     get:
       tags:

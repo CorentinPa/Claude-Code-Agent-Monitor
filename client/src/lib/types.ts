@@ -1343,6 +1343,84 @@ export interface ManualDocument {
   markdown: string;
 }
 
+// ───── XanaOS assistants ─────
+
+/** One assistant discovered under the resolved assistants directory
+ *  (OS/assistantes by convention), decorated with its verified live state
+ *  read from its own Claude config dir. Sessions and transcripts stay out of
+ *  scope — see server/routes/xanaos.js for the scope note. */
+export interface XanaosAssistant {
+  first_name: string;
+  role: string;
+  /** The directory name this card was parsed from, e.g. "Xana-IA-Orchestration". */
+  dir_name: string;
+  /** Absolute path to the assistant's directory under the assistants directory. */
+  path: string;
+  /** First non-heading, non-quote paragraph of the README, truncated to 240
+   *  characters; null when the README is missing or has no such paragraph. */
+  description: string | null;
+  /** Names of subAgents/*.md files, without extension. */
+  sub_agents: string[];
+  /** Whether a distilled runtime/CLAUDE.md exists. */
+  has_runtime: boolean;
+  /** ISO timestamp of runtime/CLAUDE.md's mtime; null when has_runtime is false. */
+  distilled_at: string | null;
+  /** Absolute path to the assistant's Claude config dir; null when deployed is false. */
+  config_dir: string | null;
+  /** Whether the assistant's config dir exists at all — false means never run. */
+  deployed: boolean;
+  /** Whether at least one session is backed by a verified live process. */
+  up: boolean;
+  /** Whether at least one verified live session is currently busy. */
+  busy: boolean;
+  /** Whether at least one verified live session exposes a Remote Control bridge. */
+  remote_control: boolean;
+}
+
+/** Response of `GET /api/xanaos/assistants`. */
+export interface XanaosAssistantsResponse {
+  /** Absolute path to the resolved assistants directory, or null when none resolved. */
+  assistants_dir: string | null;
+  /** Where assistants_dir came from: an operator setting, auto-detection, or neither. */
+  assistants_dir_source: "configured" | "auto" | "none";
+  /** Whether assistants_dir actually exists on disk. */
+  assistants_dir_exists: boolean;
+  /** Root under which each assistant's Claude config dir is expected, e.g. ~/.Xanaos. */
+  config_root: string;
+  totals: { discovered: number; up: number; remote_control: number };
+  assistants: XanaosAssistant[];
+}
+
+/** One session read from an assistant's transcript tree, decorated with what
+ *  this dashboard's database knows about it when the row exists. */
+export interface XanaosRecentSession {
+  /** The transcript's file name, without extension. */
+  session_id: string;
+  modified_at: string;
+  name: string | null;
+  status: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  /** Whether a matching row exists in this dashboard's database. */
+  known: boolean;
+}
+
+/** One recorded event, across an assistant's recent sessions. */
+export interface XanaosRecentEvent {
+  session_id: string;
+  event_type: string;
+  tool_name: string | null;
+  summary: string | null;
+  created_at: string;
+}
+
+/** Response of `GET /api/xanaos/assistants/:firstName`: one assistant's card
+ *  plus what a "see more" detail view needs to pilot and analyze it. */
+export interface XanaosAssistantDetail extends XanaosAssistant {
+  recent_sessions: XanaosRecentSession[];
+  recent_events: XanaosRecentEvent[];
+}
+
 export interface UpdateStatusPayload {
   /** False when the install directory isn't a git clone at all - in that case
    *  every other field except `repo_root`/`manual_command`/`message` is absent,
