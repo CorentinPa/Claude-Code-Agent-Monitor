@@ -18,5 +18,12 @@
   "statusNeverDeployed": "Never deployed",
   "remoteControl": "Remote Control",
   "emptyDirMissing": "No assistants directory found. Expected a sibling OS/assistantes next to this checkout, or the XANAOS_ASSISTANTS_DIR override.",
-  "emptyNoAssistants": "No assistants found in {{dir}}."
+  "emptyNoAssistants": "No assistants found in {{dir}}.",
+  "seeMore": "See more",
+  "recentSessions": "Recent sessions",
+  "noSessions": "No sessions recorded.",
+  "viewConversation": "View conversation",
+  "notIndexed": "Not indexed",
+  "recentActivity": "Recent activity",
+  "noActivity": "No activity recorded."
 }

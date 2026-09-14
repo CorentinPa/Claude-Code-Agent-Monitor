@@ -18,5 +18,12 @@
   "statusNeverDeployed": "Jamais déployée",
   "remoteControl": "Remote Control",
   "emptyDirMissing": "Aucun répertoire d'assistantes trouvé. Un OS/assistantes voisin de cette installation, ou la variable XANAOS_ASSISTANTS_DIR, est attendu.",
-  "emptyNoAssistants": "Aucune assistante trouvée dans {{dir}}."
+  "emptyNoAssistants": "Aucune assistante trouvée dans {{dir}}.",
+  "seeMore": "Voir plus",
+  "recentSessions": "Sessions récentes",
+  "noSessions": "Aucune session enregistrée.",
+  "viewConversation": "Voir la conversation",
+  "notIndexed": "Non indexée",
+  "recentActivity": "Activité récente",
+  "noActivity": "Aucune activité enregistrée."
 }

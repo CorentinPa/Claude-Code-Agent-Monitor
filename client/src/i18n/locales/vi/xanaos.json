@@ -18,5 +18,12 @@
   "statusNeverDeployed": "Chưa từng triển khai",
   "remoteControl": "Remote Control",
   "emptyDirMissing": "Không tìm thấy thư mục trợ lý. Cần một OS/assistantes nằm cạnh bản checkout này, hoặc biến XANAOS_ASSISTANTS_DIR.",
-  "emptyNoAssistants": "Không tìm thấy trợ lý nào trong {{dir}}."
+  "emptyNoAssistants": "Không tìm thấy trợ lý nào trong {{dir}}.",
+  "seeMore": "Xem thêm",
+  "recentSessions": "Phiên gần đây",
+  "noSessions": "Không có phiên nào được ghi nhận.",
+  "viewConversation": "Xem cuộc trò chuyện",
+  "notIndexed": "Chưa được lập chỉ mục",
+  "recentActivity": "Hoạt động gần đây",
+  "noActivity": "Không có hoạt động nào được ghi nhận."
 }

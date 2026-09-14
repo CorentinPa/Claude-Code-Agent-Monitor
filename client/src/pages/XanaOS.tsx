@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { Users, FolderX, Sparkles, Satellite } from "lucide-react";
 import { api } from "../lib/api";
 import type { XanaosAssistant, XanaosAssistantsResponse } from "../lib/types";
+import { XanaosAssistantDetail } from "../components/XanaosAssistantDetail";
 
 /** Deterministic accent color per assistant, so the same identity always
  *  reads the same way across refreshes rather than shuffling with array order. */
@@ -71,6 +72,7 @@ export function XanaOS() {
   const { t } = useTranslation("xanaos");
   const [data, setData] = useState<XanaosAssistantsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [detailFirstName, setDetailFirstName] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -112,10 +114,16 @@ export function XanaOS() {
       {data && data.assistants.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.assistants.map((assistant) => (
-            <AssistantCard key={assistant.dir_name} assistant={assistant} />
+            <AssistantCard
+              key={assistant.dir_name}
+              assistant={assistant}
+              onSeeMore={() => setDetailFirstName(assistant.first_name)}
+            />
           ))}
         </div>
       )}
+
+      <XanaosAssistantDetail firstName={detailFirstName} onClose={() => setDetailFirstName(null)} />
     </div>
   );
 }
@@ -169,7 +177,13 @@ function EmptyState({ icon: Icon, message }: { icon: typeof FolderX; message: st
   );
 }
 
-function AssistantCard({ assistant }: { assistant: XanaosAssistant }) {
+function AssistantCard({
+  assistant,
+  onSeeMore,
+}: {
+  assistant: XanaosAssistant;
+  onSeeMore: () => void;
+}) {
   const { t } = useTranslation("xanaos");
   const status = statusOf(assistant);
   const style = STATUS_STYLE[status];
@@ -221,6 +235,13 @@ function AssistantCard({ assistant }: { assistant: XanaosAssistant }) {
             t("runtimeNotDistilled")
           )}
         </span>
+        <button
+          type="button"
+          onClick={onSeeMore}
+          className="ml-auto text-accent underline underline-offset-2 hover:text-accent-hover"
+        >
+          {t("seeMore")}
+        </button>
       </div>
     </div>
   );

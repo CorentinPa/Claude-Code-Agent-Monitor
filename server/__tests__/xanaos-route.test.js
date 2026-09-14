@@ -19,10 +19,13 @@ const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "xanaos-route-test-"));
 const ASSISTANTS = path.join(TMP, "assistantes");
 const CONFIG_ROOT = path.join(TMP, "config");
 const XANA_SESSIONS = path.join(CONFIG_ROOT, "Xana", "sessions");
+const XANA_PROJECT = path.join(CONFIG_ROOT, "Xana", "projects", "-work");
 
 fs.mkdirSync(path.join(ASSISTANTS, "Xana-IA-Orchestration"), { recursive: true });
 fs.mkdirSync(path.join(ASSISTANTS, "Jeremie-IA-Construction"), { recursive: true });
 fs.mkdirSync(XANA_SESSIONS, { recursive: true });
+fs.mkdirSync(XANA_PROJECT, { recursive: true });
+fs.writeFileSync(path.join(XANA_PROJECT, "sess-1.jsonl"), "{}\n");
 // Jeremie's config dir under CONFIG_ROOT is deliberately absent: never deployed.
 
 fs.writeFileSync(
@@ -48,6 +51,7 @@ process.env.XANAOS_CONFIG_ROOT = CONFIG_ROOT;
 process.env.DASHBOARD_DATA_DIR = path.join(TMP, "data");
 fs.mkdirSync(process.env.DASHBOARD_DATA_DIR, { recursive: true });
 
+const { db } = require("../db");
 const { createApp } = require("../index");
 
 let server;
@@ -65,20 +69,31 @@ function get(pathname) {
   });
 }
 
+before(async () => {
+  db.prepare("INSERT INTO sessions (id, name, status, cwd, started_at) VALUES (?, ?, ?, ?, ?)").run(
+    "sess-1",
+    "Mandat direct",
+    "completed",
+    "/work",
+    "2026-09-07T12:00:00.000Z"
+  );
+  db.prepare(
+    "INSERT INTO events (session_id, event_type, tool_name, summary, created_at) VALUES (?, ?, ?, ?, ?)"
+  ).run("sess-1", "PostToolUse", "Read", "Read a file", "2026-09-07T12:01:00.000Z");
+
+  const app = createApp();
+  server = app.listen(0);
+  await new Promise((resolve) => server.once("listening", resolve));
+  baseUrl = `http://127.0.0.1:${server.address().port}`;
+});
+
+after(() => {
+  server?.close();
+  delete process.env.XANAOS_ASSISTANTS_DIR;
+  fs.rmSync(TMP, { recursive: true, force: true });
+});
+
 describe("GET /api/xanaos/assistants", () => {
-  before(async () => {
-    const app = createApp();
-    server = app.listen(0);
-    await new Promise((resolve) => server.once("listening", resolve));
-    baseUrl = `http://127.0.0.1:${server.address().port}`;
-  });
-
-  after(() => {
-    server?.close();
-    delete process.env.XANAOS_ASSISTANTS_DIR;
-    fs.rmSync(TMP, { recursive: true, force: true });
-  });
-
   it("reports the resolved directory and its source", async () => {
     const { status, body } = await get("/api/xanaos/assistants");
     assert.equal(status, 200);
@@ -125,5 +140,33 @@ describe("GET /api/xanaos/assistants", () => {
     assert.deepEqual(body.assistants, []);
     assert.equal(body.totals.discovered, 0);
     process.env.XANAOS_ASSISTANTS_DIR = ASSISTANTS;
+  });
+});
+
+describe("GET /api/xanaos/assistants/:firstName", () => {
+  it("404s on an unknown assistant", async () => {
+    const { status, body } = await get("/api/xanaos/assistants/Nobody");
+    assert.equal(status, 404);
+    assert.equal(body.error.code, "ENOTFOUND");
+  });
+
+  it("lists a deployed assistant's sessions decorated with what the database knows", async () => {
+    const { status, body } = await get("/api/xanaos/assistants/Xana");
+    assert.equal(status, 200);
+    assert.equal(body.first_name, "Xana");
+    assert.equal(body.deployed, true);
+    assert.equal(body.recent_sessions.length, 1);
+    assert.equal(body.recent_sessions[0].session_id, "sess-1");
+    assert.equal(body.recent_sessions[0].name, "Mandat direct");
+    assert.equal(body.recent_sessions[0].status, "completed");
+    assert.equal(body.recent_sessions[0].known, true);
+    assert.equal(body.recent_events[0].tool_name, "Read");
+  });
+
+  it("returns empty sessions and events for an assistant that was never deployed", async () => {
+    const { body } = await get("/api/xanaos/assistants/Jeremie");
+    assert.equal(body.deployed, false);
+    assert.deepEqual(body.recent_sessions, []);
+    assert.deepEqual(body.recent_events, []);
   });
 });

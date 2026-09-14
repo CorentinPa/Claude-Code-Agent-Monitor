@@ -18,5 +18,12 @@
   "statusNeverDeployed": "从未部署",
   "remoteControl": "Remote Control",
   "emptyDirMissing": "未找到助理目录。应存在与本检出目录同级的 OS/assistantes，或设置 XANAOS_ASSISTANTS_DIR。",
-  "emptyNoAssistants": "在 {{dir}} 中未找到任何助理。"
+  "emptyNoAssistants": "在 {{dir}} 中未找到任何助理。",
+  "seeMore": "查看更多",
+  "recentSessions": "最近会话",
+  "noSessions": "暂无记录的会话。",
+  "viewConversation": "查看对话",
+  "notIndexed": "未收录",
+  "recentActivity": "最近活动",
+  "noActivity": "暂无记录的活动。"
 }

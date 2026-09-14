@@ -1391,6 +1391,36 @@ export interface XanaosAssistantsResponse {
   assistants: XanaosAssistant[];
 }
 
+/** One session read from an assistant's transcript tree, decorated with what
+ *  this dashboard's database knows about it when the row exists. */
+export interface XanaosRecentSession {
+  /** The transcript's file name, without extension. */
+  session_id: string;
+  modified_at: string;
+  name: string | null;
+  status: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  /** Whether a matching row exists in this dashboard's database. */
+  known: boolean;
+}
+
+/** One recorded event, across an assistant's recent sessions. */
+export interface XanaosRecentEvent {
+  session_id: string;
+  event_type: string;
+  tool_name: string | null;
+  summary: string | null;
+  created_at: string;
+}
+
+/** Response of `GET /api/xanaos/assistants/:firstName`: one assistant's card
+ *  plus what a "see more" detail view needs to pilot and analyze it. */
+export interface XanaosAssistantDetail extends XanaosAssistant {
+  recent_sessions: XanaosRecentSession[];
+  recent_events: XanaosRecentEvent[];
+}
+
 export interface UpdateStatusPayload {
   /** False when the install directory isn't a git clone at all - in that case
    *  every other field except `repo_root`/`manual_command`/`message` is absent,

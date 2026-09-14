@@ -196,10 +196,59 @@ function readLiveSessions(configDir) {
   return live.sort((left, right) => (right.started_at || "").localeCompare(left.started_at || ""));
 }
 
+/**
+ * An assistant's sessions are its transcripts: `<config dir>/projects/<encoded
+ * cwd>/<sessionId>.jsonl`. The file name IS the session id, which ties a
+ * session to an assistant without depending on a name, a cwd, or a scan of
+ * the events table -- and keeps sessions from before the cockpit's hooks were
+ * installed listed too. Only the immediate children of each project
+ * directory are read, so per-session sub-agent transcripts one level down
+ * are excluded.
+ */
+function listRecentSessions(configDir, limit = 50) {
+  const projectsDir = path.join(configDir, "projects");
+  let projects;
+  try {
+    projects = fs.readdirSync(projectsDir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  const sessions = [];
+  for (const project of projects) {
+    if (!project.isDirectory()) continue;
+    const dir = path.join(projectsDir, project.name);
+    let files;
+    try {
+      files = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const file of files) {
+      if (!file.isFile() || !file.name.endsWith(".jsonl")) continue;
+      const full = path.join(dir, file.name);
+      let mtimeMs;
+      try {
+        mtimeMs = fs.statSync(full).mtimeMs;
+      } catch {
+        continue;
+      }
+      sessions.push({
+        session_id: path.basename(file.name, ".jsonl"),
+        transcript_path: full,
+        modified_at: new Date(mtimeMs).toISOString(),
+        mtime_ms: mtimeMs,
+      });
+    }
+  }
+  sessions.sort((left, right) => right.mtime_ms - left.mtime_ms);
+  return sessions.slice(0, limit).map(({ mtime_ms, ...session }) => session);
+}
+
 module.exports = {
   parseAssistantDirName,
   discoverAssistants,
   readProcStart,
   isProcessAlive,
   readLiveSessions,
+  listRecentSessions,
 };

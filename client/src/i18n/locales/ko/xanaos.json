@@ -18,5 +18,12 @@
   "statusNeverDeployed": "배포된 적 없음",
   "remoteControl": "Remote Control",
   "emptyDirMissing": "어시스턴트 디렉터리를 찾을 수 없습니다. 이 체크아웃과 같은 위치에 OS/assistantes가 있거나 XANAOS_ASSISTANTS_DIR 설정이 필요합니다.",
-  "emptyNoAssistants": "{{dir}}에서 어시스턴트를 찾을 수 없습니다."
+  "emptyNoAssistants": "{{dir}}에서 어시스턴트를 찾을 수 없습니다.",
+  "seeMore": "더 보기",
+  "recentSessions": "최근 세션",
+  "noSessions": "기록된 세션이 없습니다.",
+  "viewConversation": "대화 보기",
+  "notIndexed": "색인되지 않음",
+  "recentActivity": "최근 활동",
+  "noActivity": "기록된 활동이 없습니다."
 }

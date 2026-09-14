@@ -28,6 +28,7 @@ const {
   findTranscriptPath,
   findSubagentTranscriptPath,
 } = require("../lib/claude-home");
+const { getRecordedTranscriptPath } = require("../lib/recorded-transcript");
 
 const router = Router();
 const MAX_TASK_PROGRESS_ROWS = 100;
@@ -685,9 +686,14 @@ router.get("/:id/transcripts", async (req, res) => {
   // Query database agent list for db_agent_id association
   const dbAgents = stmts.listAgentsBySession.all(req.params.id) || [];
 
-  // Main session transcript (live, else the durable import-time snapshot)
+  // Main session transcript (live, else the durable import-time snapshot).
+  // getRecordedTranscriptPath comes right after the default-home fast path so
+  // a session under a non-default CLAUDE_CONFIG_DIR (a XanaOS assistant, a
+  // second profile) still resolves, without changing behavior for the common
+  // case that getTranscriptPath already handles.
   const mainPath =
     getTranscriptPath(req.params.id, session.cwd) ||
+    getRecordedTranscriptPath(req.params.id) ||
     findTranscriptPath(req.params.id) ||
     getSnapshotTranscriptPath(req.params.id);
   if (mainPath && fs.existsSync(mainPath)) {
@@ -946,6 +952,7 @@ function resolveSessionTranscriptPath(session, sessionId, agentId, runId) {
   }
   return (
     getTranscriptPath(sessionId, session.cwd) ||
+    getRecordedTranscriptPath(sessionId) ||
     findTranscriptPath(sessionId) ||
     getSnapshotTranscriptPath(sessionId)
   );
