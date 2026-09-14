@@ -2,8 +2,9 @@
  * @file Tests that an assistant's live state is derived from a verified
  * process, not from the presence of a registry file: a stale entry whose
  * process is gone is dropped, an entry whose recorded start time disagrees
- * with /proc is dropped as a recycled PID, and the Remote Control marker
- * follows bridgeSessionId.
+ * with /proc is dropped as a recycled PID, an unclaimed warm-pool spare
+ * (however alive its process is) is dropped too, and the Remote Control
+ * marker follows bridgeSessionId.
  * @author Son Nguyen <hoangson091104@gmail.com>
  */
 
@@ -51,6 +52,13 @@ writeEntry("recycled.json", {
   procStart: "999999999",
   sessionId: "cccc-recycled",
   status: "idle",
+});
+writeEntry("spare.json", {
+  pid: SELF,
+  procStart: SELF_START,
+  sessionId: "dddd-spare",
+  status: "idle",
+  spare: true,
 });
 writeEntry("corrupt.json", "{ not json");
 writeEntry("ignored.txt", {});
@@ -102,5 +110,10 @@ describe("readLiveSessions", () => {
 
   it("returns an empty list for a config dir with no sessions directory", () => {
     assert.deepEqual(readLiveSessions(path.join(TMP, "Jeremie")), []);
+  });
+
+  it("excludes an unclaimed warm-pool spare even though its process is alive", () => {
+    const ids = readLiveSessions(CONFIG_DIR).map((s) => s.session_id);
+    assert.equal(ids.includes("dddd-spare"), false);
   });
 });

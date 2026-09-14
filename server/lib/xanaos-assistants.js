@@ -174,6 +174,14 @@ function readLiveSessions(configDir) {
       continue;
     }
     if (!entry || typeof entry !== "object") continue;
+    // An unclaimed warm-pool worker, kept alive by the CLI's own daemon to
+    // speed up the next session start. It answers to no conversation and no
+    // Remote Control bridge, so counting it as live would report an
+    // assistant as up whenever its daemon happens to be keeping spares warm
+    // -- observed in production: Lucy always showed up because her local
+    // daemon always has a spare, while Xana and Jeremie (no local spares)
+    // fluctuated normally.
+    if (entry.spare === true) continue;
     if (!isProcessAlive(entry.pid, entry.procStart)) continue;
     live.push({
       pid: entry.pid,
