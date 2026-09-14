@@ -18,6 +18,7 @@
   "noSessionsInColumn": "Không có phiên",
   "ran": "đã chạy ",
   "running": "đang chạy ",
+  "costPending": "đang chạy",
   "session": {
     "anonymous": "Phiên chưa đặt tên",
     "agentSummary_one": "{{count}} Agent",

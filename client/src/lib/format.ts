@@ -66,6 +66,7 @@
  * - `fmtCostBare` — exported API; see TSDoc on the symbol for behavior.
  * - `shortModel` — exported API; see TSDoc on the symbol for behavior.
  * - `formatModelName` — exported API; see TSDoc on the symbol for behavior.
+ * - `localizeAgentName` — exported API; see TSDoc on the symbol for behavior.
  * - `pathBasename` — exported API; see TSDoc on the symbol for behavior.
  *
  * ## Testing pointers
@@ -152,6 +153,11 @@
  *   When behavior changes, update the `@file` overview and relevant tests.
  *
  * **formatModelName**
+ *   Part of this module's public contract. Downstream imports should treat
+ *   the signature and return type as stable unless release notes say otherwise.
+ *   When behavior changes, update the `@file` overview and relevant tests.
+ *
+ * **localizeAgentName**
  *   Part of this module's public contract. Downstream imports should treat
  *   the signature and return type as stable unless release notes say otherwise.
  *   When behavior changes, update the `@file` overview and relevant tests.
@@ -505,6 +511,30 @@ const MODEL_BRANDS: Record<string, string> = {
   gpt: "GPT",
   gemini: "Gemini",
 };
+
+/** The English literal the server persists as the main agent's name (or the head
+ *  of `"Main Agent - <label>"`). It is written into `agents.name` by the hook and
+ *  import paths, and `isAutoMainAgentName` on the server keys off it, so the row
+ *  itself must stay English — only the display is localized. */
+const MAIN_AGENT_LITERAL = "Main Agent";
+
+/**
+ * Localize the auto-generated `"Main Agent"` head of a persisted agent name.
+ * Only that exact literal is swapped for the active locale's label; a name the
+ * user set themselves (or a subagent name) is returned verbatim, and the
+ * ` - <label>` suffix is always preserved as stored.
+ * @example
+ *   localizeAgentName("Main Agent - add dark mode") // "Agent principal - add dark mode" (fr)
+ *   localizeAgentName("Reviewer")                   // "Reviewer"
+ */
+export function localizeAgentName(name: string | null | undefined): string {
+  const value = String(name ?? "");
+  if (value === MAIN_AGENT_LITERAL) return i18n.t("common:mainAgent");
+  const prefix = `${MAIN_AGENT_LITERAL} - `;
+  return value.startsWith(prefix)
+    ? `${i18n.t("common:mainAgent")} - ${value.slice(prefix.length)}`
+    : value;
+}
 
 /**
  * Human-friendly model name:

@@ -65,7 +65,14 @@ import { AgentStatusBadge } from "./StatusBadge";
 import { TodoProgressIndicator } from "./TodoProgressIndicator";
 import { effectiveAgentStatus, isAgentAwaitingInput, agentAwaitingReason } from "../lib/types";
 import type { Agent, Session } from "../lib/types";
-import { formatDuration, timeAgo, formatModelName, pathBasename, fmtCost } from "../lib/format";
+import {
+  formatDuration,
+  timeAgo,
+  formatModelName,
+  pathBasename,
+  fmtCost,
+  localizeAgentName,
+} from "../lib/format";
 
 /**
  * Display name for a main agent, swapping its auto-generated placeholder for the
@@ -75,11 +82,15 @@ import { formatDuration, timeAgo, formatModelName, pathBasename, fmtCost } from 
  * everything after the first ` - ` covers BOTH formats — the older
  * `replace(/Session [0-9a-f]{8}/)` only matched the hook form, so imported
  * sessions kept showing `<folder> - <id8>` even after their title was known.
+ * The head is run through {@link localizeAgentName} so the persisted English
+ * `Main Agent` literal displays in the active locale without the stored row
+ * changing (the server keys its auto-name detection off the English form).
  */
 function mainAgentDisplayName(agentName: string, realSessionName: string): string {
-  if (!realSessionName) return agentName;
   const sep = agentName.indexOf(" - ");
-  return sep >= 0 ? `${agentName.slice(0, sep)} - ${realSessionName}` : agentName;
+  if (sep < 0) return localizeAgentName(agentName);
+  const head = localizeAgentName(agentName.slice(0, sep));
+  return `${head} - ${realSessionName || agentName.slice(sep + 3)}`;
 }
 
 /** Keep a compact card's history legible: at most two distinct human turns,
@@ -146,6 +157,12 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
     : typeof agent.cost === "number"
       ? agent.cost
       : 0;
+  // A subagent's usage is only ingested when it stops (the server scans its own
+  // JSONL on SubagentStop), so a subagent still running legitimately has no cost
+  // yet. Rendering nothing there reads as "this agent was free" — an explicit
+  // in-progress marker is truthful. Main cards are unaffected: they show the
+  // session total, which is already live.
+  const costPending = !isMain && cost === 0 && !agent.ended_at;
   // Real (user-given) session name - auto-generated Claude/Codex fallbacks
   // carry no extra info next to the ID, so they are suppressed.
   const sessionName = session?.name?.trim() || "";
@@ -306,6 +323,12 @@ export function AgentCard({ agent, session, label, onClick }: AgentCardProps) {
           <span className="flex items-center gap-1 flex-shrink-0">
             <Coins className="w-3 h-3" />
             {fmtCost(cost)}
+          </span>
+        )}
+        {costPending && (
+          <span className="flex items-center gap-1 flex-shrink-0 italic text-gray-600">
+            <Coins className="w-3 h-3" />
+            {t("costPending")}
           </span>
         )}
         {agent.ended_at ? (

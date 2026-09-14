@@ -18,6 +18,7 @@
   "session": "sesión",
   "agents": "agentes",
   "agent": "agente",
+  "mainAgent": "Agente principal",
   "live": "En vivo",
   "offline": "Sin conexión",
   "running": "ejecutando",
